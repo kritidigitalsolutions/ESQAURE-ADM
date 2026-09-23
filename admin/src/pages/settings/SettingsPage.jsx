@@ -124,7 +124,7 @@ export default function SettingsPage() {
                 onChange={(e) => setDefaultQuality(e.target.value)}
                 className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:border-[#FEF08A]"
               >
-                <option value="1080p">1080p Full HD (VIP Default)</option>
+                <option value="1080p">1080p Full HD (Subscriber Default)</option>
                 <option value="720p">720p HD (Standard)</option>
                 <option value="Auto">Auto (Adaptive)</option>
               </select>

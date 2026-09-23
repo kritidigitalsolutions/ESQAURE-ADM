@@ -36,15 +36,15 @@ import {
 
 // System navigation routes for quick spotlight jump
 const SYSTEM_PAGES = [
-  { id: 'page-summary', tab: 'summary', title: 'Dashboard Overview', category: 'Navigation', icon: LayoutDashboard, desc: 'Real-time viewers, VIP stats, and daily revenue metrics' },
+  { id: 'page-summary', tab: 'summary', title: 'Dashboard Overview', category: 'Navigation', icon: LayoutDashboard, desc: 'Real-time viewers, subscriber stats, and daily revenue metrics' },
   { id: 'page-dramas', tab: 'dramas', title: 'Content Library (Series)', category: 'Navigation', icon: Film, desc: 'Manage vertical short-drama catalog and status' },
   { id: 'page-upload', tab: 'upload', title: 'Upload Content Studio', category: 'Navigation', icon: UploadCloud, desc: 'Publish new micro-dramas, trailers & episodes' },
   { id: 'page-episodes', tab: 'dramas', title: 'Content & Episodes Management', category: 'Navigation', icon: Play, desc: 'Manage series, paywalls, episodes and media files' },
   { id: 'page-genres', tab: 'genres', title: 'Genres & Categories', category: 'Navigation', icon: Tag, desc: 'OTT genre tags and viewer interest categories' },
-  { id: 'page-users', tab: 'users', title: 'User Management', category: 'Navigation', icon: Users, desc: 'Registered mobile accounts, watch times & VIP overrides' },
-  { id: 'page-subscribers', tab: 'subscribers', title: 'VIP Subscribers Ledger', category: 'Navigation', icon: Crown, desc: 'Active paid VIP members and subscription terms' },
+  { id: 'page-users', tab: 'users', title: 'User Management', category: 'Navigation', icon: Users, desc: 'Registered mobile accounts, watch times & subscription tiers' },
+  { id: 'page-subscribers', tab: 'subscribers', title: 'Subscribers Ledger', category: 'Navigation', icon: Crown, desc: 'Active paid members and subscription terms' },
   { id: 'page-subscriptions', tab: 'subscriptions', title: 'Subscription Plans', category: 'Navigation', icon: CreditCard, desc: 'Monthly (₹199) and Yearly (₹1,499) plan pricing' },
-  { id: 'page-promos', tab: 'promos', title: 'Promos & Coupon Vouchers', category: 'Navigation', icon: Ticket, desc: 'VIP discount coupons, trial codes & referral campaigns' },
+  { id: 'page-promos', tab: 'promos', title: 'Promos & Coupon Vouchers', category: 'Navigation', icon: Ticket, desc: 'Discount coupons, trial codes & referral campaigns' },
   { id: 'page-transactions', tab: 'transactions', title: 'Transactions & Payments', category: 'Navigation', icon: Receipt, desc: 'UPI, Razorpay & Card payment gateway logs' },
   { id: 'page-admob', tab: 'admob', title: 'AdMob Ad Monetization', category: 'Navigation', icon: TrendingUp, desc: 'Rewarded video eCPM, ad units & daily impression revenue' },
   { id: 'page-notifications', tab: 'notifications', title: 'Push Notifications', category: 'Navigation', icon: Bell, desc: 'Targeted FCM push campaigns to viewer devices' },
@@ -585,7 +585,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                     {[
                       { tab: 'dramas', title: 'Content Library', icon: Film, count: `${mockDramas.length} series` },
                       { tab: 'upload', title: 'Upload Content', icon: UploadCloud, highlight: true },
-                      { tab: 'subscribers', title: 'VIP Subscribers', icon: Crown, count: '₹24.8L MRR' },
+                      { tab: 'subscribers', title: 'Subscribers', icon: Crown, count: '₹24.8L MRR' },
                       { tab: 'admob', title: 'AdMob Revenue', icon: TrendingUp, count: '+22.4%' },
                       { tab: 'transactions', title: 'Transactions', icon: Receipt, count: '6 recent' },
                       { tab: 'auditlog', title: 'Activity Log', icon: Shield, count: '1.3k events' },

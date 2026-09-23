@@ -119,7 +119,7 @@ export default function ActivityChart({ onNavigate }) {
       { time: 'Q2 2024', date: 'Q2 2024', raw: 180, badge: '+100%', note: 'First series' },
       { time: 'Q3 2024', date: 'Q3 2024', raw: 280, badge: '+55%', note: 'Catalog rollout' },
       { time: 'Q4 2024', date: 'Q4 2024', raw: 360, badge: '+28%', note: 'Pass unlock' },
-      { time: 'Q1 2025', date: 'Q1 2025', raw: 450, badge: '+25%', note: 'VIP rollout' },
+      { time: 'Q1 2025', date: 'Q1 2025', raw: 450, badge: '+25%', note: 'Subscribers rollout' },
       { time: 'Q2 2025', date: 'Q2 2025', raw: 530, badge: '+17%', note: 'Retention uplift' },
       { time: 'Q3 2025', date: 'Q3 2025', raw: 620, badge: '+17%', note: 'Episode passes' },
       { time: 'Q4 2025', date: 'Q4 2025', raw: 700, badge: '+12%', note: 'Holiday rush' },

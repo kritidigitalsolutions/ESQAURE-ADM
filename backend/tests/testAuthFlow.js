@@ -45,6 +45,9 @@ async function runTests() {
       console.log(`Connected to in-memory test database at ${uri}`);
     }
 
+    const { seedDefaultGenres } = await import('../config/seedGenres.js');
+    await seedDefaultGenres();
+
     server = app.listen(PORT);
     console.log(`Test server running on port ${PORT}`);
 
@@ -54,6 +57,9 @@ async function runTests() {
     // Reset clean state for test phone number
     await User.deleteMany({ phoneNumber: testPhone });
     await Otp.deleteMany({ phoneNumber: testPhone });
+
+    let authToken = '';
+    let authRefreshToken = '';
 
     // TEST 1: Health Check
     logSection('1. Health Check');
@@ -122,7 +128,6 @@ async function runTests() {
 
     // TEST 4: Screen 2 - Verify Correct OTP (New User Flow)
     logSection('4. Screen 2: Verify Valid OTP (New User Flow)');
-    let authToken = '';
     try {
       const res = await fetch(`${BASE_URL}/auth/verify-otp`, {
         method: 'POST',
@@ -139,6 +144,7 @@ async function runTests() {
         body.data.token
       ) {
         authToken = body.data.token;
+        authRefreshToken = body.data.refreshToken;
         logPass('New user recognized, onboarding token issued, isNewUser: true, isProfileCompleted: false');
         passedCount++;
       } else {
@@ -174,6 +180,7 @@ async function runTests() {
         body.data.user.email === 'satyam.demo@gmail.com'
       ) {
         authToken = body.data.token; // Refresh token with updated profile status
+        authRefreshToken = body.data.refreshToken || authRefreshToken;
         logPass('Profile completed successfully with first name, last name, and email');
         passedCount++;
       } else {
@@ -184,7 +191,56 @@ async function runTests() {
       failedCount++;
     }
 
-    // TEST 6: Get Me (Authenticated Profile Fetch)
+    // TEST 5.1: Screen 4 - Fetch Available Genres for "Choose your Interest"
+    logSection('5.1 Screen 4: Fetch Active Genres (GET /auth/genres)');
+    let availableGenres = [];
+    try {
+      const res = await fetch(`${BASE_URL}/auth/genres`);
+      const body = await res.json();
+
+      if (res.status === 200 && body.success === true && Array.isArray(body.data.genres) && body.data.genres.length >= 8) {
+        availableGenres = body.data.genres;
+        logPass(`Fetched ${body.data.genres.length} active onboarding genres (Romance, Thriller, etc.)`);
+        passedCount++;
+      } else {
+        throw new Error(JSON.stringify(body));
+      }
+    } catch (err) {
+      logFail('Screen 4 Fetch Genres', err);
+      failedCount++;
+    }
+
+    // TEST 5.2: Screen 4 - Save Selected Interests (POST /auth/interests)
+    logSection('5.2 Screen 4: Save Selected Interests (POST /auth/interests)');
+    try {
+      const selectedSlugs = ['romance', 'thriller', 'action'];
+      const res = await fetch(`${BASE_URL}/auth/interests`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ interests: selectedSlugs })
+      });
+      const body = await res.json();
+
+      if (
+        res.status === 200 &&
+        body.success === true &&
+        Array.isArray(body.data.interests) &&
+        body.data.interests.length === 3
+      ) {
+        logPass('User interests saved successfully (Romance, Thriller, Action)');
+        passedCount++;
+      } else {
+        throw new Error(JSON.stringify(body));
+      }
+    } catch (err) {
+      logFail('Screen 4 Save Interests', err);
+      failedCount++;
+    }
+
+    // TEST 6: Get Me (Authenticated Profile Inspection)
     logSection('6. Authenticated Profile Inspection (GET /me)');
     try {
       const res = await fetch(`${BASE_URL}/auth/me`, {
@@ -192,14 +248,77 @@ async function runTests() {
       });
       const body = await res.json();
 
-      if (res.status === 200 && body.data.user.phoneNumber === testPhone) {
-        logPass(`Session verified. User: ${body.data.user.fullName} (${body.data.user.phoneNumber})`);
+      if (
+        res.status === 200 &&
+        body.data.user.phoneNumber === testPhone &&
+        Array.isArray(body.data.user.interests) &&
+        body.data.user.interests.length === 3
+      ) {
+        logPass(`Session verified. User: ${body.data.user.fullName} (${body.data.user.phoneNumber}) with ${body.data.user.interests.length} saved interests`);
         passedCount++;
       } else {
         throw new Error(JSON.stringify(body));
       }
     } catch (err) {
       logFail('Get Me endpoint', err);
+      failedCount++;
+    }
+
+    // TEST 6.1: Refresh Token via Body (POST /auth/refresh-token)
+    logSection('6.1 Refresh Token via Body (POST /auth/refresh-token)');
+    try {
+      const res = await fetch(`${BASE_URL}/auth/refresh-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: authRefreshToken })
+      });
+      const body = await res.json();
+
+      if (
+        res.status === 200 &&
+        body.success === true &&
+        body.data.token &&
+        body.data.refreshToken &&
+        body.data.user.fullName === 'Satyam Sharma'
+      ) {
+        authToken = body.data.token;
+        authRefreshToken = body.data.refreshToken;
+        logPass('Token refreshed successfully via refreshToken body payload');
+        passedCount++;
+      } else {
+        throw new Error(JSON.stringify(body));
+      }
+    } catch (err) {
+      logFail('Refresh Token (Body)', err);
+      failedCount++;
+    }
+
+    // TEST 6.2: Refresh Token via Bearer Authorization Header (POST /auth/refresh)
+    logSection('6.2 Refresh Token via Bearer Header (POST /auth/refresh)');
+    try {
+      const res = await fetch(`${BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        }
+      });
+      const body = await res.json();
+
+      if (
+        res.status === 200 &&
+        body.success === true &&
+        body.data.token &&
+        body.data.user.phoneNumber === testPhone
+      ) {
+        authToken = body.data.token;
+        logPass('Token refreshed successfully via Authorization Bearer header');
+        passedCount++;
+      } else {
+        throw new Error(JSON.stringify(body));
+      }
+    } catch (err) {
+      logFail('Refresh Token (Bearer)', err);
       failedCount++;
     }
 
@@ -275,6 +394,45 @@ async function runTests() {
       }
     } catch (err) {
       logFail('Logout endpoint', err);
+      failedCount++;
+    }
+
+    // TEST 10: Delete Profile / Account
+    logSection('10. Delete Profile / Account (DELETE /auth/profile)');
+    try {
+      const res = await fetch(`${BASE_URL}/auth/profile`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      const body = await res.json();
+
+      if (res.status === 200 && body.success === true && body.data.deleted === true) {
+        logPass('Account successfully deleted (status: DELETED)');
+        passedCount++;
+      } else {
+        throw new Error(JSON.stringify(body));
+      }
+    } catch (err) {
+      logFail('Delete Profile endpoint', err);
+      failedCount++;
+    }
+
+    // TEST 10.1: Verify deleted user cannot access protected endpoints
+    logSection('10.1 Verify Access Denied After Account Deletion');
+    try {
+      const res = await fetch(`${BASE_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      const body = await res.json();
+
+      if (res.status === 401 && body.success === false) {
+        logPass('Deleted account successfully blocked from protected resources');
+        passedCount++;
+      } else {
+        throw new Error('Deleted user was able to access /me!');
+      }
+    } catch (err) {
+      logFail('Verify Deleted Account Protection', err);
       failedCount++;
     }
 

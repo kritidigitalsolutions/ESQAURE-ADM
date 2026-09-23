@@ -27,8 +27,8 @@ export default function AppNotificationsPage() {
       id: 'NOTC-103',
       title: 'Auto-Pay Payment Receipt Verified',
       category: 'BILLING',
-      body: 'Your Monthly VIP Pass (₹199) was renewed successfully via Razorpay. Receipt #REC-8849 is available for download.',
-      target: 'VIP Subscribers Only',
+      body: 'Your Monthly Pass (₹199) was renewed successfully via Razorpay. Receipt #REC-8849 is available for download.',
+      target: 'Subscribers Only',
       priority: 'Normal',
       date: '15 Sep 2026',
       isActive: true
@@ -175,7 +175,7 @@ export default function AppNotificationsPage() {
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold"
                   >
                     <option value="All Active Users">All Active Users</option>
-                    <option value="VIP Subscribers Only">VIP Subscribers Only</option>
+                    <option value="Subscribers Only">Subscribers Only</option>
                     <option value="New Users (Last 7 Days)">New Users (Last 7 Days)</option>
                   </select>
                 </div>

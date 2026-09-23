@@ -9,6 +9,10 @@
     font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
+  html {
+    scrollbar-gutter: stable;
+  }
+
   html,
   body {
     font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;

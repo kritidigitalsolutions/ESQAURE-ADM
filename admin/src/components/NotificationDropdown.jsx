@@ -32,8 +32,8 @@ const DEFAULT_NOTIFICATIONS = [
   {
     id: 'notif-2',
     category: 'monetization',
-    title: 'VIP Pass Subscription Surge',
-    message: '34 viewers purchased the Annual VIP Pass in the last hour (+142% vs daily average). Total revenue: ₹6,766.',
+    title: 'Subscription Surge',
+    message: '34 viewers purchased the Annual Pass in the last hour (+142% vs daily average). Total revenue: ₹6,766.',
     time: '28m ago',
     unread: true,
     targetTab: 'subscribers',

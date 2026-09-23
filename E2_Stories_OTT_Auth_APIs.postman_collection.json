@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "esquare-ott-auth-v1",
     "name": "E² Stories OTT - Authentication & User APIs",
-    "description": "Production-ready REST APIs for E² Stories (Entertainment Squared) OTT mobile platform. Covers Phone OTP Authentication, New User Registration, Profile Setup, and Session Management.",
+    "description": "Production-ready REST APIs for E² Stories (Entertainment Squared) OTT mobile platform. Covers Phone OTP Authentication, New User Registration, Profile Setup, Interest/Genre Onboarding, and Session Management.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -28,6 +28,11 @@
     },
     {
       "key": "otp",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
       "value": "",
       "type": "string"
     }
@@ -81,9 +86,10 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.success && res.data && res.data.token) {",
-                  "    pm.collectionVariables.set('authToken', res.data.token);",
-                  "    console.log('Auto-saved authToken');",
+                  "if (res.success && res.data) {",
+                  "    if (res.data.token) pm.collectionVariables.set('authToken', res.data.token);",
+                  "    if (res.data.refreshToken) pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "    console.log('Auto-saved authToken and refreshToken');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -198,6 +204,51 @@
           "response": []
         },
         {
+          "name": "Get Genres (Choose your Interest)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/genres",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "genres"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Save Interests (Choose your Interest)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"interests\": [\"romance\", \"thriller\", \"action\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/interests",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "interests"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get Profile",
           "request": {
             "auth": {
@@ -240,6 +291,135 @@
               "host": ["{{baseUrl}}"],
               "path": ["auth", "logout"]
             }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data) {",
+                  "    if (res.data.token) pm.collectionVariables.set('authToken', res.data.token);",
+                  "    if (res.data.refreshToken) pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "    console.log('Refreshed authToken and refreshToken');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh-token"]
+            },
+            "description": "Refreshes user access token and refresh token. Accepts either refreshToken in JSON body or existing access token in Authorization Bearer header."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "File & Media Uploads",
+      "item": [
+        {
+          "name": "Upload Single File",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Single media or document file (image, video, subtitle, audio, etc.)"
+                },
+                {
+                  "key": "folder",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true,
+                  "description": "Optional custom subfolder (e.g. posters, avatars, trailers)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/upload/single",
+              "host": ["{{baseUrl}}"],
+              "path": ["upload", "single"]
+            },
+            "description": "Upload a single file. Automatically categorizes into images, videos, audios, subtitles, or documents based on MIME type. Returns public accessible URL and file metadata."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Multiple Files",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "description": "Multiple media or document files (select multiple files, up to 20)"
+                },
+                {
+                  "key": "folder",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true,
+                  "description": "Optional custom subfolder"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/upload/multiple",
+              "host": ["{{baseUrl}}"],
+              "path": ["upload", "multiple"]
+            },
+            "description": "Upload multiple files in a single request. Returns count and array of uploaded files with public URLs and metadata."
           },
           "response": []
         }

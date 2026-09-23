@@ -40,6 +40,19 @@ export const errorHandler = (err, req, res, next) => {
     message = 'Malformed JSON payload provided.';
   }
 
+  // Handle Multer upload errors
+  if (err.name === 'MulterError') {
+    statusCode = 400;
+    errorCode = err.code === 'LIMIT_FILE_SIZE' ? ERROR_CODES.FILE_TOO_LARGE : ERROR_CODES.UPLOAD_ERROR;
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      message = 'Uploaded file exceeds the maximum allowed size limit.';
+    } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      message = `Unexpected upload field '${err.field}'. Use 'file' for single upload or 'files' for multiple upload.`;
+    } else {
+      message = `Upload error: ${err.message}`;
+    }
+  }
+
   if (isDev && statusCode === 500) {
     console.error('[Unhandled Server Exception]:', err);
   }

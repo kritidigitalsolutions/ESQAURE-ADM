@@ -113,7 +113,7 @@ export default function EpisodesPage({ initialDramaId }) {
         <div class="flex items-center space-x-3 shrink-0">
           <div class="text-right hidden sm:block">
             <p class="text-[11px] font-bold text-slate-400">Freemium Paywall Rule</p>
-            <p class="text-xs font-extrabold text-slate-900">Ep 1–3 Free • Ep 4+ VIP Locked</p>
+            <p class="text-xs font-extrabold text-slate-900">Ep 1–3 Free • Ep 4+ Subscriber Locked</p>
           </div>
 
           <button
@@ -132,7 +132,7 @@ export default function EpisodesPage({ initialDramaId }) {
         <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
           <div>
             <h3 class="font-bold text-slate-950 text-sm">Episodes Sequence & Paywall Control</h3>
-            <p class="text-[11px] text-slate-400">Click the Paywall lock to toggle Free Preview vs VIP Access</p>
+            <p class="text-[11px] text-slate-400">Click the Paywall lock to toggle Free Preview vs Subscriber Access</p>
           </div>
           
           <div className="flex items-center space-x-3">
@@ -230,7 +230,7 @@ export default function EpisodesPage({ initialDramaId }) {
                       ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
                       : 'bg-[#FEF08A] text-slate-950 hover:bg-[#FDE047]'
                   }`}
-                  title={ep.isFree ? "Click to lock for VIPs only" : "Click to make Free Teaser"}
+                  title={ep.isFree ? "Click to lock for Subscribers only" : "Click to make Free Teaser"}
                 >
                   {ep.isFree ? (
                     <>
@@ -240,7 +240,7 @@ export default function EpisodesPage({ initialDramaId }) {
                   ) : (
                     <>
                       <Lock class="w-3.5 h-3.5 text-black" />
-                      <span>VIP LOCKED</span>
+                      <span>SUBSCRIBER LOCKED</span>
                     </>
                   )}
                 </button>
@@ -284,7 +284,7 @@ export default function EpisodesPage({ initialDramaId }) {
                 <p class="font-extrabold text-sm text-white">Simulated 9:16 Video Stream</p>
                 <p class="text-xs text-slate-300 mt-1">Multi-bitrate HLS (1080p, 720p Auto)</p>
                 <span class="mt-3 px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500 text-emerald-400 text-[10px] font-bold">
-                  {activeEpisode.isFree ? 'FREE PREVIEW STREAM' : 'VIP AUTHENTICATED STREAM'}
+                  {activeEpisode.isFree ? 'FREE PREVIEW STREAM' : 'SUBSCRIBER STREAM'}
                 </span>
               </div>
             </div>

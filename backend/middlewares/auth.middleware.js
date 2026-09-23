@@ -50,6 +50,12 @@ export const authenticate = async (req, res, next) => {
       );
     }
 
+    if (user.status === 'DELETED') {
+      return next(
+        new AppError('This account has been deleted. Please register or login again.', 401, ERROR_CODES.USER_NOT_FOUND)
+      );
+    }
+
     // Attach user to request object
     req.user = user;
     req.userId = user._id.toString();

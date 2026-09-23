@@ -141,8 +141,8 @@ export default function UploadContentPage({ onNavigate }) {
     { id: 1, title: 'Episode 1: The Incognito Meeting', sourceType: 'file', fileName: 'ep_01_the_incognito_meeting_9x16.mp4', videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', fileSize: '28.4 MB', duration: '2:15', isFree: true, status: 'Ready' },
     { id: 2, title: 'Episode 2: Contractual Sparks', sourceType: 'url', videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', fileName: '', fileSize: 'Remote Stream', duration: '2:30', isFree: true, status: 'Ready' },
     { id: 3, title: 'Episode 3: The Boardroom Surprise', sourceType: 'file', fileName: 'ep_03_the_boardroom_surprise_9x16.mp4', videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', fileSize: '26.8 MB', duration: '1:58', isFree: true, status: 'Ready' },
-    { id: 4, title: 'Episode 4: Behind Closed Doors', sourceType: 'file', fileName: 'ep_04_behind_closed_doors_9x16.mp4', videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', fileSize: '34.5 MB', duration: '2:45', isFree: false, status: 'VIP Locked' },
-    { id: 5, title: 'Episode 5: High Society Gala', sourceType: 'url', videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', fileName: '', fileSize: 'Remote Stream', duration: '2:10', isFree: false, status: 'VIP Locked' },
+    { id: 4, title: 'Episode 4: Behind Closed Doors', sourceType: 'file', fileName: 'ep_04_behind_closed_doors_9x16.mp4', videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', fileSize: '34.5 MB', duration: '2:45', isFree: false, status: 'Subscriber Locked' },
+    { id: 5, title: 'Episode 5: High Society Gala', sourceType: 'url', videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', fileName: '', fileSize: 'Remote Stream', duration: '2:10', isFree: false, status: 'Subscriber Locked' },
   ]);
 
   // Total episodes is automatically computed from the content episodes queue
@@ -193,11 +193,11 @@ export default function UploadContentPage({ onNavigate }) {
       { id: 1, title: 'Episode 1: The Penthouse Interview', fileName: 'ep_01_the_penthouse_interview_9x16.mp4', fileSize: '28.4 MB', duration: '2:15', isFree: true, status: 'Ready' },
       { id: 2, title: 'Episode 2: Midnight Encounter', fileName: 'ep_02_midnight_encounter_9x16.mp4', fileSize: '32.1 MB', duration: '2:40', isFree: true, status: 'Ready' },
       { id: 3, title: 'Episode 3: The Golden Locket', fileName: 'ep_03_the_golden_locket_9x16.mp4', fileSize: '24.9 MB', duration: '1:58', isFree: true, status: 'Ready' },
-      { id: 4, title: 'Episode 4: Whispers in the Boardroom', fileName: 'ep_04_whispers_in_boardroom_9x16.mp4', fileSize: '33.5 MB', duration: '2:32', isFree: false, status: 'VIP Locked' },
-      { id: 5, title: 'Episode 5: False Identity', fileName: 'ep_05_false_identity_exposed_9x16.mp4', fileSize: '29.7 MB', duration: '2:14', isFree: false, status: 'VIP Locked' },
-      { id: 6, title: 'Episode 6: The Heiress Strikes Back', fileName: 'ep_06_heiress_strikes_back_9x16.mp4', fileSize: '31.0 MB', duration: '2:20', isFree: false, status: 'VIP Locked' },
-      { id: 7, title: 'Episode 7: Locked in the Wine Cellar', fileName: 'ep_07_locked_in_cellar_9x16.mp4', fileSize: '35.4 MB', duration: '2:45', isFree: false, status: 'VIP Locked' },
-      { id: 8, title: 'Episode 8: Truth Unveiled', fileName: 'ep_08_truth_unveiled_9x16.mp4', fileSize: '27.8 MB', duration: '2:05', isFree: false, status: 'VIP Locked' },
+      { id: 4, title: 'Episode 4: Whispers in the Boardroom', fileName: 'ep_04_whispers_in_boardroom_9x16.mp4', fileSize: '33.5 MB', duration: '2:32', isFree: false, status: 'Subscriber Locked' },
+      { id: 5, title: 'Episode 5: False Identity', fileName: 'ep_05_false_identity_exposed_9x16.mp4', fileSize: '29.7 MB', duration: '2:14', isFree: false, status: 'Subscriber Locked' },
+      { id: 6, title: 'Episode 6: The Heiress Strikes Back', fileName: 'ep_06_heiress_strikes_back_9x16.mp4', fileSize: '31.0 MB', duration: '2:20', isFree: false, status: 'Subscriber Locked' },
+      { id: 7, title: 'Episode 7: Locked in the Wine Cellar', fileName: 'ep_07_locked_in_cellar_9x16.mp4', fileSize: '35.4 MB', duration: '2:45', isFree: false, status: 'Subscriber Locked' },
+      { id: 8, title: 'Episode 8: Truth Unveiled', fileName: 'ep_08_truth_unveiled_9x16.mp4', fileSize: '27.8 MB', duration: '2:05', isFree: false, status: 'Subscriber Locked' },
     ]);
   };
 
@@ -266,7 +266,7 @@ export default function UploadContentPage({ onNavigate }) {
       fileSize: newEpSourceType === 'file' ? '28.5 MB' : 'Remote Stream',
       duration: newEpDuration || '2:15',
       isFree: nextNum <= freeEpisodes,
-      status: nextNum <= freeEpisodes ? 'Ready' : 'VIP Locked'
+      status: nextNum <= freeEpisodes ? 'Ready' : 'Subscriber Locked'
     };
     setEpisodes([...episodes, newEpisode]);
     setNewEpTitle('');
@@ -327,7 +327,7 @@ export default function UploadContentPage({ onNavigate }) {
     setEpisodes(episodes.map((ep) => ({
       ...ep,
       isFree: ep.id <= count,
-      status: ep.id <= count ? 'Ready' : 'VIP Locked'
+      status: ep.id <= count ? 'Ready' : 'Subscriber Locked'
     })));
   };
 
@@ -336,7 +336,7 @@ export default function UploadContentPage({ onNavigate }) {
     handleFreeEpisodesChange(cutoff);
   };
 
-  // Toggle individual episode free / VIP status directly
+  // Toggle individual episode free / subscriber status directly
   const handleToggleEpisodeFree = (id) => {
     setEpisodes(episodes.map((ep) => {
       if (ep.id === id) {
@@ -344,7 +344,7 @@ export default function UploadContentPage({ onNavigate }) {
         return {
           ...ep,
           isFree: nextIsFree,
-          status: nextIsFree ? 'Ready' : 'VIP Locked'
+          status: nextIsFree ? 'Ready' : 'Subscriber Locked'
         };
       }
       return ep;
@@ -643,7 +643,7 @@ export default function UploadContentPage({ onNavigate }) {
                   <div className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 shrink-0" />
                 )}
                 <span className={publishingStage >= 3 ? 'text-slate-950 dark:text-white' : 'text-slate-400'}>
-                  Configuring Razorpay VIP paywall lock for episodes {freeEpisodes + 1}+
+                  Configuring Razorpay Subscriber paywall lock for episodes {freeEpisodes + 1}+
                 </span>
               </div>
               <div className="flex items-center space-x-3 text-xs font-bold">
@@ -1527,7 +1527,7 @@ export default function UploadContentPage({ onNavigate }) {
                             : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                         }`}
                       >
-                        All VIP
+                        All Subscribers
                       </button>
                     </div>
 
@@ -1631,7 +1631,7 @@ export default function UploadContentPage({ onNavigate }) {
                                       ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60 shadow-2xs'
                                       : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/60 shadow-2xs'
                                   }`}
-                                  title="Click to toggle Free vs VIP"
+                                  title="Click to toggle Free vs Subscribers"
                                 >
                                   {ep.isFree ? (
                                     <>
@@ -1641,7 +1641,7 @@ export default function UploadContentPage({ onNavigate }) {
                                   ) : (
                                     <>
                                       <Lock className="w-2.5 h-2.5 text-amber-500" />
-                                      <span>VIP</span>
+                                      <span>Subscribers</span>
                                     </>
                                   )}
                                 </button>
@@ -1688,7 +1688,7 @@ export default function UploadContentPage({ onNavigate }) {
                     Step 3: Paywall &amp; Launch
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                    Configure Free Preview vs VIP Paywall rules, set coin pricing, and publish series.
+                    Configure Free Preview vs Subscriber Paywall rules, set coin pricing, and publish series.
                   </p>
                 </div>
               </div>
@@ -1721,7 +1721,7 @@ export default function UploadContentPage({ onNavigate }) {
               </div>
 
               <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800">
-                <span className="text-[11px] font-bold text-slate-400 block uppercase">VIP Paywall Locked</span>
+                <span className="text-[11px] font-bold text-slate-400 block uppercase">Subscriber Paywall Locked</span>
                 <div className="flex items-center space-x-2 mt-1">
                   <span className="text-xl font-black text-amber-600 dark:text-amber-400">
                     {episodes.filter((ep) => !ep.isFree).length}
@@ -1735,7 +1735,7 @@ export default function UploadContentPage({ onNavigate }) {
             <div className="border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
               <div className="bg-slate-100/70 dark:bg-slate-900/80 px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
                 <span>Episode ({episodes.length} total)</span>
-                <span>Paywall Status (Click badge to toggle Free / VIP)</span>
+                <span>Paywall Status (Click badge to toggle Free / Subscriber)</span>
               </div>
 
               {episodes.length === 0 ? (
@@ -1779,12 +1779,12 @@ export default function UploadContentPage({ onNavigate }) {
                             setEpisodes(
                               episodes.map((item) =>
                                 item.id === ep.id
-                                  ? { ...item, isFree: !item.isFree, status: !item.isFree ? 'Ready' : 'VIP Locked' }
+                                  ? { ...item, isFree: !item.isFree, status: !item.isFree ? 'Ready' : 'Subscriber Locked' }
                                   : item
                               )
                             );
                           }}
-                          title="Click to toggle Free Preview or VIP Locked"
+                          title="Click to toggle Free Preview or Subscriber Locked"
                           className={`px-3 py-1.5 rounded-full text-[10px] font-extrabold tracking-wide flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95 ${
                             ep.isFree
                               ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
@@ -1799,7 +1799,7 @@ export default function UploadContentPage({ onNavigate }) {
                           ) : (
                             <>
                               <Lock className="w-3 h-3 stroke-[2.5]" />
-                              <span>VIP LOCKED</span>
+                              <span>SUBSCRIBER LOCKED</span>
                             </>
                           )}
                         </button>

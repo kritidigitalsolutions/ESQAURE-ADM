@@ -1,10 +1,14 @@
 import app from './app.js';
 import { env } from './config/env.js';
 import { connectDB, closeDB } from './config/db.js';
+import { seedDefaultGenres } from './config/seedGenres.js';
+import { removeDummyUsers } from './config/seedUsers.js';
 
 const startServer = async () => {
   // Connect to database
   await connectDB();
+  await seedDefaultGenres();
+  await removeDummyUsers();
 
   // Listen for incoming traffic
   const server = app.listen(env.PORT, () => {

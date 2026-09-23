@@ -80,12 +80,12 @@ export default function DataTableSection({ onOpenIngestModal }) {
     }
   ];
 
-  // VIP Subscription Transactions
+  // Subscription Transactions
   const subscriptionTransactions = [
     {
       id: 'SUB-9821',
       user: 'Aryan (+91 76****97)',
-      plan: 'Yearly VIP',
+      plan: 'Yearly Pass',
       amount: '₹1,499',
       paymentId: 'pay_Pq87x291KmA',
       status: 'SUCCESS',
@@ -94,7 +94,7 @@ export default function DataTableSection({ onOpenIngestModal }) {
     {
       id: 'SUB-9820',
       user: 'Priya Sharma (+91 98****12)',
-      plan: 'Monthly VIP',
+      plan: 'Monthly Pass',
       amount: '₹199',
       paymentId: 'pay_Pq86a112LzB',
       status: 'SUCCESS',
@@ -103,7 +103,7 @@ export default function DataTableSection({ onOpenIngestModal }) {
     {
       id: 'SUB-9819',
       user: 'Rahul Verma (+91 91****44)',
-      plan: 'Monthly VIP',
+      plan: 'Monthly Pass',
       amount: '₹199',
       paymentId: 'pay_Pq85b991XcC',
       status: 'FAILED',
@@ -164,7 +164,7 @@ export default function DataTableSection({ onOpenIngestModal }) {
             }`}
           >
             <Crown class="w-4 h-4 text-amber-500" />
-            <span>VIP Subscribers ({subscriptionTransactions.length})</span>
+            <span>Subscribers ({subscriptionTransactions.length})</span>
           </button>
         </div>
 

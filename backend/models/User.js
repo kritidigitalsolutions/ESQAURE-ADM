@@ -84,6 +84,26 @@ const UserSchema = new mongoose.Schema(
       default: null
     },
 
+    plan: {
+      type: String,
+      default: 'Free Tier'
+    },
+    totalWatchTime: {
+      type: String,
+      default: '0.0 hrs'
+    },
+    promoCode: {
+      type: String,
+      trim: true,
+      default: null,
+      index: true
+    },
+    voucherCode: {
+      type: String,
+      trim: true,
+      default: null
+    },
+
     // System & Status
     status: {
       type: String,
@@ -106,7 +126,45 @@ const UserSchema = new mongoose.Schema(
     toJSON: {
       virtuals: true,
       transform: (doc, ret) => {
-        ret.id = ret._id;
+        ret.id = ret._id ? ret._id.toString() : ret.id;
+        const fullName = `${doc.firstName || ''} ${doc.lastName || ''}`.trim();
+        ret.name = fullName || `${doc.countryCode || '+91'} ${doc.phoneNumber}`;
+        ret.phone = `${doc.countryCode || '+91'} ${doc.phoneNumber}`.trim();
+        ret.plan = doc.plan || (doc.isVip ? 'Monthly Pass' : 'Free Tier');
+        ret.totalWatchTime = doc.totalWatchTime || '0.0 hrs';
+        ret.promoCode = doc.promoCode || doc.voucherCode || null;
+        ret.avatarUrl = doc.avatarUrl || '';
+        
+        if (doc.vipExpiresAt) {
+          ret.vipExpiresAt = new Date(doc.vipExpiresAt).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+          });
+        } else {
+          ret.vipExpiresAt = '—';
+        }
+
+        if (doc.createdAt) {
+          ret.joinedAt = new Date(doc.createdAt).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+          });
+        }
+
+        // Relative last active
+        if (doc.lastLoginAt) {
+          const diffMs = Date.now() - new Date(doc.lastLoginAt).getTime();
+          const diffMins = Math.floor(diffMs / 60000);
+          if (diffMins < 5) ret.lastActive = 'Just now';
+          else if (diffMins < 60) ret.lastActive = `${diffMins} min ago`;
+          else if (diffMins < 1440) ret.lastActive = `${Math.floor(diffMins / 60)} hours ago`;
+          else ret.lastActive = `${Math.floor(diffMins / 1440)} days ago`;
+        } else {
+          ret.lastActive = 'Recently';
+        }
+
         delete ret._id;
         delete ret.__v;
         return ret;

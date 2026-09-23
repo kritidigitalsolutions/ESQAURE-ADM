@@ -33,18 +33,18 @@ export default function SubscribersPage() {
       }
       return sub;
     }));
-    alert('VIP subscription extended by 30 days!');
+    alert('Subscription extended by 30 days!');
   };
 
   return (
     <div className="space-y-6 font-urbanist">
       
-      {/* 4 Core VIP Subscriber KPIs */}
+      {/* 4 Core Subscriber KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
         <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-nodus">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active VIP Members</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Subscribers</span>
             <span className="w-8 h-8 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 flex items-center justify-center">
               <Crown className="w-4 h-4" />
             </span>
@@ -74,8 +74,8 @@ export default function SubscribersPage() {
         <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-nodus">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Annual Pass (₹1,499)</span>
-            <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center font-bold text-xs">
-              VIP
+            <span className="w-8 h-8 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 flex items-center justify-center font-bold text-xs">
+              1Yr
             </span>
           </div>
           <h3 className="text-2xl font-extrabold text-slate-950 mt-2">
@@ -133,7 +133,7 @@ export default function SubscribersPage() {
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              {plan === 'ALL' ? 'All VIPs' : plan === 'MONTHLY' ? 'Monthly Pass' : 'Yearly Pass'}
+              {plan === 'ALL' ? 'All Subscribers' : plan === 'MONTHLY' ? 'Monthly Pass' : 'Yearly Pass'}
             </button>
           ))}
         </div>
@@ -163,7 +163,7 @@ export default function SubscribersPage() {
                       <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                         <Search className="w-5 h-5" />
                       </div>
-                      <p className="text-xs font-bold text-slate-800">No VIP subscribers match your query</p>
+                      <p className="text-xs font-bold text-slate-800">No subscribers match your query</p>
                       <p className="text-[11px] text-slate-400">
                         {searchTerm ? `No active subscribers found for "${searchTerm}".` : 'No subscribers found in this tier.'}
                       </p>
@@ -214,7 +214,7 @@ export default function SubscribersPage() {
 
                   <td className="py-3.5 px-4">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">
-                      ACTIVE VIP
+                      SUBSCRIBED
                     </span>
                   </td>
 

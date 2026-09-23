@@ -27,10 +27,10 @@ export default function PromosPage() {
     },
     {
       id: 'VOUCH-3',
-      code: 'VIPFREE7',
+      code: 'SUBFREE7',
       discountType: 'FREE_DAYS',
       discountValue: '7 Days Free',
-      targetPlan: 'All VIP Plans',
+      targetPlan: 'All Subscription Plans',
       maxUses: 20000,
       currentUses: 14200,
       expiryDate: '28 Feb 2027',
@@ -94,7 +94,7 @@ export default function PromosPage() {
         <div>
           <h2 className="text-xl font-extrabold text-slate-950">Promos & Vouchers</h2>
           <p className="text-xs font-semibold text-slate-500 mt-0.5">
-            Create coupon discount codes, referral vouchers, and VIP trial promotions.
+            Create coupon discount codes, referral vouchers, and subscription trial promotions.
           </p>
         </div>
         <button
@@ -249,7 +249,7 @@ export default function PromosPage() {
                   >
                     <option value="PERCENTAGE">Percentage (%)</option>
                     <option value="FLAT">Flat Rupee (₹)</option>
-                    <option value="FREE_DAYS">Free VIP Days</option>
+                    <option value="FREE_DAYS">Free Subscription Days</option>
                   </select>
                 </div>
                 <div>
@@ -274,7 +274,7 @@ export default function PromosPage() {
                 >
                   <option value="Monthly Pass (₹199)">Monthly Pass (₹199)</option>
                   <option value="Yearly Pass (₹1,499)">Yearly Pass (₹1,499)</option>
-                  <option value="All VIP Plans">All VIP Plans</option>
+                  <option value="All Subscription Plans">All Subscription Plans</option>
                 </select>
               </div>
 

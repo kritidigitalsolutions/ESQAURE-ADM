@@ -116,7 +116,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
   return (
     <div className="space-y-4 mb-8 font-sans">
       
-      {/* 2 Core Stat Cards: 1) User Base & 2) Paid Subscriptions (VIP Members) */}
+      {/* 2 Core Stat Cards: 1) User Base & 2) Paid Subscriptions (Subscribers) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         {/* Card 1: User Base */}

@@ -789,7 +789,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                         Freemium Paywall Architecture
                       </h4>
                       <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                        Set how many teaser episodes mobile viewers can watch before hitting the VIP paywall
+                        Set how many teaser episodes mobile viewers can watch before hitting the subscriber paywall
                       </p>
                     </div>
                   </div>
@@ -850,7 +850,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                     ></div>
                     <div
                       className="bg-amber-400 h-full transition-all duration-300 flex-1"
-                      title={`Episodes ${Number(freeEpisodes) + 1} to ${totalEpisodes} VIP Locked`}
+                      title={`Episodes ${Number(freeEpisodes) + 1} to ${totalEpisodes} Subscriber Locked`}
                     ></div>
                   </div>
 
@@ -861,7 +861,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                     </span>
                     <span className="text-amber-700 dark:text-amber-400 flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
-                      Ep {Number(freeEpisodes) + 1}+ Requires VIP Pass
+                      Ep {Number(freeEpisodes) + 1}+ Requires Subscription
                     </span>
                   </div>
                 </div>
@@ -940,7 +940,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                             ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-700/60 hover:bg-emerald-100'
                             : 'bg-amber-100/80 text-amber-950 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 hover:bg-amber-200/60'
                         }`}
-                        title="Click to toggle Free Preview vs VIP Locked"
+                        title="Click to toggle Free Preview vs Subscriber Locked"
                       >
                         {ep.isFree ? (
                           <>
@@ -950,7 +950,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                         ) : (
                           <>
                             <Lock className="w-3 h-3 text-amber-700 dark:text-amber-400" />
-                            <span>VIP LOCKED</span>
+                            <span>SUBSCRIBER LOCKED</span>
                           </>
                         )}
                       </button>

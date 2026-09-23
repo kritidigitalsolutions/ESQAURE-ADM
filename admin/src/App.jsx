@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import PageHeader from './components/PageHeader';
@@ -32,7 +32,40 @@ export default function App() {
     }
   });
 
-  const [activeTab, setActiveTab] = useState('summary');
+  const getInitialTab = () => {
+    try {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash) return hash;
+      const stored = localStorage.getItem('admin_active_tab');
+      if (stored) return stored;
+    } catch {}
+    return 'summary';
+  };
+
+  const [activeTab, setActiveTabState] = useState(getInitialTab);
+
+  const setActiveTab = (tab) => {
+    setSelectedDramaId(null);
+    setActiveTabState(tab);
+    try {
+      localStorage.setItem('admin_active_tab', tab);
+      window.location.hash = tab;
+    } catch {}
+  };
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (hash && hash !== activeTab) {
+        setActiveTabState(hash);
+        try {
+          localStorage.setItem('admin_active_tab', hash);
+        } catch {}
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [activeTab]);
   const [selectedDramaId, setSelectedDramaId] = useState(null);
   const [isIngestModalOpen, setIsIngestModalOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
@@ -66,7 +99,7 @@ export default function App() {
       case 'summary':
         return {
           title: "Dashboard",
-          subtitle: "Real-time viewer numbers, active VIP subscriptions, revenue, and video status."
+          subtitle: "Real-time viewer numbers, active subscriptions, revenue, and video status."
         };
       case 'dramas':
         return {
@@ -95,13 +128,13 @@ export default function App() {
         };
       case 'users':
         return {
-          title: "Users",
+          title: "User Directory & Access Control",
           subtitle: "Search registered users, check watch history, and manage subscriber access."
         };
       case 'subscribers':
         return {
           title: "Subscribers",
-          subtitle: "Monitor active VIP members, recurring subscriptions, and member retention."
+          subtitle: "Monitor active subscribers, recurring subscriptions, and member retention."
         };
       case 'subscriptions':
         return {
@@ -111,7 +144,7 @@ export default function App() {
       case 'promos':
         return {
           title: "Promos & Vouchers",
-          subtitle: "Create coupon discount codes, referral vouchers, and VIP trial promotions."
+          subtitle: "Create coupon discount codes, referral vouchers, and subscription trial promotions."
         };
       case 'transactions':
         return {

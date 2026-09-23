@@ -7,7 +7,7 @@ export default function Header({ activeTab, setActiveTab, onOpenIngestModal }) {
     { id: 'auditlog', label: 'Activity Log' },
     { id: 'dramas', label: 'Series' },
     { id: 'episodes', label: 'Episodes' },
-    { id: 'users', label: 'Users & VIPs' },
+    { id: 'users', label: 'Users' },
     { id: 'subscriptions', label: 'Subscriptions' },
     { id: 'settings', label: 'Settings' },
   ];

@@ -175,7 +175,7 @@ export const mockEpisodes = [
   { id: 'EP-101', dramaId: 'DRM-101', episodeNumber: 1, title: 'The Encounter at the Gate', duration: '2:14', isFree: true, views: '184.2k', subtitles: ['Hindi', 'English'], videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', thumbnail: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=200&q=80' },
   { id: 'EP-102', dramaId: 'DRM-101', episodeNumber: 2, title: 'A Secret Worth Millions', duration: '2:28', isFree: true, views: '162.8k', subtitles: ['Hindi', 'English'], videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', thumbnail: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=200&q=80' },
   { id: 'EP-103', dramaId: 'DRM-101', episodeNumber: 3, title: 'The Midnight Ambush', duration: '1:58', isFree: true, views: '149.0k', subtitles: ['Hindi', 'English'], videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', thumbnail: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=200&q=80' },
-  { id: 'EP-104', dramaId: 'DRM-101', episodeNumber: 4, title: 'Identity Revealed (VIP Locked)', duration: '2:45', isFree: false, views: '128.4k', subtitles: ['Hindi', 'English'], videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', thumbnail: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=200&q=80' },
+  { id: 'EP-104', dramaId: 'DRM-101', episodeNumber: 4, title: 'Identity Revealed (Subscriber Locked)', duration: '2:45', isFree: false, views: '128.4k', subtitles: ['Hindi', 'English'], videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', thumbnail: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=200&q=80' },
   { id: 'EP-105', dramaId: 'DRM-101', episodeNumber: 5, title: 'The Boardroom Shock', duration: '2:10', isFree: false, views: '115.1k', subtitles: ['Hindi', 'English'], videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', thumbnail: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=200&q=80' },
   { id: 'EP-106', dramaId: 'DRM-101', episodeNumber: 6, title: 'Confrontation at Dawn', duration: '2:32', isFree: false, views: '108.9k', subtitles: ['Hindi', 'English'], videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', thumbnail: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=200&q=80' },
   { id: 'EP-107', dramaId: 'DRM-101', episodeNumber: 7, title: 'Whispers in the Dark', duration: '2:05', isFree: false, views: '99.4k', subtitles: ['Hindi', 'English'], videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', thumbnail: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=200&q=80' },
@@ -198,14 +198,14 @@ export const mockUsers = [
   { id: 'USR-8911', phone: '+91 97112 39810', firstName: 'Priya',  lastName: 'Mehra',    name: 'Priya Mehra',     email: 'priya.m22@yahoo.com',      isVip: true,  plan: 'Yearly ₹1,499',    vipExpiresAt: '24 Jul 2027', joinedAt: '03 Mar 2025', totalWatchTime: '112.4 hrs', lastActive: '12 min ago',   status: 'ACTIVE'    },
   { id: 'USR-8912', phone: '+91 98450 12893', firstName: 'Rohan',  lastName: 'Verma',    name: 'Rohan Verma',     email: 'rohan.v@outlook.com',      isVip: false, plan: 'Free Tier',         vipExpiresAt: '—',           joinedAt: '28 Apr 2025', totalWatchTime: '14.5 hrs',  lastActive: '45 min ago',   status: 'ACTIVE'    },
   { id: 'USR-8913', phone: '+91 91670 88231', firstName: 'Sneha',  lastName: 'Patel',    name: 'Sneha Patel',     email: 'sneha.patel@gmail.com',    isVip: true,  plan: 'Monthly ₹199',     vipExpiresAt: '04 Oct 2026', joinedAt: '17 Jun 2025', totalWatchTime: '62.0 hrs',  lastActive: '2 hours ago',  status: 'ACTIVE'    },
-  { id: 'USR-8914', phone: '+91 99234 56123', firstName: 'Vikram', lastName: 'Sengupta', name: 'Vikram Sengupta', email: 'vikram.sen@gmail.com',     isVip: false, plan: 'Expired VIP',       vipExpiresAt: '01 Sep 2026', joinedAt: '05 Feb 2025', totalWatchTime: '88.1 hrs',  lastActive: 'Yesterday',    status: 'SUSPENDED' },
+  { id: 'USR-8914', phone: '+91 99234 56123', firstName: 'Vikram', lastName: 'Sengupta', name: 'Vikram Sengupta', email: 'vikram.sen@gmail.com',     isVip: false, plan: 'Expired Subscription', vipExpiresAt: '01 Sep 2026', joinedAt: '05 Feb 2025', totalWatchTime: '88.1 hrs',  lastActive: 'Yesterday',    status: 'SUSPENDED' },
   { id: 'USR-8915', phone: '+91 94220 99112', firstName: 'Ananya', lastName: 'Roy',      name: 'Ananya Roy',      email: 'ananya.roy@hotmail.com',   isVip: true,  plan: 'Yearly ₹1,499',    vipExpiresAt: '12 Aug 2027', joinedAt: '21 Aug 2024', totalWatchTime: '140.8 hrs', lastActive: '3 min ago',    status: 'ACTIVE'    },
 ];
 
 export const mockSubscriptions = [
   {
     code: 'PLAN_MONTHLY',
-    name: 'VIP Monthly Pass',
+    name: 'Monthly Pass',
     price: 199,
     period: '30 Days',
     badge: 'Popular',
@@ -220,7 +220,7 @@ export const mockSubscriptions = [
   },
   {
     code: 'PLAN_YEARLY',
-    name: 'VIP Annual All-Access',
+    name: 'Annual All-Access',
     price: 1499,
     period: '365 Days',
     badge: 'Best Value (Save 37%)',
@@ -229,7 +229,7 @@ export const mockSubscriptions = [
     features: [
       'Everything in Monthly Pass',
       'Early access to new series drops',
-      'VIP badge in community comments',
+      'Subscriber badge in community comments',
       'Download episodes for offline playback'
     ]
   }

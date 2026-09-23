@@ -8,7 +8,7 @@ export default function PageHeader({ title, subtitle }) {
           {title || "Platform Summary Dashboard"}
         </h1>
         <p class="text-sm font-medium text-slate-500 mt-1">
-          {subtitle || "Real-time viewer engagement, active VIP subscriptions, revenue growth, and video status."}
+          {subtitle || "Real-time viewer engagement, active subscriptions, revenue growth, and video status."}
         </p>
       </div>
     </div>

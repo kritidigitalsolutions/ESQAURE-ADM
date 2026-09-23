@@ -40,7 +40,7 @@ export default function MobileAppDrawer({ isOpen, onClose }) {
               <span>Combined Design Reference</span>
             </div>
             <p class="text-slate-300 text-xs leading-relaxed">
-              This Admin Panel directly feeds the E² Stories Mobile App (`+91` Phone Auth, Short-dramas, Episode drawers, ₹199/₹1,499 VIP Subscriptions).
+              This Admin Panel directly feeds the E² Stories Mobile App (`+91` Phone Auth, Short-dramas, Episode drawers, ₹199/₹1,499 Subscriptions).
             </p>
           </div>
 
@@ -80,9 +80,9 @@ export default function MobileAppDrawer({ isOpen, onClose }) {
             </h4>
             <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2 text-slate-400">
               <p>• Full-screen 9:16 portrait video player with resolution & subtitle pickers</p>
-              <p>• Episodes 1–3 Free preview; Episode 4+ VIP Locked</p>
+              <p>• Episodes 1–3 Free preview; Episode 4+ Subscriber Locked</p>
               <p>• Razorpay Membership checkout: Monthly ₹199 / Yearly ₹1,499</p>
-              <p>• User Profile: VIP Badge, Saved Series (Watchlist), Watch History</p>
+              <p>• User Profile: Subscriber Badge, Saved Series (Watchlist), Watch History</p>
             </div>
           </div>
 

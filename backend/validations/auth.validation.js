@@ -75,6 +75,25 @@ export const authValidation = {
       .allow('', null)
       .messages({
         'string.email': 'Please enter a valid email address.'
+      }),
+    interests: Joi.array()
+      .items(Joi.string().trim())
+      .default([])
+  }),
+
+  // Choose your Interest (Screen 4 / Onboarding genres)
+  saveInterests: Joi.object({
+    interests: Joi.array()
+      .items(Joi.string().trim())
+      .default([])
+      .messages({
+        'array.base': 'Interests must be an array of genre IDs or slugs.'
       })
+  }),
+
+  // Refresh Token
+  refreshToken: Joi.object({
+    refreshToken: Joi.string().trim().optional(),
+    token: Joi.string().trim().optional()
   })
 };

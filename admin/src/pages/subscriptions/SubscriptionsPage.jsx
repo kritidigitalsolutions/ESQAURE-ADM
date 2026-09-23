@@ -20,7 +20,7 @@ export default function SubscriptionsPage() {
         </div>
 
         <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-nodus">
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Active VIP Subscribers</span>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Active Subscribers</span>
           <div class="mt-2 flex items-baseline justify-between">
             <span class="text-2xl font-extrabold text-slate-950 font-urbanist">12,450</span>
             <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">+24.1%</span>
@@ -29,7 +29,7 @@ export default function SubscriptionsPage() {
         </div>
 
         <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-nodus">
-          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Free-to-VIP Conversion</span>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Free-to-Subscriber Conversion</span>
           <div class="mt-2 flex items-baseline justify-between">
             <span class="text-2xl font-extrabold text-slate-950 font-urbanist">8.4%</span>
             <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">+1.2%</span>
@@ -73,7 +73,7 @@ export default function SubscriptionsPage() {
               <div class="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <span class="text-slate-400 text-[10px] block">Active Subscribers</span>
-                  <span class="font-extrabold text-slate-900">{plan.activeSubscribers.toLocaleString()} VIPs</span>
+                  <span class="font-extrabold text-slate-900">{plan.activeSubscribers.toLocaleString()} Subscribers</span>
                 </div>
                 <div>
                   <span class="text-slate-400 text-[10px] block">MRR Share</span>

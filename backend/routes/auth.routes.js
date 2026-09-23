@@ -56,6 +56,28 @@ router.post(
 );
 
 /**
+ * @route   GET /api/v1/auth/genres
+ * @desc    Choose your Interest: Fetch active genres list
+ * @access  Public
+ */
+router.get(
+  '/genres',
+  AuthController.getGenres
+);
+
+/**
+ * @route   POST /api/v1/auth/interests
+ * @desc    Choose your Interest: Save user genre preferences
+ * @access  Private (Bearer JWT)
+ */
+router.post(
+  '/interests',
+  authenticate,
+  validate(authValidation.saveInterests),
+  AuthController.saveInterests
+);
+
+/**
  * @route   GET /api/v1/auth/me
  * @desc    Get currently logged in user profile & VIP status
  * @access  Private (Bearer JWT)
@@ -67,6 +89,24 @@ router.get(
 );
 
 /**
+ * @route   POST /api/v1/auth/refresh-token
+ * @desc    Refresh access token using refresh token or existing bearer token
+ * @access  Public / Bearer JWT
+ */
+router.post(
+  '/refresh-token',
+  validate(authValidation.refreshToken),
+  AuthController.refreshToken
+);
+
+// Alias: /refresh
+router.post(
+  '/refresh',
+  validate(authValidation.refreshToken),
+  AuthController.refreshToken
+);
+
+/**
  * @route   POST /api/v1/auth/logout
  * @desc    Logout active session
  * @access  Private (Bearer JWT)
@@ -75,6 +115,28 @@ router.post(
   '/logout',
   authenticate,
   AuthController.logout
+);
+
+/**
+ * @route   DELETE /api/v1/auth/profile
+ * @desc    Delete user account / profile
+ * @access  Private (Bearer JWT)
+ */
+router.delete(
+  '/profile',
+  authenticate,
+  AuthController.deleteAccount
+);
+
+/**
+ * @route   POST /api/v1/auth/delete-account
+ * @desc    Alternative action endpoint to delete account
+ * @access  Private (Bearer JWT)
+ */
+router.post(
+  '/delete-account',
+  authenticate,
+  AuthController.deleteAccount
 );
 
 export default router;

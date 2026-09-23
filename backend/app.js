@@ -1,16 +1,25 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import mongoSanitize from 'express-mongo-sanitize';
 import apiRoutes from './routes/index.js';
 import { errorHandler } from './middlewares/error.middleware.js';
 import { ApiResponse } from './utils/apiResponse.js';
 import { env } from './config/env.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
-// 1. HTTP Security Headers
-app.use(helmet());
+// 1. HTTP Security Headers (allows cross-origin media loading on web/mobile apps)
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  })
+);
 
 // 2. CORS configuration
 app.use(
@@ -29,13 +38,16 @@ app.use(
 );
 
 // 3. Request body parsing
-app.use(express.json({ limit: '50kb' }));
-app.use(express.urlencoded({ extended: true, limit: '50kb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // 4. Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
 
-// 5. Mount API version 1
+// 5. Statically serve uploaded files (/uploads)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// 6. Mount API version 1
 app.use('/api/v1', apiRoutes);
 
 // 6. Handle undefined routes (404)

@@ -23,8 +23,8 @@ By downloading, registering, or subscribing to the E² Stories application, you 
 2. USER ACCOUNTS & PHONE OTP AUTHENTICATION
 Users authenticate via verified mobile phone numbers (+91 OTP). Each account is licensed for personal, non-commercial entertainment purposes.
 
-3. VIP MEMBERSHIPS & SUBSCRIPTIONS
-- Monthly VIP Pass (₹199): Auto-renews every 30 days unless canceled 24 hours prior to renewal.
+3. SUBSCRIPTIONS & MEMBERSHIPS
+- Monthly Pass (₹199): Auto-renews every 30 days unless canceled 24 hours prior to renewal.
 - Yearly All-Access Pass (₹1,499): Billed annually with 365 days of uninterrupted access.
 - Payments are processed via PCI-DSS certified gateway (Razorpay).
 
