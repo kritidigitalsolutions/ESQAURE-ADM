@@ -1,9 +1,34 @@
-// Comprehensive mock dataset representing the E² Stories vertical micro-drama OTT platform
+// Priority normalization and reordering utilities for continuous 1..N sequence
+export const normalizePriorities = (dramaList) => {
+  return [...dramaList]
+    .sort((a, b) => (a.priority ?? 9999) - (b.priority ?? 9999))
+    .map((item, index) => ({
+      ...item,
+      priority: index + 1
+    }));
+};
+
+export const reassignPriority = (dramaList, dramaId, targetPriority) => {
+  const current = dramaList.find(d => d.id === dramaId);
+  if (!current) return normalizePriorities(dramaList);
+
+  const target = Math.max(1, Math.min(dramaList.length, Number(targetPriority) || 1));
+  const otherDramas = dramaList.filter(d => d.id !== dramaId);
+  const sortedOthers = normalizePriorities(otherDramas);
+
+  sortedOthers.splice(target - 1, 0, { ...current, priority: target });
+
+  return sortedOthers.map((item, index) => ({
+    ...item,
+    priority: index + 1
+  }));
+};
 
 export const mockDramas = [
   {
     id: 'DRM-101',
     title: 'Security Guard Ki CEO GF',
+    priority: 1,
     slug: 'security-guard-ki-ceo-gf',
     synopsis: 'A humble night security guard secretly protects the heiress of Mumbai\'s largest media empire. When an assassination attempt fails, an unexpected romance blossoms between two opposite worlds.',
     genres: ['Romance', 'Drama', 'CEO'],
@@ -27,6 +52,7 @@ export const mockDramas = [
   {
     id: 'DRM-102',
     title: 'Dhokha: A Dark Side of Love',
+    priority: 2,
     slug: 'dhokha-dark-side-of-love',
     synopsis: 'Betrayal runs deep in this gripping psychological thriller where high-society secrets and deceptive revenge collide in suburban Delhi.',
     genres: ['Romance', 'Thriller', 'Revenge'],
@@ -50,6 +76,7 @@ export const mockDramas = [
   {
     id: 'DRM-103',
     title: 'My Wife Rented Me Out',
+    priority: 3,
     slug: 'my-wife-rented-me-out',
     synopsis: 'To pay off an unexpected family debt, a quirky contract husband is rented out as a fake boyfriend to wealthy socialites—until real feelings ignite.',
     genres: ['Comedy', 'Romance'],
@@ -73,6 +100,7 @@ export const mockDramas = [
   {
     id: 'DRM-104',
     title: 'The Last Promise',
+    priority: 4,
     slug: 'the-last-promise',
     synopsis: 'Separated by destiny and a 10-year family rivalry, two lovers make a binding vow beneath the rainy streets of Kolkata.',
     genres: ['Drama', 'Mystery'],
@@ -96,6 +124,7 @@ export const mockDramas = [
   {
     id: 'DRM-105',
     title: 'The Secret Billionaire Heir',
+    priority: 5,
     slug: 'the-secret-billionaire-heir',
     synopsis: 'Mocked by his in-laws as an unemployed loser, Kabir secretly controls the nation\'s biggest conglomerate. Today, the disguise comes off.',
     genres: ['Action', 'Revenge', 'Billionaire'],
@@ -119,6 +148,7 @@ export const mockDramas = [
   {
     id: 'DRM-106',
     title: 'Midnight Affair: Room 404',
+    priority: 6,
     slug: 'midnight-affair-room-404',
     synopsis: 'A luxury hotel manager stumbles upon an unsolved mystery that ties back to the city\'s most powerful politician.',
     genres: ['Mystery', 'Thriller'],
@@ -164,12 +194,12 @@ export const mockGenres = [
 ];
 
 export const mockUsers = [
-  { id: 'USR-8910', phone: '+91 98201 44582', name: 'Aarav Sharma', email: 'aarav.sharma@gmail.com', isVip: true, plan: 'Monthly ₹199', vipExpiresAt: '18 Oct 2026', totalWatchTime: '48.2 hrs', lastActive: '5 min ago', status: 'ACTIVE' },
-  { id: 'USR-8911', phone: '+91 97112 39810', name: 'Priya Mehra', email: 'priya.m22@yahoo.com', isVip: true, plan: 'Yearly ₹1,499', vipExpiresAt: '24 Jul 2027', totalWatchTime: '112.4 hrs', lastActive: '12 min ago', status: 'ACTIVE' },
-  { id: 'USR-8912', phone: '+91 98450 12893', name: 'Rohan Verma', email: 'rohan.v@outlook.com', isVip: false, plan: 'Free Tier', vipExpiresAt: '—', totalWatchTime: '14.5 hrs', lastActive: '45 min ago', status: 'ACTIVE' },
-  { id: 'USR-8913', phone: '+91 91670 88231', name: 'Sneha Patel', email: 'sneha.patel@gmail.com', isVip: true, plan: 'Monthly ₹199', vipExpiresAt: '04 Oct 2026', totalWatchTime: '62.0 hrs', lastActive: '2 hours ago', status: 'ACTIVE' },
-  { id: 'USR-8914', phone: '+91 99234 56123', name: 'Vikram Sengupta', email: 'vikram.sen@gmail.com', isVip: false, plan: 'Expired VIP', vipExpiresAt: '01 Sep 2026', totalWatchTime: '88.1 hrs', lastActive: 'Yesterday', status: 'SUSPENDED' },
-  { id: 'USR-8915', phone: '+91 94220 99112', name: 'Ananya Roy', email: 'ananya.roy@hotmail.com', isVip: true, plan: 'Yearly ₹1,499', vipExpiresAt: '12 Aug 2027', totalWatchTime: '140.8 hrs', lastActive: '3 min ago', status: 'ACTIVE' },
+  { id: 'USR-8910', phone: '+91 98201 44582', firstName: 'Aarav',  lastName: 'Sharma',   name: 'Aarav Sharma',    email: 'aarav.sharma@gmail.com',   isVip: true,  plan: 'Monthly ₹199',     vipExpiresAt: '18 Oct 2026', joinedAt: '12 Jan 2025', totalWatchTime: '48.2 hrs',  lastActive: '5 min ago',    status: 'ACTIVE'    },
+  { id: 'USR-8911', phone: '+91 97112 39810', firstName: 'Priya',  lastName: 'Mehra',    name: 'Priya Mehra',     email: 'priya.m22@yahoo.com',      isVip: true,  plan: 'Yearly ₹1,499',    vipExpiresAt: '24 Jul 2027', joinedAt: '03 Mar 2025', totalWatchTime: '112.4 hrs', lastActive: '12 min ago',   status: 'ACTIVE'    },
+  { id: 'USR-8912', phone: '+91 98450 12893', firstName: 'Rohan',  lastName: 'Verma',    name: 'Rohan Verma',     email: 'rohan.v@outlook.com',      isVip: false, plan: 'Free Tier',         vipExpiresAt: '—',           joinedAt: '28 Apr 2025', totalWatchTime: '14.5 hrs',  lastActive: '45 min ago',   status: 'ACTIVE'    },
+  { id: 'USR-8913', phone: '+91 91670 88231', firstName: 'Sneha',  lastName: 'Patel',    name: 'Sneha Patel',     email: 'sneha.patel@gmail.com',    isVip: true,  plan: 'Monthly ₹199',     vipExpiresAt: '04 Oct 2026', joinedAt: '17 Jun 2025', totalWatchTime: '62.0 hrs',  lastActive: '2 hours ago',  status: 'ACTIVE'    },
+  { id: 'USR-8914', phone: '+91 99234 56123', firstName: 'Vikram', lastName: 'Sengupta', name: 'Vikram Sengupta', email: 'vikram.sen@gmail.com',     isVip: false, plan: 'Expired VIP',       vipExpiresAt: '01 Sep 2026', joinedAt: '05 Feb 2025', totalWatchTime: '88.1 hrs',  lastActive: 'Yesterday',    status: 'SUSPENDED' },
+  { id: 'USR-8915', phone: '+91 94220 99112', firstName: 'Ananya', lastName: 'Roy',      name: 'Ananya Roy',      email: 'ananya.roy@hotmail.com',   isVip: true,  plan: 'Yearly ₹1,499',    vipExpiresAt: '12 Aug 2027', joinedAt: '21 Aug 2024', totalWatchTime: '140.8 hrs', lastActive: '3 min ago',    status: 'ACTIVE'    },
 ];
 
 export const mockSubscriptions = [
@@ -215,9 +245,9 @@ export const mockTransactions = [
 ];
 
 export const mockAuditLogs = [
-  { id: 'AUD-901', action: 'UPLOAD_SERIES', entity: 'Drama', targetId: 'DRM-105 (The Secret Billionaire Heir)', admin: 'Greg B. (Super Admin)', time: '14:20:12', duration: '320ms', status: 'SUCCESS', diff: { before: null, after: { title: 'The Secret Billionaire Heir', totalEpisodes: 30, status: 'PUBLISHED' } } },
-  { id: 'AUD-902', action: 'UPDATE_EPISODE_PAYWALL', entity: 'Episode', targetId: 'EP-104 (Security Guard Ki CEO GF)', admin: 'Kriti D. (Content Lead)', time: '13:50:45', duration: '145ms', status: 'SUCCESS', diff: { before: { isFree: true }, after: { isFree: false } } },
-  { id: 'AUD-903', action: 'OVERRIDE_VIP', entity: 'User', targetId: 'USR-8910 (Aarav Sharma)', admin: 'Greg B. (Super Admin)', time: '12:30:10', duration: '190ms', status: 'SUCCESS', diff: { before: { isVip: false }, after: { isVip: true, daysGranted: 30 } } },
+  { id: 'AUD-901', action: 'UPLOAD_SERIES', entity: 'Drama', targetId: 'DRM-105 (The Secret Billionaire Heir)', admin: 'Greg B. (Admin)', time: '14:20:12', duration: '320ms', status: 'SUCCESS', diff: { before: null, after: { title: 'The Secret Billionaire Heir', totalEpisodes: 30, status: 'PUBLISHED' } } },
+  { id: 'AUD-902', action: 'UPDATE_PRICING', entity: 'Subscription', targetId: 'PLAN-YEARLY', admin: 'Priya K. (Billing)', time: '13:05:44', duration: '110ms', status: 'SUCCESS', diff: { before: { price: 1299 }, after: { price: 1499 } } },
+  { id: 'AUD-903', action: 'OVERRIDE_VIP', entity: 'User', targetId: 'USR-8910 (Aarav Sharma)', admin: 'Greg B. (Admin)', time: '12:30:10', duration: '190ms', status: 'SUCCESS', diff: { before: { isVip: false }, after: { isVip: true, daysGranted: 30 } } },
   { id: 'AUD-904', action: 'BROADCAST_NOTIFICATION', entity: 'PushNotification', targetId: 'FCM-4921 ("Episode 24 Dropped")', admin: 'Aman S. (Marketing)', time: '11:15:00', duration: '890ms', status: 'SUCCESS', diff: { before: null, after: { sentTo: '148,920 users', status: 'DELIVERED' } } },
   { id: 'AUD-905', action: 'ENCODING_FAILURE_RETRY', entity: 'Transcoder', targetId: 'DRM-104 (The Last Promise - Ep 17)', admin: 'System Transcoder', time: '10:05:22', duration: '4100ms', status: 'FAILED', diff: { error: 'Transcoding timeout at frame 4200 (1080p ladder)' } },
 ];

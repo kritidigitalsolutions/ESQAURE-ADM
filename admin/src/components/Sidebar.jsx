@@ -4,13 +4,15 @@ import {
   Clapperboard,
   Upload,
   Layers,
-  BadgePercent,
   Users,
   BadgeCheck,
   CreditCard,
+  Receipt,
   TicketPercent,
+  BadgePercent,
   SendHorizontal,
   Bell,
+  Clock,
   Shield,
   Settings
 } from 'lucide-react';
@@ -28,7 +30,7 @@ export default function Sidebar({
 
   const navSections = [
     {
-      title: 'ANALYTICS',
+      title: 'OVERVIEW',
       items: [
         { id: 'summary', label: 'Dashboard', icon: LayoutDashboard },
       ]
@@ -42,20 +44,32 @@ export default function Sidebar({
       ]
     },
     {
-      title: 'MONETIZATION',
+      title: 'AUDIENCE',
       items: [
-        { id: 'admob', label: 'AdMob', icon: BadgePercent },
         { id: 'users', label: 'Users', icon: Users },
         { id: 'subscribers', label: 'Subscribers', icon: BadgeCheck },
-        { id: 'subscriptions', label: 'Subscription Plans', icon: CreditCard },
-        { id: 'promos', label: 'Promos & Vouchers', icon: TicketPercent },
       ]
     },
     {
-      title: 'SYSTEM & NOTIFICATIONS',
+      title: 'MONETIZATION',
+      items: [
+        { id: 'subscriptions', label: 'Subscription Plans', icon: CreditCard },
+        { id: 'transactions', label: 'Transactions', icon: Receipt },
+        { id: 'promos', label: 'Promos & Vouchers', icon: TicketPercent },
+        { id: 'admob', label: 'AdMob', icon: BadgePercent },
+      ]
+    },
+    {
+      title: 'ENGAGEMENT',
       items: [
         { id: 'notifications', label: 'Push Notifications', icon: SendHorizontal },
         { id: 'app_notifications', label: 'Notifications', icon: Bell },
+      ]
+    },
+    {
+      title: 'SYSTEM',
+      items: [
+        { id: 'auditlog', label: 'Activity Log', icon: Clock },
         { id: 'legal', label: 'Legal', icon: Shield },
         { id: 'settings', label: 'Settings', icon: Settings },
       ]
@@ -98,14 +112,14 @@ export default function Sidebar({
       </div>
 
       {/* 2. Navigation Links Area */}
-      <nav className={`flex-1 ${isCollapsed ? 'p-2 space-y-3' : 'p-3 space-y-3'} overflow-y-auto overflow-x-hidden custom-scrollbar`}>
+      <nav className={`flex-1 ${isCollapsed ? 'p-2 space-y-2.5' : 'p-3 space-y-2'} overflow-y-auto overflow-x-hidden custom-scrollbar`}>
         {navSections.map((section, sIdx) => (
-          <div key={sIdx} className={isCollapsed ? 'space-y-1.5' : 'space-y-0.5'}>
+          <div key={sIdx} className={isCollapsed ? 'space-y-1' : 'space-y-0.5'}>
             {isCollapsed ? (
-              sIdx > 0 && <div className="my-2.5 mx-auto w-7 border-t border-slate-200/80 dark:border-slate-800" title={section.title} />
+              sIdx > 0 && <div className="my-2 mx-auto w-6 border-t border-slate-200/80 dark:border-slate-800" title={section.title} />
             ) : (
-              <div className="px-3 pb-1 flex items-center justify-between">
-                <span className="text-[11.5px] font-extrabold text-slate-500 dark:text-slate-600 uppercase tracking-wider truncate">
+              <div className={`px-3 ${sIdx === 0 ? 'pb-1' : 'pt-2 pb-1'} flex items-center justify-between`}>
+                <span className="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">
                   {section.title}
                 </span>
               </div>
@@ -123,12 +137,12 @@ export default function Sidebar({
                       ? `w-10 h-10 mx-auto justify-center rounded-xl ${
                           isActive
                             ? 'bg-[#FEF08A] text-black shadow-xs ring-1 ring-amber-300/80 font-bold'
-                            : 'text-slate-800 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800'
+                            : 'text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800'
                         }`
-                      : `w-full justify-between px-3 py-[9px] rounded-xl text-[14.5px] ${
+                      : `w-full justify-between px-3 py-2 rounded-xl text-[13.5px] ${
                           isActive
                             ? 'bg-[#FEF08A] text-black shadow-xs border border-amber-300/60 font-bold'
-                            : 'text-slate-900 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800 font-semibold'
+                            : 'text-slate-800 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/80 font-semibold'
                         }`
                   }`}
                   title={isCollapsed ? item.label : undefined}
@@ -140,10 +154,10 @@ export default function Sidebar({
 
                   <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2.5 min-w-0'}`}>
                     <Icon
-                      className={`w-[19px] h-[19px] shrink-0 transition-all duration-150 group-hover:scale-105 ${
+                      className={`w-[18px] h-[18px] shrink-0 transition-all duration-150 group-hover:scale-105 ${
                         isActive
-                          ? 'text-black stroke-[2.1]'
-                          : 'text-slate-800 dark:text-slate-400 group-hover:text-black dark:group-hover:text-white stroke-[1.75]'
+                          ? 'text-black stroke-[2.2]'
+                          : 'text-slate-600 dark:text-slate-400 group-hover:text-black dark:group-hover:text-white stroke-[1.8]'
                       }`}
                     />
 
@@ -156,7 +170,7 @@ export default function Sidebar({
 
                   {/* Collapsed Tooltip */}
                   {isCollapsed && (
-                    <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-950 dark:bg-slate-100 text-white dark:text-slate-900 text-[12.5px] font-semibold rounded-lg shadow-xl border border-slate-800 dark:border-slate-200 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap">
+                    <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-950 dark:bg-slate-100 text-white dark:text-slate-900 text-[12px] font-semibold rounded-lg shadow-xl border border-slate-800 dark:border-slate-200 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap">
                       {item.label}
                       <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-slate-950 dark:border-r-slate-100" />
                     </div>

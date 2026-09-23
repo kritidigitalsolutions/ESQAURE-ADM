@@ -73,7 +73,7 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
                     </span>
 
                     {/* 9:16 Portrait Poster */}
-                    <div className="w-10 h-14 rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-slate-200/80 dark:border-slate-700 shadow-2xs group-hover:scale-105 transition-transform duration-200">
+                    <div className="w-10 h-14 rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-slate-200/80 dark:border-slate-700 shadow-2xs group-hover:scale-[1.02] transition-transform duration-200">
                       <img
                         src={drama.poster}
                         alt={drama.title}

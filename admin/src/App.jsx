@@ -9,8 +9,6 @@ import MobileAppDrawer from './components/MobileAppDrawer';
 import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import DramasPage from './pages/dramas/DramasPage';
-import EpisodesPage from './pages/episodes/EpisodesPage';
-import CurationPage from './pages/curation/CurationPage';
 import GenresPage from './pages/genres/GenresPage';
 import UsersPage from './pages/users/UsersPage';
 import SubscriptionsPage from './pages/subscriptions/SubscriptionsPage';
@@ -35,7 +33,7 @@ export default function App() {
   });
 
   const [activeTab, setActiveTab] = useState('summary');
-  const [selectedDramaId, setSelectedDramaId] = useState('DRM-101');
+  const [selectedDramaId, setSelectedDramaId] = useState(null);
   const [isIngestModalOpen, setIsIngestModalOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -84,11 +82,6 @@ export default function App() {
         return {
           title: "Episodes",
           subtitle: "Upload episode videos, subtitle files, and set free or locked episodes."
-        };
-      case 'curation':
-        return {
-          title: "Featured & Feed",
-          subtitle: "Choose home screen banners, top 10 rankings, and suggested series."
         };
       case 'genres':
         return {
@@ -170,7 +163,10 @@ export default function App() {
       {/* Fixed Left Sidebar Navigation */}
       <Sidebar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => {
+          setSelectedDramaId(null);
+          setActiveTab(tab);
+        }}
         onOpenIngestModal={() => setIsIngestModalOpen(true)}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={toggleSidebar}
@@ -187,13 +183,19 @@ export default function App() {
           isSidebarCollapsed={isSidebarCollapsed}
           onToggleSidebar={toggleSidebar}
           onLogout={handleLogout}
+          onNavigate={(tab) => {
+            setSelectedDramaId(null);
+            setActiveTab(tab);
+          }}
+          onSelectDrama={(id) => {
+            setSelectedDramaId(id);
+            setActiveTab('dramas');
+          }}
+          onOpenIngestModal={() => setIsIngestModalOpen(true)}
         />
 
         {/* Dynamic Page Container */}
         <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
-
-          
-
 
           {/* Active Page View */}
           {activeTab === 'summary' && (
@@ -203,13 +205,12 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'dramas' && (
+          {(activeTab === 'dramas' || activeTab === 'episodes') && (
             <DramasPage
               onOpenIngestModal={() => setIsIngestModalOpen(true)}
-              onSelectDramaForEpisodes={(id) => {
-                setSelectedDramaId(id);
-                setActiveTab('episodes');
-              }}
+              onNavigate={setActiveTab}
+              selectedDramaId={selectedDramaId}
+              onClearSelectedDrama={() => setSelectedDramaId(null)}
             />
           )}
 
@@ -217,22 +218,12 @@ export default function App() {
             <UploadContentPage onNavigate={setActiveTab} />
           )}
 
-          {activeTab === 'episodes' && (
-            <EpisodesPage
-              initialDramaId={selectedDramaId}
-            />
-          )}
-
-          {activeTab === 'curation' && (
-            <CurationPage />
-          )}
-
           {activeTab === 'genres' && (
-            <GenresPage />
+            <GenresPage onNavigate={setActiveTab} />
           )}
 
           {activeTab === 'users' && (
-            <UsersPage />
+            <UsersPage onNavigate={setActiveTab} />
           )}
 
           {activeTab === 'subscribers' && (

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, ChevronLeft, ChevronRight, Maximize, Minimize, Sun, Moon, User, LogOut } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { Search, ChevronLeft, ChevronRight, Maximize, Minimize, User, LogOut } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
+import GlobalSearchBar from './GlobalSearchBar';
+import NotificationDropdown from './NotificationDropdown';
 
 export default function Topbar({
   onOpenMobileDrawer,
@@ -8,11 +10,13 @@ export default function Topbar({
   subtitle,
   isSidebarCollapsed,
   onToggleSidebar,
-  onLogout
+  onLogout,
+  onNavigate,
+  onSelectDrama,
+  onOpenIngestModal
 }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const { isDark, toggleTheme } = useTheme();
   const profileRef = useRef(null);
 
   useEffect(() => {
@@ -83,14 +87,11 @@ export default function Topbar({
         <div className="flex items-center space-x-3 shrink-0">
 
           {/* Global Search Bar */}
-          <div className="relative w-64 xl:w-80">
-            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search dramas, users, logs..."
-              className="w-full pl-9 pr-4 py-2 text-xs font-medium bg-slate-100/80 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 rounded-full border border-slate-200 dark:border-slate-700 focus:border-[#FEF08A] dark:focus:border-[#FEF08A] focus:outline-none transition-colors"
-            />
-          </div>
+          <GlobalSearchBar
+            onNavigate={onNavigate}
+            onSelectDrama={onSelectDrama}
+            onOpenIngestModal={onOpenIngestModal}
+          />
 
           {/* Fullscreen Toggle */}
           <button
@@ -106,31 +107,17 @@ export default function Topbar({
             )}
           </button>
 
-          {/* Dark Mode Toggle */}
-          <button
-            onClick={toggleTheme}
-            title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-          >
-            {isDark ? (
-              <Sun className="w-4 h-4 text-[#FEF08A]" />
-            ) : (
-              <Moon className="w-4 h-4" />
-            )}
-          </button>
+          {/* Radical Theme Switch Toggle */}
+          <ThemeToggle variant="topbar" />
 
-          {/* Notification Bell */}
-          <button className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full relative transition-colors">
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-[#0D0D0D]"></span>
-          </button>
+          {/* Notification Bell Dropdown */}
+          <NotificationDropdown onNavigate={onNavigate} />
 
           {/* Profile Avatar Dropdown */}
           <div className="relative pl-2.5 border-l border-slate-200 dark:border-slate-800" ref={profileRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              title="Super Admin Profile"
+              title="Admin Profile"
               className="relative flex items-center justify-center cursor-pointer hover:opacity-95 transition-all group"
             >
               <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center border border-slate-200/90 dark:border-slate-700/80 shadow-xs group-hover:bg-slate-200/80 dark:group-hover:bg-slate-700 group-hover:border-slate-300 dark:group-hover:border-slate-600 transition-all duration-200">
@@ -144,7 +131,7 @@ export default function Topbar({
               <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121212] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-50 animate-fadeIn">
                 <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
                   <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                    Super Admin
+                    Admin
                   </p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                     {storedAdminEmail}

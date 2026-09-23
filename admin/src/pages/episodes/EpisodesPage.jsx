@@ -1,10 +1,32 @@
 import React, { useState } from 'react';
 import { mockDramas, mockEpisodes } from '../../data/mockOttData';
-import { Video, Plus, Play, Lock, Unlock, UploadCloud, Subtitles, CheckCircle2, ChevronRight, X, Clock, Eye } from 'lucide-react';
+import { Video, Plus, Play, Lock, Unlock, UploadCloud, Subtitles, CheckCircle2, ChevronRight, X, Clock, Eye, Search } from 'lucide-react';
 
 export default function EpisodesPage({ initialDramaId }) {
+  const [dramas] = useState(() => {
+    try {
+      const saved = localStorage.getItem('esquare_dramas');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return mockDramas;
+  });
+
   const [selectedDramaId, setSelectedDramaId] = useState(initialDramaId || 'DRM-101');
-  const [episodes, setEpisodes] = useState(mockEpisodes);
+  const [episodes, setEpisodes] = useState(() => {
+    try {
+      const saved = localStorage.getItem('esquare_episodes');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return mockEpisodes;
+  });
+
+  const [searchTerm, setSearchTerm] = useState('');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [activeEpisode, setActiveEpisode] = useState(null);
   const [isAddEpisodeModalOpen, setIsAddEpisodeModalOpen] = useState(false);
@@ -15,8 +37,15 @@ export default function EpisodesPage({ initialDramaId }) {
   const [newEpDuration, setNewEpDuration] = useState('2:15');
   const [newEpIsFree, setNewEpIsFree] = useState(false);
 
-  const selectedDrama = mockDramas.find(d => d.id === selectedDramaId) || mockDramas[0];
+  const selectedDrama = dramas.find(d => d.id === selectedDramaId) || dramas[0] || mockDramas[0];
   const dramaEpisodes = episodes.filter(e => e.dramaId === selectedDramaId);
+  const filteredEpisodes = dramaEpisodes.filter(e => {
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase();
+    return e.title.toLowerCase().includes(term) ||
+           e.id.toLowerCase().includes(term) ||
+           String(e.episodeNumber).includes(term);
+  });
 
   // Toggle Paywall status (Free Preview vs VIP Locked)
   const togglePaywall = (epId) => {
@@ -66,9 +95,9 @@ export default function EpisodesPage({ initialDramaId }) {
               onChange={(e) => setSelectedDramaId(e.target.value)}
               class="block w-full sm:w-80 mt-1 font-extrabold text-base text-slate-950 bg-slate-100/80 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-[#FEF08A] cursor-pointer"
             >
-              {mockDramas.map(d => (
+              {dramas.map(d => (
                 <option key={d.id} value={d.id}>
-                  {d.title} ({d.totalEpisodes} Eps)
+                  {d.title} ({d.totalEpisodes || d.episodes?.length || 0} Eps)
                 </option>
               ))}
             </select>
@@ -100,16 +129,52 @@ export default function EpisodesPage({ initialDramaId }) {
 
       {/* Episodes Table & Media Inspector */}
       <div class="bg-white rounded-2xl border border-slate-200/90 shadow-nodus overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
           <div>
             <h3 class="font-bold text-slate-950 text-sm">Episodes Sequence & Paywall Control</h3>
             <p class="text-[11px] text-slate-400">Click the Paywall lock to toggle Free Preview vs VIP Access</p>
           </div>
-          <span class="text-xs font-bold text-slate-500">{dramaEpisodes.length} Episodes</span>
+          
+          <div className="flex items-center space-x-3">
+            <div className="relative w-full sm:w-60">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search episodes (#, title)..."
+                className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold bg-white border border-slate-200 rounded-xl focus:border-[#FEF08A] focus:outline-none"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full"
+                  title="Clear search"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+            <span class="text-xs font-bold text-slate-500 shrink-0">{filteredEpisodes.length} Episodes</span>
+          </div>
         </div>
 
         <div class="divide-y divide-slate-100">
-          {dramaEpisodes.map((ep) => (
+          {filteredEpisodes.length === 0 ? (
+            <div className="py-12 text-center">
+              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-2">
+                <Search className="w-5 h-5" />
+              </div>
+              <p className="text-xs font-bold text-slate-800">No episodes match "{searchTerm}"</p>
+              <button
+                onClick={() => setSearchTerm('')}
+                className="mt-2 px-3 py-1 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-lg transition-colors"
+              >
+                Clear Filter
+              </button>
+            </div>
+          ) : (
+            filteredEpisodes.map((ep) => (
             <div
               key={ep.id}
               class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/80 transition-colors"
@@ -190,7 +255,8 @@ export default function EpisodesPage({ initialDramaId }) {
                 </button>
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
       </div>
 

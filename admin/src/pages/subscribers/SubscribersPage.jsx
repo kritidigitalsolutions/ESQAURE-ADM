@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { mockUsers } from '../../data/mockOttData';
-import { Crown, Search, CheckCircle2, Shield, Calendar, CreditCard, ArrowUpRight, TrendingUp } from 'lucide-react';
+import { Crown, Search, X, CheckCircle2, Shield, Calendar, CreditCard, ArrowUpRight, TrendingUp } from 'lucide-react';
 import AnimatedNumber from '../../components/common/AnimatedNumber';
 
 export default function SubscribersPage() {
@@ -10,9 +10,13 @@ export default function SubscribersPage() {
   const [planFilter, setPlanFilter] = useState('ALL'); // 'ALL' | 'MONTHLY' | 'YEARLY'
 
   const filteredSubscribers = subscribers.filter(s => {
-    const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          s.phone.includes(searchTerm) ||
-                          s.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = !term ||
+                          s.name.toLowerCase().includes(term) ||
+                          s.phone.includes(term) ||
+                          s.email.toLowerCase().includes(term) ||
+                          s.id.toLowerCase().includes(term) ||
+                          s.plan.toLowerCase().includes(term);
     const matchesPlan = planFilter === 'ALL' ||
                         (planFilter === 'MONTHLY' && s.plan.toLowerCase().includes('monthly')) ||
                         (planFilter === 'YEARLY' && s.plan.toLowerCase().includes('yearly'));
@@ -99,14 +103,23 @@ export default function SubscribersPage() {
       <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-nodus flex flex-col md:flex-row md:items-center justify-between gap-4">
         
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             placeholder="Search by subscriber name, phone (+91)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-black"
+            className="w-full pl-9 pr-8 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-black"
           />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full"
+              title="Clear search"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         <div className="flex items-center space-x-2">
@@ -143,7 +156,28 @@ export default function SubscribersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-semibold text-slate-900">
-              {filteredSubscribers.map((sub) => (
+              {filteredSubscribers.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="py-12 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                        <Search className="w-5 h-5" />
+                      </div>
+                      <p className="text-xs font-bold text-slate-800">No VIP subscribers match your query</p>
+                      <p className="text-[11px] text-slate-400">
+                        {searchTerm ? `No active subscribers found for "${searchTerm}".` : 'No subscribers found in this tier.'}
+                      </p>
+                      <button
+                        onClick={() => { setSearchTerm(''); setPlanFilter('ALL'); }}
+                        className="mt-1 px-3 py-1 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-lg transition-colors"
+                      >
+                        Reset Filters
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredSubscribers.map((sub) => (
                 <tr key={sub.id} className="hover:bg-slate-50/80 transition-colors">
                   <td className="py-3.5 px-5">
                     <div className="flex items-center space-x-3">
@@ -193,7 +227,8 @@ export default function SubscribersPage() {
                     </button>
                   </td>
                 </tr>
-              ))}
+              ))
+            )}
             </tbody>
           </table>
         </div>

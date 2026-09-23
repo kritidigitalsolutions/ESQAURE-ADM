@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, SlidersHorizontal, Download, ChevronDown, Plus, Film, Crown, Play, Eye, MoreVertical, Edit3, Trash2, CheckCircle2, Clock, Flame } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Search, X, SlidersHorizontal, Download, ChevronDown, Plus, Film, Crown, Play, Eye, MoreVertical, Edit3, Trash2, CheckCircle2, Clock, Flame } from 'lucide-react';
 
 export default function DataTableSection({ onOpenIngestModal }) {
   const [activeTab, setActiveTab] = useState('dramas');
@@ -111,6 +111,31 @@ export default function DataTableSection({ onOpenIngestModal }) {
     }
   ];
 
+  // Filtered lists based on searchTerm
+  const filteredDramaItems = useMemo(() => {
+    if (!searchTerm.trim()) return dramaItems;
+    const term = searchTerm.toLowerCase();
+    return dramaItems.filter(d =>
+      d.title.toLowerCase().includes(term) ||
+      d.id.toLowerCase().includes(term) ||
+      d.status.toLowerCase().includes(term) ||
+      d.genres.some(g => g.toLowerCase().includes(term))
+    );
+  }, [searchTerm, dramaItems]);
+
+  const filteredSubscriptionTransactions = useMemo(() => {
+    if (!searchTerm.trim()) return subscriptionTransactions;
+    const term = searchTerm.toLowerCase();
+    return subscriptionTransactions.filter(tx =>
+      tx.id.toLowerCase().includes(term) ||
+      tx.user.toLowerCase().includes(term) ||
+      tx.paymentId.toLowerCase().includes(term) ||
+      tx.plan.toLowerCase().includes(term) ||
+      tx.status.toLowerCase().includes(term) ||
+      tx.amount.toLowerCase().includes(term)
+    );
+  }, [searchTerm, subscriptionTransactions]);
+
   return (
     <div class="bg-white rounded-2xl border border-slate-200/90 shadow-nodus overflow-hidden">
       
@@ -139,7 +164,7 @@ export default function DataTableSection({ onOpenIngestModal }) {
             }`}
           >
             <Crown class="w-4 h-4 text-amber-500" />
-            <span>VIP Subscribers</span>
+            <span>VIP Subscribers ({subscriptionTransactions.length})</span>
           </button>
         </div>
 
@@ -158,18 +183,27 @@ export default function DataTableSection({ onOpenIngestModal }) {
         
         <div class="flex items-center space-x-3 w-full md:w-auto">
           <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-xs font-bold whitespace-nowrap">
-            {activeTab === 'dramas' ? `${dramaItems.length} Dramas` : `${subscriptionTransactions.length} Transactions`}
+            {activeTab === 'dramas' ? `${filteredDramaItems.length} Dramas` : `${filteredSubscriptionTransactions.length} Transactions`}
           </span>
 
           <div class="relative flex-1 md:w-80">
-            <Search class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               placeholder={activeTab === 'dramas' ? "Search drama title, genre, ID..." : "Search user phone, payment ID..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              class="w-full pl-9 pr-4 py-1.5 text-xs font-medium bg-slate-100/80 focus:bg-white text-slate-900 placeholder-slate-400 rounded-full border border-slate-200 focus:border-slate-950 focus:outline-none transition-colors"
+              class="w-full pl-9 pr-9 py-1.5 text-xs font-medium bg-slate-100/80 focus:bg-white text-slate-900 placeholder-slate-400 rounded-full border border-slate-200 focus:border-slate-950 focus:outline-none transition-colors"
             />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-full"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -217,98 +251,118 @@ export default function DataTableSection({ onOpenIngestModal }) {
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 font-medium">
-              {dramaItems.map((drama) => (
-                <tr key={drama.id} class="hover:bg-slate-50/80 transition-colors group">
-                  
-                  {/* Status */}
-                  <td class="py-4 px-4 sm:px-6 whitespace-nowrap">
-                    <span class={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${
-                      drama.status === 'PUBLISHED'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-amber-100 text-amber-800'
-                    }`}>
-                      <span class={`w-1.5 h-1.5 rounded-full ${drama.status === 'PUBLISHED' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-                      <span>{drama.status}</span>
-                    </span>
-                  </td>
-
-                  {/* Drama Poster & Title */}
-                  <td class="py-4 px-4 sm:px-6">
-                    <div class="flex items-center space-x-3">
-                      <img
-                        src={drama.poster}
-                        alt={drama.title}
-                        class="w-9 h-12 rounded-lg object-cover shadow-sm ring-1 ring-slate-200 shrink-0"
-                      />
-                      <div>
-                        <p class="font-bold text-slate-950 text-sm group-hover:text-amber-500 transition-colors font-urbanist">
-                          {drama.title}
-                        </p>
-                        <p class="text-[11px] text-slate-400 font-normal">ID: {drama.id} • Updated {drama.updatedAt}</p>
+              {filteredDramaItems.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="py-12 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                        <Search className="w-5 h-5" />
                       </div>
-                    </div>
-                  </td>
-
-                  {/* Genres */}
-                  <td class="py-4 px-4 sm:px-6 whitespace-nowrap">
-                    <div class="flex items-center space-x-1">
-                      {drama.genres.map((g, idx) => (
-                        <span key={idx} class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold">
-                          {g}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-
-                  {/* Episodes */}
-                  <td class="py-4 px-4 sm:px-6 text-center font-bold text-slate-900">
-                    {drama.episodes} Ep
-                  </td>
-
-                  {/* Total Views */}
-                  <td class="py-4 px-4 sm:px-6 text-center font-bold text-amber-600">
-                    {drama.views}
-                  </td>
-
-                  {/* Curation Flags */}
-                  <td class="py-4 px-4 sm:px-6 whitespace-nowrap">
-                    <div class="flex items-center space-x-1.5">
-                      {drama.isTrending && (
-                        <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">
-                          <Flame class="w-3 h-3 text-red-500" />
-                          <span>Rank #{drama.trendingRank}</span>
-                        </span>
-                      )}
-                      {drama.isFeatured && (
-                        <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
-                          <Crown class="w-3 h-3 text-amber-500" />
-                          <span>Featured Banner</span>
-                        </span>
-                      )}
-                    </div>
-                  </td>
-
-                  {/* Actions */}
-                  <td class="py-4 px-4 sm:px-6 text-right whitespace-nowrap">
-                    <div class="flex items-center justify-end space-x-1">
+                      <p className="text-xs font-bold text-slate-800">No micro-dramas match "{searchTerm}"</p>
+                      <p className="text-[11px] text-slate-400">Try checking title spelling or clearing the search filter.</p>
                       <button
-                        onClick={onOpenIngestModal}
-                        title="Edit Details"
-                        class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                        onClick={() => setSearchTerm('')}
+                        className="mt-1 px-3 py-1 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-lg transition-colors"
                       >
-                        <Edit3 class="w-4 h-4" />
-                      </button>
-                      <button
-                        title="Delete"
-                        class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 class="w-4 h-4" />
+                        Clear Search
                       </button>
                     </div>
                   </td>
-
                 </tr>
-              ))}
+              ) : (
+                filteredDramaItems.map((drama) => (
+                  <tr key={drama.id} class="hover:bg-slate-50/80 transition-colors group">
+                    
+                    {/* Status */}
+                    <td class="py-4 px-4 sm:px-6 whitespace-nowrap">
+                      <span class={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                        drama.status === 'PUBLISHED'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        <span class={`w-1.5 h-1.5 rounded-full ${drama.status === 'PUBLISHED' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                        <span>{drama.status}</span>
+                      </span>
+                    </td>
+
+                    {/* Drama Poster & Title */}
+                    <td class="py-4 px-4 sm:px-6">
+                      <div class="flex items-center space-x-3">
+                        <img
+                          src={drama.poster}
+                          alt={drama.title}
+                          class="w-9 h-12 rounded-lg object-cover shadow-sm ring-1 ring-slate-200 shrink-0"
+                        />
+                        <div>
+                          <p class="font-bold text-slate-950 text-sm group-hover:text-amber-500 transition-colors font-urbanist">
+                            {drama.title}
+                          </p>
+                          <p class="text-[11px] text-slate-400 font-normal">ID: {drama.id} • Updated {drama.updatedAt}</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Genres */}
+                    <td class="py-4 px-4 sm:px-6 whitespace-nowrap">
+                      <div class="flex items-center space-x-1">
+                        {drama.genres.map((g, idx) => (
+                          <span key={idx} class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-semibold">
+                            {g}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+
+                    {/* Episodes */}
+                    <td class="py-4 px-4 sm:px-6 text-center font-bold text-slate-900">
+                      {drama.episodes} Ep
+                    </td>
+
+                    {/* Total Views */}
+                    <td class="py-4 px-4 sm:px-6 text-center font-bold text-amber-600">
+                      {drama.views}
+                    </td>
+
+                    {/* Curation Flags */}
+                    <td class="py-4 px-4 sm:px-6 whitespace-nowrap">
+                      <div class="flex items-center space-x-1.5">
+                        {drama.isTrending && (
+                          <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">
+                            <Flame class="w-3 h-3 text-red-500" />
+                            <span>Rank #{drama.trendingRank}</span>
+                          </span>
+                        )}
+                        {drama.isFeatured && (
+                          <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
+                            <Crown class="w-3 h-3 text-amber-500" />
+                            <span>Featured Banner</span>
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Actions */}
+                    <td class="py-4 px-4 sm:px-6 text-right whitespace-nowrap">
+                      <div class="flex items-center justify-end space-x-1">
+                        <button
+                          onClick={onOpenIngestModal}
+                          title="Edit Details"
+                          class="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                        >
+                          <Edit3 class="w-4 h-4" />
+                        </button>
+                        <button
+                          title="Delete"
+                          class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 class="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         ) : (
@@ -324,22 +378,42 @@ export default function DataTableSection({ onOpenIngestModal }) {
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 font-medium">
-              {subscriptionTransactions.map((tx) => (
-                <tr key={tx.id} class="hover:bg-slate-50/80 transition-colors">
-                  <td class="py-4 px-4 sm:px-6 whitespace-nowrap">
-                    <span class={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${
-                      tx.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-                    }`}>
-                      <span>{tx.status}</span>
-                    </span>
+              {filteredSubscriptionTransactions.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="py-12 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                        <Search className="w-5 h-5" />
+                      </div>
+                      <p className="text-xs font-bold text-slate-800">No transactions match "{searchTerm}"</p>
+                      <p className="text-[11px] text-slate-400">Try searching by payment ID, customer name, or phone number.</p>
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="mt-1 px-3 py-1 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-lg transition-colors"
+                      >
+                        Clear Search
+                      </button>
+                    </div>
                   </td>
-                  <td class="py-4 px-4 sm:px-6 font-bold text-slate-900">{tx.user}</td>
-                  <td class="py-4 px-4 sm:px-6 font-bold text-amber-800">{tx.plan}</td>
-                  <td class="py-4 px-4 sm:px-6 font-bold text-slate-950">{tx.amount}</td>
-                  <td class="py-4 px-4 sm:px-6 font-mono text-[11px] text-slate-500">{tx.paymentId}</td>
-                  <td class="py-4 px-4 sm:px-6 text-right text-slate-400">{tx.time}</td>
                 </tr>
-              ))}
+              ) : (
+                filteredSubscriptionTransactions.map((tx) => (
+                  <tr key={tx.id} class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-4 px-4 sm:px-6 whitespace-nowrap">
+                      <span class={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                        tx.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                      }`}>
+                        <span>{tx.status}</span>
+                      </span>
+                    </td>
+                    <td class="py-4 px-4 sm:px-6 font-bold text-slate-900">{tx.user}</td>
+                    <td class="py-4 px-4 sm:px-6 font-bold text-amber-800">{tx.plan}</td>
+                    <td class="py-4 px-4 sm:px-6 font-bold text-slate-950">{tx.amount}</td>
+                    <td class="py-4 px-4 sm:px-6 font-mono text-[11px] text-slate-500">{tx.paymentId}</td>
+                    <td class="py-4 px-4 sm:px-6 text-right text-slate-400">{tx.time}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         )}
