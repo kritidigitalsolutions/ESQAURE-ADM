@@ -5,7 +5,7 @@ dotenv.config();
 
 export const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: parseInt(process.env.PORT || '5000', 10),
+  PORT: parseInt(process.env.PORT || '5001', 10),
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/esquare_ott',
   JWT_SECRET: process.env.JWT_SECRET || 'esquare_ott_super_secure_jwt_secret_key_2026_x!',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
