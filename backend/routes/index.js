@@ -1,26 +1,46 @@
 import { Router } from 'express';
-import authRoutes from './auth.routes.js';
-import userRoutes from './user.routes.js';
-import uploadRoutes from './upload.routes.js';
+import authRoutes         from './auth.routes.js';
+import userRoutes         from './user.routes.js';
+import uploadRoutes       from './upload.routes.js';
+import notificationRoutes from './notification.routes.js';
 
 const router = Router();
 
-// Health check endpoint
+// ─────────────────────────────────────────────────────────────────────────────
+//  SYSTEM
+// ─────────────────────────────────────────────────────────────────────────────
 router.get('/health', (req, res) => {
   res.status(200).json({
+    success: true,
     status: 'ok',
     service: 'E² Stories OTT API',
+    version: '1.0.0',
     timestamp: new Date().toISOString()
   });
 });
 
-// Authentication endpoints (/api/v1/auth)
+// ─────────────────────────────────────────────────────────────────────────────
+//  MOBILE APP ROUTES
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** OTP login, profile setup, token refresh, genre/interest onboarding */
 router.use('/auth', authRoutes);
 
-// User management endpoints (/api/v1/users)
+/** Notification list, settings, FCM device token management */
+router.use('/notifications', notificationRoutes);
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ADMIN PANEL ROUTES
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** User list, search, filter, VIP management, status toggle */
 router.use('/users', userRoutes);
 
-// File and media upload endpoints (/api/v1/upload)
+// ─────────────────────────────────────────────────────────────────────────────
+//  SHARED ROUTES  (used by both Mobile App and Admin Panel)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Single and multiple file/media uploads */
 router.use('/upload', uploadRoutes);
 
 export default router;

@@ -54,8 +54,13 @@ async function runTests() {
     const testPhone = '7600000097';
     const testCountry = '+91';
 
-    // Reset clean state for test phone number
-    await User.deleteMany({ phoneNumber: testPhone });
+    // Reset clean state for test phone number and test emails
+    await User.deleteMany({
+      $or: [
+        { phoneNumber: testPhone },
+        { email: { $in: ['satyam.demo@gmail.com', 'kartik.edit@gmail.in'] } }
+      ]
+    });
     await Otp.deleteMany({ phoneNumber: testPhone });
 
     let authToken = '';
@@ -188,6 +193,101 @@ async function runTests() {
       }
     } catch (err) {
       logFail('Screen 3 Complete Profile', err);
+      failedCount++;
+    }
+
+    // TEST 5.05: Edit Profile (PUT /auth/profile - matching mobile Edit Profile UI)
+    logSection('5.05 Edit Profile (PUT /auth/profile)');
+    try {
+      const res = await fetch(`${BASE_URL}/auth/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          firstName: 'kartik',
+          lastName: 'khandelwal',
+          email: 'kartik.edit@gmail.in',
+          avatarUrl: 'http://localhost:5001/uploads/images/sample-avatar.png'
+        })
+      });
+      const body = await res.json();
+
+      if (
+        res.status === 200 &&
+        body.success === true &&
+        body.data.user.firstName === 'kartik' &&
+        body.data.user.lastName === 'khandelwal' &&
+        body.data.user.fullName === 'kartik khandelwal' &&
+        body.data.user.email === 'kartik.edit@gmail.in' &&
+        body.data.user.avatarUrl === 'http://localhost:5001/uploads/images/sample-avatar.png'
+      ) {
+        logPass('Profile edited successfully with kartik khandelwal & kartik.edit@gmail.in');
+        passedCount++;
+      } else {
+        throw new Error(JSON.stringify(body));
+      }
+    } catch (err) {
+      logFail('Edit Profile PUT', err);
+      failedCount++;
+    }
+
+    // TEST 5.06: Reject Phone Number Modification in Edit Profile
+    logSection('5.06 Reject Phone Number Change in Edit Profile');
+    try {
+      const res = await fetch(`${BASE_URL}/auth/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          phoneNumber: '9999999999' // Different phone number
+        })
+      });
+      const body = await res.json();
+
+      if (res.status === 400 && body.success === false) {
+        logPass('Phone number modification correctly rejected (locked to account)');
+        passedCount++;
+      } else {
+        throw new Error(JSON.stringify(body));
+      }
+    } catch (err) {
+      logFail('Reject Phone Change in Edit Profile', err);
+      failedCount++;
+    }
+
+    // TEST 5.07: Restore profile name using PATCH /auth/profile
+    logSection('5.07 Edit Profile (PATCH /auth/profile)');
+    try {
+      const res = await fetch(`${BASE_URL}/auth/profile`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          firstName: 'Satyam',
+          lastName: 'Sharma',
+          email: 'satyam.demo@gmail.com'
+        })
+      });
+      const body = await res.json();
+
+      if (
+        res.status === 200 &&
+        body.success === true &&
+        body.data.user.fullName === 'Satyam Sharma'
+      ) {
+        logPass('Profile updated via PATCH back to Satyam Sharma');
+        passedCount++;
+      } else {
+        throw new Error(JSON.stringify(body));
+      }
+    } catch (err) {
+      logFail('Edit Profile PATCH', err);
       failedCount++;
     }
 

@@ -269,21 +269,21 @@ export default function NotificationDropdown({ onNavigate }) {
       {isOpen && (
         <div
           ref={panelRef}
-          className="absolute right-0 mt-2.5 w-[390px] sm:w-[420px] max-w-[calc(100vw-2rem)] bg-white dark:bg-[#111111] border border-slate-200/90 dark:border-slate-800/90 rounded-2xl sm:rounded-3xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.18)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] z-50 overflow-hidden overscroll-contain animate-in fade-in zoom-in-95 duration-150 flex flex-col"
+          className="absolute right-0 mt-2.5 w-[390px] sm:w-[420px] max-w-[calc(100vw-2rem)] bg-white dark:bg-[#1C221C] border border-slate-200/90 dark:border-white/12 rounded-2xl sm:rounded-3xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.18)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] z-50 overflow-hidden overscroll-contain animate-in fade-in zoom-in-95 duration-150 flex flex-col"
         >
           
           {/* Header */}
-          <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between bg-slate-50/50 dark:bg-black/20">
+          <div className="px-5 py-3.5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.03]">
             <div className="flex items-center space-x-2">
               <span className="text-sm font-black tracking-tight text-slate-900 dark:text-white">
                 Notifications
               </span>
               {unreadCount > 0 ? (
-                <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700">
+                <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-slate-100 text-slate-800 dark:bg-[#161B16] dark:text-slate-200 border border-slate-200/80 dark:border-white/10">
                   {unreadCount} new
                 </span>
               ) : (
-                <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-slate-100 text-slate-600 dark:bg-[#161B16] dark:text-slate-400">
                   Caught up
                 </span>
               )}
@@ -295,7 +295,7 @@ export default function NotificationDropdown({ onNavigate }) {
                 <button
                   onClick={handleMarkAllRead}
                   title="Mark all as read"
-                  className="flex items-center space-x-1 px-2.5 py-1 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                  className="flex items-center space-x-1 px-2.5 py-1 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/[0.06] rounded-lg transition-colors cursor-pointer"
                 >
                   <CheckCheck className="w-3.5 h-3.5 text-slate-700 dark:text-slate-300" />
                   <span>Mark all read</span>
@@ -305,7 +305,7 @@ export default function NotificationDropdown({ onNavigate }) {
           </div>
 
           {/* Filter Tabs */}
-          <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800/60 flex items-center gap-1.5 overflow-x-auto scrollbar-none bg-white dark:bg-[#111111]">
+          <div className="px-4 py-2 border-b border-slate-100 dark:border-white/10 flex items-center gap-1.5 overflow-x-auto scrollbar-none bg-white dark:bg-[#1C221C]">
             {[
               { key: 'all', label: 'All', count: notifications.length },
               { key: 'unread', label: 'Unread', count: unreadCount },
@@ -320,8 +320,8 @@ export default function NotificationDropdown({ onNavigate }) {
                   onClick={() => setActiveFilter(tab.key)}
                   className={`px-3 py-1 text-xs font-bold rounded-full transition-all whitespace-nowrap cursor-pointer ${
                     isActive
-                      ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-slate-950 text-white dark:bg-[#FEF08A] dark:text-slate-950 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   {tab.label}
@@ -329,8 +329,8 @@ export default function NotificationDropdown({ onNavigate }) {
                     <span
                       className={`ml-1.5 px-1.5 py-0.2 rounded-full text-[10px] font-black ${
                         isActive
-                          ? 'bg-white/20 text-white dark:bg-slate-900/30 dark:text-slate-900'
-                          : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                          ? 'bg-white/20 text-white dark:bg-black/20 dark:text-slate-950'
+                          : 'bg-slate-200/80 dark:bg-[#161B16] text-slate-600 dark:text-slate-300'
                       }`}
                     >
                       {tab.count}
@@ -438,7 +438,7 @@ export default function NotificationDropdown({ onNavigate }) {
           </div>
 
           {/* Footer */}
-          <div className="p-3 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-black/30 flex items-center justify-between text-xs font-bold">
+          <div className="p-3 border-t border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-[#161B16] flex items-center justify-between text-xs font-bold">
             <button
               onClick={() => {
                 if (onNavigate) {

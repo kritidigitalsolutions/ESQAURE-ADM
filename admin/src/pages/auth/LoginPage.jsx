@@ -80,10 +80,10 @@ export default function LoginPage({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-900 dark:bg-[#0A0A0A] text-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-urbanist relative overflow-hidden selection:bg-[#ECBD2A] selection:text-black">
+    <div className="min-h-screen w-full bg-[#080B08] text-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-urbanist relative overflow-hidden selection:bg-[#FEF08A] selection:text-slate-950">
       
 
-      {/* Animated Radial Breathing Gradient Background with Website Brand Palette (#ECBD2A) */}
+      {/* Animated Radial Breathing Gradient Background with Website Brand Palette (#FEF08A) */}
       <AnimatedGradientBackground 
         Breathing={true} 
         animationSpeed={0.02} 
@@ -91,13 +91,13 @@ export default function LoginPage({ onLoginSuccess }) {
         startingGap={125}
         position="50% 20%" 
         gradientColors={[
-          "#0A0A0A",
-          "#4D1D09",
-          "#8A3D0B",
-          "#C27D16",
-          "#ECBD2A",
-          "#F4D465",
-          "#FDF5CF"
+          "#080B08",
+          "#121612",
+          "#1A1F1A",
+          "#2A2810",
+          "#FEF08A",
+          "#FDE047",
+          "#FEF9C3"
         ]}
         gradientStops={[35, 50, 60, 70, 80, 90, 100]}
       />
@@ -170,7 +170,7 @@ export default function LoginPage({ onLoginSuccess }) {
                       setErrorMessage('');
                       setViewMode('forgot_password');
                     }}
-                    className="text-xs font-semibold text-[#ECBD2A] hover:underline focus:outline-none transition-colors"
+                    className="text-xs font-semibold text-[#FEF08A] hover:underline focus:outline-none transition-colors"
                   >
                     Forgot password?
                   </button>
@@ -203,7 +203,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3.5 px-4 bg-[#ECBD2A] hover:bg-[#dbaa1e] active:bg-[#c99b17] text-slate-950 font-extrabold text-sm rounded-xl transition-colors flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-sm"
+                  className="w-full py-3.5 px-4 bg-[#FEF08A] hover:bg-[#FDE047] active:bg-amber-300 text-slate-950 font-extrabold text-sm rounded-xl transition-colors flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shadow-sm"
                 >
                   {isLoading ? (
                     <>
@@ -221,7 +221,7 @@ export default function LoginPage({ onLoginSuccess }) {
                   onClick={handleAutoFill}
                   className="w-full py-2.5 px-4 bg-white/[0.05] hover:bg-white/[0.1] active:bg-white/[0.07] border border-white/10 hover:border-white/20 text-slate-200 hover:text-white font-bold text-xs rounded-xl transition-colors flex items-center justify-center space-x-2 group cursor-pointer"
                 >
-                  <KeyRound className="w-3.5 h-3.5 text-[#ECBD2A]" />
+                  <KeyRound className="w-3.5 h-3.5 text-[#FEF08A]" />
                   <span>Auto Credentials</span>
                 </button>
               </div>
@@ -282,7 +282,7 @@ export default function LoginPage({ onLoginSuccess }) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3.5 px-4 bg-[#ECBD2A] hover:bg-[#dbaa1e] active:bg-[#c99b17] text-slate-950 font-extrabold text-sm rounded-xl transition-colors flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed mt-2 cursor-pointer shadow-sm"
+                className="w-full py-3.5 px-4 bg-[#FEF08A] hover:bg-[#FDE047] active:bg-amber-300 text-slate-950 font-extrabold text-sm rounded-xl transition-colors flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed mt-2 cursor-pointer shadow-sm"
               >
                 {isLoading ? (
                   <>

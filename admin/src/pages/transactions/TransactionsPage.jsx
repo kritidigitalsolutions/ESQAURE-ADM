@@ -184,7 +184,7 @@ export default function TransactionsPage() {
     <div className="space-y-6 font-urbanist">
       
       {/* Top Filter & Search Bar */}
-      <div className="bg-white dark:bg-[#111111] rounded-2xl p-5 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         
         {/* Search */}
         <div className="relative w-full sm:w-80">
@@ -194,7 +194,7 @@ export default function TransactionsPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search by Payment ID, phone, or name..."
-            className="w-full pl-9 pr-8 py-2 text-xs font-semibold bg-slate-100/80 dark:bg-slate-800/80 focus:bg-white dark:focus:bg-[#161616] text-slate-900 dark:text-white placeholder-slate-400 rounded-xl border border-slate-200 dark:border-slate-700 focus:border-[#FEF08A] focus:outline-none transition-colors"
+            className="w-full pl-9 pr-8 py-2 text-xs font-semibold bg-slate-100/80 dark:bg-[#161B16] focus:bg-white dark:focus:bg-[#1A201A] text-slate-900 dark:text-white placeholder-slate-400 rounded-xl border border-slate-200 dark:border-white/10 focus:border-[#FEF08A] focus:outline-none transition-colors"
           />
           {searchTerm && (
             <button
@@ -209,15 +209,15 @@ export default function TransactionsPage() {
 
         {/* Status Filters & Export Buttons */}
         <div className="flex items-center space-x-2.5">
-          <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center space-x-1 bg-slate-100 dark:bg-[#161B16] p-1 rounded-xl border border-slate-200 dark:border-white/10">
             {['ALL', 'SUCCESS', 'FAILED'].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   statusFilter === st
                     ? 'bg-[#FEF08A] text-slate-950 font-extrabold shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 {st}
@@ -228,7 +228,7 @@ export default function TransactionsPage() {
           <button
             type="button"
             onClick={handleExportCSV}
-            className="py-2 px-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-slate-700 shadow-xs cursor-pointer"
+            className="py-2 px-3 bg-slate-100 dark:bg-white/[0.06] hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-white/10 shadow-xs cursor-pointer"
             title="Download CSV ledger"
           >
             <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
@@ -238,7 +238,7 @@ export default function TransactionsPage() {
           <button
             type="button"
             onClick={handleExportPDF}
-            className="py-2 px-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-slate-700 shadow-xs cursor-pointer"
+            className="py-2 px-3 bg-slate-100 dark:bg-white/[0.06] hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-white/10 shadow-xs cursor-pointer"
             title="Download PDF ledger"
           >
             <FileText className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
@@ -249,10 +249,10 @@ export default function TransactionsPage() {
       </div>
 
       {/* Transactions Table */}
-      <div className="bg-white dark:bg-[#111111] rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 dark:bg-[#161616] border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+            <thead className="bg-slate-50 dark:bg-[#161B16] border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="py-3.5 px-4">Payment ID & Order</th>
                 <th className="py-3.5 px-4">Customer Phone & Name</th>
@@ -263,12 +263,12 @@ export default function TransactionsPage() {
                 <th className="py-3.5 px-4 text-right">Timestamp</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
               {filteredTxns.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="py-12 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                      <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/[0.06] flex items-center justify-center text-slate-400">
                         <Search className="w-5 h-5" />
                       </div>
                       <p className="text-xs font-bold text-slate-800 dark:text-slate-200">No transactions match your query</p>
@@ -277,7 +277,7 @@ export default function TransactionsPage() {
                       </p>
                       <button
                         onClick={() => { setSearchTerm(''); setStatusFilter('ALL'); }}
-                        className="mt-1 px-3 py-1 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-lg transition-colors"
+                        className="mt-1 px-3 py-1 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-lg transition-colors cursor-pointer"
                       >
                         Reset Transaction Filters
                       </button>
@@ -286,17 +286,17 @@ export default function TransactionsPage() {
                 </tr>
               ) : (
                 filteredTxns.map((txn) => (
-                <tr key={txn.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                <tr key={txn.id} className="hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors">
                   <td className="py-3.5 px-4 font-mono">
                     <p className="font-bold text-slate-900 dark:text-white">{txn.id}</p>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500">{txn.orderId}</p>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-400">{txn.orderId}</p>
                   </td>
                   <td className="py-3.5 px-4">
                     <p className="font-bold text-slate-900 dark:text-white">{txn.user}</p>
-                    <p className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">{txn.phone}</p>
+                    <p className="text-[11px] text-slate-400 dark:text-slate-400 font-mono">{txn.phone}</p>
                   </td>
                   <td className="py-3.5 px-4">
-                    <span className="px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 font-extrabold text-[10px] border border-amber-200/50 dark:border-amber-800/50">
+                    <span className="px-2 py-0.5 rounded bg-[#FEF08A]/40 dark:bg-[#FEF08A]/30 text-slate-950 dark:text-amber-300 font-extrabold text-[10px] border border-amber-200/50 dark:border-amber-700/40">
                       {txn.plan}
                     </span>
                   </td>
@@ -314,7 +314,7 @@ export default function TransactionsPage() {
                       <span>{txn.status}</span>
                     </span>
                   </td>
-                  <td className="py-3.5 px-4 text-right text-slate-400 dark:text-slate-500 text-[11px]">
+                  <td className="py-3.5 px-4 text-right text-slate-400 dark:text-slate-400 text-[11px]">
                     {txn.date}
                   </td>
                 </tr>

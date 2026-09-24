@@ -1,447 +1,850 @@
 {
   "info": {
-    "_postman_id": "esquare-ott-auth-v1",
-    "name": "E² Stories OTT - Authentication & User APIs",
-    "description": "Production-ready REST APIs for E² Stories (Entertainment Squared) OTT mobile platform. Covers Phone OTP Authentication, New User Registration, Profile Setup, Interest/Genre Onboarding, and Session Management.",
+    "_postman_id": "e2-stories-ott-api-v2",
+    "name": "E² Stories OTT — Complete API Collection",
+    "description": "Single, complete API collection for the E² Stories (Entertainment Squared) OTT Platform.\n\nOrganised into 3 top-level sections:\n  📱 MOBILE APP   — Authentication, Profile, Notifications\n  🖥️  ADMIN PANEL  — User Management, Admin Notifications\n  ⚙️  SHARED       — File Uploads, System Health\n\n─── HOW TO USE ───\n1. Run '1.1 Request OTP' → OTP auto-saved\n2. Run '1.3 Verify OTP'  → authToken + refreshToken auto-saved\n3. All other requests pick up tokens automatically\n\n─── BASE URL ───\nChange the 'baseUrl' collection variable to point to your server.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:5001/api/v1",
-      "type": "string"
-    },
-    {
-      "key": "authToken",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "phoneNumber",
-      "value": "7600000097",
-      "type": "string"
-    },
-    {
-      "key": "countryCode",
-      "value": "+91",
-      "type": "string"
-    },
-    {
-      "key": "otp",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "refreshToken",
-      "value": "",
-      "type": "string"
-    }
+    { "key": "baseUrl",      "value": "http://localhost:5001/api/v1", "type": "string",  "description": "API base URL. Change for staging/production." },
+    { "key": "phoneNumber",  "value": "7600000097",                   "type": "string",  "description": "Test mobile number" },
+    { "key": "countryCode",  "value": "+91",                          "type": "string",  "description": "Country code" },
+    { "key": "otp",          "value": "",                             "type": "string",  "description": "Auto-filled by Request OTP script" },
+    { "key": "authToken",    "value": "",                             "type": "string",  "description": "Auto-filled by Verify OTP script" },
+    { "key": "refreshToken", "value": "",                             "type": "string",  "description": "Auto-filled by Verify OTP script" },
+    { "key": "userId",       "value": "",                             "type": "string",  "description": "Paste a user _id here for admin user requests" }
   ],
+
   "item": [
+
     {
-      "name": "Authentication",
+      "name": "📱 MOBILE APP",
+      "description": "All APIs consumed by the E² Stories mobile application. Covers OTP login, profile setup, notifications, and content onboarding.",
       "item": [
+
         {
-          "name": "Request OTP",
-          "event": [
+          "name": "1. Authentication",
+          "description": "OTP-based login. Run in order: 1.1 Request OTP → 1.3 Verify OTP. Tokens are auto-saved — no copy-pasting needed.",
+          "item": [
+
             {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "const res = pm.response.json();",
-                  "if (res.success && res.data && res.data.devOtp) {",
-                  "    pm.collectionVariables.set('otp', res.data.devOtp);",
-                  "    console.log('Auto-saved OTP:', res.data.devOtp);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"phoneNumber\": \"{{phoneNumber}}\",\n  \"countryCode\": \"{{countryCode}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/request-otp",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "request-otp"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Verify OTP",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "const res = pm.response.json();",
-                  "if (res.success && res.data) {",
-                  "    if (res.data.token) pm.collectionVariables.set('authToken', res.data.token);",
-                  "    if (res.data.refreshToken) pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
-                  "    console.log('Auto-saved authToken and refreshToken');",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"phoneNumber\": \"{{phoneNumber}}\",\n  \"countryCode\": \"{{countryCode}}\",\n  \"otp\": \"{{otp}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/verify-otp",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "verify-otp"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Resend OTP",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "const res = pm.response.json();",
-                  "if (res.success && res.data && res.data.devOtp) {",
-                  "    pm.collectionVariables.set('otp', res.data.devOtp);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"phoneNumber\": \"{{phoneNumber}}\",\n  \"countryCode\": \"{{countryCode}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/resend-otp",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "resend-otp"]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "User Profile & Onboarding",
-      "item": [
-        {
-          "name": "Complete Profile",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "const res = pm.response.json();",
-                  "if (res.success && res.data && res.data.token) {",
-                  "    pm.collectionVariables.set('authToken', res.data.token);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Satyam\",\n  \"lastName\": \"Sharma\",\n  \"email\": \"satyam.sharma@example.com\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "profile"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Genres (Choose your Interest)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/auth/genres",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "genres"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Save Interests (Choose your Interest)",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"interests\": [\"romance\", \"thriller\", \"action\"]\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/interests",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "interests"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Profile",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/auth/me",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "me"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Logout",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/auth/logout",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "logout"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Refresh Token",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "const res = pm.response.json();",
-                  "if (res.success && res.data) {",
-                  "    if (res.data.token) pm.collectionVariables.set('authToken', res.data.token);",
-                  "    if (res.data.refreshToken) pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
-                  "    console.log('Refreshed authToken and refreshToken');",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/refresh-token",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "refresh-token"]
-            },
-            "description": "Refreshes user access token and refresh token. Accepts either refreshToken in JSON body or existing access token in Authorization Bearer header."
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Profile",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{authToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/auth/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "profile"]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "File & Media Uploads",
-      "item": [
-        {
-          "name": "Upload Single File",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "file",
-                  "type": "file",
-                  "description": "Single media or document file (image, video, subtitle, audio, etc.)"
+              "name": "1.1 Request OTP",
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "const r = pm.response.json();",
+                "if (r.success && r.data && r.data.devOtp) {",
+                "    pm.collectionVariables.set('otp', r.data.devOtp);",
+                "    console.log('✓ OTP auto-saved:', r.data.devOtp);",
+                "}"
+              ]}}],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"phoneNumber\": \"{{phoneNumber}}\",\n  \"countryCode\": \"{{countryCode}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
                 },
-                {
-                  "key": "folder",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true,
-                  "description": "Optional custom subfolder (e.g. posters, avatars, trailers)"
-                }
-              ]
+                "url": { "raw": "{{baseUrl}}/auth/request-otp", "host": ["{{baseUrl}}"], "path": ["auth","request-otp"] },
+                "description": "Send a 4-digit OTP to the user's mobile number.\n\nIn development mode, `devOtp` is returned in the response and auto-saved to the `otp` variable by the test script.\n\n**Response fields:**\n- `maskedNumber` — e.g. ****097\n- `isExistingUser` — true = returning user\n- `resendAfterSeconds` — countdown before resend is allowed\n- `devOtp` — only in NODE_ENV=development"
+              },
+              "response": []
             },
-            "url": {
-              "raw": "{{baseUrl}}/upload/single",
-              "host": ["{{baseUrl}}"],
-              "path": ["upload", "single"]
-            },
-            "description": "Upload a single file. Automatically categorizes into images, videos, audios, subtitles, or documents based on MIME type. Returns public accessible URL and file metadata."
-          },
-          "response": []
-        },
-        {
-          "name": "Upload Multiple Files",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "files",
-                  "type": "file",
-                  "description": "Multiple media or document files (select multiple files, up to 20)"
+
+            {
+              "name": "1.2 Resend OTP",
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "const r = pm.response.json();",
+                "if (r.success && r.data && r.data.devOtp) {",
+                "    pm.collectionVariables.set('otp', r.data.devOtp);",
+                "    console.log('✓ Resend OTP saved:', r.data.devOtp);",
+                "}"
+              ]}}],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"phoneNumber\": \"{{phoneNumber}}\",\n  \"countryCode\": \"{{countryCode}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
                 },
+                "url": { "raw": "{{baseUrl}}/auth/resend-otp", "host": ["{{baseUrl}}"], "path": ["auth","resend-otp"] },
+                "description": "Resend a new OTP. Only works after the 60-second cooldown from the previous request has passed. Returns a new `devOtp` in development mode."
+              },
+              "response": []
+            },
+
+            {
+              "name": "1.3 Verify OTP (Login)",
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "const r = pm.response.json();",
+                "if (r.success && r.data) {",
+                "    if (r.data.token) {",
+                "        pm.collectionVariables.set('authToken', r.data.token);",
+                "        console.log('✓ authToken saved');",
+                "    }",
+                "    if (r.data.refreshToken) {",
+                "        pm.collectionVariables.set('refreshToken', r.data.refreshToken);",
+                "        console.log('✓ refreshToken saved');",
+                "    }",
+                "    if (r.data.user && r.data.user.id) {",
+                "        pm.collectionVariables.set('userId', r.data.user.id);",
+                "        console.log('✓ userId saved:', r.data.user.id);",
+                "    }",
+                "    console.log('isNewUser:', r.data.isNewUser, '| isProfileCompleted:', r.data.isProfileCompleted);",
+                "}"
+              ]}}],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"phoneNumber\": \"{{phoneNumber}}\",\n  \"countryCode\": \"{{countryCode}}\",\n  \"otp\": \"{{otp}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/auth/verify-otp", "host": ["{{baseUrl}}"], "path": ["auth","verify-otp"] },
+                "description": "Verify the OTP and log in.\n\n**Auto-saves:** `authToken`, `refreshToken`, `userId`\n\n**Response fields:**\n- `token` — short-lived access token\n- `refreshToken` — long-lived token for silent renewal\n- `isNewUser` — true = navigate to profile setup (Screen 3)\n- `isProfileCompleted` — false = show onboarding, true = go to home"
+              },
+              "response": []
+            },
+
+            {
+              "name": "1.4 Refresh Token",
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "const r = pm.response.json();",
+                "if (r.success && r.data) {",
+                "    if (r.data.token)        pm.collectionVariables.set('authToken', r.data.token);",
+                "    if (r.data.refreshToken) pm.collectionVariables.set('refreshToken', r.data.refreshToken);",
+                "    console.log('✓ Tokens refreshed');",
+                "}"
+              ]}}],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/auth/refresh-token", "host": ["{{baseUrl}}"], "path": ["auth","refresh-token"] },
+                "description": "Exchange a refresh token for a new access token + refresh token pair.\n\nCall this when the app receives a **401 TOKEN_EXPIRED** error. Both new tokens are auto-saved."
+              },
+              "response": []
+            },
+
+            {
+              "name": "1.5 Logout",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "POST",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth","logout"] },
+                "description": "Log out the current session. After logout, call **3.10 Unregister Device Token** to stop push notifications on this device."
+              },
+              "response": []
+            }
+
+          ]
+        },
+
+        {
+          "name": "2. Profile & Onboarding",
+          "description": "New user flow (after 1.3 when isNewUser = true): 2.1 → 2.4 → 2.5. Returning users start at 2.2.",
+          "item": [
+
+            {
+              "name": "2.1 Complete Profile (New User)",
+              "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+                "const r = pm.response.json();",
+                "if (r.success && r.data && r.data.token) {",
+                "    pm.collectionVariables.set('authToken', r.data.token);",
+                "    console.log('✓ Profile completed — authToken updated');",
+                "}"
+              ]}}],
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Satyam\",\n  \"lastName\": \"Sharma\",\n  \"email\": \"satyam@gmail.com\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/auth/profile", "host": ["{{baseUrl}}"], "path": ["auth","profile"] },
+                "description": "Screen 3 — Welcome to Entertainment Squared.\n\nFirst-time profile setup. Saves firstName, lastName, email. Returns a refreshed token with `isProfileCompleted: true`."
+              },
+              "response": []
+            },
+
+            {
+              "name": "2.2 Get My Profile",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth","me"] },
+                "description": "Fetch the full profile of the currently logged-in user including VIP status, interests, settings, and notification preferences."
+              },
+              "response": []
+            },
+
+            {
+              "name": "2.3 Edit Profile",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Kartik\",\n  \"lastName\": \"Khandelwal\",\n  \"email\": \"kartik@gmail.com\",\n  \"avatarUrl\": \"http://localhost:5001/uploads/images/avatar.png\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/auth/profile", "host": ["{{baseUrl}}"], "path": ["auth","profile"] },
+                "description": "Update profile details from the Edit Profile screen.\n\n**Updatable fields:** firstName, lastName, email, avatarUrl, interests\n\n⚠️ Phone number is permanently locked to the OTP account — cannot be changed here."
+              },
+              "response": []
+            },
+
+            {
+              "name": "2.4 Get Genres (Choose Interests)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/auth/genres", "host": ["{{baseUrl}}"], "path": ["auth","genres"] },
+                "description": "Screen 4 — Choose Your Interest.\n\nFetch all active OTT genres (Romance, Thriller, Revenge, Billionaire, etc.) to display on the genre-selection screen. No auth required."
+              },
+              "response": []
+            },
+
+            {
+              "name": "2.5 Save Interests",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"interests\": [\"romance\", \"thriller\", \"action\"]\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/auth/interests", "host": ["{{baseUrl}}"], "path": ["auth","interests"] },
+                "description": "Save the user's selected genre preferences. Accepts genre slugs (e.g. `romance`), genre names, or MongoDB ObjectIDs."
+              },
+              "response": []
+            },
+
+            {
+              "name": "2.6 Delete Account",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth","profile"],
+                  "query": [{ "key": "hardDelete", "value": "false", "description": "true = permanent deletion. Default is soft-delete (can re-register).", "disabled": true }]
+                },
+                "description": "Delete the user's own account.\n\n- **Default (soft delete):** status set to DELETED, data cleared, user can re-register with same number\n- **Hard delete** (`?hardDelete=true`): permanently removed from database — irreversible"
+              },
+              "response": []
+            }
+
+          ]
+        },
+
+        {
+          "name": "3. Notifications",
+          "description": "Notification list, read/unread state, settings toggles (matches the Notifications Settings screen), and device push token management.",
+          "item": [
+
+            {
+              "name": "3.1 Get Notifications",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/notifications?page=0&limit=20",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["notifications"],
+                  "query": [
+                    { "key": "page",       "value": "0",           "description": "Page index starting from 0 (default: 0)" },
+                    { "key": "limit",      "value": "20",          "description": "Per page, max 50 (default: 20)" },
+                    { "key": "unreadOnly", "value": "true",        "description": "Only return unread notifications",                                              "disabled": true },
+                    { "key": "type",       "value": "NEW_EPISODE", "description": "Filter by type: NEW_EPISODE | NEW_RELEASE | RECOMMENDATION | SYSTEM", "disabled": true }
+                  ]
+                },
+                "description": "Fetch the notification list grouped by date section: **Today / Yesterday / N Days Ago**.\n\nEach notification includes:\n- `title`, `body`, `imageUrl` (thumbnail)\n- `isRead` — drives the red dot\n- `timeAgo` — human label (12 min ago, 2 days ago)\n- `deepLink` — app route to open on tap"
+              },
+              "response": [
                 {
-                  "key": "folder",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true,
-                  "description": "Optional custom subfolder"
+                  "name": "200 Success — Notification Groups",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/notifications?page=0&limit=20",
+                      "host": ["{{baseUrl}}"],
+                      "path": ["notifications"]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [{ "key": "Content-Type", "value": "application/json" }],
+                  "body": "{\n  \"success\": true,\n  \"statusCode\": 200,\n  \"message\": \"Notifications fetched successfully\",\n  \"data\": {\n    \"unreadCount\": 2,\n    \"pagination\": {\n      \"page\": 0,\n      \"limit\": 20,\n      \"total\": 4,\n      \"totalPages\": 1,\n      \"hasNextPage\": false,\n      \"hasPrevPage\": false\n    },\n    \"groups\": [\n      {\n        \"label\": \"Today\",\n        \"notifications\": [\n          {\n            \"id\": \"66f2c0a1b2c3d4e5f6a7b8c1\",\n            \"userId\": \"66f1a0b2c3d4e5f6a7b8c9d0\",\n            \"type\": \"NEW_EPISODE\",\n            \"title\": \"New Episode Available\",\n            \"body\": \"Episode 09 of The Last Promise is now available.\",\n            \"imageUrl\": \"https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=300&q=80\",\n            \"deepLink\": \"/watch/the-last-promise/ep-9\",\n            \"isRead\": false,\n            \"timeAgo\": \"12 min ago\",\n            \"createdAt\": \"2026-09-24T10:00:00.000Z\",\n            \"updatedAt\": \"2026-09-24T10:00:00.000Z\"\n          },\n          {\n            \"id\": \"66f2c0a1b2c3d4e5f6a7b8c2\",\n            \"userId\": \"66f1a0b2c3d4e5f6a7b8c9d0\",\n            \"type\": \"NEW_RELEASE\",\n            \"title\": \"New Release\",\n            \"body\": \"A new drama has arrived. Discover Dangerous Love.\",\n            \"imageUrl\": \"https://images.unsplash.com/photo-1485846234645-a62644f84728?w=300&q=80\",\n            \"deepLink\": \"/series/dangerous-love\",\n            \"isRead\": false,\n            \"timeAgo\": \"12 min ago\",\n            \"createdAt\": \"2026-09-24T10:00:00.000Z\",\n            \"updatedAt\": \"2026-09-24T10:00:00.000Z\"\n          }\n        ]\n      },\n      {\n        \"label\": \"2 Days Ago\",\n        \"notifications\": [\n          {\n            \"id\": \"66f2c0a1b2c3d4e5f6a7b8c3\",\n            \"userId\": \"66f1a0b2c3d4e5f6a7b8c9d0\",\n            \"type\": \"NEW_EPISODE\",\n            \"title\": \"New Episode Available\",\n            \"body\": \"Episode 09 of The Last Promise is now available.\",\n            \"imageUrl\": \"https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=300&q=80\",\n            \"deepLink\": \"/watch/the-last-promise/ep-8\",\n            \"isRead\": true,\n            \"timeAgo\": \"2 days ago\",\n            \"createdAt\": \"2026-09-22T10:00:00.000Z\",\n            \"updatedAt\": \"2026-09-22T10:00:00.000Z\"\n          },\n          {\n            \"id\": \"66f2c0a1b2c3d4e5f6a7b8c4\",\n            \"userId\": \"66f1a0b2c3d4e5f6a7b8c9d0\",\n            \"type\": \"NEW_RELEASE\",\n            \"title\": \"New Release\",\n            \"body\": \"A new drama has arrived. Discover Dangerous Love.\",\n            \"imageUrl\": \"https://images.unsplash.com/photo-1485846234645-a62644f84728?w=300&q=80\",\n            \"deepLink\": \"/series/dangerous-love\",\n            \"isRead\": true,\n            \"timeAgo\": \"2 days ago\",\n            \"createdAt\": \"2026-09-22T10:00:00.000Z\",\n            \"updatedAt\": \"2026-09-22T10:00:00.000Z\"\n          }\n        ]\n      }\n    ]\n  }\n}"
                 }
               ]
             },
-            "url": {
-              "raw": "{{baseUrl}}/upload/multiple",
-              "host": ["{{baseUrl}}"],
-              "path": ["upload", "multiple"]
+
+            {
+              "name": "3.2 Get Unread Count",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/notifications/unread-count", "host": ["{{baseUrl}}"], "path": ["notifications","unread-count"] },
+                "description": "Returns `unreadCount`. Use this to display the red badge dot on the notification bell icon in the app header."
+              },
+              "response": []
             },
-            "description": "Upload multiple files in a single request. Returns count and array of uploaded files with public URLs and metadata."
-          },
-          "response": []
+
+            {
+              "name": "3.3 Mark Single Notification as Read",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "PATCH",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/notifications/NOTIFICATION_ID/read", "host": ["{{baseUrl}}"], "path": ["notifications","NOTIFICATION_ID","read"] },
+                "description": "Mark one notification as read (removes its red dot). Replace `NOTIFICATION_ID` with an actual `id` from the 3.1 list response."
+              },
+              "response": []
+            },
+
+            {
+              "name": "3.4 Mark All as Read",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "PATCH",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/notifications/read-all", "host": ["{{baseUrl}}"], "path": ["notifications","read-all"] },
+                "description": "Mark ALL unread notifications as read in one call. Returns `updatedCount`."
+              },
+              "response": []
+            },
+
+            {
+              "name": "3.5 Delete Single Notification",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "DELETE",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/notifications/NOTIFICATION_ID", "host": ["{{baseUrl}}"], "path": ["notifications","NOTIFICATION_ID"] },
+                "description": "Delete one notification by ID (swipe-to-delete gesture). Replace `NOTIFICATION_ID` with an actual notification id."
+              },
+              "response": []
+            },
+
+            {
+              "name": "3.6 Clear All Notifications",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "DELETE",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/notifications/clear-all", "host": ["{{baseUrl}}"], "path": ["notifications","clear-all"] },
+                "description": "Delete ALL notifications for this user. Use for the 'Clear All' button. Returns `deletedCount`."
+              },
+              "response": []
+            },
+
+            {
+              "name": "3.7 Get Notification Settings",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/notifications/settings", "host": ["{{baseUrl}}"], "path": ["notifications","settings"] },
+                "description": "Fetch the 3 notification preference toggles for the **Notification Settings screen**:\n- `newEpisodes` — Get notified when a series continues\n- `newReleases` — Discover newly added series\n- `recommendations` — Personalized stories for you"
+              },
+              "response": []
+            },
+
+            {
+              "name": "3.8 Update Notification Settings",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"newEpisodes\": true,\n  \"newReleases\": true,\n  \"recommendations\": false\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/notifications/settings", "host": ["{{baseUrl}}"], "path": ["notifications","settings"] },
+                "description": "Update one or more notification toggle preferences. Send only the fields you want to change — others remain unchanged."
+              },
+              "response": []
+            },
+
+            {
+              "name": "3.9 Register Device Token (FCM)",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fcmToken\": \"PASTE_FCM_DEVICE_TOKEN_HERE\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/notifications/register-device", "host": ["{{baseUrl}}"], "path": ["notifications","register-device"] },
+                "description": "Save the device's FCM push notification token.\n\nCall this on every app launch or when the OS issues a new token. Duplicate tokens are automatically ignored (`$addToSet`)."
+              },
+              "response": []
+            },
+
+            {
+              "name": "3.10 Unregister Device Token (FCM)",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "DELETE",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fcmToken\": \"PASTE_FCM_DEVICE_TOKEN_HERE\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/notifications/unregister-device", "host": ["{{baseUrl}}"], "path": ["notifications","unregister-device"] },
+                "description": "Remove the device's FCM token on user logout so the device stops receiving push notifications."
+              },
+              "response": []
+            },
+
+            {
+              "name": "3.11 Seed Sample Notifications",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/notifications/seed?reset=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["notifications", "seed"],
+                  "query": [{ "key": "reset", "value": "true", "description": "true = clear previous before seeding" }]
+                },
+                "description": "Seeds 4 sample notifications matching the mobile app screens (Today + 2 Days Ago, read and unread). Use this to test the notification list UI without manually setting up data."
+              },
+              "response": []
+            }
+
+          ]
         }
+
       ]
     },
+
     {
-      "name": "System",
+      "name": "🖥️ ADMIN PANEL",
+      "description": "All APIs used by the E² Stories Admin Panel. Covers user management (search, VIP, suspend, delete) and sending notifications to users.",
       "item": [
+
         {
-          "name": "Health Check",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/health",
-              "host": ["{{baseUrl}}"],
-              "path": ["health"]
+          "name": "4. User Management",
+          "description": "View, search, filter, edit, suspend, grant VIP, and delete users.",
+          "item": [
+
+            {
+              "name": "4.1 List All Users",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users?filter=ALL&page=1&limit=100",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users"],
+                  "query": [
+                    { "key": "filter", "value": "ALL",  "description": "ALL | VIP | FREE | SUSPENDED" },
+                    { "key": "page",   "value": "1",    "description": "Page number" },
+                    { "key": "limit",  "value": "100",  "description": "Users per page (max 100)" },
+                    { "key": "search", "value": "",     "description": "Search by name, email, or phone number", "disabled": true }
+                  ]
+                },
+                "description": "Fetch all users. Also returns KPI stats:\n- `counts.all` — total users\n- `counts.vip` — VIP subscribers\n- `counts.free` — free-tier users\n- `counts.suspended` — suspended accounts\n- `counts.activeToday` — active in last 24h\n- `counts.avgWatchTime` — average watch hours"
+              },
+              "response": []
+            },
+
+            {
+              "name": "4.2 Search Users",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users?search=kartik&filter=ALL&page=1&limit=50",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["users"],
+                  "query": [
+                    { "key": "search", "value": "kartik", "description": "Searches firstName, lastName, email, and phoneNumber" },
+                    { "key": "filter", "value": "ALL" },
+                    { "key": "page",   "value": "1" },
+                    { "key": "limit",  "value": "50" }
+                  ]
+                },
+                "description": "Search users by name, email, or phone number. Results sorted newest first."
+              },
+              "response": []
+            },
+
+            {
+              "name": "4.3 Filter — VIP Users",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/users?filter=VIP&page=1&limit=100", "host": ["{{baseUrl}}"], "path": ["users"], "query": [{ "key": "filter", "value": "VIP" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "100" }] },
+                "description": "List only paid VIP subscribers."
+              },
+              "response": []
+            },
+
+            {
+              "name": "4.4 Filter — Free Users",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/users?filter=FREE&page=1&limit=100", "host": ["{{baseUrl}}"], "path": ["users"], "query": [{ "key": "filter", "value": "FREE" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "100" }] },
+                "description": "List only free-tier users (not VIP, not suspended)."
+              },
+              "response": []
+            },
+
+            {
+              "name": "4.5 Filter — Suspended Users",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/users?filter=SUSPENDED&page=1&limit=100", "host": ["{{baseUrl}}"], "path": ["users"], "query": [{ "key": "filter", "value": "SUSPENDED" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "100" }] },
+                "description": "List only suspended accounts."
+              },
+              "response": []
+            },
+
+            {
+              "name": "4.6 Get User by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}"] },
+                "description": "Fetch the full profile of a single user.\n\nSet the `userId` collection variable, or replace `{{userId}}` with an actual MongoDB `_id`."
+              },
+              "response": []
+            },
+
+            {
+              "name": "4.7 Edit User Details",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Kartik\",\n  \"lastName\": \"Khandelwal\",\n  \"email\": \"kartik@gmail.com\",\n  \"promoCode\": \"PROMO2026\",\n  \"avatarUrl\": \"https://example.com/avatar.png\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}"] },
+                "description": "Update user fields from the admin panel.\n\n**Editable:** firstName, lastName, email, phone, promoCode, voucherCode, avatarUrl\n\nSend only the fields you want to update — others remain unchanged."
+              },
+              "response": []
+            },
+
+            {
+              "name": "4.8 Activate User",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/users/{{userId}}/status", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}","status"] },
+                "description": "Set user status to ACTIVE (reactivate a suspended account).\n\nYou can also omit the body to **toggle** between ACTIVE and SUSPENDED automatically."
+              },
+              "response": []
+            },
+
+            {
+              "name": "4.9 Suspend User",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"SUSPENDED\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/users/{{userId}}/status", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}","status"] },
+                "description": "Suspend a user account. The user receives a **403 ACCOUNT_SUSPENDED** error on their next API call."
+              },
+              "response": []
+            },
+
+            {
+              "name": "4.10 Grant VIP Subscription",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"isVip\": true,\n  \"days\": 30,\n  \"planName\": \"Monthly Pass\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/users/{{userId}}/vip", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}","vip"] },
+                "description": "Grant VIP subscription access.\n\n**Body fields:**\n- `isVip: true` — enable VIP\n- `days` — subscription duration (default: 30)\n- `planName` — label shown on profile (Monthly Pass / Annual Pass)\n\nFor Annual use `days: 365`."
+              },
+              "response": []
+            },
+
+            {
+              "name": "4.11 Revoke VIP Subscription",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"isVip\": false\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/users/{{userId}}/vip", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}","vip"] },
+                "description": "Revoke VIP access and revert the user to Free Tier."
+              },
+              "response": []
+            },
+
+            {
+              "name": "4.12 Delete User (Permanent)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/users/{{userId}}", "host": ["{{baseUrl}}"], "path": ["users","{{userId}}"] },
+                "description": "⚠️ Permanently delete a user from the database. This is irreversible.\n\nFor a recoverable removal, use user's own **2.6 Delete Account** which soft-deletes the account."
+              },
+              "response": []
             }
-          },
-          "response": []
+
+          ]
+        },
+
+        {
+          "name": "5. Send Notifications (Admin)",
+          "description": "Create and push notifications to specific users. Notifications are saved to the DB and respect the user's opt-in toggle preferences.",
+          "item": [
+
+            {
+              "name": "5.1 Send — New Episode",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"type\": \"NEW_EPISODE\",\n  \"title\": \"New Episode Available\",\n  \"body\": \"Episode 09 of The Last Promise is now available.\",\n  \"imageUrl\": \"https://yourcdn.com/thumbnails/last-promise-ep9.jpg\",\n  \"deepLink\": \"/content/the-last-promise?episode=9\",\n  \"contentId\": null\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/notifications/send", "host": ["{{baseUrl}}"], "path": ["notifications","send"] },
+                "description": "Send a NEW_EPISODE notification. Skipped automatically if the user has turned off the `newEpisodes` toggle."
+              },
+              "response": []
+            },
+
+            {
+              "name": "5.2 Send — New Release",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"type\": \"NEW_RELEASE\",\n  \"title\": \"New Release\",\n  \"body\": \"A new drama has arrived. Discover Dangerous Love.\",\n  \"imageUrl\": \"https://yourcdn.com/thumbnails/dangerous-love.jpg\",\n  \"deepLink\": \"/content/dangerous-love\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/notifications/send", "host": ["{{baseUrl}}"], "path": ["notifications","send"] },
+                "description": "Send a NEW_RELEASE notification. Skipped if user has turned off `newReleases` toggle."
+              },
+              "response": []
+            },
+
+            {
+              "name": "5.3 Send — Recommendation",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"type\": \"RECOMMENDATION\",\n  \"title\": \"Recommended For You\",\n  \"body\": \"Based on your watch history, you might enjoy Midnight Billionaire.\",\n  \"imageUrl\": \"https://yourcdn.com/thumbnails/midnight-billionaire.jpg\",\n  \"deepLink\": \"/content/midnight-billionaire\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/notifications/send", "host": ["{{baseUrl}}"], "path": ["notifications","send"] },
+                "description": "Send a personalised recommendation. Skipped if user has turned off `recommendations` toggle."
+              },
+              "response": []
+            },
+
+            {
+              "name": "5.4 Send — System Message",
+              "request": {
+                "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"type\": \"SYSTEM\",\n  \"title\": \"Account Notice\",\n  \"body\": \"Your VIP subscription has been activated. Enjoy unlimited access!\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/notifications/send", "host": ["{{baseUrl}}"], "path": ["notifications","send"] },
+                "description": "Send a system-level message. SYSTEM type is **always delivered** regardless of the user's notification preferences."
+              },
+              "response": []
+            },
+
+            {
+              "name": "5.5 Get Push Broadcast Campaigns & Stats",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/notifications/admin/campaigns", "host": ["{{baseUrl}}"], "path": ["notifications","admin","campaigns"] },
+                "description": "Fetch real push broadcast history from MongoDB and audience statistics (total registered users, subscribers, inactive users, and active FCM device tokens)."
+              },
+              "response": []
+            },
+
+            {
+              "name": "5.6 Broadcast Push Notification (FCM)",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"🔥 New Episode Alert: Security Guard Ki CEO GF\",\n  \"message\": \"Episode 24 is now live! Stream now in 1080p.\",\n  \"targetAudience\": \"All Users\",\n  \"selectedDrama\": \"DRM-101\",\n  \"deepLink\": \"/watch/security-guard-ki-ceo-gf/ep-24\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/notifications/admin/broadcast", "host": ["{{baseUrl}}"], "path": ["notifications","admin","broadcast"] },
+                "description": "Broadcast an instant push notification to registered devices via Firebase FCM and deliver in-app notifications into user inboxes."
+              },
+              "response": []
+            },
+
+            {
+              "name": "5.7 Get In-App Announcements",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/notifications/admin/announcements", "host": ["{{baseUrl}}"], "path": ["notifications","admin","announcements"] },
+                "description": "Fetch all real in-app announcements stored in MongoDB."
+              },
+              "response": []
+            },
+
+            {
+              "name": "5.8 Create In-App Announcement",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Scheduled Stream CDN Maintenance\",\n  \"body\": \"Our playback servers will undergo a 10-minute routine optimization on Sunday at 3:00 AM IST.\",\n  \"category\": \"SYSTEM\",\n  \"target\": \"All Active Users\",\n  \"priority\": \"High\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": { "raw": "{{baseUrl}}/notifications/admin/announcements", "host": ["{{baseUrl}}"], "path": ["notifications","admin","announcements"] },
+                "description": "Publish a new in-app announcement and deliver it into targeted user inboxes."
+              },
+              "response": []
+            },
+
+            {
+              "name": "5.9 Delete In-App Announcement",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/notifications/admin/announcements/ANNOUNCEMENT_ID", "host": ["{{baseUrl}}"], "path": ["notifications","admin","announcements","ANNOUNCEMENT_ID"] },
+                "description": "Permanently delete an in-app announcement from MongoDB by its ID."
+              },
+              "response": []
+            }
+
+          ]
         }
+
+      ]
+    },
+
+    {
+      "name": "⚙️ SHARED",
+      "description": "Shared APIs used by both the Mobile App and Admin Panel.",
+      "item": [
+
+        {
+          "name": "6. File Uploads",
+          "description": "Upload images, videos, audio, and documents. Files are auto-categorised by MIME type into separate subfolders.",
+          "item": [
+
+            {
+              "name": "6.1 Upload Single File",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "file",   "type": "file", "description": "Required. Any image, video, audio, or document file." },
+                    { "key": "folder", "type": "text", "value": "", "disabled": true, "description": "Optional. Custom subfolder (e.g. avatars, posters, banners, thumbnails, episodes)." }
+                  ]
+                },
+                "url": { "raw": "{{baseUrl}}/upload/single", "host": ["{{baseUrl}}"], "path": ["upload","single"] },
+                "description": "Upload one file. Returns the public URL and file metadata.\n\n**Auto-folder by MIME type:**\n- `image/*`  → uploads/images\n- `video/*`  → uploads/videos\n- `audio/*`  → uploads/audio\n- other      → uploads/documents\n\n**Response fields:** filename, originalName, mimetype, size, folder, url, path"
+              },
+              "response": []
+            },
+
+            {
+              "name": "6.2 Upload Multiple Files",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "files",  "type": "file", "description": "Required. Select up to 20 files at once." },
+                    { "key": "folder", "type": "text", "value": "", "disabled": true, "description": "Optional. Custom subfolder name." }
+                  ]
+                },
+                "url": { "raw": "{{baseUrl}}/upload/multiple", "host": ["{{baseUrl}}"], "path": ["upload","multiple"] },
+                "description": "Upload up to 20 files in one request. Returns `count` and an array of file objects, each with their public URL."
+              },
+              "response": []
+            }
+
+          ]
+        },
+
+        {
+          "name": "7. System",
+          "item": [
+            {
+              "name": "7.1 Health Check",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] },
+                "description": "Confirm the backend server is live. Returns service name, version, and current timestamp."
+              },
+              "response": []
+            }
+          ]
+        }
+
       ]
     }
+
   ]
 }

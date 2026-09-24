@@ -137,7 +137,7 @@ export default function GenresPage() {
     <div className="space-y-6 font-urbanist">
 
       {/* Clean & Simple Header */}
-      <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-nodus flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-extrabold text-slate-950 dark:text-white">
             Genres & Categories
@@ -156,12 +156,12 @@ export default function GenresPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search genres..."
-              className="w-full pl-8 pr-7 py-2 text-xs font-semibold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
+              className="w-full pl-8 pr-7 py-2 text-xs font-semibold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -172,7 +172,7 @@ export default function GenresPage() {
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="py-2.5 px-4 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-2 transition-all shrink-0 active:scale-95 shadow-xs"
+            className="py-2.5 px-4 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-2 transition-all shrink-0 active:scale-95 shadow-xs cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Add Genre</span>
@@ -182,11 +182,11 @@ export default function GenresPage() {
 
       {/* Minimal Genres Grid */}
       {filteredGenres.length === 0 ? (
-        <div className="bg-white dark:bg-[#111111] rounded-2xl p-12 text-center border border-slate-200/80 dark:border-slate-800 shadow-nodus">
-          <p className="text-xs font-bold text-slate-500">No genres found matching "{searchTerm}"</p>
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-12 text-center border border-slate-200/80 dark:border-white/10 shadow-nodus">
+          <p className="text-xs font-bold text-slate-500 dark:text-slate-400">No genres found matching "{searchTerm}"</p>
           <button
             onClick={() => setSearchTerm('')}
-            className="mt-3 px-3 py-1.5 bg-[#FEF08A] text-slate-950 font-bold text-xs rounded-xl"
+            className="mt-3 px-3 py-1.5 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-xl cursor-pointer"
           >
             Clear Filter
           </button>
@@ -200,7 +200,7 @@ export default function GenresPage() {
             return (
               <div
                 key={genre.id}
-                className="bg-white dark:bg-[#111111] rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-nodus flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all"
+                className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 shadow-nodus flex flex-col justify-between hover:border-slate-300 dark:hover:border-white/20 transition-all"
               >
                 {/* Top: Icon, Name & Status */}
                 <div className="flex items-start justify-between mb-4">
@@ -221,7 +221,7 @@ export default function GenresPage() {
                       <h4 className="font-extrabold text-sm text-slate-950 dark:text-white truncate">
                         {genre.name}
                       </h4>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono truncate">
+                      <p className="text-[10px] text-slate-400 dark:text-slate-400 font-mono truncate">
                         /{genre.slug}
                       </p>
                     </div>
@@ -231,10 +231,10 @@ export default function GenresPage() {
                   <button
                     type="button"
                     onClick={() => toggleStatus(genre.id)}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold transition-colors shrink-0 ${
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold transition-colors shrink-0 cursor-pointer ${
                       genre.isActive
-                        ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-500/20'
+                        : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200/80 dark:border-white/10'
                     }`}
                   >
                     <span
@@ -247,9 +247,9 @@ export default function GenresPage() {
                 </div>
 
                 {/* Bottom: Associated Catalog & Quick Edit/Delete */}
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
+                <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-xs">
                   <div className="flex items-center space-x-1.5">
-                    <span className="text-slate-400 dark:text-slate-500 font-medium">Catalog:</span>
+                    <span className="text-slate-400 dark:text-slate-400 font-medium">Catalog:</span>
                     <span className="font-extrabold text-slate-900 dark:text-white">
                       {genre.dramaCount || 0} Series
                     </span>
@@ -259,7 +259,7 @@ export default function GenresPage() {
                     <button
                       type="button"
                       onClick={() => handleOpenEdit(genre)}
-                      className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                      className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                       title="Edit"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
@@ -267,7 +267,7 @@ export default function GenresPage() {
                     <button
                       type="button"
                       onClick={() => handleDelete(genre.id)}
-                      className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                      className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -284,9 +284,9 @@ export default function GenresPage() {
       {/* Simple Clean Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#111111] rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white dark:bg-[#202620] rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200 dark:border-white/15 animate-in fade-in zoom-in-95 duration-150">
             
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
               <h3 className="font-extrabold text-base text-slate-950 dark:text-white">
                 {editingGenre ? 'Edit Genre' : 'Add New Genre'}
               </h3>
@@ -312,7 +312,7 @@ export default function GenresPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Fantasy"
                   required
-                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold focus:border-[#FEF08A] focus:outline-none"
+                  className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161B16] text-slate-900 dark:text-white font-bold focus:border-[#FEF08A] focus:outline-none"
                 />
               </div>
 
@@ -333,7 +333,7 @@ export default function GenresPage() {
                         className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
                           isSelected
                             ? 'bg-[#FEF08A] text-slate-950 shadow-xs scale-105'
-                            : 'bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700'
+                            : 'bg-slate-50 dark:bg-[#161B16] text-slate-500 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/10'
                         }`}
                       >
                         <Comp className="w-4 h-4 stroke-[2.2]" />
@@ -394,11 +394,11 @@ export default function GenresPage() {
               </div>
 
               {/* Buttons */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end space-x-2">
+              <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
+                  className="px-4 py-2 text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-xl"
                 >
                   Cancel
                 </button>

@@ -173,14 +173,14 @@ export default function IncomeChart({ className = '' }) {
 
   return (
     <div
-      className={`w-full rounded-[28px] border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#111111] p-5 sm:px-7 sm:py-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover font-sans ${className}`}
+      className={`w-full rounded-[28px] border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#121612] p-5 sm:px-7 sm:py-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover font-sans ${className}`}
     >
       {/* 1. TOP HEADER ROW: Pure clean layout, completely isolated from graph */}
-      <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-slate-800">
+      <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-white/10">
         {/* Left: Title & Subtle Icon */}
         <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-xl bg-amber-100/90 dark:bg-amber-900/30 border border-amber-300/70 dark:border-amber-700/40 flex items-center justify-center text-slate-950 shadow-2xs shrink-0">
-            <IndianRupee className="w-4 h-4 stroke-[2.5] dark:text-amber-400" />
+          <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shadow-2xs shrink-0">
+            <IndianRupee className="w-4 h-4 stroke-[2.5]" />
           </div>
           <div>
             <h3 className="text-base font-extrabold tracking-tight text-slate-950 dark:text-white font-urbanist">
@@ -190,7 +190,7 @@ export default function IncomeChart({ className = '' }) {
         </div>
 
         {/* Right: Only the 3 clean period pills requested: Today | Monthly | Yearly */}
-        <div className="inline-flex items-center gap-1 rounded-xl bg-slate-100/90 dark:bg-slate-900 p-1 border border-slate-200/70 dark:border-slate-700 shadow-2xs">
+        <div className="inline-flex items-center gap-1 rounded-xl bg-slate-100/90 dark:bg-[#161B16] p-1 border border-slate-200/70 dark:border-white/10 shadow-2xs">
           {[
             { id: 'today', label: 'Today' },
             { id: 'monthly', label: 'Monthly' },
@@ -208,7 +208,7 @@ export default function IncomeChart({ className = '' }) {
                 className={`rounded-lg px-3.5 py-1 text-xs font-extrabold transition-all cursor-pointer ${
                   isActive
                     ? 'bg-[#FEF08A] text-slate-950 shadow-2xs border border-amber-300/70'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/[0.06]'
                 }`}
               >
                 {btn.label}
@@ -237,7 +237,7 @@ export default function IncomeChart({ className = '' }) {
             </span>
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-slate-500 font-medium mt-1.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1.5">
             {currentData.subtext}
           </p>
         </div>
@@ -247,7 +247,7 @@ export default function IncomeChart({ className = '' }) {
           ref={containerRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          className="relative flex-1 w-full h-[120px] sm:h-[130px] rounded-2xl bg-gradient-to-l from-amber-50/40 dark:from-amber-900/10 via-amber-50/15 dark:via-amber-900/5 to-transparent border border-slate-100/90 dark:border-slate-800 overflow-hidden cursor-crosshair select-none"
+          className="relative flex-1 w-full h-[120px] sm:h-[130px] rounded-2xl bg-gradient-to-l from-amber-50/40 dark:from-amber-900/10 via-amber-50/15 dark:via-amber-900/5 to-transparent border border-slate-100/90 dark:border-white/10 overflow-hidden cursor-crosshair select-none"
         >
           {/* Subtle Dotted Pattern Overlay */}
           <div
@@ -345,12 +345,12 @@ export default function IncomeChart({ className = '' }) {
                 top: activePoint.y < 45 ? '48%' : `${Math.max(6, (activePoint.y / chartBounds.height) * 100 - 28)}%`,
               }}
             >
-              <div className="bg-slate-950/95 backdrop-blur-md text-white px-3 py-1 rounded-xl shadow-xl text-xs font-semibold whitespace-nowrap flex items-center gap-2 border border-slate-800">
+              <div className="bg-slate-950/95 dark:bg-[#1C221C]/95 backdrop-blur-md text-white px-3 py-1 rounded-xl shadow-xl text-xs font-semibold whitespace-nowrap flex items-center gap-2 border border-slate-800 dark:border-white/12">
                 <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
                 <span className="font-urbanist font-black text-white">
                   {formatINRFull(activePoint.value)}
                 </span>
-                <span className="text-slate-400 font-medium text-[11px] border-l border-slate-800 pl-1.5">
+                <span className="text-slate-400 dark:text-slate-400 font-medium text-[11px] border-l border-slate-800 dark:border-white/10 pl-1.5">
                   {activePoint.time}
                 </span>
               </div>

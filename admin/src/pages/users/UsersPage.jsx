@@ -633,7 +633,7 @@ export default function UsersPage({ onNavigate }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
         {/* Metric 1: Total Registered Base */}
-        <div className="bg-white dark:bg-[#111111] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -650,7 +650,7 @@ export default function UsersPage({ onNavigate }) {
                 </div>
               </div>
 
-              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 shadow-xs">
+              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 shadow-xs">
                 Total
               </span>
             </div>
@@ -662,7 +662,7 @@ export default function UsersPage({ onNavigate }) {
             </div>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
             <span>{counts.vip} paid subscribers</span>
             <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               {counts.all > 0 ? ((counts.vip / counts.all) * 100).toFixed(1) : '0.0'}% Subscribed share
@@ -671,7 +671,7 @@ export default function UsersPage({ onNavigate }) {
         </div>
 
         {/* Metric 2: Paid Subscribers */}
-        <div className="bg-white dark:bg-[#111111] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -696,14 +696,14 @@ export default function UsersPage({ onNavigate }) {
             </div>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
             <span>{counts.free} free tier accounts</span>
-            <span className="text-amber-600 dark:text-amber-400 font-bold">{counts.suspended} suspended</span>
+            <span className="text-amber-500 dark:text-amber-400 font-bold">{counts.suspended} suspended</span>
           </div>
         </div>
 
         {/* Metric 3: Daily Active Users (DAU) */}
-        <div className="bg-white dark:bg-[#111111] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -732,7 +732,7 @@ export default function UsersPage({ onNavigate }) {
             </div>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
             <span>{counts.activeToday} active in last 24 hrs</span>
             <span className="text-slate-700 dark:text-slate-300 font-bold">
               {counts.all > 0 ? ((counts.activeToday / counts.all) * 100).toFixed(0) : '0'}% active rate
@@ -741,7 +741,7 @@ export default function UsersPage({ onNavigate }) {
         </div>
 
         {/* Metric 4: Average Watch Time */}
-        <div className="bg-white dark:bg-[#111111] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -767,13 +767,13 @@ export default function UsersPage({ onNavigate }) {
               <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
                 <AnimatedNumber value={counts.avgWatchTime} />
               </span>
-              <span className="text-sm font-bold text-slate-400 dark:text-slate-500">
+              <span className="text-sm font-bold text-slate-400 dark:text-slate-400">
                 hrs / user
               </span>
             </div>
           </div>
 
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
             <span>Peak: {counts.peakWatchTime} hrs</span>
             <span className="text-emerald-600 dark:text-emerald-400 font-bold">Live DB metric</span>
           </div>
@@ -782,11 +782,11 @@ export default function UsersPage({ onNavigate }) {
       </div>
 
       {/* Unified Controls Toolbar: Filter Pills (Left) & Search + Export (Right) */}
-      <div className="bg-white dark:bg-[#111111] rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-nodus">
+      <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 shadow-nodus">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           
           {/* Segmented Sliding Toggle Track (Compact & Sleek) */}
-          <div className="relative bg-slate-100/90 dark:bg-slate-900/90 p-1 rounded-xl border border-slate-200/70 dark:border-slate-800 shadow-2xs w-full sm:w-[420px]">
+          <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-1 rounded-xl border border-slate-200/70 dark:border-white/10 shadow-2xs w-full sm:w-[420px]">
             {/* Smooth Sliding Active Indicator Pill */}
             <span
               className="absolute top-1 bottom-1 left-1 rounded-lg bg-[#FEF08A] shadow-xs transition-transform duration-300 ease-out pointer-events-none border border-amber-300/70"
@@ -841,7 +841,7 @@ export default function UsersPage({ onNavigate }) {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by phone, name, email..."
-                className="w-full pl-8 pr-7 py-2 text-xs font-semibold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors shadow-2xs"
+                className="w-full pl-8 pr-7 py-2 text-xs font-semibold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors shadow-2xs"
               />
               {searchTerm && (
                 <button
@@ -860,7 +860,7 @@ export default function UsersPage({ onNavigate }) {
               type="button"
               onClick={() => loadUsers(false)}
               disabled={isLoading}
-              className="py-2 px-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-slate-700 shadow-xs cursor-pointer disabled:opacity-50"
+              className="py-2 px-3 bg-slate-100 dark:bg-white/[0.06] hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-white/10 shadow-xs cursor-pointer disabled:opacity-50"
               title="Refresh live user data"
             >
               <RefreshCw className={`w-3.5 h-3.5 text-slate-500 dark:text-slate-400 ${isLoading ? 'animate-spin' : ''}`} />
@@ -871,7 +871,7 @@ export default function UsersPage({ onNavigate }) {
             <button
               type="button"
               onClick={handleExportCSV}
-              className="py-2 px-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-slate-700 shadow-xs cursor-pointer"
+              className="py-2 px-3 bg-slate-100 dark:bg-white/[0.06] hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-white/10 shadow-xs cursor-pointer"
               title="Download CSV report"
             >
               <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
@@ -882,7 +882,7 @@ export default function UsersPage({ onNavigate }) {
             <button
               type="button"
               onClick={handleExportPDF}
-              className="py-2 px-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-slate-700 shadow-xs cursor-pointer"
+              className="py-2 px-3 bg-slate-100 dark:bg-white/[0.06] hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-white/10 shadow-xs cursor-pointer"
               title="Download PDF report"
             >
               <FileText className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
@@ -895,10 +895,10 @@ export default function UsersPage({ onNavigate }) {
       </div>
 
       {/* Users Registry Table */}
-      <div className="bg-white dark:bg-[#111111] rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-nodus overflow-hidden">
+      <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50/80 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+            <thead className="bg-slate-50/80 dark:bg-[#161B16] border-b border-slate-100 dark:border-white/10 text-slate-400 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="py-3.5 px-4 sm:px-6">User Account</th>
                 <th className="py-3.5 px-4">Phone & Email</th>
@@ -909,7 +909,7 @@ export default function UsersPage({ onNavigate }) {
                 <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100/80 dark:divide-slate-800 font-medium">
+            <tbody className="divide-y divide-slate-100/80 dark:divide-white/5 font-medium">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, idx) => (
                   <tr key={`user-skel-${idx}`} className="animate-pulse">
@@ -1005,7 +1005,7 @@ export default function UsersPage({ onNavigate }) {
                   return (
                     <tr
                       key={user.id}
-                      className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors group"
+                      className="hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors group"
                     >
                       {/* User Account */}
                       <td className="py-3.5 px-4 sm:px-6">
@@ -1190,10 +1190,10 @@ export default function UsersPage({ onNavigate }) {
           />
 
           {/* Right-Side Slide-Over Panel */}
-          <div className="relative w-full max-w-md h-full bg-white dark:bg-[#111111] shadow-2xl border-l border-slate-200/80 dark:border-slate-800 flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out font-urbanist overflow-hidden">
+          <div className="relative w-full max-w-md h-full bg-white dark:bg-[#1E241E] shadow-2xl border-l border-slate-200/80 dark:border-white/12 flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out font-urbanist overflow-hidden">
             
             {/* Top Bar Header */}
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between bg-white/90 dark:bg-[#111111]/90 backdrop-blur-md shrink-0">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-white/90 dark:bg-[#161B16]/95 backdrop-blur-md shrink-0">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
                   <Pencil className="w-4 h-4 stroke-[2.2]" />
@@ -1222,9 +1222,9 @@ export default function UsersPage({ onNavigate }) {
             <form onSubmit={handleSaveUser} className="flex-1 overflow-y-auto p-5 sm:p-6 flex flex-col justify-between space-y-4">
               <div className="space-y-3.5">
                 {/* User Identity Preview Banner */}
-                <div className="p-3 bg-slate-50/90 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
+                <div className="p-3 bg-slate-50/90 dark:bg-[#161B16] rounded-xl border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3">
                   <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-xs border border-slate-200/80 dark:border-slate-700 shrink-0 flex items-center justify-center relative">
+                    <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 dark:bg-[#121612] shadow-xs border border-slate-200/80 dark:border-white/10 shrink-0 flex items-center justify-center relative">
                       {(editForm.avatarUrl || overrideUser.avatarUrl) ? (
                         <img
                           src={editForm.avatarUrl || overrideUser.avatarUrl}
@@ -1282,7 +1282,7 @@ export default function UsersPage({ onNavigate }) {
                       value={editForm.avatarUrl}
                       onChange={(e) => setEditForm(prev => ({ ...prev, avatarUrl: e.target.value }))}
                       placeholder="https://... real photo URL"
-                      className="w-full pl-8 pr-3 py-2 text-xs font-medium bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors placeholder:text-slate-400"
+                      className="w-full pl-8 pr-3 py-2 text-xs font-medium bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors placeholder:text-slate-400"
                     />
                   </div>
                 </div>
@@ -1298,7 +1298,7 @@ export default function UsersPage({ onNavigate }) {
                       value={editForm.firstName}
                       onChange={(e) => setEditForm(prev => ({ ...prev, firstName: e.target.value }))}
                       placeholder="First name"
-                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
+                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
                     />
                   </div>
 
@@ -1311,7 +1311,7 @@ export default function UsersPage({ onNavigate }) {
                       value={editForm.lastName}
                       onChange={(e) => setEditForm(prev => ({ ...prev, lastName: e.target.value }))}
                       placeholder="Last name"
-                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
+                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
                     />
                   </div>
                 </div>
@@ -1327,7 +1327,7 @@ export default function UsersPage({ onNavigate }) {
                       value={editForm.phone}
                       onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
                       placeholder="+91..."
-                      className="w-full px-3 py-2 text-xs font-mono font-semibold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
+                      className="w-full px-3 py-2 text-xs font-mono font-semibold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
                     />
                   </div>
 
@@ -1340,7 +1340,7 @@ export default function UsersPage({ onNavigate }) {
                       value={editForm.email}
                       onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
                       placeholder="yourname@gmail.com"
-                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
+                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
                     />
                   </div>
                 </div>
@@ -1372,7 +1372,7 @@ export default function UsersPage({ onNavigate }) {
                         value={promoCode}
                         onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                         placeholder="e.g. WELCOME50, SUBFREE7"
-                        className="w-full pl-8 pr-3 py-2 text-xs font-mono font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors placeholder:font-normal placeholder:text-slate-400 uppercase"
+                        className="w-full pl-8 pr-3 py-2 text-xs font-mono font-bold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors placeholder:font-normal placeholder:text-slate-400 uppercase"
                       />
                     </div>
                     {promoCode.trim() ? (
@@ -1381,7 +1381,7 @@ export default function UsersPage({ onNavigate }) {
                         Active
                       </span>
                     ) : (
-                      <span className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium text-[10px] rounded-xl flex items-center shrink-0">
+                      <span className="px-3 py-2 bg-slate-100 dark:bg-[#161B16] text-slate-500 dark:text-slate-400 font-medium text-[10px] rounded-xl flex items-center shrink-0 border border-slate-200/60 dark:border-white/10">
                         Direct
                       </span>
                     )}
@@ -1402,18 +1402,18 @@ export default function UsersPage({ onNavigate }) {
                     </span>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 overflow-hidden shadow-2xs transition-all">
+                  <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161B16] overflow-hidden shadow-2xs transition-all">
                     {/* Selected Plan Header (Click to toggle) */}
                     <button
                       type="button"
                       onClick={() => setIsPlanDropdownOpen((prev) => !prev)}
-                      className="w-full px-3.5 py-2.5 flex items-center justify-between cursor-pointer hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors text-left"
+                      className="w-full px-3.5 py-2.5 flex items-center justify-between cursor-pointer hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors text-left"
                     >
                       <span className="text-xs font-bold text-slate-900 dark:text-white">
                         {currentPlanItem.name}
                       </span>
                       <div className="flex items-center space-x-2">
-                        <span className="text-xs font-black text-slate-900 dark:text-white font-urbanist">
+                        <span className="text-xs font-black text-slate-950 dark:text-white font-urbanist">
                           {currentPlanItem.price}
                         </span>
                         <ChevronDown
@@ -1426,7 +1426,7 @@ export default function UsersPage({ onNavigate }) {
 
                     {/* Expanded Options */}
                     {isPlanDropdownOpen && (
-                      <div className="border-t border-slate-100 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800/60 bg-slate-50/60 dark:bg-slate-950/40 max-h-40 overflow-y-auto">
+                      <div className="border-t border-slate-100 dark:border-white/10 divide-y divide-slate-100 dark:divide-white/5 bg-slate-50/60 dark:bg-[#121612] max-h-40 overflow-y-auto">
                         {SUBSCRIPTION_PLANS.map((plan) => {
                           const isSelected = currentPlanItem.id === plan.id;
                           return (
@@ -1436,8 +1436,8 @@ export default function UsersPage({ onNavigate }) {
                               onClick={() => handleSelectPlan(plan)}
                               className={`w-full px-3.5 py-2.5 flex items-center justify-between cursor-pointer text-left transition-colors ${
                                 isSelected
-                                  ? 'bg-[#FEF08A]/35 dark:bg-[#FEF08A]/10 text-slate-950 dark:text-amber-300 font-bold'
-                                  : 'hover:bg-slate-100/70 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300'
+                                  ? 'bg-[#FEF08A]/35 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] font-bold'
+                                  : 'hover:bg-slate-100/70 dark:hover:bg-white/[0.04] text-slate-700 dark:text-slate-300'
                               }`}
                             >
                               <span className={`text-xs ${isSelected ? 'font-black text-slate-950 dark:text-white' : 'font-medium'}`}>
@@ -1448,7 +1448,7 @@ export default function UsersPage({ onNavigate }) {
                                   {plan.price}
                                 </span>
                                 {isSelected && (
-                                  <span className="w-1.5 h-1.5 rounded-full bg-slate-950 dark:bg-amber-400" />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-slate-950 dark:bg-[#FEF08A]" />
                                 )}
                               </div>
                             </button>
@@ -1460,7 +1460,7 @@ export default function UsersPage({ onNavigate }) {
                 </div>
 
                 {/* Account Status Switch */}
-                <div className="p-3 bg-slate-50 dark:bg-slate-900/80 rounded-xl border border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
+                <div className="p-3 bg-slate-50 dark:bg-[#161B16] rounded-xl border border-slate-200/80 dark:border-white/10 flex items-center justify-between">
                   <div>
                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
                       Account Status
@@ -1524,10 +1524,10 @@ export default function UsersPage({ onNavigate }) {
           />
 
           {/* Right-Side Slide-Over Panel */}
-          <div className="relative w-full max-w-md h-full bg-white dark:bg-[#111111] shadow-2xl border-l border-slate-200/80 dark:border-slate-800 flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out font-urbanist overflow-hidden">
+          <div className="relative w-full max-w-md h-full bg-white dark:bg-[#1E241E] shadow-2xl border-l border-slate-200/80 dark:border-white/12 flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out font-urbanist overflow-hidden">
             
             {/* Top Bar Header */}
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between bg-white/90 dark:bg-[#111111]/90 backdrop-blur-md shrink-0">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-white/90 dark:bg-[#161B16]/95 backdrop-blur-md shrink-0">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
                   <Eye className="w-4 h-4 stroke-[2.2]" />
@@ -1608,7 +1608,7 @@ export default function UsersPage({ onNavigate }) {
               </div>
 
               {/* Polished Activity Status Card */}
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 group">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3 group">
                 <div className="flex items-center space-x-3 min-w-0">
                   <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs shrink-0">
                     <Clock className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
@@ -1638,9 +1638,9 @@ export default function UsersPage({ onNavigate }) {
                 </span>
 
                 {/* Phone */}
-                <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/90 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/90 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3">
                   <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#121612] flex items-center justify-center text-slate-500 shrink-0 border border-slate-200/60 dark:border-white/10">
                       <Smartphone className="w-4 h-4 text-slate-700 dark:text-slate-300" />
                     </div>
                     <div className="min-w-0">
@@ -1655,7 +1655,7 @@ export default function UsersPage({ onNavigate }) {
                   <button
                     type="button"
                     onClick={() => handleCopyText(viewUser.phone, 'Phone number')}
-                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer shrink-0"
+                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-[#121612] rounded-lg transition-colors cursor-pointer shrink-0"
                     title="Copy Phone"
                   >
                     <Copy className="w-3.5 h-3.5" />
@@ -1663,9 +1663,9 @@ export default function UsersPage({ onNavigate }) {
                 </div>
 
                 {/* Email */}
-                <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/90 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/90 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3">
                   <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#121612] flex items-center justify-center text-slate-500 shrink-0 border border-slate-200/60 dark:border-white/10">
                       <Mail className="w-4 h-4 text-slate-700 dark:text-slate-300" />
                     </div>
                     <div className="min-w-0">
@@ -1680,7 +1680,7 @@ export default function UsersPage({ onNavigate }) {
                   <button
                     type="button"
                     onClick={() => handleCopyText(viewUser.email, 'Email address')}
-                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer shrink-0"
+                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-[#121612] rounded-lg transition-colors cursor-pointer shrink-0"
                     title="Copy Email"
                   >
                     <Copy className="w-3.5 h-3.5" />
@@ -1694,7 +1694,7 @@ export default function UsersPage({ onNavigate }) {
                   Membership & Entitlement
                 </span>
 
-                <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/90 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/80 space-y-2.5">
+                <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/90 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Crown className="w-4 h-4 text-amber-500" />
@@ -1750,7 +1750,7 @@ export default function UsersPage({ onNavigate }) {
             </div>
 
             {/* Sticky Bottom Action Footer */}
-            <div className="p-3.5 sm:p-4 border-t border-slate-100 dark:border-slate-800/80 bg-white/95 dark:bg-[#111111]/95 backdrop-blur-sm shrink-0 flex items-center justify-between gap-3">
+            <div className="p-3.5 sm:p-4 border-t border-slate-100 dark:border-white/10 bg-white/95 dark:bg-[#161B16]/95 backdrop-blur-sm shrink-0 flex items-center justify-between gap-3">
               {/* Suspend / Unblock Button */}
               <button
                 type="button"
@@ -1800,7 +1800,7 @@ export default function UsersPage({ onNavigate }) {
           />
 
           {/* Custom Confirmation Card */}
-          <div className="relative w-full max-w-md bg-white dark:bg-[#111111] rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] border border-slate-200/90 dark:border-slate-800 z-10 animate-in fade-in zoom-in-95 duration-200 font-urbanist overflow-hidden">
+          <div className="relative w-full max-w-md bg-white dark:bg-[#202620] rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] border border-slate-200/90 dark:border-white/15 z-10 animate-in fade-in zoom-in-95 duration-200 font-urbanist overflow-hidden">
             
             <div className="p-6 sm:p-7 space-y-5">
               
@@ -1823,7 +1823,7 @@ export default function UsersPage({ onNavigate }) {
                 <button
                   type="button"
                   onClick={() => setUserToDelete(null)}
-                  className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                  className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-transparent dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer shrink-0"
                   title="Close"
                 >
                   <X className="w-4 h-4" />
@@ -1831,7 +1831,7 @@ export default function UsersPage({ onNavigate }) {
               </div>
 
               {/* Targeted User Info Preview Card */}
-              <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80 space-y-3">
+              <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-[#1A201A] border border-slate-200/80 dark:border-white/10 space-y-3">
                 {/* Identity Row */}
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center space-x-3 min-w-0">
@@ -1896,7 +1896,7 @@ export default function UsersPage({ onNavigate }) {
                 <button
                   type="button"
                   onClick={() => setUserToDelete(null)}
-                  className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 transition-all shadow-2xs active:scale-95 cursor-pointer text-center"
+                  className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161B16] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-xs font-bold text-slate-700 dark:text-slate-300 transition-all shadow-2xs active:scale-95 cursor-pointer text-center"
                 >
                   Cancel
                 </button>

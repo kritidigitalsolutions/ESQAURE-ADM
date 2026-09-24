@@ -164,3 +164,34 @@ All errors propagate to a single centralized Express middleware (`errorHandler.j
 3. **Database Indexing**:
    - Every queried foreign key must be indexed: `dramaId`, `userId`, `isVip`, `isTrending`.
    - Compound indices on `(userId, dramaId)` for instant watchlist and history lookup.
+
+---
+
+## 6. Frontend & Admin UI Theme Standards
+
+### 6.1 Material Design 2 Dark Theme Implementation
+- **Base Surfaces**: Use deep charcoal/slate (`#080B08` to `#121612`). Never use pure `#000000` for surface fills.
+- **Elevation Hierarchy**: Communicated via surface lightness overlays:
+  - 00dp: `#080B08` (Base layout canvas)
+  - 01dp: `bg-[#121612]` (Cards, table rows, input containers, 5% overlay)
+  - 02dp: `bg-[#161B16]` (Elevated cards, widgets, 7% overlay)
+  - 04dp: `bg-[#1A1F1A]` (App bar, sticky header, 9% overlay)
+  - 08dp: `bg-[#202620]` (Dropdown menus, popovers, 12% overlay)
+  - 16dp: `bg-[#242A24]` (Slide-over drawers, 15% overlay)
+  - 24dp: `bg-[#282E28]` (Modals, dialogs, 16% overlay)
+- **Drop Shadows**: Retain natural z-axis shadows (`shadow-md`, `shadow-xl`) to define clear boundaries. Never replace shadows with colored glowing outlines.
+- **Text & Contrast (WCAG AA)**:
+  - High-emphasis text & icons: 87%–90% White (`text-white/90` or `text-slate-100`, ≥15.8:1 contrast).
+  - Medium-emphasis text: 60% White (`text-white/60` or `text-slate-400`, ≥4.5:1 contrast).
+  - Disabled text / placeholders: 38% White (`text-white/38` or `text-slate-500`).
+  - Dividers & borders: 10%–12% White (`border-white/10`).
+
+### 6.2 Accent Color Restraint & Uniform Icon Styling
+- **Primary Theme Accent**: `#FEF08A` (Light Pastel Yellow).
+- **Uniform Metric Icon Badges**: Never use rainbow/multi-colored backgrounds across stat cards. Always use `#FEF08A` badges:
+  ```jsx
+  <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
+    <Icon className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+  </div>
+  ```
+- **Primary Actions**: Use `bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold` for primary CTA buttons and active indicators.

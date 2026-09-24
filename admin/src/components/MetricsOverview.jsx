@@ -120,7 +120,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         {/* Card 1: User Base */}
-        <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 sm:p-7 min-h-[170px] border border-slate-200/90 dark:border-slate-800 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 min-h-[170px] border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center space-x-3">
@@ -131,14 +131,14 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block font-urbanist">
                     {userMetrics[userTab].label}
                   </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-500 font-medium block">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
                     {userMetrics[userTab].sublabel}
                   </span>
                 </div>
               </div>
 
               {/* Switcher Buttons */}
-              <div className="relative bg-slate-100/90 dark:bg-slate-900 p-1 rounded-xl w-full sm:w-[290px] border border-slate-200/70 dark:border-slate-700 shadow-xs">
+              <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-1 rounded-xl w-full sm:w-[290px] border border-slate-200/70 dark:border-white/10 shadow-xs">
                 {/* Sliding Active Indicator Pill */}
                 <span
                   className="absolute top-1 bottom-1 left-1 rounded-lg bg-[#FEF08A] shadow-xs transition-transform duration-300 ease-out pointer-events-none border border-amber-300/60"
@@ -208,7 +208,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
         </div>
 
         {/* Card 2: Paid Subscriptions */}
-        <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 sm:p-7 min-h-[170px] border border-slate-200/90 dark:border-slate-800 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 min-h-[170px] border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center space-x-3">
@@ -219,14 +219,14 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block font-urbanist">
                     {subscriptionMetrics[subTab].label}
                   </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-500 font-medium block">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
                     {subscriptionMetrics[subTab].sublabel}
                   </span>
                 </div>
               </div>
 
               {/* Switcher Buttons */}
-              <div className="relative bg-slate-100/90 dark:bg-slate-900 p-1 rounded-xl w-full sm:w-[290px] border border-slate-200/70 dark:border-slate-700 shadow-xs">
+              <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-1 rounded-xl w-full sm:w-[290px] border border-slate-200/70 dark:border-white/10 shadow-xs">
                 {/* Sliding Active Indicator Pill */}
                 <span
                   className="absolute top-1 bottom-1 left-1 rounded-lg bg-[#FEF08A] shadow-xs transition-transform duration-300 ease-out pointer-events-none border border-amber-300/60"
@@ -298,7 +298,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
       </div>
 
       {/* Hero Income / Revenue Banner */}
-      <div className="bg-white dark:bg-[#111111] rounded-2xl p-5 sm:p-6 border border-slate-200/90 dark:border-slate-800 shadow-nodus relative overflow-hidden group transition-all">
+      <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           
           {/* Left: Two Split Metrics + Top Driver */}
@@ -313,14 +313,14 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   <span className="text-2xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
                     <AnimatedNumber value={current.stat1Value} />
                   </span>
-                  <span className="inline-flex items-center text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
+                  <span className="inline-flex items-center text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                     <AnimatedNumber value={current.stat1Badge} />
                   </span>
                 </div>
               </div>
 
               {/* Vertical divider */}
-              <div className="h-9 w-px bg-slate-200 dark:bg-slate-700" />
+              <div className="h-9 w-px bg-slate-200 dark:bg-white/10" />
 
               {/* Stat 2 */}
               <div>
@@ -331,7 +331,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   <span className="text-2xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
                     <AnimatedNumber value={current.stat2Value} />
                   </span>
-                  <span className="inline-flex items-center text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
+                  <span className="inline-flex items-center text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                     <AnimatedNumber value={current.stat2Badge} />
                   </span>
                 </div>
@@ -341,9 +341,9 @@ export default function MetricsOverview({ onOpenIngestModal }) {
             {/* Bottom subtitle */}
             <div className="mt-3 flex items-center space-x-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-              <p className="text-xs font-medium text-slate-400 dark:text-slate-500">
+              <p className="text-xs font-medium text-slate-400 dark:text-slate-400">
                 Top Revenue Driver:{' '}
-                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                <span className="font-semibold text-slate-700 dark:text-slate-200">
                   Monthly All-Access Pass (₹199)
                 </span>
               </p>
@@ -351,7 +351,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
           </div>
 
           {/* Center: Hero Stat Box */}
-          <div className="flex flex-col items-start lg:items-center justify-center lg:border-x lg:border-slate-100 dark:lg:border-slate-800 lg:px-8 py-2">
+          <div className="flex flex-col items-start lg:items-center justify-center lg:border-x lg:border-slate-100 dark:lg:border-white/10 lg:px-8 py-2">
             <span className="text-4xl sm:text-5xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
               <AnimatedNumber value={current.centerValue} />
             </span>
@@ -361,10 +361,10 @@ export default function MetricsOverview({ onOpenIngestModal }) {
           </div>
 
           {/* Right: Switcher Tabs */}
-          <div className="relative bg-slate-100/90 dark:bg-slate-900 p-1.5 rounded-full flex items-center border border-slate-200/70 dark:border-slate-700 shadow-xs self-start lg:self-center shrink-0 w-full sm:w-[320px]">
+          <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-1.5 rounded-full flex items-center border border-slate-200/70 dark:border-white/10 shadow-xs self-start lg:self-center shrink-0 w-full sm:w-[320px]">
             {/* Sliding Pill */}
             <span
-              className="absolute top-1.5 bottom-1.5 left-1.5 rounded-full bg-slate-950 dark:bg-white shadow-md transition-transform duration-300 ease-out pointer-events-none"
+              className="absolute top-1.5 bottom-1.5 left-1.5 rounded-full bg-[#FEF08A] shadow-md transition-transform duration-300 ease-out pointer-events-none border border-amber-300/60"
               style={{
                 width: 'calc((100% - 12px) / 3)',
                 transform: `translateX(${
@@ -377,8 +377,8 @@ export default function MetricsOverview({ onOpenIngestModal }) {
               <button
                 type="button"
                 onClick={() => setActiveTab('revenue')}
-                className={`py-2 text-xs font-extrabold rounded-full flex items-center justify-center space-x-1.5 transition-colors duration-200 cursor-pointer ${
-                  activeTab === 'revenue' ? 'text-white dark:text-slate-950' : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                className={`py-2 text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors duration-200 cursor-pointer ${
+                  activeTab === 'revenue' ? 'text-slate-950 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
                 }`}
               >
                 <IndianRupee className="w-3.5 h-3.5" />
@@ -388,8 +388,8 @@ export default function MetricsOverview({ onOpenIngestModal }) {
               <button
                 type="button"
                 onClick={() => setActiveTab('subscribers')}
-                className={`py-2 text-xs font-extrabold rounded-full flex items-center justify-center space-x-1.5 transition-colors duration-200 cursor-pointer ${
-                  activeTab === 'subscribers' ? 'text-white dark:text-slate-950' : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                className={`py-2 text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors duration-200 cursor-pointer ${
+                  activeTab === 'subscribers' ? 'text-slate-950 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
                 }`}
               >
                 <Crown className="w-3.5 h-3.5" />
@@ -399,8 +399,8 @@ export default function MetricsOverview({ onOpenIngestModal }) {
               <button
                 type="button"
                 onClick={() => setActiveTab('plans')}
-                className={`py-2 text-xs font-extrabold rounded-full flex items-center justify-center space-x-1.5 transition-colors duration-200 cursor-pointer ${
-                  activeTab === 'plans' ? 'text-white dark:text-slate-950' : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                className={`py-2 text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors duration-200 cursor-pointer ${
+                  activeTab === 'plans' ? 'text-slate-950 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
                 }`}
               >
                 <LayoutGrid className="w-3.5 h-3.5" />

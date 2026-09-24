@@ -7,136 +7,84 @@ import { otpRateLimiter, authRateLimiter } from '../middlewares/rateLimiter.js';
 
 const router = Router();
 
-/**
- * @route   POST /api/v1/auth/request-otp
- * @desc    Screen 1: Request 4-digit OTP for phone number
- * @access  Public
- */
-router.post(
-  '/request-otp',
-  otpRateLimiter,
-  validate(authValidation.requestOtp),
-  AuthController.requestOtp
-);
+// ─────────────────────────────────────────────────────────────────────────────
+//  PUBLIC ROUTES  (no token required)
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * @route   POST /api/v1/auth/resend-otp
- * @desc    Screen 2: Resend 4-digit OTP
- * @access  Public
+ * POST /api/v1/auth/request-otp
+ * Screen 1: Send 4-digit OTP to mobile number
  */
-router.post(
-  '/resend-otp',
-  otpRateLimiter,
-  validate(authValidation.resendOtp),
-  AuthController.resendOtp
-);
+router.post('/request-otp', otpRateLimiter, validate(authValidation.requestOtp), AuthController.requestOtp);
 
 /**
- * @route   POST /api/v1/auth/verify-otp
- * @desc    Screen 2: Verify 4-digit OTP (Login for existing user or Step 1 for new user)
- * @access  Public
+ * POST /api/v1/auth/resend-otp
+ * Screen 1: Resend OTP (after 60s cooldown)
  */
-router.post(
-  '/verify-otp',
-  authRateLimiter,
-  validate(authValidation.verifyOtp),
-  AuthController.verifyOtp
-);
+router.post('/resend-otp', otpRateLimiter, validate(authValidation.resendOtp), AuthController.resendOtp);
 
 /**
- * @route   POST /api/v1/auth/profile
- * @desc    Screen 3: Welcome to Entertainment Squared (first name, last name, email)
- * @access  Private (Bearer JWT)
+ * POST /api/v1/auth/verify-otp
+ * Screen 2: Verify OTP → returns token + refreshToken
  */
-router.post(
-  '/profile',
-  authenticate,
-  validate(authValidation.completeProfile),
-  AuthController.completeProfile
-);
+router.post('/verify-otp', authRateLimiter, validate(authValidation.verifyOtp), AuthController.verifyOtp);
 
 /**
- * @route   GET /api/v1/auth/genres
- * @desc    Choose your Interest: Fetch active genres list
- * @access  Public
+ * POST /api/v1/auth/refresh-token
+ * Refresh expired access token using a refresh token
  */
-router.get(
-  '/genres',
-  AuthController.getGenres
-);
+router.post('/refresh-token', validate(authValidation.refreshToken), AuthController.refreshToken);
 
 /**
- * @route   POST /api/v1/auth/interests
- * @desc    Choose your Interest: Save user genre preferences
- * @access  Private (Bearer JWT)
+ * GET /api/v1/auth/genres
+ * Fetch active genres for the "Choose Your Interest" onboarding screen
  */
-router.post(
-  '/interests',
-  authenticate,
-  validate(authValidation.saveInterests),
-  AuthController.saveInterests
-);
+router.get('/genres', AuthController.getGenres);
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  PRIVATE ROUTES  (Bearer JWT required)
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * @route   GET /api/v1/auth/me
- * @desc    Get currently logged in user profile & VIP status
- * @access  Private (Bearer JWT)
+ * GET /api/v1/auth/me
+ * Fetch the currently authenticated user's full profile
  */
-router.get(
-  '/me',
-  authenticate,
-  AuthController.getMe
-);
+router.get('/me', authenticate, AuthController.getMe);
 
 /**
- * @route   POST /api/v1/auth/refresh-token
- * @desc    Refresh access token using refresh token or existing bearer token
- * @access  Public / Bearer JWT
+ * POST /api/v1/auth/profile
+ * Screen 3: First-time profile setup (firstName, lastName, email)
  */
-router.post(
-  '/refresh-token',
-  validate(authValidation.refreshToken),
-  AuthController.refreshToken
-);
-
-// Alias: /refresh
-router.post(
-  '/refresh',
-  validate(authValidation.refreshToken),
-  AuthController.refreshToken
-);
+router.post('/profile', authenticate, validate(authValidation.completeProfile), AuthController.completeProfile);
 
 /**
- * @route   POST /api/v1/auth/logout
- * @desc    Logout active session
- * @access  Private (Bearer JWT)
+ * PUT /api/v1/auth/profile
+ * Edit Profile screen: update name, email, avatar, interests
  */
-router.post(
-  '/logout',
-  authenticate,
-  AuthController.logout
-);
+router.put('/profile', authenticate, validate(authValidation.editProfile), AuthController.editProfile);
 
 /**
- * @route   DELETE /api/v1/auth/profile
- * @desc    Delete user account / profile
- * @access  Private (Bearer JWT)
+ * PATCH /api/v1/auth/profile
+ * Same as PUT — partial update supported
  */
-router.delete(
-  '/profile',
-  authenticate,
-  AuthController.deleteAccount
-);
+router.patch('/profile', authenticate, validate(authValidation.editProfile), AuthController.editProfile);
 
 /**
- * @route   POST /api/v1/auth/delete-account
- * @desc    Alternative action endpoint to delete account
- * @access  Private (Bearer JWT)
+ * POST /api/v1/auth/interests
+ * Screen 4: Save selected genre preferences
  */
-router.post(
-  '/delete-account',
-  authenticate,
-  AuthController.deleteAccount
-);
+router.post('/interests', authenticate, validate(authValidation.saveInterests), AuthController.saveInterests);
+
+/**
+ * POST /api/v1/auth/logout
+ * Invalidate current session
+ */
+router.post('/logout', authenticate, AuthController.logout);
+
+/**
+ * DELETE /api/v1/auth/profile
+ * Delete user account (soft delete by default, hard delete via ?hardDelete=true)
+ */
+router.delete('/profile', authenticate, AuthController.deleteAccount);
 
 export default router;

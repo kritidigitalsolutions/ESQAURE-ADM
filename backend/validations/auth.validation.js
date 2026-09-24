@@ -95,5 +95,40 @@ export const authValidation = {
   refreshToken: Joi.object({
     refreshToken: Joi.string().trim().optional(),
     token: Joi.string().trim().optional()
+  }),
+
+  // Edit Profile
+  editProfile: Joi.object({
+    firstName: Joi.string()
+      .trim()
+      .min(1)
+      .max(50)
+      .optional()
+      .messages({
+        'string.empty': 'First name cannot be empty.'
+      }),
+    lastName: Joi.string()
+      .trim()
+      .allow('', null)
+      .max(50)
+      .optional(),
+    email: Joi.string()
+      .trim()
+      .email()
+      .allow('', null)
+      .optional()
+      .messages({
+        'string.email': 'Please enter a valid email address.'
+      }),
+    avatarUrl: Joi.string()
+      .trim()
+      .allow('', null)
+      .optional(),
+    phoneNumber: Joi.string()
+      .trim()
+      .optional(),
+    interests: Joi.array()
+      .items(Joi.string().trim())
+      .optional()
   })
 };

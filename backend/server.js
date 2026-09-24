@@ -3,12 +3,14 @@ import { env } from './config/env.js';
 import { connectDB, closeDB } from './config/db.js';
 import { seedDefaultGenres } from './config/seedGenres.js';
 import { removeDummyUsers } from './config/seedUsers.js';
+import { initializeFirebase } from './config/firebase.js';
 
 const startServer = async () => {
   // Connect to database
   await connectDB();
   await seedDefaultGenres();
   await removeDummyUsers();
+  initializeFirebase();
 
   // Listen for incoming traffic
   const server = app.listen(env.PORT, () => {

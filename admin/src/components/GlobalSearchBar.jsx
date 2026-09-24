@@ -266,7 +266,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleInputKeyDown}
           placeholder="Search dramas, users, logs..."
-          className="w-full pl-9 pr-8 py-2 text-xs font-medium bg-slate-100/90 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-full border border-slate-200/90 dark:border-slate-700/80 focus:border-[#FEF08A] dark:focus:border-[#FEF08A] focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/20 transition-all shadow-2xs"
+          className="w-full pl-9 pr-8 py-2 text-xs font-medium bg-slate-100/90 dark:bg-[#161B16] focus:bg-white dark:focus:bg-[#1A201A] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-full border border-slate-200/90 dark:border-white/10 focus:border-[#FEF08A] dark:focus:border-[#FEF08A] focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/20 transition-all shadow-2xs"
         />
 
         {/* Clear Button */}
@@ -277,7 +277,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
               inputRef.current?.focus();
             }}
             title="Clear search"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-full hover:bg-slate-200 dark:hover:bg-white/[0.08] transition-colors"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -286,11 +286,11 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
 
       {/* Interactive Dropdown Results Panel */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2.5 w-[calc(100vw-2rem)] max-w-[560px] sm:w-[480px] md:w-[560px] bg-white dark:bg-[#121212] border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden font-urbanist animate-fadeIn">
+        <div className="absolute right-0 top-full mt-2.5 w-[calc(100vw-2rem)] max-w-[560px] sm:w-[480px] md:w-[560px] bg-white dark:bg-[#1C221C] border border-slate-200/90 dark:border-white/12 rounded-2xl shadow-2xl z-50 overflow-hidden font-urbanist animate-fadeIn">
           
           {/* Query Filter Chips Header (When query exists) */}
           {query.trim() && (
-            <div className="p-2.5 bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-100 dark:border-slate-800 flex items-center gap-1.5 overflow-x-auto text-[11px]">
+            <div className="p-2.5 bg-slate-50/80 dark:bg-[#161B16] border-b border-slate-100 dark:border-white/10 flex items-center gap-1.5 overflow-x-auto text-[11px]">
               {[
                 { id: 'ALL', label: 'All', count: searchResults.totalCount },
                 { id: 'dramas', label: 'Series', count: searchResults.dramas.length },
@@ -663,7 +663,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
 
           {/* Search match counter if querying */}
           {query.trim() && (
-            <div className="px-3 py-1.5 bg-slate-50 dark:bg-slate-900/90 border-t border-slate-100 dark:border-slate-800 text-[10px] font-semibold text-slate-400 dark:text-slate-500 text-right">
+            <div className="px-3 py-1.5 bg-slate-50 dark:bg-[#161B16] border-t border-slate-100 dark:border-white/10 text-[10px] font-semibold text-slate-400 dark:text-slate-400 text-right">
               {searchResults.totalCount} {searchResults.totalCount === 1 ? 'match' : 'matches'}
             </div>
           )}

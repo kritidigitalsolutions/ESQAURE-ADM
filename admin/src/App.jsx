@@ -154,12 +154,12 @@ export default function App() {
       case 'notifications':
         return {
           title: "Push Notifications",
-          subtitle: "Send instant push notifications about new episodes and special offers."
+          subtitle: "Broadcast instant FCM push alerts to registered mobile devices and lockscreens."
         };
       case 'app_notifications':
         return {
-          title: "Notifications",
-          subtitle: "Broadcast in-app notices, maintenance announcements, and user receipts."
+          title: "In-App Notices",
+          subtitle: "Broadcast system notices, maintenance announcements, and promotional offers to user inboxes."
         };
       case 'legal':
         return {
@@ -191,7 +191,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F3F4F7] dark:bg-[#0A0A0A] flex font-urbanist selection:bg-[#FEF08A] selection:text-black">
+    <div className="min-h-screen bg-[#F3F4F7] dark:bg-[#080B08] flex font-urbanist selection:bg-[#FEF08A] selection:text-black">
       
       {/* Fixed Left Sidebar Navigation */}
       <Sidebar
@@ -302,7 +302,7 @@ export default function App() {
         </main>
 
         {/* Footer */}
-        <footer className="bg-white dark:bg-[#0D0D0D] border-t border-slate-200 dark:border-slate-800 py-3.5 text-center text-xs text-slate-400 dark:text-slate-600 font-medium shrink-0">
+        <footer className="bg-white dark:bg-[#121612] border-t border-slate-200 dark:border-white/10 py-3.5 text-center text-xs text-slate-400 dark:text-slate-500 font-medium shrink-0">
           <p>© 2026 E² Stories (Entertainment Squared) — Vertical Micro-Drama OTT Platform Dashboard</p>
         </footer>
 

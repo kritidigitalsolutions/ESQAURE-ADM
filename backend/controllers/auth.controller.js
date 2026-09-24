@@ -324,6 +324,99 @@ export class AuthController {
   }
 
   /**
+   * Edit User Profile (Screen: Edit Profile)
+   * PUT /api/v1/auth/profile
+   * PATCH /api/v1/auth/profile
+   * PUT /api/v1/auth/edit-profile
+   * @access Private (Bearer JWT)
+   */
+  static async editProfile(req, res, next) {
+    try {
+      const user = req.user;
+      const { firstName, lastName, email, avatarUrl, interests, phoneNumber } = req.body;
+
+      // Guard: Phone number is verified via OTP and cannot be altered via edit profile
+      if (phoneNumber && phoneNumber.trim() && phoneNumber.trim() !== user.phoneNumber) {
+        throw new AppError(
+          'Phone number cannot be changed here as it is permanently bound to your mobile OTP account.',
+          400,
+          ERROR_CODES.VALIDATION_ERROR
+        );
+      }
+
+      // Check unique email if modifying email address
+      if (email !== undefined) {
+        const trimmedEmail = (email || '').trim().toLowerCase();
+        if (trimmedEmail) {
+          const emailExists = await User.findOne({
+            email: trimmedEmail,
+            _id: { $ne: user._id }
+          });
+          if (emailExists) {
+            throw new AppError(
+              'This email address is already associated with another account.',
+              400,
+              ERROR_CODES.EMAIL_ALREADY_EXISTS
+            );
+          }
+          user.email = trimmedEmail;
+        } else {
+          user.email = null;
+        }
+      }
+
+      // Update name fields if supplied
+      if (firstName !== undefined) {
+        user.firstName = firstName.trim();
+      }
+      if (lastName !== undefined) {
+        user.lastName = (lastName || '').trim();
+      }
+
+      // Update avatar URL if supplied
+      if (avatarUrl !== undefined) {
+        user.avatarUrl = (avatarUrl || '').trim();
+      }
+
+      // Update interests if supplied
+      if (interests !== undefined && Array.isArray(interests)) {
+        user.interests = await resolveGenreIds(interests);
+      }
+
+      user.isProfileCompleted = true;
+      await user.save();
+      await user.populate('interests', 'name slug icon iconUrl imageUrl');
+
+      const userPayload = {
+        id: user._id,
+        phoneNumber: user.phoneNumber,
+        countryCode: user.countryCode,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        fullName: user.fullName,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+        interests: user.interests,
+        isProfileCompleted: user.isProfileCompleted,
+        isVip: user.isVip,
+        vipExpiresAt: user.vipExpiresAt,
+        status: user.status
+      };
+
+      return ApiResponse.success(
+        res,
+        'Profile updated successfully.',
+        {
+          user: userPayload
+        },
+        200
+      );
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
    * Screen 4: Fetch Active Genres for "Choose your Interest" onboarding
    * GET /api/v1/auth/genres
    */

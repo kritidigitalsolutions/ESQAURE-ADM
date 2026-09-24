@@ -45,6 +45,9 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
   const [selectedGenres, setSelectedGenres] = useState(drama.genres || ['Romance']);
   const [ageRating, setAgeRating] = useState('U/A 13+');
   const [status, setStatus] = useState(drama.status || 'PUBLISHED');
+  const [isActive, setIsActive] = useState(drama.isActive !== undefined ? Boolean(drama.isActive) : (drama.status === 'PUBLISHED' || drama.status === 'ENCODING'));
+  const [isPaid, setIsPaid] = useState(drama.isPaid !== undefined ? Boolean(drama.isPaid) : true);
+  const [plan, setPlan] = useState(drama.plan || (drama.isPaid === false ? 'Free Tier' : 'VIP Plan'));
   const [isTrending, setIsTrending] = useState(drama.isTrending ?? false);
   const [isFeatured, setIsFeatured] = useState(drama.isFeatured ?? true);
   const [trendingRank, setTrendingRank] = useState(drama.trendingRank || 1);
@@ -83,6 +86,9 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
     setSynopsis(drama.synopsis || '');
     setSelectedGenres(drama.genres || ['Romance']);
     setStatus(drama.status || 'PUBLISHED');
+    setIsActive(drama.isActive !== undefined ? Boolean(drama.isActive) : (drama.status === 'PUBLISHED' || drama.status === 'ENCODING'));
+    setIsPaid(drama.isPaid !== undefined ? Boolean(drama.isPaid) : true);
+    setPlan(drama.plan || (drama.isPaid === false ? 'Free Tier' : 'VIP Plan'));
     setIsTrending(drama.isTrending ?? false);
     setIsFeatured(drama.isFeatured ?? true);
     setTrendingRank(drama.trendingRank || 1);
@@ -217,7 +223,10 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
       title,
       synopsis,
       genres: selectedGenres,
-      status,
+      status: isActive ? (status === 'DRAFT' ? 'PUBLISHED' : status) : 'DRAFT',
+      isActive,
+      isPaid,
+      plan: isPaid ? (plan === 'Free Tier' ? 'VIP Plan' : plan) : 'Free Tier',
       isTrending,
       isFeatured,
       trendingRank: Number(trendingRank),
@@ -241,14 +250,14 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
     <div className="fixed inset-0 z-[1000] overflow-y-auto bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 selection:bg-[#FEF08A] selection:text-black animate-in fade-in duration-200">
       
       {/* Modal Card Shell */}
-      <div className="bg-white dark:bg-[#111111] rounded-[28px] w-full max-w-4xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] border border-slate-200/90 dark:border-slate-800/90 flex flex-col max-h-[92vh] overflow-hidden font-urbanist animate-in zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-[#202620] rounded-[28px] w-full max-w-4xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] border border-slate-200/90 dark:border-white/15 flex flex-col max-h-[92vh] overflow-hidden font-urbanist animate-in zoom-in-95 duration-200">
         
         {/* Top Header Card */}
-        <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800/80 bg-gradient-to-r from-slate-50/80 via-white to-amber-50/20 dark:from-slate-900/50 dark:via-[#111111] dark:to-amber-950/10 flex items-center justify-between shrink-0">
+        <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-white/10 bg-gradient-to-r from-slate-50/80 via-white to-amber-50/20 dark:from-[#202620] dark:via-[#202620] dark:to-amber-950/10 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-4 min-w-0">
             
             {/* Visual Portrait Thumbnail */}
-            <div className="relative w-12 h-16 sm:w-13 sm:h-17 rounded-xl overflow-hidden bg-slate-950 border border-slate-200/90 dark:border-slate-700 shadow-sm shrink-0 group">
+            <div className="relative w-12 h-16 sm:w-13 sm:h-17 rounded-xl overflow-hidden bg-slate-950 border border-slate-200/90 dark:border-white/10 shadow-sm shrink-0 group">
               <img
                 src={posterUrl}
                 alt={title}
@@ -264,7 +273,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 {/* ID Badge */}
-                <span className="text-[11px] font-mono font-extrabold px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700">
+                <span className="text-[11px] font-mono font-extrabold px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-[#161B16] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10">
                   {drama.id}
                 </span>
 
@@ -275,7 +284,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                       ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50'
                       : status === 'ENCODING'
                       ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                      : 'bg-slate-100 dark:bg-[#161B16] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10'
                   }`}
                 >
                   <span
@@ -312,7 +321,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-xl bg-slate-100/80 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all flex items-center justify-center shrink-0 ml-3 cursor-pointer shadow-2xs"
+            className="w-9 h-9 rounded-xl bg-slate-100/80 dark:bg-[#161B16] hover:bg-slate-200 dark:hover:bg-white/[0.08] text-slate-500 hover:text-slate-900 dark:hover:text-white border border-transparent dark:border-white/10 transition-all flex items-center justify-center shrink-0 ml-3 cursor-pointer shadow-2xs"
             title="Close"
           >
             <X className="w-4 h-4" />
@@ -320,19 +329,19 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
         </div>
 
         {/* Modern Segmented Navigation Bar (Dashboard Style) */}
-        <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#151515] flex items-center shrink-0">
-          <div className="bg-slate-200/70 dark:bg-slate-900 p-1 rounded-2xl flex items-center gap-1 w-full sm:w-auto border border-slate-200/80 dark:border-slate-800">
+        <div className="px-6 py-3 border-b border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-[#1A201A] flex items-center shrink-0">
+          <div className="bg-slate-200/70 dark:bg-[#141914] p-1 rounded-2xl flex items-center gap-1 w-full sm:w-auto border border-slate-200/80 dark:border-white/10">
             <button
               type="button"
               onClick={() => setActiveTab('info')}
               className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center space-x-2 transition-all cursor-pointer ${
                 activeTab === 'info'
-                  ? 'bg-white dark:bg-[#1C1C1E] text-slate-950 dark:text-white shadow-xs border border-slate-200/60 dark:border-slate-700'
+                  ? 'bg-white dark:bg-[#262C26] text-slate-950 dark:text-white shadow-xs border border-slate-200/60 dark:border-white/12'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <div className={`w-5 h-5 rounded-lg flex items-center justify-center ${
-                activeTab === 'info' ? 'bg-[#FEF08A] text-slate-950' : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                activeTab === 'info' ? 'bg-[#FEF08A] text-slate-950' : 'bg-slate-200/80 dark:bg-[#202620] text-slate-600 dark:text-slate-400'
               }`}>
                 <Film className="w-3 h-3" />
               </div>
@@ -344,12 +353,12 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
               onClick={() => setActiveTab('media')}
               className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center space-x-2 transition-all cursor-pointer ${
                 activeTab === 'media'
-                  ? 'bg-white dark:bg-[#1C1C1E] text-slate-950 dark:text-white shadow-xs border border-slate-200/60 dark:border-slate-700'
+                  ? 'bg-white dark:bg-[#262C26] text-slate-950 dark:text-white shadow-xs border border-slate-200/60 dark:border-white/12'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <div className={`w-5 h-5 rounded-lg flex items-center justify-center ${
-                activeTab === 'media' ? 'bg-[#FEF08A] text-slate-950' : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                activeTab === 'media' ? 'bg-[#FEF08A] text-slate-950' : 'bg-slate-200/80 dark:bg-[#202620] text-slate-600 dark:text-slate-400'
               }`}>
                 <ImageIcon className="w-3 h-3" />
               </div>
@@ -361,12 +370,12 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
               onClick={() => setActiveTab('episodes')}
               className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center space-x-2 transition-all cursor-pointer ${
                 activeTab === 'episodes'
-                  ? 'bg-white dark:bg-[#1C1C1E] text-slate-950 dark:text-white shadow-xs border border-slate-200/60 dark:border-slate-700'
+                  ? 'bg-white dark:bg-[#262C26] text-slate-950 dark:text-white shadow-xs border border-slate-200/60 dark:border-white/12'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <div className={`w-5 h-5 rounded-lg flex items-center justify-center ${
-                activeTab === 'episodes' ? 'bg-[#FEF08A] text-slate-950' : 'bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                activeTab === 'episodes' ? 'bg-[#FEF08A] text-slate-950' : 'bg-slate-200/80 dark:bg-[#202620] text-slate-600 dark:text-slate-400'
               }`}>
                 <Video className="w-3 h-3" />
               </div>
@@ -388,9 +397,9 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
             <div className="space-y-6">
               
               {/* Section 1: Core Details Card */}
-              <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800/80 space-y-4">
-                <div className="flex items-center space-x-2.5 pb-2 border-b border-slate-200/60 dark:border-slate-800">
-                  <div className="w-8 h-8 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-xs">
+              <div className="bg-slate-50/70 dark:bg-[#161B16] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 space-y-4">
+                <div className="flex items-center space-x-2.5 pb-2 border-b border-slate-200/60 dark:border-white/10">
+                  <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
                     <FileText className="w-4 h-4 stroke-[2.2]" />
                   </div>
                   <div>
@@ -414,7 +423,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. The Secret Billionaire Heir"
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-bold bg-white dark:bg-[#161616] text-slate-950 dark:text-white focus:border-amber-400 focus:outline-none transition-all shadow-xs"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 font-bold bg-white dark:bg-[#121612] text-slate-950 dark:text-white focus:border-[#FEF08A] focus:outline-none transition-all shadow-xs"
                     />
                   </div>
 
@@ -426,7 +435,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                       <select
                         value={ageRating}
                         onChange={(e) => setAgeRating(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-bold bg-white dark:bg-[#161616] text-slate-950 dark:text-white focus:border-amber-400 focus:outline-none transition-all shadow-xs cursor-pointer"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 font-bold bg-white dark:bg-[#121612] text-slate-950 dark:text-white focus:border-[#FEF08A] focus:outline-none transition-all shadow-xs cursor-pointer"
                       >
                         <option value="U (All Ages)">U (Universal — All Audiences)</option>
                         <option value="U/A 7+">U/A 7+ (Mild Drama & Fantasy)</option>
@@ -452,16 +461,16 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                     value={synopsis}
                     onChange={(e) => setSynopsis(e.target.value)}
                     placeholder="Write the dramatic storyline hook that drives viewers to watch episode 1..."
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-medium text-slate-900 dark:text-slate-100 bg-white dark:bg-[#161616] focus:border-amber-400 focus:outline-none transition-all shadow-xs"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 font-medium text-slate-900 dark:text-slate-100 bg-white dark:bg-[#121612] focus:border-[#FEF08A] focus:outline-none transition-all shadow-xs"
                   />
                 </div>
               </div>
 
               {/* Section 2: Genres Multi-Select */}
-              <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800/80 space-y-3">
+              <div className="bg-slate-50/70 dark:bg-[#161B16] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-xs">
+                    <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
                       <Tag className="w-4 h-4 stroke-[2.2]" />
                     </div>
                     <div>
@@ -489,7 +498,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                         className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center space-x-1.5 cursor-pointer ${
                           isSelected
                             ? 'bg-[#FEF08A] text-slate-950 border border-amber-300 shadow-xs font-extrabold scale-102'
-                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 hover:border-slate-300 hover:bg-slate-100'
+                            : 'bg-white dark:bg-[#121612] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 hover:border-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.04]'
                         }`}
                       >
                         {isSelected ? (
@@ -507,37 +516,118 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
               {/* Section 3: Publishing & Curation Controls */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
-                {/* Catalog Publishing Status */}
-                <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between space-y-3">
-                  <div className="flex items-center space-x-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-xs">
-                      <Tv className="w-4 h-4 stroke-[2.2]" />
+                {/* Status: Active or Inactive */}
+                <div className="bg-slate-50/70 dark:bg-[#161B16] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
+                        <Tv className="w-4 h-4 stroke-[2.2]" />
+                      </div>
+                      <div>
+                        <h4 className="font-extrabold text-slate-950 dark:text-white text-xs sm:text-sm">
+                          Content Status
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          Active or Inactive in viewer apps
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-extrabold text-slate-950 dark:text-white text-xs sm:text-sm">
-                        App Feed Status
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                        Controls visibility on viewer screens
-                      </p>
-                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsActive(!isActive)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer shadow-xs ${
+                        isActive
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-600/40'
+                          : 'bg-slate-200 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-white/10'
+                      }`}
+                    >
+                      <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                      <span>{isActive ? 'ACTIVE' : 'INACTIVE'}</span>
+                    </button>
                   </div>
 
                   <select
                     value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-extrabold bg-white dark:bg-[#161616] text-slate-950 dark:text-white focus:border-amber-400 focus:outline-none transition-all shadow-xs cursor-pointer"
+                    onChange={(e) => {
+                      setStatus(e.target.value);
+                      setIsActive(e.target.value !== 'DRAFT');
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 font-extrabold bg-white dark:bg-[#121612] text-slate-950 dark:text-white focus:border-[#FEF08A] focus:outline-none transition-all shadow-xs cursor-pointer"
                   >
-                    <option value="PUBLISHED">🟢 Published (Live on Android &amp; iOS)</option>
+                    <option value="PUBLISHED">🟢 Published &amp; Active (Live on Apps)</option>
                     <option value="ENCODING">🟡 Encoding / Processing Bitrates</option>
-                    <option value="DRAFT">⚪ Draft (Internal Admin Review)</option>
+                    <option value="DRAFT">⚪ Draft &amp; Inactive (Hidden)</option>
                   </select>
                 </div>
 
+                {/* Pricing / Plan: Paid (With Plan) or Unpaid (Free) */}
+                <div className="bg-slate-50/70 dark:bg-[#161B16] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
+                        {isPaid ? <Lock className="w-4 h-4 stroke-[2.2]" /> : <Unlock className="w-4 h-4 stroke-[2.2]" />}
+                      </div>
+                      <div>
+                        <h4 className="font-extrabold text-slate-950 dark:text-white text-xs sm:text-sm">
+                          Pricing &amp; Access
+                        </h4>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                          Paid (With Plan) or Unpaid (Free)
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center bg-slate-200/80 dark:bg-[#121612] p-0.5 rounded-lg border border-slate-200 dark:border-white/10 text-[11px] font-bold">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsPaid(true);
+                          if (plan === 'Free Tier') setPlan('VIP Plan');
+                        }}
+                        className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                          isPaid ? 'bg-[#FEF08A] text-slate-950 font-black shadow-xs' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        Paid
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsPaid(false);
+                          setPlan('Free Tier');
+                        }}
+                        className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                          !isPaid ? 'bg-[#FEF08A] text-slate-950 font-black shadow-xs' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        Free
+                      </button>
+                    </div>
+                  </div>
+
+                  {isPaid ? (
+                    <select
+                      value={plan}
+                      onChange={(e) => setPlan(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 font-extrabold bg-white dark:bg-[#121612] text-slate-950 dark:text-white focus:border-[#FEF08A] focus:outline-none transition-all shadow-xs cursor-pointer"
+                    >
+                      <option value="VIP Plan">🔒 VIP Plan (All Passholders)</option>
+                      <option value="Monthly Pass">💳 Monthly Pass (₹199 / mo)</option>
+                      <option value="Yearly All-Access">👑 Yearly All-Access (₹1,499 / yr)</option>
+                    </select>
+                  ) : (
+                    <div className="w-full px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-2">
+                      <Unlock className="w-3.5 h-3.5" />
+                      <span>Unpaid Content (Available for Free to All Users)</span>
+                    </div>
+                  )}
+                </div>
+
                 {/* Catalog Display Priority */}
-                <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between space-y-3">
+                <div className="bg-slate-50/70 dark:bg-[#161B16] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between space-y-3">
                   <div className="flex items-center space-x-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-xs">
+                    <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
                       <Layers className="w-4 h-4 stroke-[2.2]" />
                     </div>
                     <div>
@@ -557,15 +647,15 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                       max={99}
                       value={priority}
                       onChange={(e) => setPriority(Math.max(1, Number(e.target.value)))}
-                      className="w-24 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 font-black text-center bg-white dark:bg-[#161616] text-slate-950 dark:text-white focus:border-amber-400 focus:outline-none transition-all shadow-xs text-sm"
+                      className="w-24 px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 font-black text-center bg-white dark:bg-[#121612] text-slate-950 dark:text-white focus:border-[#FEF08A] focus:outline-none transition-all shadow-xs text-sm"
                     />
                   </div>
                 </div>
 
                 {/* Carousel & Trending Toggles */}
-                <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between space-y-3">
+                <div className="bg-slate-50/70 dark:bg-[#161B16] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between space-y-3">
                   <div className="flex items-center space-x-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-xs">
+                    <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
                       <Crown className="w-4 h-4 stroke-[2.2]" />
                     </div>
                     <div>
@@ -582,7 +672,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                     {/* Feature on Carousel Toggle */}
                     <div
                       onClick={() => setIsFeatured(!isFeatured)}
-                      className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#161616] border border-slate-200/80 dark:border-slate-700/80 cursor-pointer select-none hover:border-amber-300 transition-colors"
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#121612] border border-slate-200/80 dark:border-white/10 cursor-pointer select-none hover:border-[#FEF08A]/50 transition-colors"
                     >
                       <div className="flex items-center space-x-2">
                         <Sparkles className="w-4 h-4 text-amber-500" />
@@ -591,7 +681,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                         </span>
                       </div>
                       <div className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${
-                        isFeatured ? 'bg-[#FEF08A] justify-end border border-amber-300' : 'bg-slate-300 dark:bg-slate-700 justify-start'
+                        isFeatured ? 'bg-[#FEF08A] justify-end border border-amber-300' : 'bg-slate-300 dark:bg-[#202620] justify-start border border-transparent dark:border-white/10'
                       }`}>
                         <div className={`w-4 h-4 rounded-full shadow-xs transform transition-transform ${
                           isFeatured ? 'bg-slate-950' : 'bg-white'
@@ -602,7 +692,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                     {/* Trending Chart Toggle */}
                     <div
                       onClick={() => setIsTrending(!isTrending)}
-                      className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#161616] border border-slate-200/80 dark:border-slate-700/80 cursor-pointer select-none hover:border-amber-300 transition-colors"
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#121612] border border-slate-200/80 dark:border-white/10 cursor-pointer select-none hover:border-[#FEF08A]/50 transition-colors"
                     >
                       <div className="flex items-center space-x-2">
                         <Flame className="w-4 h-4 text-amber-500" />
@@ -611,7 +701,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                         </span>
                       </div>
                       <div className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${
-                        isTrending ? 'bg-[#FEF08A] justify-end border border-amber-300' : 'bg-slate-300 dark:bg-slate-700 justify-start'
+                        isTrending ? 'bg-[#FEF08A] justify-end border border-amber-300' : 'bg-slate-300 dark:bg-[#202620] justify-start border border-transparent dark:border-white/10'
                       }`}>
                         <div className={`w-4 h-4 rounded-full shadow-xs transform transition-transform ${
                           isTrending ? 'bg-slate-950' : 'bg-white'
@@ -651,7 +741,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 
                 {/* Card 1: 9:16 Vertical Poster */}
-                <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between space-y-3">
+                <div className="bg-slate-50/70 dark:bg-[#161B16] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between space-y-3">
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-extrabold text-slate-950 dark:text-white text-xs">
@@ -662,7 +752,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                       </span>
                     </div>
 
-                    <div className="aspect-[9/13] rounded-xl overflow-hidden bg-slate-950 relative group border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div className="aspect-[9/13] rounded-xl overflow-hidden bg-slate-950 relative group border border-slate-200 dark:border-white/10 shadow-sm">
                       <img
                         src={posterUrl}
                         alt="Poster"
@@ -683,7 +773,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                   <button
                     type="button"
                     onClick={() => handleSimulateFileChange('poster')}
-                    className="w-full py-2 px-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-[#FEF08A] hover:text-slate-950 dark:hover:bg-[#FEF08A] dark:hover:text-slate-950 text-slate-900 dark:text-white font-extrabold text-xs transition-all flex items-center justify-center space-x-1.5 border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer group"
+                    className="w-full py-2 px-3 rounded-xl bg-white dark:bg-[#121612] hover:bg-[#FEF08A] hover:text-slate-950 dark:hover:bg-[#FEF08A] dark:hover:text-slate-950 text-slate-900 dark:text-white font-extrabold text-xs transition-all flex items-center justify-center space-x-1.5 border border-slate-200 dark:border-white/10 shadow-xs cursor-pointer group"
                   >
                     <FolderUp className="w-3.5 h-3.5 group-hover:-translate-y-0.5 transition-transform" />
                     <span>Replace Poster File</span>
@@ -691,7 +781,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                 </div>
 
                 {/* Card 2: 16:9 Landscape Banner */}
-                <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between space-y-3">
+                <div className="bg-slate-50/70 dark:bg-[#161B16] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between space-y-3">
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-extrabold text-slate-950 dark:text-white text-xs">
@@ -702,7 +792,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                       </span>
                     </div>
 
-                    <div className="aspect-[16/10] rounded-xl overflow-hidden bg-slate-950 relative group border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div className="aspect-[16/10] rounded-xl overflow-hidden bg-slate-950 relative group border border-slate-200 dark:border-white/10 shadow-sm">
                       <img
                         src={bannerUrl || posterUrl}
                         alt="Banner"
@@ -723,7 +813,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                   <button
                     type="button"
                     onClick={() => handleSimulateFileChange('banner')}
-                    className="w-full py-2 px-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-[#FEF08A] hover:text-slate-950 dark:hover:bg-[#FEF08A] dark:hover:text-slate-950 text-slate-900 dark:text-white font-extrabold text-xs transition-all flex items-center justify-center space-x-1.5 border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer group"
+                    className="w-full py-2 px-3 rounded-xl bg-white dark:bg-[#121612] hover:bg-[#FEF08A] hover:text-slate-950 dark:hover:bg-[#FEF08A] dark:hover:text-slate-950 text-slate-900 dark:text-white font-extrabold text-xs transition-all flex items-center justify-center space-x-1.5 border border-slate-200 dark:border-white/10 shadow-xs cursor-pointer group"
                   >
                     <FolderUp className="w-3.5 h-3.5 group-hover:-translate-y-0.5 transition-transform" />
                     <span>Replace Banner File</span>
@@ -731,18 +821,18 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                 </div>
 
                 {/* Card 3: 9:16 Vertical Teaser Trailer */}
-                <div className="bg-slate-50/70 dark:bg-slate-900/40 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between space-y-3">
+                <div className="bg-slate-50/70 dark:bg-[#161B16] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between space-y-3">
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-extrabold text-slate-950 dark:text-white text-xs">
                         9:16 Teaser Trailer
                       </span>
-                      <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                      <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded-md bg-[#FEF08A] text-slate-950 shadow-2xs">
                         MP4 / H.264
                       </span>
                     </div>
 
-                    <div className="aspect-[9/13] rounded-xl overflow-hidden bg-slate-950 relative group border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center text-center p-4">
+                    <div className="aspect-[9/13] rounded-xl overflow-hidden bg-slate-950 relative group border border-slate-200 dark:border-white/10 shadow-sm flex flex-col items-center justify-center text-center p-4">
                       <div className="w-12 h-12 rounded-full bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform cursor-pointer">
                         <Play className="w-5 h-5 fill-current ml-0.5" />
                       </div>
@@ -759,7 +849,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                   <button
                     type="button"
                     onClick={() => handleSimulateFileChange('trailer')}
-                    className="w-full py-2 px-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-[#FEF08A] hover:text-slate-950 dark:hover:bg-[#FEF08A] dark:hover:text-slate-950 text-slate-900 dark:text-white font-extrabold text-xs transition-all flex items-center justify-center space-x-1.5 border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer group"
+                    className="w-full py-2 px-3 rounded-xl bg-white dark:bg-[#121612] hover:bg-[#FEF08A] hover:text-slate-950 dark:hover:bg-[#FEF08A] dark:hover:text-slate-950 text-slate-900 dark:text-white font-extrabold text-xs transition-all flex items-center justify-center space-x-1.5 border border-slate-200 dark:border-white/10 shadow-xs cursor-pointer group"
                   >
                     <Video className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
                     <span>Replace Teaser MP4</span>
@@ -778,10 +868,10 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
             <div className="space-y-6">
               
               {/* Paywall Configuration Blueprint Card */}
-              <div className="bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-slate-50/50 dark:from-amber-950/30 dark:via-slate-900/40 dark:to-slate-900/20 rounded-2xl p-5 border border-amber-400/30 dark:border-amber-700/30 space-y-4 shadow-xs">
+              <div className="bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-slate-50/50 dark:from-amber-950/20 dark:via-[#161B16] dark:to-[#121612] rounded-2xl p-5 border border-amber-400/30 dark:border-amber-700/30 space-y-4 shadow-xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center space-x-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center font-bold shadow-xs">
+                    <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
                       <Lock className="w-4 h-4" />
                     </div>
                     <div>
@@ -806,7 +896,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
 
                 {/* Steppers & Stats */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                  <div className="bg-white dark:bg-[#161616] p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+                  <div className="bg-white dark:bg-[#121612] p-4 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs">
                     <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                       Total Published Episodes
                     </span>
@@ -822,7 +912,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                     </div>
                   </div>
 
-                  <div className="bg-white dark:bg-[#161616] p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+                  <div className="bg-white dark:bg-[#121612] p-4 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs">
                     <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                       Free Preview Episodes
                     </span>
@@ -842,7 +932,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
 
                 {/* Visual Ratio Bar */}
                 <div className="space-y-1.5 pt-1">
-                  <div className="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex shadow-inner">
+                  <div className="w-full h-3 rounded-full bg-slate-200 dark:bg-[#121612] overflow-hidden flex shadow-inner">
                     <div
                       className="bg-emerald-500 h-full transition-all duration-300"
                       style={{ width: `${Math.min(100, (freeEpisodes / totalEpisodes) * 100)}%` }}
@@ -893,11 +983,11 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                 {episodesList.map((ep) => (
                   <div
                     key={ep.id}
-                    className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-[#151515] border border-slate-200/80 dark:border-slate-800 hover:border-amber-300/80 dark:hover:border-amber-500/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
+                    className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 hover:border-amber-300/80 dark:hover:border-amber-500/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
                   >
                     {/* Left: Number, Title, and Video Specs */}
                     <div className="flex items-center space-x-3.5 min-w-0 flex-1">
-                      <span className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 font-black text-slate-800 dark:text-slate-200 flex items-center justify-center text-xs shrink-0 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs font-mono">
+                      <span className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#121612] font-black text-slate-800 dark:text-slate-200 flex items-center justify-center text-xs shrink-0 border border-slate-200/60 dark:border-white/10 shadow-2xs font-mono">
                         {ep.episodeNumber.toString().padStart(2, '0')}
                       </span>
 
@@ -906,7 +996,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                           type="text"
                           value={ep.title}
                           onChange={(e) => handleEpisodeTitleChange(ep.id, e.target.value)}
-                          className="w-full font-bold text-slate-950 dark:text-white bg-transparent border-b border-transparent hover:border-slate-300 dark:hover:border-slate-700 focus:border-amber-400 focus:outline-none text-xs py-0.5 truncate"
+                          className="w-full font-bold text-slate-950 dark:text-white bg-transparent border-b border-transparent hover:border-slate-300 dark:hover:border-white/20 focus:border-[#FEF08A] focus:outline-none text-xs py-0.5 truncate"
                         />
                         
                         <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-400 mt-1 font-mono">
@@ -926,7 +1016,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                     <div className="flex items-center space-x-2.5 shrink-0 self-end sm:self-center">
                       
                       {/* Subtitles Track Badge */}
-                      <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700 flex items-center gap-1 font-mono">
+                      <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-100 dark:bg-[#121612] text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-white/10 flex items-center gap-1 font-mono">
                         <Subtitles className="w-3 h-3 text-slate-400" />
                         <span>EN, HI</span>
                       </span>
@@ -975,7 +1065,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/80 dark:bg-[#151515] flex items-center justify-between shrink-0">
+        <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-white/10 bg-slate-50/80 dark:bg-[#1A201A] flex items-center justify-between shrink-0">
           <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center space-x-2">
             {saveSuccess ? (
               <span className="text-emerald-600 dark:text-emerald-400 font-extrabold flex items-center gap-1.5 animate-in fade-in">
@@ -994,7 +1084,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="px-5 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
             >
               Cancel
             </button>

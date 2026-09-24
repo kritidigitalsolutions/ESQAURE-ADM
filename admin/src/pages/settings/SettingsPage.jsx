@@ -20,7 +20,7 @@ export default function SettingsPage() {
     <div className="space-y-6 font-urbanist max-w-4xl">
       
       {/* Top Header */}
-      <div className="bg-white dark:bg-[#0D0D0D] rounded-2xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-nodus flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
+      <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
         <div>
           <h2 className="text-lg font-extrabold text-slate-950 dark:text-white">Platform Settings</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage themes, default video quality, cloud storage connections, and compliance.</p>
@@ -36,8 +36,8 @@ export default function SettingsPage() {
       <form onSubmit={handleSave} className="space-y-6">
 
         {/* Radical Theme & Appearance Section */}
-        <div className="bg-white dark:bg-[#0D0D0D] rounded-2xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-nodus space-y-4 transition-colors">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-nodus space-y-4 transition-colors">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
             <div className="flex items-center space-x-2">
               <Palette className="w-4 h-4 text-amber-500" />
               <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">Appearance & Radial Theme Engine</h3>
@@ -48,11 +48,11 @@ export default function SettingsPage() {
             </span>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <p className="font-bold text-xs text-slate-900 dark:text-slate-100">Interface Theme Mode</p>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                Experience the radical circular reveal transition expanding across the entire viewport. Shortcut: <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded text-slate-700 dark:text-slate-300 font-bold">Alt + T</kbd>
+                Experience the radical circular reveal transition expanding across the entire viewport. Shortcut: <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-[#121612] border border-slate-300 dark:border-white/10 rounded text-slate-700 dark:text-slate-300 font-bold">Alt + T</kbd>
               </p>
             </div>
             <div className="flex items-center space-x-3 shrink-0">
@@ -67,7 +67,7 @@ export default function SettingsPage() {
               className={`p-4 rounded-xl border text-left transition-all flex items-start gap-3.5 ${
                 !isDark
                   ? 'border-amber-400 bg-amber-50/50 dark:bg-amber-950/20 ring-2 ring-amber-400/20'
-                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'
+                  : 'border-slate-200 dark:border-white/10 bg-white dark:bg-[#161B16] hover:border-slate-300 dark:hover:border-white/20'
               }`}
             >
               <div className="p-2.5 rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 shrink-0">
@@ -90,10 +90,10 @@ export default function SettingsPage() {
               className={`p-4 rounded-xl border text-left transition-all flex items-start gap-3.5 ${
                 isDark
                   ? 'border-[#FEF08A] bg-[#FEF08A]/5 ring-2 ring-[#FEF08A]/20'
-                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'
+                  : 'border-slate-200 dark:border-white/10 bg-white dark:bg-[#161B16] hover:border-slate-300 dark:hover:border-white/20'
               }`}
             >
-              <div className="p-2.5 rounded-lg bg-slate-900 text-[#FEF08A] dark:bg-black dark:text-[#FEF08A] shrink-0 border border-slate-800">
+              <div className="p-2.5 rounded-lg bg-slate-900 text-[#FEF08A] dark:bg-[#FEF08A]/30 dark:text-[#FEF08A] shrink-0 border border-slate-800 dark:border-amber-700/40">
                 <Moon className="w-5 h-5" />
               </div>
               <div>
@@ -110,8 +110,8 @@ export default function SettingsPage() {
         </div>
         
         {/* Streaming & Playback Engine */}
-        <div className="bg-white dark:bg-[#0D0D0D] rounded-2xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-nodus space-y-4 transition-colors">
-          <div className="flex items-center space-x-2 border-b border-slate-100 dark:border-slate-800/80 pb-3">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-nodus space-y-4 transition-colors">
+          <div className="flex items-center space-x-2 border-b border-slate-100 dark:border-white/10 pb-3">
             <Server className="w-4 h-4 text-amber-500" />
             <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">Video & Playback Settings</h3>
           </div>
@@ -122,7 +122,7 @@ export default function SettingsPage() {
               <select
                 value={defaultQuality}
                 onChange={(e) => setDefaultQuality(e.target.value)}
-                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:border-[#FEF08A]"
+                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-white/10 font-bold text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-[#161B16] focus:outline-none focus:border-[#FEF08A]"
               >
                 <option value="1080p">1080p Full HD (Subscriber Default)</option>
                 <option value="720p">720p HD (Standard)</option>
@@ -136,12 +136,12 @@ export default function SettingsPage() {
                 type="number"
                 value={freeTeaserCount}
                 onChange={(e) => setFreeTeaserCount(e.target.value)}
-                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:border-[#FEF08A]"
+                className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-white/10 font-bold text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-[#161B16] focus:outline-none focus:border-[#FEF08A]"
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-xs">
             <div>
               <span className="font-bold text-slate-900 dark:text-slate-100 block">Autoplay Next Episode in Vertical Player</span>
               <span className="text-[11px] text-slate-400">Instantly plays the next 2-minute episode on end</span>
@@ -159,14 +159,14 @@ export default function SettingsPage() {
         </div>
 
         {/* Cloud Infrastructure & CDN Status */}
-        <div className="bg-white dark:bg-[#0D0D0D] rounded-2xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-nodus space-y-4 transition-colors">
-          <div className="flex items-center space-x-2 border-b border-slate-100 dark:border-slate-800/80 pb-3">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-nodus space-y-4 transition-colors">
+          <div className="flex items-center space-x-2 border-b border-slate-100 dark:border-white/10 pb-3">
             <Shield className="w-4 h-4 text-emerald-500" />
             <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">Storage & API Integrations</h3>
           </div>
 
           <div className="space-y-2.5 text-xs">
-            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-[#161B16]">
               <div>
                 <p className="font-bold text-slate-900 dark:text-slate-100">AWS S3 Media Bucket</p>
                 <p className="text-[11px] text-slate-400 font-mono">arn:aws:s3:::esquare-media-prod-ap-south-1</p>
@@ -176,7 +176,7 @@ export default function SettingsPage() {
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-[#161B16]">
               <div>
                 <p className="font-bold text-slate-900 dark:text-slate-100">Razorpay Payment Gateway</p>
                 <p className="text-[11px] text-slate-400 font-mono">rzp_live_••••••••••••8819</p>
@@ -186,7 +186,7 @@ export default function SettingsPage() {
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+            <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-[#161B16]">
               <div>
                 <p className="font-bold text-slate-900 dark:text-slate-100">SMS OTP Gateway (India +91)</p>
                 <p className="text-[11px] text-slate-400">MSG91 Enterprise Route with DLT Template ID</p>
@@ -199,14 +199,14 @@ export default function SettingsPage() {
         </div>
 
         {/* Legal & Compliance Policies */}
-        <div className="bg-white dark:bg-[#0D0D0D] rounded-2xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-nodus space-y-4 transition-colors">
-          <div className="flex items-center space-x-2 border-b border-slate-100 dark:border-slate-800/80 pb-3">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-nodus space-y-4 transition-colors">
+          <div className="flex items-center space-x-2 border-b border-slate-100 dark:border-white/10 pb-3">
             <FileText className="w-4 h-4 text-blue-500" />
             <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">Legal & App Store Compliance</h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/40 dark:bg-slate-900/40">
+            <div className="p-3 rounded-xl border border-slate-200 dark:border-white/10 flex items-center justify-between bg-slate-50/40 dark:bg-[#161B16]">
               <div>
                 <p className="font-bold text-slate-900 dark:text-slate-100">Terms & Conditions</p>
                 <p className="text-[10px] text-slate-400">Version 2.1 • Last updated Aug 2026</p>
@@ -217,7 +217,7 @@ export default function SettingsPage() {
               </button>
             </div>
 
-            <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/40 dark:bg-slate-900/40">
+            <div className="p-3 rounded-xl border border-slate-200 dark:border-white/10 flex items-center justify-between bg-slate-50/40 dark:bg-[#161B16]">
               <div>
                 <p className="font-bold text-slate-900 dark:text-slate-100">Privacy Policy (DPDP Act)</p>
                 <p className="text-[10px] text-slate-400">Indian DPDP & GDPR Compliant</p>

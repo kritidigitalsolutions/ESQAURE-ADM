@@ -56,7 +56,7 @@ export default function Topbar({
   const storedAdminEmail = localStorage.getItem('admin_user_email') || 'admin@e2stories.com';
 
   return (
-    <header className="bg-white dark:bg-[#0D0D0D] border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-30 px-6 py-3 shadow-sm dark:shadow-[0_1px_0_0_rgba(255,255,255,0.04)] font-urbanist">
+    <header className="bg-white/95 dark:bg-[#141914]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10 sticky top-0 z-30 px-6 py-3 shadow-xs dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)] font-urbanist">
       <div className="flex items-center justify-between gap-4">
 
         {/* Left: Sidebar Toggle + Page Title & Subtitle */}
@@ -66,7 +66,7 @@ export default function Topbar({
               onClick={onToggleSidebar}
               title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className="p-2 -ml-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
+              className="p-2 -ml-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors shrink-0"
             >
               {isSidebarCollapsed ? (
                 <ChevronRight className="w-5 h-5 text-slate-700 dark:text-slate-300" strokeWidth={2.2} />
@@ -98,7 +98,7 @@ export default function Topbar({
             onClick={toggleFullscreen}
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
             aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-            className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+            className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-full transition-colors"
           >
             {isFullscreen ? (
               <Minimize className="w-4 h-4" />
@@ -114,22 +114,22 @@ export default function Topbar({
           <NotificationDropdown onNavigate={onNavigate} />
 
           {/* Profile Avatar Dropdown */}
-          <div className="relative pl-2.5 border-l border-slate-200 dark:border-slate-800" ref={profileRef}>
+          <div className="relative pl-2.5 border-l border-slate-200 dark:border-white/10" ref={profileRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               title="Admin Profile"
               className="relative flex items-center justify-center cursor-pointer hover:opacity-95 transition-all group"
             >
-              <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center border border-slate-200/90 dark:border-slate-700/80 shadow-xs group-hover:bg-slate-200/80 dark:group-hover:bg-slate-700 group-hover:border-slate-300 dark:group-hover:border-slate-600 transition-all duration-200">
+              <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-[#1A201A] text-slate-700 dark:text-slate-200 flex items-center justify-center border border-slate-200/90 dark:border-white/10 shadow-xs group-hover:bg-slate-200/80 dark:group-hover:bg-[#202620] group-hover:border-slate-300 dark:group-hover:border-white/20 transition-all duration-200">
                 <User className="w-4 h-4 text-slate-700 dark:text-slate-300" strokeWidth={2} />
               </div>
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-[#0D0D0D] rounded-full shadow-xs"></span>
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-[#141914] rounded-full shadow-xs"></span>
             </button>
 
             {/* Dropdown Menu */}
             {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#121212] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-50 animate-fadeIn">
-                <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1C221C] border border-slate-200 dark:border-white/12 rounded-2xl shadow-xl py-2 z-50 animate-fadeIn">
+                <div className="px-4 py-2 border-b border-slate-100 dark:border-white/10">
                   <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
                     Admin
                   </p>

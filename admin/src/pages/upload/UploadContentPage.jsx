@@ -44,13 +44,13 @@ function SlideSwitch({ checked, onChange, label, sublabel, icon: Icon, badge }) 
   const switchId = useId();
 
   return (
-    <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition-all group">
+    <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/70 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all group">
       <div className="flex items-start space-x-3.5 pr-4 min-w-0">
         {Icon && (
           <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
             checked
-              ? 'bg-amber-400/15 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 border border-amber-400/30'
-              : 'bg-slate-200/70 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-transparent'
+              ? 'bg-[#FEF08A]/20 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] border border-amber-300/60 dark:border-amber-700/40'
+              : 'bg-slate-200/70 dark:bg-[#121612] text-slate-400 dark:text-slate-500 border border-transparent dark:border-white/5'
           }`}>
             <Icon className="w-4 h-4 stroke-[2.2]" />
           </div>
@@ -443,7 +443,10 @@ export default function UploadContentPage({ onNavigate }) {
                 freeEpisodes: publishedEpisodes.filter(e => e.isFree).length,
                 views: '0',
                 rating: 5.0,
-                status: 'PUBLISHED',
+                status: isPublished ? 'PUBLISHED' : 'DRAFT',
+                isActive: isPublished,
+                isPaid: isVipPaywallActive,
+                plan: isVipPaywallActive ? 'VIP Plan' : 'Free Tier',
                 isTrending: true,
                 trendingRank: 1,
                 isFeatured: priority === 1,
@@ -500,11 +503,11 @@ export default function UploadContentPage({ onNavigate }) {
     <div className="space-y-6 font-urbanist max-w-5xl mx-auto pb-16 selection:bg-[#FEF08A] selection:text-black">
       
       {/* Top Header Card */}
-      <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-nodus relative overflow-hidden transition-all">
+      <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden transition-all">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="flex items-start space-x-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-400/15 dark:bg-amber-400/10 border border-amber-400/30 dark:border-amber-400/20 flex items-center justify-center shrink-0 shadow-xs">
-              <Upload className="w-6 h-6 text-amber-600 dark:text-amber-400 stroke-[2.2]" />
+            <div className="w-12 h-12 rounded-2xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
+              <Upload className="w-6 h-6 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-extrabold text-slate-950 dark:text-white tracking-tight">
@@ -521,7 +524,7 @@ export default function UploadContentPage({ onNavigate }) {
             <button
               type="button"
               onClick={() => onNavigate && onNavigate('dramas')}
-              className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all"
+              className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 border border-transparent dark:border-white/10 text-xs font-bold transition-all cursor-pointer"
             >
               Cancel
             </button>
@@ -553,9 +556,9 @@ export default function UploadContentPage({ onNavigate }) {
                   onClick={() => setCurrentStep(s.num)}
                   className={`flex flex-col sm:flex-row items-center sm:items-start p-2 sm:p-2.5 rounded-xl text-left transition-all relative ${
                     isCurrent
-                      ? 'bg-[#FEF08A]/30 dark:bg-amber-400/10 border border-amber-300/80 dark:border-amber-500/40 shadow-xs'
+                      ? 'bg-[#FEF08A]/30 dark:bg-[#FEF08A]/15 border border-amber-300/80 dark:border-amber-500/40 shadow-xs'
                       : isCompleted
-                      ? 'bg-slate-50 dark:bg-slate-900/40 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 text-slate-700 dark:text-slate-300'
+                      ? 'bg-slate-50 dark:bg-[#161B16] border border-transparent hover:border-slate-200 dark:hover:border-white/10 text-slate-700 dark:text-slate-300'
                       : 'border border-transparent opacity-60 hover:opacity-100'
                   }`}
                 >
@@ -564,7 +567,7 @@ export default function UploadContentPage({ onNavigate }) {
                       ? 'bg-[#FEF08A] text-slate-950 shadow-2xs font-extrabold'
                       : isCompleted
                       ? 'bg-emerald-500 text-white font-bold'
-                      : 'bg-slate-200/80 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                      : 'bg-slate-200/80 dark:bg-[#121612] text-slate-500 dark:text-slate-400'
                   }`}>
                     {isCompleted ? <Check className="w-4 h-4 stroke-[3]" /> : <IconComp className="w-4 h-4" />}
                   </div>
@@ -603,7 +606,7 @@ export default function UploadContentPage({ onNavigate }) {
       {/* Publishing Modal Overlay */}
       {isPublishing && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#111111] rounded-3xl p-8 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-6 text-center animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-[#202620] rounded-3xl p-8 max-w-md w-full border border-slate-200 dark:border-white/15 shadow-2xl space-y-6 text-center animate-in zoom-in-95 duration-200">
             <div className="w-16 h-16 rounded-2xl bg-[#FEF08A]/30 border border-amber-300/80 flex items-center justify-center mx-auto shadow-xs">
               <RotateCcw className="w-8 h-8 text-slate-950 dark:text-[#FEF08A] animate-spin" />
             </div>
@@ -666,11 +669,11 @@ export default function UploadContentPage({ onNavigate }) {
       {/* ======================================================== */}
       {currentStep === 1 && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-nodus space-y-6">
+          <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-6">
             
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 border border-amber-400/30 flex items-center justify-center font-extrabold shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 text-slate-950 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center font-extrabold shadow-xs">
                   <Film className="w-5 h-5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -698,13 +701,13 @@ export default function UploadContentPage({ onNavigate }) {
                 placeholder="e.g. The Billionaire's Secret Nanny"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-2.5 text-xs sm:text-sm font-semibold bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-xl focus:bg-white dark:focus:bg-[#161616] focus:border-amber-400 dark:focus:border-amber-400 focus:outline-none text-slate-950 dark:text-white transition-colors"
+                className="w-full px-4 py-2.5 text-xs sm:text-sm font-semibold bg-slate-50/70 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:bg-white dark:focus:bg-[#121612] focus:border-[#FEF08A] dark:focus:border-[#FEF08A] focus:outline-none text-slate-950 dark:text-white transition-colors"
               />
               <p className="text-[11px] text-slate-400 mt-1">Displayed as the primary headline on user search &amp; catalog.</p>
             </div>
 
             {/* Catalog Display Priority */}
-            <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <label className="block text-xs font-bold text-slate-900 dark:text-slate-200">
                   Catalog Display Priority
@@ -721,7 +724,7 @@ export default function UploadContentPage({ onNavigate }) {
                   max={99}
                   value={priority}
                   onChange={(e) => setPriority(Math.max(1, Number(e.target.value)))}
-                  className="w-20 px-3 py-1.5 text-xs sm:text-sm font-bold text-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-950 dark:text-white focus:outline-none focus:border-amber-400"
+                  className="w-20 px-3 py-1.5 text-xs sm:text-sm font-bold text-center bg-white dark:bg-[#121612] border border-slate-200 dark:border-white/10 rounded-xl text-slate-950 dark:text-white focus:outline-none focus:border-[#FEF08A]"
                 />
               </div>
             </div>
@@ -742,7 +745,7 @@ export default function UploadContentPage({ onNavigate }) {
                 placeholder="Write a high-tension synopsis designed for 2-minute vertical video binge-watchers..."
                 value={synopsis}
                 onChange={(e) => setSynopsis(e.target.value)}
-                className="w-full px-4 py-2.5 text-xs sm:text-sm font-medium bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-xl focus:bg-white dark:focus:bg-[#161616] focus:border-amber-400 dark:focus:border-amber-400 focus:outline-none text-slate-950 dark:text-white transition-colors leading-relaxed"
+                className="w-full px-4 py-2.5 text-xs sm:text-sm font-medium bg-slate-50/70 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:bg-white dark:focus:bg-[#121612] focus:border-[#FEF08A] dark:focus:border-[#FEF08A] focus:outline-none text-slate-950 dark:text-white transition-colors leading-relaxed"
               />
             </div>
 
@@ -761,8 +764,8 @@ export default function UploadContentPage({ onNavigate }) {
                       onClick={() => setAgeRating(rating.value)}
                       className={`p-3 rounded-xl text-left border transition-all flex flex-col justify-between ${
                         isSelected
-                          ? 'border-amber-400 bg-amber-50/60 dark:bg-amber-950/20 ring-1 ring-amber-400 shadow-2xs'
-                          : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700'
+                          ? 'border-[#FEF08A] bg-[#FEF08A]/10 dark:bg-[#FEF08A]/10 ring-1 ring-[#FEF08A] shadow-2xs'
+                          : 'border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-[#161B16] hover:border-slate-300 dark:hover:border-white/20'
                       }`}
                     >
                       <span className={`px-2 py-0.5 rounded text-[11px] font-black w-fit mb-1.5 ${rating.color}`}>
@@ -821,7 +824,7 @@ export default function UploadContentPage({ onNavigate }) {
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs font-semibold bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-xl focus:bg-white dark:focus:bg-[#161616] focus:border-amber-400 text-slate-900 dark:text-white focus:outline-none"
+                  className="w-full px-4 py-2.5 text-xs font-semibold bg-slate-50/70 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:bg-white dark:focus:bg-[#121612] focus:border-[#FEF08A] text-slate-900 dark:text-white focus:outline-none"
                 >
                   <option value="Hindi">Hindi (Original)</option>
                   <option value="Hindi (Dubbed)">Hindi (Dubbed)</option>
@@ -840,7 +843,7 @@ export default function UploadContentPage({ onNavigate }) {
                   placeholder="e.g. E² In-House Originals"
                   value={director}
                   onChange={(e) => setDirector(e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs font-semibold bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-xl focus:bg-white dark:focus:bg-[#161616] focus:border-amber-400 text-slate-900 dark:text-white focus:outline-none"
+                  className="w-full px-4 py-2.5 text-xs font-semibold bg-slate-50/70 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:bg-white dark:focus:bg-[#121612] focus:border-[#FEF08A] text-slate-900 dark:text-white focus:outline-none"
                 />
               </div>
             </div>
@@ -854,12 +857,12 @@ export default function UploadContentPage({ onNavigate }) {
       {/* ======================================================== */}
       {currentStep === 2 && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-nodus space-y-6">
+          <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-6">
 
             {/* Clean, Minimal Header matching Step 1 and Step 3 */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 border border-amber-400/30 flex items-center justify-center font-extrabold shadow-xs shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 text-slate-950 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center font-extrabold shadow-xs shrink-0">
                   <Video className="w-5 h-5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -871,7 +874,7 @@ export default function UploadContentPage({ onNavigate }) {
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+              <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 border border-transparent dark:border-white/10">
                 Step 2 of 3
               </span>
             </div>
@@ -888,20 +891,20 @@ export default function UploadContentPage({ onNavigate }) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 
                 {/* 1. 9:16 Vertical Poster */}
-                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 bg-white dark:bg-[#151515] flex flex-col justify-between shadow-2xs">
+                <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 p-5 bg-white dark:bg-[#161B16] flex flex-col justify-between shadow-2xs">
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-1.5">
                         <ImageIcon className="w-4 h-4 text-amber-500" />
                         <span className="text-xs font-bold text-slate-900 dark:text-white">Vertical Poster (9:16)</span>
                       </div>
-                      <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-bold">
+                      <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-[#161B16] text-[10px] font-bold border border-transparent dark:border-white/10">
                         <button
                           type="button"
                           onClick={() => setPosterMode('file')}
                           className={`px-2 py-0.5 rounded transition-all ${
                             posterMode === 'file'
-                              ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-2xs font-extrabold'
+                              ? 'bg-white dark:bg-[#121612] text-slate-950 dark:text-white shadow-2xs font-extrabold'
                               : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
@@ -912,7 +915,7 @@ export default function UploadContentPage({ onNavigate }) {
                           onClick={() => setPosterMode('url')}
                           className={`px-2 py-0.5 rounded transition-all ${
                             posterMode === 'url'
-                              ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-2xs font-extrabold'
+                              ? 'bg-white dark:bg-[#121612] text-slate-950 dark:text-white shadow-2xs font-extrabold'
                               : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
@@ -921,9 +924,9 @@ export default function UploadContentPage({ onNavigate }) {
                       </div>
                     </div>
 
-                    <div className="h-64 rounded-xl border border-dashed border-slate-200 dark:border-slate-700/80 overflow-hidden bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-center p-3 relative">
+                    <div className="h-64 rounded-xl border border-dashed border-slate-200 dark:border-white/10 overflow-hidden bg-slate-50/50 dark:bg-[#161B16]/30 flex items-center justify-center p-3 relative">
                       {posterUrl ? (
-                        <div className="relative h-full aspect-[9/16] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group shadow-sm">
+                        <div className="relative h-full aspect-[9/16] rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 group shadow-sm">
                           <img src={posterUrl} alt="Poster" className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button
@@ -945,7 +948,7 @@ export default function UploadContentPage({ onNavigate }) {
                             placeholder="https://.../poster.jpg"
                             value={posterUrlInput}
                             onChange={(e) => setPosterUrlInput(e.target.value)}
-                            className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-amber-400 font-mono"
+                            className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] font-mono"
                           />
                           <button
                             type="button"
@@ -1002,13 +1005,13 @@ export default function UploadContentPage({ onNavigate }) {
                         <Video className="w-4 h-4 text-amber-500" />
                         <span className="text-xs font-bold text-slate-900 dark:text-white">Teaser Trailer (9:16)</span>
                       </div>
-                      <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-bold">
+                      <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-[#161B16] text-[10px] font-bold border border-transparent dark:border-white/10">
                         <button
                           type="button"
                           onClick={() => setTrailerMode('file')}
                           className={`px-2 py-0.5 rounded transition-all ${
                             trailerMode === 'file'
-                              ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-2xs font-extrabold'
+                              ? 'bg-white dark:bg-[#121612] text-slate-950 dark:text-white shadow-2xs font-extrabold'
                               : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
@@ -1019,7 +1022,7 @@ export default function UploadContentPage({ onNavigate }) {
                           onClick={() => setTrailerMode('url')}
                           className={`px-2 py-0.5 rounded transition-all ${
                             trailerMode === 'url'
-                              ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-2xs font-extrabold'
+                              ? 'bg-white dark:bg-[#121612] text-slate-950 dark:text-white shadow-2xs font-extrabold'
                               : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
@@ -1028,7 +1031,7 @@ export default function UploadContentPage({ onNavigate }) {
                       </div>
                     </div>
 
-                    <div className="h-64 rounded-xl border border-dashed border-slate-200 dark:border-slate-700/80 overflow-hidden bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-center p-3 relative">
+                    <div className="h-64 rounded-xl border border-dashed border-slate-200 dark:border-white/10 overflow-hidden bg-slate-50/50 dark:bg-[#161B16]/30 flex items-center justify-center p-3 relative">
                       {trailerFileName || trailerUrl ? (
                         <div className="w-full h-full rounded-lg bg-slate-900 text-white p-3 flex flex-col items-center justify-center text-center relative border border-slate-700">
                           <div
@@ -1081,7 +1084,7 @@ export default function UploadContentPage({ onNavigate }) {
                             placeholder="https://.../trailer.mp4"
                             value={trailerUrlInput}
                             onChange={(e) => setTrailerUrlInput(e.target.value)}
-                            className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-amber-400 font-mono"
+                            className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] font-mono"
                           />
                           <button
                             type="button"
@@ -1139,13 +1142,13 @@ export default function UploadContentPage({ onNavigate }) {
                         <Film className="w-4 h-4 text-amber-500" />
                         <span className="text-xs font-bold text-slate-900 dark:text-white">Hero Billboard (16:9)</span>
                       </div>
-                      <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-bold">
+                      <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-[#161B16] text-[10px] font-bold border border-transparent dark:border-white/10">
                         <button
                           type="button"
                           onClick={() => setBannerMode('file')}
                           className={`px-2 py-0.5 rounded transition-all ${
                             bannerMode === 'file'
-                              ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-2xs font-extrabold'
+                              ? 'bg-white dark:bg-[#121612] text-slate-950 dark:text-white shadow-2xs font-extrabold'
                               : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
@@ -1156,7 +1159,7 @@ export default function UploadContentPage({ onNavigate }) {
                           onClick={() => setBannerMode('url')}
                           className={`px-2 py-0.5 rounded transition-all ${
                             bannerMode === 'url'
-                              ? 'bg-white dark:bg-slate-900 text-slate-950 dark:text-white shadow-2xs font-extrabold'
+                              ? 'bg-white dark:bg-[#121612] text-slate-950 dark:text-white shadow-2xs font-extrabold'
                               : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
@@ -1165,7 +1168,7 @@ export default function UploadContentPage({ onNavigate }) {
                       </div>
                     </div>
 
-                    <div className="h-64 rounded-xl border border-dashed border-slate-200 dark:border-slate-700/80 overflow-hidden bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-center p-3 relative">
+                    <div className="h-64 rounded-xl border border-dashed border-slate-200 dark:border-white/10 overflow-hidden bg-slate-50/50 dark:bg-[#161B16]/30 flex items-center justify-center p-3 relative">
                       {bannerUrl ? (
                         <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group shadow-sm">
                           <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover" />
@@ -1189,7 +1192,7 @@ export default function UploadContentPage({ onNavigate }) {
                             placeholder="https://.../banner.jpg"
                             value={bannerUrlInput}
                             onChange={(e) => setBannerUrlInput(e.target.value)}
-                            className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-amber-400 font-mono"
+                            className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] font-mono"
                           />
                           <button
                             type="button"
@@ -1242,7 +1245,7 @@ export default function UploadContentPage({ onNavigate }) {
             </div>
 
             {/* Section B: Episode Video Files & Ingestion */}
-            <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4">
+            <div className="pt-6 border-t border-slate-100 dark:border-white/10 space-y-4">
               
               <div className="flex items-center space-x-2">
                 <Film className="w-4 h-4 text-amber-500" />
@@ -1252,8 +1255,8 @@ export default function UploadContentPage({ onNavigate }) {
               </div>
 
               {/* Episode Ingestion Card */}
-              <div className="rounded-2xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-200/70 dark:border-slate-800 pb-2.5">
+              <div className="rounded-2xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 p-4 sm:p-5 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-200/70 dark:border-white/10 pb-2.5">
                   <div className="flex items-center space-x-2">
                     <span className="w-5 h-5 rounded-md bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center">
                       {episodes.length + 1}
@@ -1476,10 +1479,10 @@ export default function UploadContentPage({ onNavigate }) {
               </div>
 
               {/* Episodes Queue Table */}
-              <div className="border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs bg-white dark:bg-[#111111]">
+              <div className="border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs bg-white dark:bg-[#121612]">
                 
                 {/* Table Top Toolbar */}
-                <div className="px-5 py-3.5 bg-slate-50/70 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="px-5 py-3.5 bg-slate-50/70 dark:bg-[#161B16] border-b border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center space-x-2.5">
                     <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                       Episodes Queue
@@ -1554,7 +1557,7 @@ export default function UploadContentPage({ onNavigate }) {
                 ) : (
                   <div className="overflow-x-auto max-h-[380px] overflow-y-auto">
                     <table className="w-full text-left text-xs border-collapse">
-                      <thead className="bg-slate-50/90 dark:bg-slate-900/80 sticky top-0 z-10 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                      <thead className="bg-slate-50/90 dark:bg-[#161B16] sticky top-0 z-10 border-b border-slate-200/80 dark:border-white/10 text-slate-400 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                         <tr>
                           <th className="py-2.5 px-4 w-12 text-center">#</th>
                           <th className="py-2.5 px-4 min-w-[220px]">Episode Title</th>
@@ -1564,7 +1567,7 @@ export default function UploadContentPage({ onNavigate }) {
                           <th className="py-2.5 px-4 w-16 text-right">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 font-medium">
+                      <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
                         {episodes
                           .filter((ep) =>
                             ep.title.toLowerCase().includes(episodeSearchQuery.toLowerCase()) ||
@@ -1675,12 +1678,12 @@ export default function UploadContentPage({ onNavigate }) {
       {/* ======================================================== */}
       {currentStep === 3 && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#111111] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-nodus space-y-6">
+          <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-6">
             
             {/* Step 3 Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10 gap-3">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 border border-amber-400/30 flex items-center justify-center font-extrabold shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 text-slate-950 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center font-extrabold shadow-xs">
                   <Lock className="w-5 h-5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1700,7 +1703,7 @@ export default function UploadContentPage({ onNavigate }) {
 
             {/* Quick Metrics Bar */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800">
+              <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
                 <span className="text-[11px] font-bold text-slate-400 block uppercase">Total Episodes</span>
                 <div className="flex items-center space-x-2 mt-1">
                   <span className="text-xl font-black text-slate-950 dark:text-white">
@@ -1710,7 +1713,7 @@ export default function UploadContentPage({ onNavigate }) {
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800">
+              <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
                 <span className="text-[11px] font-bold text-slate-400 block uppercase">Free Preview Episodes</span>
                 <div className="flex items-center space-x-2 mt-1">
                   <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">
@@ -1720,10 +1723,10 @@ export default function UploadContentPage({ onNavigate }) {
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800">
+              <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
                 <span className="text-[11px] font-bold text-slate-400 block uppercase">Subscriber Paywall Locked</span>
                 <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-xl font-black text-amber-600 dark:text-amber-400">
+                  <span className="text-xl font-black text-amber-600 dark:text-[#FEF08A]">
                     {episodes.filter((ep) => !ep.isFree).length}
                   </span>
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Episodes (Requires Coins/Pass)</span>
@@ -1732,24 +1735,24 @@ export default function UploadContentPage({ onNavigate }) {
             </div>
 
             {/* Episode Paywall Access Table */}
-            <div className="border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs">
-              <div className="bg-slate-100/70 dark:bg-slate-900/80 px-4 py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+            <div className="border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-xs">
+              <div className="bg-slate-100/70 dark:bg-[#161B16] px-4 py-3 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
                 <span>Episode ({episodes.length} total)</span>
                 <span>Paywall Status (Click badge to toggle Free / Subscriber)</span>
               </div>
 
               {episodes.length === 0 ? (
-                <div className="p-8 text-center bg-white dark:bg-[#111111]">
+                <div className="p-8 text-center bg-white dark:bg-[#121612]">
                   <FileVideo className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
                   <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No episodes found</p>
                   <p className="text-xs text-slate-400 mt-1">Please go back to Step 2 (Media Studio) to add episode videos.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 dark:divide-slate-800/80 max-h-[380px] overflow-y-auto">
+                <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[380px] overflow-y-auto">
                   {episodes.map((ep) => (
                     <div
                       key={ep.id}
-                      className="px-4 py-3 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-900/40 transition-colors bg-white dark:bg-[#111111]"
+                      className="px-4 py-3 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors bg-white dark:bg-[#121612]"
                     >
                       <div className="flex items-center space-x-3 min-w-0 pr-3 flex-1">
                         <span className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 font-black text-xs flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0">
@@ -1818,7 +1821,7 @@ export default function UploadContentPage({ onNavigate }) {
       {/* ======================================================== */}
       {/* BOTTOM FIXED NAVIGATION BAR */}
       {/* ======================================================== */}
-      <div className="bg-white dark:bg-[#111111] rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 shadow-nodus flex items-center justify-between gap-4 sticky bottom-4 z-40">
+      <div className="bg-white/95 dark:bg-[#141914]/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 shadow-nodus flex items-center justify-between gap-4 sticky bottom-4 z-40">
         
         <button
           type="button"

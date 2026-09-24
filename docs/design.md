@@ -19,29 +19,40 @@ The **E² Stories Admin Panel** is designed as a sleek, high-precision, desktop-
 ### 2.1 Color Palette
 
 ```
-/* Base Backgrounds & Surfaces */
---bg-canvas:        #F8F9FC;      /* Light surface mode */
---bg-surface:       #FFFFFF;      /* Clean card surface */
---bg-canvas-dark:   #090A0F;      /* Deep Obsidian dark mode */
---bg-surface-dark:  #12141D;      /* Card & Modal dark surface */
---bg-card-border:   #232638;      /* Subtle border contrast */
+/* Base Backgrounds & Surfaces (Material Design 2 Elevation Model) */
+--bg-canvas:          #F8F9FC;      /* Light surface mode */
+--bg-surface:         #FFFFFF;      /* Clean card surface */
+
+--bg-canvas-dark:     #080B08;      /* Deep dark slate/charcoal (0dp base canvas, never pure #000000) */
+--bg-surface-01dp:    #121612;      /* Level 1: Cards, table rows, input containers (5% overlay) */
+--bg-surface-02dp:    #161B16;      /* Level 2: Elevated/hovered cards, widgets (7% overlay) */
+--bg-surface-04dp:    #1A1F1A;      /* Level 4: App bars, sticky page headers (9% overlay) */
+--bg-surface-08dp:    #202620;      /* Level 8: Menus, dropdowns, filter popovers (12% overlay) */
+--bg-surface-16dp:    #242A24;      /* Level 16: Slide-over navigation drawers (15% overlay) */
+--bg-surface-24dp:    #282E28;      /* Level 24: Modals, confirmation dialogs (16% overlay) */
+
+--border-subtle-dark: rgba(255, 255, 255, 0.10); /* 10% white divider/border */
+--border-focus-dark:  rgba(254, 240, 138, 0.40); /* Theme accent focus ring */
 
 /* Accent & Brand Colors */
---color-brand-primary:   #FEF08A;  /* Brand Primary Pastel Yellow (buttons, active tabs, charts) */
+--color-brand-primary:   #FEF08A;  /* Brand Primary Pastel Yellow (buttons, active tabs, KPI badges) */
+--color-brand-primary-h: #FDE047;  /* Hover state for primary buttons */
 --color-brand-secondary: #8FFE01;  /* Neon Lime (positive growth, active status, badges) */
 --color-brand-accent:    #E50914;  /* E² Crimson Red (critical actions, play badges) */
 --color-gold-accent:     #E5A93C;  /* E² Stories Gold (VIP status highlight) */
 
-/* Text & Neutrals */
---text-primary:     #0F172A;      /* Dark text on light */
---text-secondary:   #64748B;      /* Muted subtitles */
---text-primary-dark:#F8FAFC;      /* Crisp light text on dark */
---text-muted-dark:  #94A3B8;      /* Muted captions on dark */
+/* Text & "On-Surface" Neutrals (WCAG AA Compliant) */
+--text-primary:          #0F172A;      /* Dark text on light mode */
+--text-secondary:        #64748B;      /* Muted subtitles light mode */
+
+--text-high-dark:        rgba(255, 255, 255, 0.90); /* 87-90% White: High emphasis titles, headers (≥15.8:1) */
+--text-med-dark:         rgba(255, 255, 255, 0.60); /* 60% White: Medium emphasis body, descriptions (≥4.5:1) */
+--text-disabled-dark:    rgba(255, 255, 255, 0.38); /* 38% White: Disabled text, placeholders */
 
 /* Functional States */
---status-success:   #10B981;      /* Published / Payment Verified */
---status-warning:   #F59E0B;      /* Draft / Pending Verification */
---status-danger:    #EF4444;      /* Suspended / Failed Payment */
+--status-success:        #10B981;      /* Published / Payment Verified */
+--status-warning:        #F59E0B;      /* Draft / Pending Verification */
+--status-danger:         #EF4444;      /* Suspended / Failed Payment */
 ```
 
 ### 2.2 Typography Scale
@@ -51,6 +62,25 @@ The **E² Stories Admin Panel** is designed as a sleek, high-precision, desktop-
 - **Heading 2**: `20px / 1.3 / SemiBold (600)` — Section headers & modal titles
 - **Body Regular**: `14px / 1.5 / Regular (400)` — Table cells & body copy
 - **Caption / Label**: `12px / 1.4 / Medium (500)` — Badges, filter chips, timestamps
+
+### 2.3 Material Design 2 Dark Theme Architecture (UI Application Rules)
+Following [Material Design 2 Dark Theme Guidelines](https://m2.material.io/design/color/dark-theme.html#ui-application):
+
+1. **Elevation via Surface Lightness**:
+   - Depth is communicated in dark mode through progressively lighter surface tones rather than solely through cast shadows.
+   - White semi-transparent overlays are applied above the dark base: 0dp (0%), 1dp (5%), 2dp (7%), 4dp (9%), 8dp (12%), 16dp (15%), 24dp (16%).
+   - Cast shadows along the z-axis (`shadow-md`, `shadow-xl`) remain active to delineate overlapping surfaces. Never use colored glowing halos as substitutes for shadows.
+2. **Surface Purity vs. Glare**:
+   - Avoid pure `#000000` for surface fills. Dark grey/slate (`#080B08` to `#121612`) mitigates eye strain and allows elevation tiers to be visually discernible.
+3. **Accent Restraint**:
+   - Saturated colors must not dominate large surface areas. 90%+ of UI real estate consists of dark surfaces.
+   - Primary `#FEF08A` is reserved for high-impact focal points (CTA buttons, active navigation, active filters, KPI badges).
+   - Elevation white overlays are **never** applied to primary-accented surfaces.
+4. **Legibility & Contrast Hierarchy**:
+   - High-emphasis text: 87–90% opacity white (`text-white/90` or `text-slate-100`).
+   - Medium-emphasis text: 60% opacity white (`text-white/60` or `text-slate-400`).
+   - Disabled / Placeholders: 38% opacity white (`text-white/38` or `text-slate-500`).
+   - Dividers & borders: 10–12% opacity white (`border-white/10`).
 
 ---
 

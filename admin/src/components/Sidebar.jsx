@@ -63,7 +63,7 @@ export default function Sidebar({
       title: 'ENGAGEMENT',
       items: [
         { id: 'notifications', label: 'Push Notifications', icon: SendHorizontal },
-        { id: 'app_notifications', label: 'Notifications', icon: Bell },
+        { id: 'app_notifications', label: 'In-App Notices', icon: Bell },
       ]
     },
     {
@@ -80,11 +80,11 @@ export default function Sidebar({
     <aside
       className={`${
         isCollapsed ? 'w-[76px]' : 'w-64'
-      } bg-white dark:bg-[#0D0D0D] text-slate-900 dark:text-slate-100 flex flex-col h-screen sticky top-0 shrink-0 border-r border-slate-200/90 dark:border-slate-800 shadow-[1px_0_12px_-4px_rgba(15,23,42,0.04)] dark:shadow-[1px_0_12px_-4px_rgba(0,0,0,0.4)] z-40 font-urbanist selection:bg-[#FEF08A] selection:text-black transition-[width] duration-300 ease-in-out`}
+      } bg-white dark:bg-[#141914] text-slate-900 dark:text-slate-100 flex flex-col h-screen sticky top-0 shrink-0 border-r border-slate-200/90 dark:border-white/10 shadow-[1px_0_12px_-4px_rgba(15,23,42,0.04)] dark:shadow-[1px_0_12px_-4px_rgba(0,0,0,0.5)] z-40 font-urbanist selection:bg-[#FEF08A] selection:text-black transition-[width] duration-300 ease-in-out`}
     >
       
       {/* 1. Header & Brand Identity */}
-      <div className={`p-4 border-b border-slate-100 dark:border-slate-800 flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} bg-white dark:bg-[#0D0D0D] shrink-0`}>
+      <div className={`p-4 border-b border-slate-100 dark:border-white/10 flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} bg-white dark:bg-[#141914] shrink-0`}>
         <div
           className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} cursor-pointer group min-w-0 w-full`}
           onClick={() => setActiveTab('summary')}
@@ -96,7 +96,7 @@ export default function Sidebar({
               alt="Admin Panel Logo"
               className="w-full h-full object-contain filter drop-shadow-sm"
             />
-            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-[#0D0D0D] rounded-full"></span>
+            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-[#141914] rounded-full"></span>
           </div>
           {!isCollapsed && (
             <div className="min-w-0 flex-1">
@@ -116,7 +116,7 @@ export default function Sidebar({
         {navSections.map((section, sIdx) => (
           <div key={sIdx} className={isCollapsed ? 'space-y-1' : 'space-y-0.5'}>
             {isCollapsed ? (
-              sIdx > 0 && <div className="my-2 mx-auto w-6 border-t border-slate-200/80 dark:border-slate-800" title={section.title} />
+              sIdx > 0 && <div className="my-2 mx-auto w-6 border-t border-slate-200/80 dark:border-white/10" title={section.title} />
             ) : (
               <div className={`px-3 ${sIdx === 0 ? 'pb-1' : 'pt-2 pb-1'} flex items-center justify-between`}>
                 <span className="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">
@@ -137,12 +137,12 @@ export default function Sidebar({
                       ? `w-10 h-10 mx-auto justify-center rounded-xl ${
                           isActive
                             ? 'bg-[#FEF08A] text-black shadow-xs ring-1 ring-amber-300/80 font-bold'
-                            : 'text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800'
+                            : 'text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-white/[0.06]'
                         }`
                       : `w-full justify-between px-3 py-2 rounded-xl text-[13.5px] ${
                           isActive
                             ? 'bg-[#FEF08A] text-black shadow-xs border border-amber-300/60 font-bold'
-                            : 'text-slate-800 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-slate-800/80 font-semibold'
+                            : 'text-slate-800 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-white/[0.06] font-semibold'
                         }`
                   }`}
                   title={isCollapsed ? item.label : undefined}

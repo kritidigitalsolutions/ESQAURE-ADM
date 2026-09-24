@@ -51,7 +51,7 @@ export default function ProgressMetricCard({
   const isCompact = size === 'sm';
   const gridId = `grid-${useId().replace(/:/g, '')}`;
   const minHeightClass = isCompact ? 'min-h-[200px] sm:min-h-[220px]' : 'min-h-[340px] sm:min-h-[380px]';
-  const shell = `relative flex ${minHeightClass} w-full flex-col overflow-hidden rounded-[28px] border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#111111] shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover ${className}`;
+  const shell = `relative flex ${minHeightClass} w-full flex-col overflow-hidden rounded-[28px] border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#121612] shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover ${className}`;
 
   const periods = periodOptions ?? DEFAULT_PERIODS;
   const [selectedLabel, setSelectedLabel] = useState(period);
@@ -221,7 +221,7 @@ export default function ProgressMetricCard({
 
           {/* Unified Signature Dashboard Pill Tabs (Users vs Subscribers) */}
           {tabs.length > 0 && (
-            <div className="pointer-events-auto inline-flex items-center gap-0.5 rounded-xl bg-slate-100/90 dark:bg-slate-900 p-1 border border-slate-200/70 dark:border-slate-700 shadow-2xs self-start sm:self-auto">
+            <div className="pointer-events-auto inline-flex items-center gap-0.5 rounded-xl bg-slate-100/90 dark:bg-[#161B16] p-1 border border-slate-200/70 dark:border-white/10 shadow-2xs self-start sm:self-auto">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
@@ -291,10 +291,10 @@ export default function ProgressMetricCard({
 
       {/* Footer Area: Timeline Date Labels */}
       <div
-        className={`relative z-10 flex items-center justify-between gap-3 border-t border-slate-100 dark:border-slate-800 bg-white/95 dark:bg-[#111111]/95 backdrop-blur-xs ${isCompact ? 'px-4 sm:px-5 py-2.5' : 'px-5 sm:px-7 py-3.5'}`}
+        className={`relative z-10 flex items-center justify-between gap-3 border-t border-slate-100 dark:border-white/10 bg-white/95 dark:bg-[#141914]/95 backdrop-blur-xs ${isCompact ? 'px-4 sm:px-5 py-2.5' : 'px-5 sm:px-7 py-3.5'}`}
       >
         {/* Dynamic Date Labels Under Graph */}
-        <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-semibold text-slate-500 dark:text-slate-500 overflow-x-auto w-full py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 overflow-x-auto w-full py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {primary?.data?.map((pt, idx) => {
             const isSelected = hoveredIdx === idx;
             return (
@@ -306,8 +306,8 @@ export default function ProgressMetricCard({
                 onClick={() => setHoveredIdx(idx)}
                 className={`px-2 sm:px-2.5 py-1 rounded-lg transition-all whitespace-nowrap cursor-pointer ${
                   isSelected
-                    ? 'bg-slate-950 dark:bg-[#FEF08A] text-[#FEF08A] dark:text-slate-950 font-extrabold shadow-2xs scale-105'
-                    : 'text-slate-600 dark:text-slate-500 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-[#FEF08A] text-slate-950 font-extrabold shadow-2xs scale-105'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06]'
                 }`}
               >
                 {pt.date}
