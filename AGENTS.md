@@ -71,3 +71,12 @@ Whenever creating or modifying KPI cards, stat cards, metric overviews, or featu
 
 4. **Action Buttons / Active Indicators**:
    - Primary action buttons, active tab indicators, and search highlights should use `bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold`.
+
+---
+
+## Postman Collection Maintenance Standard
+
+- **Always update the Postman collection**: Whenever any new API endpoint is created, updated, or modified, immediately update `E2_Stories_OTT_Auth_APIs.postman_collection.json`.
+- Keep folders organized under `MOBILE APP`, `ADMIN PANEL`, and `SHARED`.
+- Ensure all query parameters, headers, sample request bodies, and documentation descriptions are included.
+

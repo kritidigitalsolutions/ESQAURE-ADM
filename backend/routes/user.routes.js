@@ -11,7 +11,7 @@ const router = Router();
 
 /**
  * GET /api/v1/users
- * List all users with search, filters (ALL | VIP | FREE | SUSPENDED), and KPI stats
+ * List all users with search, filters (ALL | SUBSCRIBED | FREE | SUSPENDED), and KPI stats
  * Query: ?search=&filter=ALL&page=1&limit=100
  */
 router.get('/', UserController.getUsers);
@@ -37,7 +37,7 @@ router.patch('/:id/status', UserController.updateUserStatus);
 
 /**
  * PATCH /api/v1/users/:id/vip
- * Grant or revoke VIP subscription access
+ * Grant or revoke subscription access
  * Body: { "isVip": true, "days": 30, "planName": "Monthly Pass" }
  */
 router.patch('/:id/vip', UserController.updateUserVip);

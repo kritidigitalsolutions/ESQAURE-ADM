@@ -3,6 +3,13 @@ import authRoutes         from './auth.routes.js';
 import userRoutes         from './user.routes.js';
 import uploadRoutes       from './upload.routes.js';
 import notificationRoutes from './notification.routes.js';
+import legalRoutes        from './legal.routes.js';
+import subscriptionRoutes from './subscription.routes.js';
+import playerRoutes       from './player.routes.js';
+import dramaRoutes        from './drama.routes.js';
+import searchRoutes       from './search.routes.js';
+import homeRoutes         from './home.routes.js';
+import genreRoutes        from './genre.routes.js';
 
 const router = Router();
 
@@ -26,15 +33,33 @@ router.get('/health', (req, res) => {
 /** OTP login, profile setup, token refresh, genre/interest onboarding */
 router.use('/auth', authRoutes);
 
+/** Subscription Plans, 7-Day Rs. 2 Trial, Razorpay verification, Upgrades & Webhooks */
+router.use('/subscriptions', subscriptionRoutes);
+
 /** Notification list, settings, FCM device token management */
 router.use('/notifications', notificationRoutes);
+
+/** Video Player, Scrubber, Episodes Drawer & Playback Settings */
+router.use('/player', playerRoutes);
+
+/** Drama series catalog and nested stream endpoints */
+router.use('/dramas', dramaRoutes);
+
+/** Search & Discovery (Popular Searches, Genre-based Recommendations, Auto-suggest) */
+router.use('/search', searchRoutes);
+
+/** Home Feed, Prioritized Content, Categories & Admin Home Sections */
+router.use('/home', homeRoutes);
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  ADMIN PANEL ROUTES
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** User list, search, filter, VIP management, status toggle */
+/** User list, search, filter, subscription management, status toggle */
 router.use('/users', userRoutes);
+
+/** Genre and category management (CRUD, active toggle, stats) */
+router.use('/genres', genreRoutes);
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  SHARED ROUTES  (used by both Mobile App and Admin Panel)
@@ -42,5 +67,8 @@ router.use('/users', userRoutes);
 
 /** Single and multiple file/media uploads */
 router.use('/upload', uploadRoutes);
+
+/** Legal documents (Privacy Policy, Terms & Conditions, Refund, Compliance) */
+router.use('/legal', legalRoutes);
 
 export default router;

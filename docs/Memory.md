@@ -30,10 +30,10 @@
    - Each `Drama` has multiple `Episodes` (1–3 min duration).
    - Media: 9:16 portrait poster, 16:9 carousel banner, 9:16 vertical trailer preview.
    - Multi-language subtitles (`Hindi`, `English`).
-2. **Freemium & VIP Paywall**:
+2. **Freemium & Subscription Paywall**:
    - Episodes 1 to 3 are typically Free (`isFree = true`).
-   - Episode 4 and onward require an active VIP subscription (`isVip = true`).
-   - If an unauthenticated or non-VIP user requests a paywalled stream, API returns `403 Forbidden` with error code `VIP_REQUIRED`.
+   - Episode 4 and onward require an active subscription (`isVip = true`).
+   - If an unauthenticated or non-subscribed user requests a paywalled stream, API returns `403 Forbidden` with error code `SUBSCRIPTION_REQUIRED`.
 3. **Monetization Plans**:
    - **Monthly**: ₹199 / month (30 days).
    - **Yearly**: ₹1,499 / year (365 days).

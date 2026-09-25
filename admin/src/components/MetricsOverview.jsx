@@ -1,40 +1,66 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowUpRight, Crown, Users, IndianRupee, PlayCircle, LayoutGrid, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react';
 import AnimatedNumber from './common/AnimatedNumber';
+import { userService } from '../services/userService';
+import { subscriptionService } from '../services/subscriptionService';
 
 export default function MetricsOverview({ onOpenIngestModal }) {
   const [activeTab, setActiveTab] = useState('revenue');
   const [userTab, setUserTab] = useState('total');
   const [subTab, setSubTab] = useState('active');
 
+  const [realUserCounts, setRealUserCounts] = useState(null);
+  const [realSubKpis, setRealSubKpis] = useState(null);
+
+  useEffect(() => {
+    Promise.allSettled([
+      userService.getUsers({ limit: 1 }),
+      subscriptionService.getOverview()
+    ]).then(([usersRes, subRes]) => {
+      if (usersRes.status === 'fulfilled' && usersRes.value?.counts) {
+        setRealUserCounts(usersRes.value.counts);
+      }
+      if (subRes.status === 'fulfilled' && subRes.value?.kpis) {
+        setRealSubKpis(subRes.value.kpis);
+      }
+    }).catch((err) => {
+      console.warn('MetricsOverview API fetch fallback:', err);
+    });
+  }, []);
+
   // Dynamic values for User Base Card (Audience & Acquisition)
+  const totalUsersVal = (realUserCounts?.all ?? 0).toLocaleString();
+  const activeTodayVal = (realUserCounts?.activeToday ?? 0).toLocaleString();
+  const vipUsersVal = (realUserCounts?.vip ?? realSubKpis?.activeSubscribers ?? 0).toLocaleString();
+  const freeUsersVal = (realUserCounts?.free ?? 0).toLocaleString();
+
   const userMetrics = {
     total: {
       label: 'Total Users',
       sublabel: 'Platform Registered Base',
-      value: '148,920',
-      badge: '+18.2%',
+      value: totalUsersVal,
+      badge: 'Live DB',
       unit: '',
-      footerLeft: '12,450 paid subscribers',
-      footerRight: '8.4% conversion rate',
+      footerLeft: `${vipUsersVal} paid subscribers`,
+      footerRight: `${freeUsersVal} free tier accounts`,
     },
     active: {
       label: 'Daily Active Users',
       sublabel: 'Active Sessions Today',
-      value: '64,800',
-      badge: '+12.4%',
+      value: activeTodayVal,
+      badge: 'Live DB',
       unit: 'DAU',
-      footerLeft: '72% active stream viewers',
-      footerRight: 'Avg 4.2 sessions / user',
+      footerLeft: `${realUserCounts?.avgWatchTime || '0.0'} hrs avg watch time`,
+      footerRight: `Peak ${realUserCounts?.peakWatchTime || '0.0'} hrs`,
     },
     new: {
-      label: 'New Installs',
-      sublabel: 'First-time Installs',
-      value: '2,450',
-      badge: '+14.5%',
+      label: 'Free Tier Accounts',
+      sublabel: 'Non-Subscribed Base',
+      value: freeUsersVal,
+      badge: 'Live DB',
       unit: '',
-      footerLeft: '54.2% organic store search',
-      footerRight: '+14.5% vs last week',
+      footerLeft: 'Eligible for 7-Day Trial',
+      footerRight: `${realUserCounts?.suspended || 0} suspended`,
     },
   };
 
@@ -43,29 +69,29 @@ export default function MetricsOverview({ onOpenIngestModal }) {
     active: {
       label: 'Paid Subscribers',
       sublabel: 'Active Paid Subscriptions',
-      value: '12,450',
-      badge: '+24.1%',
+      value: vipUsersVal,
+      badge: 'Live DB',
       unit: '',
-      footerLeft: '8.4% of total user base',
-      footerRight: '₹199 avg monthly plan',
+      footerLeft: `MRR: ₹${realSubKpis?.totalMrr || '0.00'}`,
+      footerRight: '1 Month / 6 Months / 12 Months',
     },
     new: {
-      label: 'New Subscribers',
-      sublabel: 'Daily Paid Signups Today',
-      value: '1,280',
-      badge: '+31.5%',
-      unit: 'Today',
-      footerLeft: '+310 UPI / Card activations',
-      footerRight: '+24.1% vs yesterday',
+      label: '7-Day Free Trials',
+      sublabel: 'AutoPay Mandates Active',
+      value: (realSubKpis?.activeTrialUsers ?? 0).toLocaleString(),
+      badge: 'Live DB',
+      unit: 'Active',
+      footerLeft: 'Razorpay e-Mandates',
+      footerRight: '₹2 Token Mandate',
     },
     renewals: {
-      label: 'Auto-Renewal Rate',
-      sublabel: 'Subscription Retention & Recurring Pay',
-      value: '94.6%',
-      badge: '+3.2%',
+      label: 'Churn Rate',
+      sublabel: 'Subscription Retention Metric',
+      value: realSubKpis?.churnRate || '0.0%',
+      badge: 'Live DB',
       unit: '',
-      footerLeft: 'Churn low at 5.4%',
-      footerRight: 'Avg lifetime: 4.8 months',
+      footerLeft: 'Zero-Grace Locking',
+      footerRight: 'Immediate Expiry',
     },
   };
 
@@ -80,34 +106,34 @@ export default function MetricsOverview({ onOpenIngestModal }) {
   // Dynamic values for the Hero Metric Card based on active tab (Income & Monetization)
   const metricData = {
     revenue: {
-      centerValue: '₹94,500',
-      centerLabel: `TODAY'S REVENUE • ${currentMonthYear}`,
-      stat1Label: 'MONTHLY REVENUE',
-      stat1Value: '₹24.8 Lakh',
-      stat1Badge: '+28.4%',
-      stat2Label: 'LIFETIME REVENUE',
-      stat2Value: '₹1.82 Cr',
-      stat2Badge: '+35.6%',
+      centerValue: `₹${realSubKpis?.totalMrr || '0.00'}`,
+      centerLabel: `LIVE RECURRING MRR • ${currentMonthYear}`,
+      stat1Label: 'TOTAL REVENUE COLLECTED',
+      stat1Value: `₹${(realSubKpis?.totalRevenueCollected || 0).toLocaleString()}`,
+      stat1Badge: 'Live DB',
+      stat2Label: 'ACTIVE SUBSCRIBERS',
+      stat2Value: vipUsersVal,
+      stat2Badge: 'Live DB',
     },
     subscribers: {
-      centerValue: '12,450',
+      centerValue: vipUsersVal,
       centerLabel: `ACTIVE SUBSCRIBERS • ${currentMonthYear}`,
-      stat1Label: 'NEW SUBSCRIBERS TODAY',
-      stat1Value: '1,280',
-      stat1Badge: '+24.1%',
-      stat2Label: 'CONVERSION RATE',
-      stat2Value: '8.4%',
-      stat2Badge: '+2.1%',
+      stat1Label: '7-DAY TRIALS',
+      stat1Value: (realSubKpis?.activeTrialUsers ?? 0).toLocaleString(),
+      stat1Badge: 'Live DB',
+      stat2Label: 'CHURN RATE',
+      stat2Value: realSubKpis?.churnRate || '0.0%',
+      stat2Badge: 'Live DB',
     },
     plans: {
-      centerValue: '₹199',
-      centerLabel: `AVG REVENUE PER USER • ${currentMonthYear}`,
-      stat1Label: 'MONTHLY PLANS',
-      stat1Value: '₹18.4L',
-      stat1Badge: '74.2%',
-      stat2Label: 'ANNUAL PASSES',
-      stat2Value: '₹6.4L',
-      stat2Badge: '25.8%',
+      centerValue: `₹${realSubKpis?.totalMrr || '0.00'}`,
+      centerLabel: `MONTHLY RUN-RATE • ${currentMonthYear}`,
+      stat1Label: 'TOTAL USER BASE',
+      stat1Value: totalUsersVal,
+      stat1Badge: 'Live DB',
+      stat2Label: 'PAID BASE',
+      stat2Value: vipUsersVal,
+      stat2Badge: 'Live DB',
     },
   };
 
@@ -120,12 +146,12 @@ export default function MetricsOverview({ onOpenIngestModal }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         {/* Card 1: User Base */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 min-h-[170px] border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 min-h-[170px] border border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-xl dark:hover:border-amber-400/40 hover:-translate-y-1 relative overflow-hidden group transition-all duration-300 flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 group-hover:scale-105 transition-transform shadow-xs">
-                  <Users className="w-5 h-5 text-slate-950 dark:text-amber-400" />
+                <div className="w-11 h-11 rounded-xl bg-[#FEF08A] dark:bg-[#FEF08A]/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-110 transition-transform shadow-xs shrink-0">
+                  <Users className="w-5.5 h-5.5 stroke-[2.2]" />
                 </div>
                 <div>
                   <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block font-urbanist">
@@ -208,12 +234,12 @@ export default function MetricsOverview({ onOpenIngestModal }) {
         </div>
 
         {/* Card 2: Paid Subscriptions */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 min-h-[170px] border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 min-h-[170px] border border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-xl dark:hover:border-amber-400/40 hover:-translate-y-1 relative overflow-hidden group transition-all duration-300 flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 group-hover:scale-105 transition-transform shadow-xs">
-                  <ShieldCheck className="w-5 h-5 text-slate-950 dark:text-amber-400" />
+                <div className="w-11 h-11 rounded-xl bg-[#FEF08A] dark:bg-[#FEF08A]/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-110 transition-transform shadow-xs shrink-0">
+                  <ShieldCheck className="w-5.5 h-5.5 stroke-[2.2]" />
                 </div>
                 <div>
                   <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block font-urbanist">
@@ -344,7 +370,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
               <p className="text-xs font-medium text-slate-400 dark:text-slate-400">
                 Top Revenue Driver:{' '}
                 <span className="font-semibold text-slate-700 dark:text-slate-200">
-                  Monthly All-Access Pass (₹199)
+                  1 Month Pass (₹99) &amp; 12M Pass (₹899)
                 </span>
               </p>
             </div>

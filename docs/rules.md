@@ -76,7 +76,7 @@ All API endpoints must return a predictable, uniform JSON structure:
 {
   "success": false,
   "statusCode": 403,
-  "error": "VIP_REQUIRED",
+  "error": "SUBSCRIPTION_REQUIRED",
   "message": "Premium membership is required to unlock this episode."
 }
 ```
@@ -86,7 +86,7 @@ All API endpoints must return a predictable, uniform JSON structure:
 - `201 Created`: Successful POST entity creation.
 - `400 Bad Request`: Client input validation error (missing/invalid fields).
 - `401 Unauthorized`: Missing, expired, or invalid JWT.
-- `403 Forbidden`: Authenticated user lacks permission (e.g. Free user trying to stream VIP episode).
+- `403 Forbidden`: Authenticated user lacks permission (e.g. Free user trying to stream paywalled episode).
 - `404 Not Found`: Resource does not exist.
 - `429 Too Many Requests`: Rate limit reached (e.g., OTP flood limit).
 - `500 Internal Server Error`: Uncaught server exception.
@@ -126,7 +126,7 @@ All API endpoints must return a predictable, uniform JSON structure:
 ### 3.4 Payment Webhook Verification
 - Never trust client-reported payment success.
 - **Mandatory Webhook Verification**: Compute SHA256 HMAC of the raw webhook payload against `RAZORPAY_WEBHOOK_SECRET`.
-- Only grant VIP membership upon successful webhook validation or verified signature check on `/verify-payment`.
+- Only grant subscription access upon successful webhook validation or verified signature check on `/verify-payment`.
 
 ---
 

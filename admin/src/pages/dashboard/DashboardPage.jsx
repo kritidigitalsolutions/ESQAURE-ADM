@@ -1,19 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import MetricsOverview from '../../components/MetricsOverview';
 import ActivityChart from '../../components/ActivityChart';
 import IncomeChart from '../../components/IncomeChart';
 import AnimatedNumber from '../../components/common/AnimatedNumber';
-import { mockDramas, mockTransactions } from '../../data/mockOttData';
+import Badge from '../../components/common/Badge';
+import { subscriptionService } from '../../services/subscriptionService';
+import { mockDramas } from '../../data/mockOttData';
 import { Flame, CreditCard, ChevronRight, Crown, Sparkles } from 'lucide-react';
 
 export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
   const trendingDramas = mockDramas.filter(d => d.isTrending).sort((a, b) => a.trendingRank - b.trendingRank);
+  const [recentTransactions, setRecentTransactions] = useState([]);
 
-  // Time stamps for recent subscriptions
-  const relativeTimes = ['2m ago', '12m ago', '28m ago', '54m ago', '1h ago', '2h ago'];
+  useEffect(() => {
+    subscriptionService
+      .getTransactions({ limit: 4 })
+      .then((res) => {
+        if (res?.transactions && Array.isArray(res.transactions)) {
+          setRecentTransactions(res.transactions);
+        }
+      })
+      .catch((err) => {
+        console.warn('Dashboard transactions load error:', err);
+      });
+  }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 font-urbanist">
       {/* 4 Core OTT Stat Cards & Nodus Metric Row */}
       <MetricsOverview onOpenIngestModal={onOpenIngestModal} />
 
@@ -136,66 +149,67 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
 
             {/* Subscriptions List: Clean, Frameless, Perfectly Columnar */}
             <div className="divide-y divide-slate-100/80 dark:divide-white/5">
-              {mockTransactions.slice(0, 4).map((txn) => {
-                const isYearly = txn.plan.toLowerCase().includes('yearly');
-                const isSuccess = txn.status === 'SUCCESS';
-                const initials = txn.user
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')
-                  .toUpperCase();
+              {recentTransactions.length === 0 ? (
+                <div className="py-8 text-center text-slate-400 text-xs font-bold">
+                  No recent subscription transactions
+                </div>
+              ) : (
+                recentTransactions.slice(0, 4).map((txn) => {
+                  const initials = (txn.user || 'User')
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .toUpperCase();
 
-                return (
-                  <div
-                    key={txn.id}
-                    onClick={() => onNavigate('transactions')}
-                    className="grid grid-cols-12 gap-3 items-center py-3 px-2 -mx-2 rounded-xl hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors cursor-pointer group"
-                  >
-                    {/* Col 1: Subscriber (col-span-5) */}
-                    <div className="col-span-5 flex items-center space-x-2.5 min-w-0 pr-1">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
-                        isYearly ? 'bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 text-slate-950 dark:text-amber-400 font-extrabold' : 'bg-slate-100 dark:bg-[#161B16] dark:border dark:border-white/10 text-slate-700 dark:text-slate-300'
-                      }`}>
-                        {initials}
+                  return (
+                    <div
+                      key={txn.id}
+                      onClick={() => onNavigate('transactions')}
+                      className="grid grid-cols-12 gap-3 items-center py-3 px-2 -mx-2 rounded-xl hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors cursor-pointer group"
+                    >
+                      {/* Col 1: Subscriber (col-span-5) */}
+                      <div className="col-span-5 flex items-center space-x-2.5 min-w-0 pr-1">
+                        <div className="w-8 h-8 rounded-full bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 text-slate-950 dark:text-amber-400 font-extrabold flex items-center justify-center text-xs shrink-0">
+                          {initials}
+                        </div>
+
+                        <div className="min-w-0">
+                          <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 truncate block group-hover:text-amber-400 transition-colors">
+                            {txn.user}
+                          </span>
+                          <span className="text-[11px] text-slate-400 dark:text-slate-400 font-medium truncate block mt-0.5">
+                            {txn.phone}
+                          </span>
+                        </div>
                       </div>
 
-                      <div className="min-w-0">
-                        <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 truncate block group-hover:text-amber-400 transition-colors">
-                          {txn.user}
-                        </span>
-                        <span className="text-[11px] text-slate-400 dark:text-slate-400 font-medium truncate block mt-0.5">
-                          {txn.phone}
+                      {/* Col 2: Plan & Method (col-span-4) */}
+                      <div className="col-span-4 min-w-0 pr-1 space-y-1">
+                        <Badge plan={txn.plan} size="xs">
+                          {txn.plan}
+                        </Badge>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate block">
+                          {txn.method}
                         </span>
                       </div>
-                    </div>
 
-                    {/* Col 2: Plan & Method (col-span-4) */}
-                    <div className="col-span-4 min-w-0 pr-1">
-                      <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold leading-none ${
-                        isYearly ? 'bg-[#FEF08A] text-slate-950' : 'bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 dark:border dark:border-white/10'
-                      }`}>
-                        {txn.plan}
-                      </span>
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate block mt-1">
-                        {txn.method}
-                      </span>
+                      {/* Col 3: Amount & Status (col-span-3 text-right) */}
+                      <div className="col-span-3 text-right shrink-0">
+                        <span className="font-black text-slate-950 dark:text-white text-xs sm:text-sm font-urbanist block">
+                          {txn.amount}
+                        </span>
+                        <Badge
+                          variant={txn.status === 'SUCCESS' ? 'active' : txn.status === 'PENDING' ? 'flix9-trial' : 'inactive'}
+                          size="xs"
+                          className="mt-1"
+                        >
+                          {txn.status === 'SUCCESS' ? 'Success' : txn.status === 'PENDING' ? 'Pending' : 'Failed'}
+                        </Badge>
+                      </div>
                     </div>
-
-                    {/* Col 3: Amount & Status (col-span-3 text-right) */}
-                    <div className="col-span-3 text-right shrink-0">
-                      <span className="font-black text-slate-950 dark:text-white text-xs sm:text-sm font-urbanist block">
-                        <AnimatedNumber value={txn.amount} />
-                      </span>
-                      <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full mt-1 ${
-                        isSuccess ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20' : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400 border border-rose-500/20'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${isSuccess ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                        {txn.status}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
         </div>

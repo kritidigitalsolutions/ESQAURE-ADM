@@ -64,3 +64,49 @@ export const authenticate = async (req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * Middleware to optionally authenticate requests:
+ * If a valid Bearer token is provided, req.user and req.userId are populated.
+ * If no token or an invalid token is provided, req.user remains null without failing.
+ */
+export const optionalAuthenticate = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      req.user = null;
+      req.userId = null;
+      return next();
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    let decoded;
+    try {
+      decoded = verifyJwt(token);
+    } catch {
+      req.user = null;
+      req.userId = null;
+      return next();
+    }
+
+    if (decoded && decoded.userId) {
+      const user = await User.findById(decoded.userId);
+      if (user && user.status === 'ACTIVE') {
+        req.user = user;
+        req.userId = user._id.toString();
+      } else {
+        req.user = null;
+        req.userId = null;
+      }
+    }
+
+    return next();
+  } catch {
+    req.user = null;
+    req.userId = null;
+    return next();
+  }
+};
+

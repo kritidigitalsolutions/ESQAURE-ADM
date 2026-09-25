@@ -138,8 +138,8 @@ export default function App() {
         };
       case 'subscriptions':
         return {
-          title: "Subscription Plans",
-          subtitle: "Set monthly (₹199) and yearly (₹1,499) plans, pricing, and member benefits."
+          title: "Subscription Plans & Pricing",
+          subtitle: "Manage E² Stories subscription tiers (1M ₹99, 6M ₹499, 12M ₹899), 7-day trials (₹2), and AutoPay mandates."
         };
       case 'promos':
         return {
@@ -191,7 +191,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F3F4F7] dark:bg-[#080B08] flex font-urbanist selection:bg-[#FEF08A] selection:text-black">
+    <div className="h-screen overflow-hidden bg-[#F3F4F7] dark:bg-[#080B08] flex font-urbanist selection:bg-[#FEF08A] selection:text-black">
       
       {/* Fixed Left Sidebar Navigation */}
       <Sidebar
@@ -205,10 +205,10 @@ export default function App() {
         onToggleCollapse={toggleSidebar}
       />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Main Content Area (Fixed layout, clean top header docking) */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         
-        {/* Top Header Bar */}
+        {/* Top Header Bar (Fixed / Pinned) */}
         <Topbar
           onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
           title={meta.title}

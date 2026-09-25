@@ -72,7 +72,7 @@ export const userService = {
   },
 
   /**
-   * Grant or revoke VIP tier
+   * Grant or revoke subscription tier
    */
   async updateUserVip(id, { isVip, days = 30, planName } = {}) {
     return await request(`/${id}/vip`, {

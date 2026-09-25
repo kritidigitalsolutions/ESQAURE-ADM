@@ -555,7 +555,7 @@ export class AuthController {
         );
       }
 
-      // Soft delete: set status to DELETED, reset profile, clear tokens & VIP
+      // Soft delete: set status to DELETED, reset profile, clear tokens & subscription
       user.status = 'DELETED';
       user.isProfileCompleted = false;
       user.fcmTokens = [];

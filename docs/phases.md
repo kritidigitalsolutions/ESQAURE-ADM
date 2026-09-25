@@ -36,7 +36,7 @@
   - `PUT /api/v1/admin/dramas/:id` (edit drama details, genres, status).
   - `DELETE /api/v1/admin/dramas/:id` (soft-delete / archive).
   - `GET /api/v1/admin/dramas/:id/episodes` (list all episodes for a drama).
-  - `POST /api/v1/admin/dramas/:id/episodes` (upload episode video, set sequence number, subtitle tracks, free/VIP toggle).
+  - `POST /api/v1/admin/dramas/:id/episodes` (upload episode video, set sequence number, subtitle tracks, free/paywall toggle).
   - `PUT /api/v1/admin/dramas/:id/episodes/:episodeId` (update episode info).
 - [ ] Seed sample short-dramas matching mobile screens (*"Security Guard Ki CEO GF"*, *"Dhokha - A Dark Side of Love"*, *"My Wife Rented Me Out"*, *"The Last Promise"*).
 
@@ -53,8 +53,8 @@
 - [ ] **Explore Tab**:
   - `GET /api/v1/feed/explore` (Vertical swipeable trailer feed with short-drama metadata).
 - [ ] **Video Streaming & Player APIs**:
-  - `GET /api/v1/dramas/:id/episodes` (episode drawer with lock/unlock status based on user's VIP flag).
-  - `GET /api/v1/dramas/:id/episodes/:episodeNumber/stream` (checks if episode is free or user has active VIP; returns video stream URL and subtitles).
+  - `GET /api/v1/dramas/:id/episodes` (episode drawer with lock/unlock status based on user's subscription flag).
+  - `GET /api/v1/dramas/:id/episodes/:episodeNumber/stream` (checks if episode is free or user has active subscription; returns video stream URL and subtitles).
   - `POST /api/v1/dramas/:id/episodes/:episodeNumber/progress` (updates `WatchHistory` with watched seconds, duration, and completion flag).
 - [ ] **User Library & Search**:
   - `GET /api/v1/user/saved-series` & `POST /api/v1/user/saved-series/:dramaId` (toggle watchlist).
@@ -66,8 +66,8 @@
 
 ---
 
-## Phase 4: Monetization, Razorpay & VIP Subscriptions
-**Objective**: Build full monetization infrastructure supporting Monthly (₹199) and Yearly (₹1,499) VIP plans with secure payment gateway callbacks.
+## Phase 4: Monetization, Razorpay & Subscriptions
+**Objective**: Build full monetization infrastructure supporting Monthly (₹199) and Yearly (₹1,499) premium plans with secure payment gateway callbacks.
 
 ### Deliverables & Tasks:
 - [ ] Implement Mongoose models: `SubscriptionPlan`, `Subscription`.
@@ -76,7 +76,7 @@
 - [ ] `POST /api/v1/subscriptions/create-order` (call Razorpay Orders API, store pending transaction).
 - [ ] `POST /api/v1/subscriptions/verify-payment` (verify SHA256 signature, mark active, update user `isVip = true` and `vipExpiresAt`).
 - [ ] `POST /api/v1/subscriptions/webhook` (asynchronous webhook listener with HMAC signature verification for instant activation and chargeback handling).
-- [ ] Build automated cron/job (node-cron) to check expired subscriptions daily and revoke VIP status.
+- [ ] Build automated cron/job (node-cron) to check expired subscriptions daily and revoke subscription status.
 
 ---
 
@@ -88,15 +88,15 @@
 - [ ] Configure Tailwind theme with Urbanist typography and pastel yellow/neon/black color tokens (`#FEF08A`, `#8FFE01`, `#080B08`).
 - [ ] Build Layout shell: Sidebar navigation, Header with breadcrumbs, Admin profile badge, Notifications.
 - [ ] **Overview / Analytics Dashboard**:
-  - KPI metric cards (Total Users, Active VIP Subscribers, Monthly Revenue, Total Views).
+  - KPI metric cards (Total Users, Active Paid Subscribers, Monthly Revenue, Total Views).
   - Interactive charts (Daily Views curve, Revenue histogram using Recharts).
 - [ ] **Drama & Episode CMS Pages**:
   - Data table with search, genre filters, and status badges.
   - Drama creation/edit modal with image/video upload.
   - Episode Studio drawer to manage individual episodes and upload `.vtt` subtitles.
 - [ ] **User & Subscriber Management**:
-  - Searchable user table with VIP filters and last active date.
-  - Modal to view user watch history and manual VIP override toggle.
+  - Searchable user table with subscription filters and last active date.
+  - Modal to view user watch history and manual subscription override toggle.
 - [ ] **Audit Log Screen**:
   - Real-time immutable audit trail showing admin actions, diffs, and CSV export.
 

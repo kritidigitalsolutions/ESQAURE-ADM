@@ -60,6 +60,8 @@ const UserSchema = new mongoose.Schema(
     settings: {
       autoplayNext: { type: Boolean, default: true },
       videoQuality: { type: String, enum: ['Auto', '1080p', '720p'], default: 'Auto' },
+      subtitlesLanguage: { type: String, enum: ['Hindi', 'English', 'Off'], default: 'Hindi' },
+      playbackSpeed: { type: String, enum: ['0.75x', '1x', '1.25x', '1.5x'], default: '1x' },
       appLanguage: { type: String, default: 'English' },
       notifications: {
         newEpisodes: { type: Boolean, default: true },
@@ -68,7 +70,7 @@ const UserSchema = new mongoose.Schema(
       }
     },
 
-    // VIP & Subscription Status
+    // Subscription Status
     isVip: {
       type: Boolean,
       default: false,
@@ -82,6 +84,11 @@ const UserSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Subscription',
       default: null
+    },
+    hasUsedFreeTrial: {
+      type: Boolean,
+      default: false,
+      index: true
     },
 
     plan: {
@@ -128,7 +135,8 @@ const UserSchema = new mongoose.Schema(
       transform: (doc, ret) => {
         ret.id = ret._id ? ret._id.toString() : ret.id;
         const fullName = `${doc.firstName || ''} ${doc.lastName || ''}`.trim();
-        ret.name = fullName || `${doc.countryCode || '+91'} ${doc.phoneNumber}`;
+        const phoneLast4 = doc.phoneNumber ? String(doc.phoneNumber).slice(-4) : (ret.id ? String(ret.id).slice(-4) : '1001');
+        ret.name = fullName || `User #${phoneLast4}`;
         ret.phone = `${doc.countryCode || '+91'} ${doc.phoneNumber}`.trim();
         ret.plan = doc.plan || (doc.isVip ? 'Monthly Pass' : 'Free Tier');
         ret.totalWatchTime = doc.totalWatchTime || '0.0 hrs';

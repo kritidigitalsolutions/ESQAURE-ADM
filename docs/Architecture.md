@@ -22,7 +22,7 @@ graph TD
         ContentModule["Content & Streaming Service (CMS & Video URLs)"]
         FeedModule["Feed & Discovery Service (Home, Explore, Trending)"]
         UserModule["User & Library Service (Watchlist, History)"]
-        PaymentModule["Payment & VIP Subscription Service (Razorpay)"]
+        PaymentModule["Payment & Subscription Service (Razorpay)"]
         AdminModule["Admin Operations & Audit Service"]
     end
 
@@ -77,7 +77,7 @@ graph TD
 | **In-Memory Cache** | Redis (ioredis) | Sub-millisecond caching for Home feeds, trending rankings, OTP expiration cooldowns, and request throttling. |
 | **Admin Panel** | React.js (Vite) + Tailwind CSS | Fast bundle size, rapid UI component authoring, and sleek SaaS aesthetics matching the modern reference layout. |
 | **Storage & Video** | AWS S3 / Cloudinary CDN | High-durability object storage for vertical 9:16 video clips, trailer previews, posters, and subtitle tracks. |
-| **Payments** | Razorpay (Node SDK) | Native INR support (₹199 / ₹1499), UPI, cards, and signed webhook validation for instant VIP status activation. |
+| **Payments** | Razorpay (Node SDK) | Native INR support (₹199 / ₹1499), UPI, cards, and signed webhook validation for instant subscription status activation. |
 | **SMS / Push** | MSG91 / Twilio & Firebase FCM | Fast SMS delivery for Indian numbers (+91) and real-time push alerts for new episode drops. |
 
 ---
@@ -114,7 +114,7 @@ const UserSchema = new mongoose.Schema({
     }
   },
   
-  // VIP & Subscription Status
+  // Subscription Status
   isVip: { type: Boolean, default: false, index: true },
   vipExpiresAt: { type: Date, default: null },
   currentSubscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscription', default: null },
@@ -271,7 +271,7 @@ const AdminUserSchema = new mongoose.Schema({
 const AuditLogSchema = new mongoose.Schema({
   adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'AdminUser', required: true, index: true },
   adminEmail: { type: String, required: true },
-  action: { type: String, required: true }, // "CREATE_DRAMA", "UPDATE_EPISODE", "OVERRIDE_VIP"
+  action: { type: String, required: true }, // "CREATE_DRAMA", "UPDATE_EPISODE", "OVERRIDE_SUBSCRIPTION"
   targetEntity: { type: String, required: true }, // "Drama", "Episode", "User"
   entityId: { type: String, required: true },
   changes: { type: mongoose.Schema.Types.Mixed }, // { before: {...}, after: {...} }
@@ -298,12 +298,12 @@ const AuditLogSchema = new mongoose.Schema({
 
 ### 4.3 Drama & Video Player Endpoints (`/api/v1/dramas`)
 - `GET /api/v1/dramas/:id`: Drama details, genres, total episodes, user watchlist status.
-- `GET /api/v1/dramas/:id/episodes`: Full episodes drawer list with locked/unlocked VIP status.
-- `GET /api/v1/dramas/:id/episodes/:episodeNumber/stream`: Secure stream token & video playback URL with subtitles. Validates user's VIP membership if episode is paywalled.
+- `GET /api/v1/dramas/:id/episodes`: Full episodes drawer list with locked/unlocked subscription status.
+- `GET /api/v1/dramas/:id/episodes/:episodeNumber/stream`: Secure stream token & video playback URL with subtitles. Validates user's subscription membership if episode is paywalled.
 - `POST /api/v1/dramas/:id/episodes/:episodeNumber/progress`: Heartbeat to sync resume playback timestamp.
 
 ### 4.4 User Library & Settings (`/api/v1/user`)
-- `GET /api/v1/user/profile`: Profile info, VIP expiration, library counts.
+- `GET /api/v1/user/profile`: Profile info, subscription expiration, library counts.
 - `GET /api/v1/user/saved-series`: Saved watchlist.
 - `POST /api/v1/user/saved-series/:dramaId`: Toggle drama in watchlist (+ / -).
 - `GET /api/v1/user/watch-history`: History listing with resume timestamps.
@@ -319,7 +319,7 @@ const AuditLogSchema = new mongoose.Schema({
 ### 4.6 Monetization & Subscription Endpoints (`/api/v1/subscriptions`)
 - `GET /api/v1/subscriptions/plans`: List active plans (₹199 / ₹1499).
 - `POST /api/v1/subscriptions/create-order`: Create Razorpay order ID.
-- `POST /api/v1/subscriptions/verify-payment`: Verify Razorpay signature and activate VIP status.
+- `POST /api/v1/subscriptions/verify-payment`: Verify Razorpay signature and activate subscription status.
 - `POST /api/v1/subscriptions/webhook`: Razorpay asynchronous server-to-server webhook.
 
 ### 4.7 Admin Operations Endpoints (`/api/v1/admin`)
@@ -329,8 +329,8 @@ const AuditLogSchema = new mongoose.Schema({
 - `POST /api/v1/admin/dramas`: Create drama (with file upload presigned URLs).
 - `PUT /api/v1/admin/dramas/:id`: Update drama metadata or status.
 - `POST /api/v1/admin/dramas/:id/episodes`: Add/upload episodes with subtitles.
-- `GET /api/v1/admin/users`: User management table with VIP status filter and search.
-- `PATCH /api/v1/admin/users/:id/vip`: Manual VIP grant/revoke override.
+- `GET /api/v1/admin/users`: User management table with subscription status filter and search.
+- `PATCH /api/v1/admin/users/:id/vip`: Manual subscription grant/revoke override.
 - `GET /api/v1/admin/audit-logs`: Paginated audit trail with CSV export.
 
 ---

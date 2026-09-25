@@ -3,6 +3,7 @@ import { Search, ChevronLeft, ChevronRight, Maximize, Minimize, User, LogOut } f
 import ThemeToggle from './ThemeToggle';
 import GlobalSearchBar from './GlobalSearchBar';
 import NotificationDropdown from './NotificationDropdown';
+import Badge from './common/Badge';
 
 export default function Topbar({
   onOpenMobileDrawer,
@@ -56,7 +57,7 @@ export default function Topbar({
   const storedAdminEmail = localStorage.getItem('admin_user_email') || 'admin@e2stories.com';
 
   return (
-    <header className="bg-white/95 dark:bg-[#141914]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10 sticky top-0 z-30 px-6 py-3 shadow-xs dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)] font-urbanist">
+    <header className="bg-white/95 dark:bg-[#141914]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10 sticky top-0 z-30 px-6 py-3 shadow-xs dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)] font-urbanist shrink-0">
       <div className="flex items-center justify-between gap-4">
 
         {/* Left: Sidebar Toggle + Page Title & Subtitle */}
@@ -129,13 +130,16 @@ export default function Topbar({
             {/* Dropdown Menu */}
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1C221C] border border-slate-200 dark:border-white/12 rounded-2xl shadow-xl py-2 z-50 animate-fadeIn">
-                <div className="px-4 py-2 border-b border-slate-100 dark:border-white/10">
-                  <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                    Admin
-                  </p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                    {storedAdminEmail}
-                  </p>
+                <div className="px-4 py-2.5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                      Administrator
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                      {storedAdminEmail}
+                    </p>
+                  </div>
+                  <Badge variant="admin" size="xs">Admin</Badge>
                 </div>
                 <div className="p-1">
                   {onLogout && (

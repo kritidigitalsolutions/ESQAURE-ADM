@@ -31,7 +31,18 @@ import {
   Tag,
   FileText
 } from 'lucide-react';
-import { mockGenres, mockEpisodes } from '../data/mockOttData';
+import { dramaService } from '../services/dramaService';
+
+const AVAILABLE_GENRES = [
+  { id: 'g1', name: 'Romance' },
+  { id: 'g2', name: 'Thriller' },
+  { id: 'g3', name: 'Drama' },
+  { id: 'g4', name: 'Mystery' },
+  { id: 'g5', name: 'Action' },
+  { id: 'g6', name: 'Horror' },
+  { id: 'g7', name: 'Comedy' },
+  { id: 'g8', name: 'Fantasy' }
+];
 
 export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
   if (!isOpen || !drama) return null;
@@ -47,7 +58,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
   const [status, setStatus] = useState(drama.status || 'PUBLISHED');
   const [isActive, setIsActive] = useState(drama.isActive !== undefined ? Boolean(drama.isActive) : (drama.status === 'PUBLISHED' || drama.status === 'ENCODING'));
   const [isPaid, setIsPaid] = useState(drama.isPaid !== undefined ? Boolean(drama.isPaid) : true);
-  const [plan, setPlan] = useState(drama.plan || (drama.isPaid === false ? 'Free Tier' : 'VIP Plan'));
+  const [plan, setPlan] = useState(drama.plan || (drama.isPaid === false ? 'Free Tier' : 'Premium Plan'));
   const [isTrending, setIsTrending] = useState(drama.isTrending ?? false);
   const [isFeatured, setIsFeatured] = useState(drama.isFeatured ?? true);
   const [trendingRank, setTrendingRank] = useState(drama.trendingRank || 1);
@@ -88,70 +99,52 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
     setStatus(drama.status || 'PUBLISHED');
     setIsActive(drama.isActive !== undefined ? Boolean(drama.isActive) : (drama.status === 'PUBLISHED' || drama.status === 'ENCODING'));
     setIsPaid(drama.isPaid !== undefined ? Boolean(drama.isPaid) : true);
-    setPlan(drama.plan || (drama.isPaid === false ? 'Free Tier' : 'VIP Plan'));
+    setPlan(drama.plan || (drama.isPaid === false ? 'Free Tier' : 'Premium Plan'));
     setIsTrending(drama.isTrending ?? false);
     setIsFeatured(drama.isFeatured ?? true);
     setTrendingRank(drama.trendingRank || 1);
     setPriority(drama.priority || 1);
-    setPosterUrl(drama.poster || '');
-    setBannerUrl(drama.banner || '');
+    setPosterUrl(drama.poster || drama.posterUrl || '');
+    setBannerUrl(drama.banner || drama.bannerUrl || '');
     setTrailerUrl(drama.trailerUrl || '');
     setTotalEpisodes(drama.totalEpisodes || 24);
     setFreeEpisodes(drama.freeEpisodes || 3);
 
-    const existingEps = (drama.episodes && Array.isArray(drama.episodes) && drama.episodes.length > 0)
-      ? drama.episodes
-      : (() => {
-          try {
-            const saved = localStorage.getItem('esquare_episodes');
-            if (saved) {
-              const parsed = JSON.parse(saved);
-              const found = parsed.filter(e => e.dramaId === drama.id);
-              if (found.length > 0) return found;
-            }
-          } catch (e) {}
-          return mockEpisodes.filter(e => e.dramaId === drama.id);
-        })();
-
-    if (existingEps.length > 0) {
-      setEpisodesList(existingEps.map(e => ({
-        ...e,
-        videoFileName: e.fileName || `ep_${e.episodeNumber.toString().padStart(2, '0')}_1080p.mp4`,
-        subtitleTracks: e.subtitles || ['English', 'Hindi']
-      })));
-    } else {
-      const count = Math.min(drama.totalEpisodes || 12, 12);
-      const freeCount = drama.freeEpisodes || 3;
-      const sampleTitles = [
-        'The First Encounter',
-        'Hidden Intentions',
-        'Truth Unveiled',
-        'The Silent Betrayal',
-        'Shadows of the Past',
-        'The Power Play',
-        'Dangerous Secrets',
-        'Midnight Alliance',
-        'A Fateful Decision',
-        'Breaking the Chains',
-        'The Billionaire\'s Revenge',
-        'The Final Standoff'
-      ];
-      const generated = Array.from({ length: count }).map((_, i) => {
-        const epNum = i + 1;
-        return {
-          id: `EP-${drama.id}-${epNum}`,
-          dramaId: drama.id,
-          episodeNumber: epNum,
-          title: sampleTitles[i] || `Episode ${epNum}: Chapter ${epNum}`,
-          duration: `${2 + (epNum % 2)}:${(10 + (epNum * 7) % 50).toString().padStart(2, '0')}`,
-          isFree: epNum <= freeCount,
-          views: `${(100 + epNum * 15)}k`,
-          videoFileName: `ep_${epNum.toString().padStart(2, '0')}_1080p.mp4`,
-          subtitleTracks: ['English', 'Hindi']
-        };
+    let isMounted = true;
+    dramaService.getDramaById(drama.id)
+      .then((res) => {
+        if (!isMounted || !res || !res.drama) return;
+        const d = res.drama;
+        if (d.episodes && d.episodes.length > 0) {
+          setEpisodesList(d.episodes);
+        } else {
+          const count = Math.min(d.totalEpisodes || 12, 50);
+          const freeCount = d.freeEpisodes || 3;
+          const generated = Array.from({ length: count }).map((_, i) => {
+            const epNum = i + 1;
+            return {
+              id: `EP-${d.id}-${epNum}`,
+              dramaId: d.id,
+              episodeNumber: epNum,
+              title: `Episode ${epNum}`,
+              duration: '2:15',
+              durationSeconds: 135,
+              isFree: epNum <= freeCount,
+              views: '12.5k',
+              videoFileName: `ep_${epNum.toString().padStart(2, '0')}_1080p.mp4`,
+              subtitleTracks: ['English', 'Hindi']
+            };
+          });
+          setEpisodesList(generated);
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not fetch drama episodes from API:', err);
       });
-      setEpisodesList(generated);
-    }
+
+    return () => {
+      isMounted = false;
+    };
   }, [drama]);
 
   const toggleGenre = (genreName) => {
@@ -216,7 +209,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
     if (type === 'trailer') setTrailerFile(`trailer_hls_v2_${rand}.mp4`);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const updatedDrama = {
       ...drama,
@@ -226,17 +219,29 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
       status: isActive ? (status === 'DRAFT' ? 'PUBLISHED' : status) : 'DRAFT',
       isActive,
       isPaid,
-      plan: isPaid ? (plan === 'Free Tier' ? 'VIP Plan' : plan) : 'Free Tier',
+      plan: isPaid ? (plan === 'Free Tier' ? 'Premium Plan' : plan) : 'Free Tier',
       isTrending,
       isFeatured,
       trendingRank: Number(trendingRank),
       poster: posterUrl,
+      posterUrl,
       banner: bannerUrl,
+      bannerUrl,
       trailerUrl,
       totalEpisodes: Number(totalEpisodes),
       freeEpisodes: Number(freeEpisodes),
       priority: Number(priority) || 1
     };
+
+    try {
+      await dramaService.updateDrama(drama.id, updatedDrama);
+      await dramaService.saveEpisodes(drama.id, {
+        episodes: episodesList,
+        freeEpisodes: Number(freeEpisodes)
+      });
+    } catch (err) {
+      console.warn('API save warning:', err);
+    }
 
     setSaveSuccess(true);
     setTimeout(() => {
@@ -488,7 +493,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                 </div>
 
                 <div className="flex flex-wrap gap-2 pt-1">
-                  {mockGenres.map((g) => {
+                  {AVAILABLE_GENRES.map((g) => {
                     const isSelected = selectedGenres.includes(g.name);
                     return (
                       <button
@@ -583,7 +588,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                         type="button"
                         onClick={() => {
                           setIsPaid(true);
-                          if (plan === 'Free Tier') setPlan('VIP Plan');
+                          if (plan === 'Free Tier') setPlan('Premium Plan');
                         }}
                         className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                           isPaid ? 'bg-[#FEF08A] text-slate-950 font-black shadow-xs' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -612,9 +617,10 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                       onChange={(e) => setPlan(e.target.value)}
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 font-extrabold bg-white dark:bg-[#121612] text-slate-950 dark:text-white focus:border-[#FEF08A] focus:outline-none transition-all shadow-xs cursor-pointer"
                     >
-                      <option value="VIP Plan">🔒 VIP Plan (All Passholders)</option>
-                      <option value="Monthly Pass">💳 Monthly Pass (₹199 / mo)</option>
-                      <option value="Yearly All-Access">👑 Yearly All-Access (₹1,499 / yr)</option>
+                      <option value="Premium Plan">🔒 All Active Subscribers (1M / 6M / 12M / Trial)</option>
+                      <option value="1 Month Pass">💳 1 Month Pass (₹99 / mo)</option>
+                      <option value="6 Months Pass">⭐ 6 Months Pass (₹499 / 6 mo)</option>
+                      <option value="12 Months All-Access">👑 12 Months All-Access (₹899 / yr)</option>
                     </select>
                   ) : (
                     <div className="w-full px-4 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center gap-2">

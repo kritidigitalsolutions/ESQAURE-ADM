@@ -17,7 +17,7 @@ const GenreSchema = new mongoose.Schema(
     },
     icon: {
       type: String,
-      default: ''
+      default: 'Tags'
     },
     iconUrl: {
       type: String,
@@ -26,6 +26,10 @@ const GenreSchema = new mongoose.Schema(
     imageUrl: {
       type: String,
       default: ''
+    },
+    color: {
+      type: String,
+      default: '#F59E0B'
     },
     displayOrder: {
       type: Number,

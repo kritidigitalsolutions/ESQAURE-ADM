@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { mockAuditLogs } from '../../data/mockOttData';
+import Badge from '../../components/common/Badge';
 import { ShieldAlert, Search, Download, CheckCircle2, XCircle, Code, Eye, X, Clock, Calendar } from 'lucide-react';
 
 export default function AuditlogPage() {
@@ -157,18 +158,25 @@ export default function AuditlogPage() {
                 filteredLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors">
                   <td className="py-3 px-4">
-                    <span className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                      log.status === 'SUCCESS' ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50' : 'bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-200/50 dark:border-red-800/50'
-                    }`}>
-                      {log.status === 'SUCCESS' ? <CheckCircle2 className="w-3 h-3 mr-0.5" /> : <XCircle className="w-3 h-3 mr-0.5" />}
-                      <span>{log.status}</span>
-                    </span>
+                    <Badge
+                      variant={log.status === 'SUCCESS' ? 'active' : 'inactive'}
+                      size="xs"
+                    >
+                      {log.status === 'SUCCESS' ? 'Success' : 'Failed'}
+                    </Badge>
                   </td>
                   <td className="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">
                     {log.action}
                   </td>
-                  <td className="py-3 px-4 font-bold text-slate-700 dark:text-slate-300">
-                    {log.admin}
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-slate-700 dark:text-slate-300">
+                        {log.admin}
+                      </span>
+                      {log.admin?.toLowerCase().includes('admin') && (
+                        <Badge variant="admin" size="xs">Admin</Badge>
+                      )}
+                    </div>
                   </td>
                   <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium truncate max-w-[200px]" title={log.targetId}>
                     {log.targetId}

@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { mockDramas, normalizePriorities, reassignPriority } from '../../data/mockOttData';
+import { dramaService } from '../../services/dramaService';
 import AnimatedNumber from '../../components/common/AnimatedNumber';
+import Badge from '../../components/common/Badge';
+import KpiStatCard from '../../components/common/KpiStatCard';
 import ManageContentModal from '../../components/ManageContentModal';
 import {
   Search,
@@ -24,36 +26,10 @@ import {
   Lock,
   Unlock,
   CheckCircle2,
-  Pencil
+  Pencil,
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
-
-// Cohesive color styling per plan with uniform dimensions (pure text badge)
-const getPlanBadgeConfig = (planName, isPaid) => {
-  const p = (planName || '').toLowerCase().trim();
-  if (!isPaid || p.includes('free') || p.includes('unpaid')) {
-    return {
-      label: 'Free Tier',
-      className: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border-emerald-200/90 dark:border-emerald-500/30',
-    };
-  }
-  if (p.includes('yearly') || p.includes('annual')) {
-    return {
-      label: 'Yearly Pass',
-      className: 'bg-purple-50 dark:bg-purple-500/10 text-purple-800 dark:text-purple-300 border-purple-200/90 dark:border-purple-500/30',
-    };
-  }
-  if (p.includes('monthly')) {
-    return {
-      label: 'Monthly Pass',
-      className: 'bg-sky-50 dark:bg-sky-500/10 text-sky-800 dark:text-sky-300 border-sky-200/90 dark:border-sky-500/30',
-    };
-  }
-  // Default: VIP Plan
-  return {
-    label: 'VIP Plan',
-    className: 'bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-200/90 dark:border-amber-500/30',
-  };
-};
 
 export default function DramasPage({
   onOpenIngestModal,
@@ -61,36 +37,42 @@ export default function DramasPage({
   selectedDramaId,
   onClearSelectedDrama
 }) {
-  const [dramas, setDramas] = useState(() => {
+  const [dramas, setDramas] = useState([]);
+  const [serverStats, setServerStats] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [managingDrama, setManagingDrama] = useState(null);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState('ALL');
+  const [selectedStatus, setSelectedStatus] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'INACTIVE' | 'TRENDING'
+  const [selectedAccess, setSelectedAccess] = useState('ALL'); // 'ALL' | 'PAID' | 'FREE'
+  const [sortBy, setSortBy] = useState('priority');
+  const [viewMode, setViewMode] = useState('table'); // 'grid' | 'table'
+
+  // Load catalog dynamically from backend API
+  const loadDramas = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
-      const saved = localStorage.getItem('esquare_dramas');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return normalizePriorities(
-            parsed.map((d, index) => {
-              const defaultPlan = index === 1 ? 'Monthly Pass' : index === 3 ? 'Yearly All-Access' : (index === 2 || index === 5 ? 'Free Tier' : 'VIP Plan');
-              return {
-                ...d,
-                isActive: d.isActive !== undefined ? Boolean(d.isActive) : (d.status === 'PUBLISHED' || d.status === 'ENCODING'),
-                isPaid: d.isPaid !== undefined ? Boolean(d.isPaid) : (index === 2 || index === 5 ? false : true),
-                plan: d.plan || defaultPlan
-              };
-            })
-          );
+      const data = await dramaService.getAdminDramas();
+      if (data && Array.isArray(data.dramas)) {
+        setDramas(data.dramas);
+        if (data.stats) {
+          setServerStats(data.stats);
         }
       }
-    } catch (e) {}
-    return normalizePriorities(mockDramas);
-  });
+    } catch (err) {
+      console.error('Failed to load dramas from API:', err);
+      setError(err.message || 'Failed to fetch content library.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    try {
-      localStorage.setItem('esquare_dramas', JSON.stringify(dramas));
-    } catch (e) {}
-  }, [dramas]);
-
-  const [managingDrama, setManagingDrama] = useState(null);
+    loadDramas();
+  }, []);
 
   useEffect(() => {
     if (selectedDramaId) {
@@ -100,89 +82,83 @@ export default function DramasPage({
       }
     }
   }, [selectedDramaId, dramas]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('ALL');
-  const [selectedStatus, setSelectedStatus] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'INACTIVE' | 'TRENDING'
-  const [selectedAccess, setSelectedAccess] = useState('ALL'); // 'ALL' | 'PAID' | 'FREE'
-  const [sortBy, setSortBy] = useState('priority');
-  const [viewMode, setViewMode] = useState('table'); // 'grid' | 'table'
 
-  // When admin deletes content, priority shifts automatically:
-  // (e.g. deleting #1 shifts #2 -> #1, #3 -> #2, etc.)
-  const handleDeleteDrama = (id) => {
-    setDramas(prev => {
-      const remaining = prev.filter(d => d.id !== id);
-      return normalizePriorities(remaining);
-    });
+  // Delete Drama via API
+  const handleDeleteDrama = async (id) => {
+    try {
+      await dramaService.deleteDrama(id);
+      loadDramas();
+    } catch (err) {
+      console.error('Delete drama failed:', err);
+      // Fallback state update
+      setDramas(prev => prev.filter(d => d.id !== id));
+    }
   };
 
-  const handleUpdatePriority = (id, newPriority) => {
-    setDramas(prev => reassignPriority(prev, id, newPriority));
-  };
-
-  const handleMovePriority = (id, direction) => {
+  // Move priority up / down via API
+  const handleMovePriority = async (id, direction) => {
     const current = dramas.find(d => d.id === id);
     if (!current) return;
-    const targetPriority = direction === 'up' ? (current.priority || 1) - 1 : (current.priority || 1) + 1;
-    setDramas(prev => reassignPriority(prev, id, targetPriority));
+    const currentPriority = Number(current.priority) || 1;
+    const targetPriority = direction === 'up' ? Math.max(1, currentPriority - 1) : currentPriority + 1;
+    try {
+      await dramaService.updatePriority(id, targetPriority);
+      loadDramas();
+    } catch (err) {
+      console.error('Update priority failed:', err);
+    }
   };
 
-  // Toggle Series Active / Inactive
-  const handleToggleActive = (id) => {
-    setDramas(prev =>
-      prev.map(d => {
-        if (d.id === id) {
-          const nextActive = !d.isActive;
-          return {
-            ...d,
-            isActive: nextActive,
-            status: nextActive ? 'PUBLISHED' : 'DRAFT'
-          };
-        }
-        return d;
-      })
-    );
+  // Toggle Series Active / Inactive via API
+  const handleToggleActive = async (id) => {
+    try {
+      await dramaService.toggleActive(id);
+      loadDramas();
+    } catch (err) {
+      console.error('Toggle active failed:', err);
+    }
   };
 
-  // Toggle Series Paid (With Plan) / Unpaid (Free)
-  const handleTogglePaid = (id) => {
-    setDramas(prev =>
-      prev.map(d => {
-        if (d.id === id) {
-          const nextPaid = !d.isPaid;
-          return {
-            ...d,
-            isPaid: nextPaid,
-            plan: nextPaid ? (d.plan === 'Free Tier' ? 'VIP Plan' : d.plan || 'VIP Plan') : 'Free Tier'
-          };
-        }
-        return d;
-      })
-    );
+  // Toggle Series Paid / Free via API
+  const handleTogglePaid = async (id) => {
+    try {
+      await dramaService.togglePaid(id);
+      loadDramas();
+    } catch (err) {
+      console.error('Toggle paid failed:', err);
+    }
   };
 
-  // Available Genres
+  // Dynamically compute unique genres from real database records
   const genres = useMemo(() => {
     const set = new Set();
-    dramas.forEach(d => d.genres.forEach(g => set.add(g)));
+    dramas.forEach(d => {
+      if (Array.isArray(d.genres)) {
+        d.genres.forEach(g => {
+          if (typeof g === 'string') set.add(g);
+          else if (g && g.name) set.add(g.name);
+        });
+      }
+    });
     return ['ALL', ...Array.from(set)];
   }, [dramas]);
 
-  // Top Clean Stats
+  // Dynamic catalog statistics derived from live data & server stats
   const stats = useMemo(() => {
     const totalSeries = dramas.length;
-    const published = dramas.filter(d => d.isActive).length;
+    const published = dramas.filter(d => d.isActive || d.status === 'PUBLISHED').length;
     const totalEpisodes = dramas.reduce((acc, d) => acc + (d.totalEpisodes || 0), 0);
-    const topDrama = dramas.find(d => d.isTrending && d.trendingRank === 1) || dramas[0];
+    const topDrama = dramas.reduce((prev, curr) => ((curr.viewsCount || 0) > (prev?.viewsCount || 0) ? curr : prev), dramas[0]);
 
     return {
-      totalSeries,
-      published,
-      totalEpisodes,
-      topDrama,
-      totalStreams: '18.1M'
+      totalSeries: serverStats?.totalSeries ?? totalSeries,
+      published: serverStats?.published ?? published,
+      totalEpisodes: serverStats?.totalEpisodes ?? totalEpisodes,
+      totalStreams: serverStats?.totalStreams ?? '18.1M',
+      topDrama: serverStats?.topDrama ?? topDrama,
+      watchTime: serverStats?.watchTime ?? '2.04M Hrs'
     };
-  }, [dramas]);
+  }, [dramas, serverStats]);
 
   // Filter & Sort
   const filteredDramas = useMemo(() => {
@@ -246,155 +222,53 @@ export default function DramasPage({
   return (
     <div className="space-y-6 font-urbanist selection:bg-[#FEF08A] selection:text-black">
       
-      {/* 4 Core Content Library KPI Metric Cards (Uniform with User Page Size & Structure) */}
+      {/* 4 Core Content Library KPI Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
         {/* Metric 1: Total Series */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-                  <Film className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block">
-                    Total Series
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
-                    Catalog Titles
-                  </span>
-                </div>
-              </div>
-
-              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">
-                <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" /> +12.5%
-              </span>
-            </div>
-
-            <div className="mt-4 flex items-baseline space-x-2">
-              <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
-                <AnimatedNumber value={stats.totalSeries} />
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-            <span>{stats.published} published series live</span>
-            <span className="text-amber-600 dark:text-amber-400 font-bold">
-              {stats.totalSeries - stats.published} in draft
-            </span>
-          </div>
-        </div>
+        <KpiStatCard
+          icon={Film}
+          title="Total Series"
+          subtitle="Catalog Titles"
+          value={stats.totalSeries}
+          animateNumber
+          footerLeft={`${stats.published} published series live`}
+          footerRight={`${stats.totalSeries - stats.published} in draft`}
+          footerRightColor="text-amber-600 dark:text-amber-400 font-bold"
+        />
 
         {/* Metric 2: Total Episodes */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-                  <Tv className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block">
-                    Total Episodes
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
-                    Catalog Inventory
-                  </span>
-                </div>
-              </div>
-
-              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-[#161B16] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 shadow-xs">
-                Catalog
-              </span>
-            </div>
-
-            <div className="mt-4 flex items-baseline space-x-2">
-              <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
-                <AnimatedNumber value={stats.totalEpisodes} />
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-            <span>Avg {(stats.totalEpisodes / (stats.totalSeries || 1)).toFixed(0)} eps / series</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold">100% HD Ready</span>
-          </div>
-        </div>
+        <KpiStatCard
+          icon={Tv}
+          title="Total Episodes"
+          subtitle="Catalog Inventory"
+          value={stats.totalEpisodes}
+          animateNumber
+          footerLeft={`Avg ${(stats.totalEpisodes / (stats.totalSeries || 1)).toFixed(0)} eps / series`}
+          footerRight="100% HD Ready"
+          footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
+        />
 
         {/* Metric 3: Total Streams */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-                  <Play className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2] ml-0.5" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block">
-                    Total Streams
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
-                    Across All Series
-                  </span>
-                </div>
-              </div>
-
-              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">
-                <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" /> +24.8%
-              </span>
-            </div>
-
-            <div className="mt-4 flex items-baseline space-x-2">
-              <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
-                {stats.totalStreams}
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-            <span className="truncate max-w-[140px]">Top: {stats.topDrama?.title || 'Dhokha'}</span>
-            <span className="text-slate-700 dark:text-slate-300 font-bold shrink-0">{stats.topDrama?.views || '4.2M'} plays</span>
-          </div>
-        </div>
+        <KpiStatCard
+          icon={Play}
+          title="Total Streams"
+          subtitle="Across All Series"
+          value={stats.totalStreams}
+          footerLeft={`Top: ${stats.topDrama?.title || 'Dhokha'}`}
+          footerRight={`${stats.topDrama?.views || '4.2M'} plays`}
+          footerRightColor="text-slate-700 dark:text-slate-300 font-bold"
+        />
 
         {/* Metric 4: Total Watch Time */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-                  <Clock className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block">
-                    Watch Time
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
-                    Catalog Engagement
-                  </span>
-                </div>
-              </div>
-
-              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">
-                <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" /> +28.4%
-              </span>
-            </div>
-
-            <div className="mt-4 flex items-baseline space-x-2">
-              <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
-                2.04M Hrs
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-            <span>Avg completion 78%</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold">High Retention</span>
-          </div>
-        </div>
-
+        <KpiStatCard
+          icon={Clock}
+          title="Watch Time"
+          subtitle="Catalog Engagement"
+          value="2.04M Hrs"
+          footerLeft="Avg completion 78%"
+          footerRight="High Retention"
+          footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
+        />
       </div>
 
       {/* Clean, Smart & Perfectly Aligned Toolbar */}
@@ -636,30 +510,27 @@ export default function DramasPage({
 
                 {/* Badges on Top Right: Status (Active / Inactive) & Access (Paid / Free) */}
                 <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    type="button"
+                  <Badge
+                    variant={drama.isActive ? 'active' : 'inactive'}
+                    size="xs"
                     onClick={() => handleToggleActive(drama.id)}
-                    className={`inline-flex items-center gap-1 text-[9px] font-extrabold px-2 py-0.5 rounded-full shadow-xs cursor-pointer hover:scale-105 transition-all ${
-                      drama.isActive
-                        ? 'bg-emerald-500 text-white'
-                        : 'bg-slate-800/90 text-slate-300 border border-white/20'
-                    }`}
                     title="Click to toggle Active/Inactive"
                   >
-                    <span className={`w-1 h-1 rounded-full ${drama.isActive ? 'bg-white animate-pulse' : 'bg-slate-400'}`} />
-                    <span>{drama.isActive ? 'Active' : 'Inactive'}</span>
-                  </button>
+                    {drama.isActive ? 'Active' : 'Inactive'}
+                  </Badge>
 
-                  {(() => {
-                    const config = getPlanBadgeConfig(drama.plan, drama.isPaid);
-                    return (
-                      <span
-                        className={`w-[74px] h-[19px] inline-flex items-center justify-center text-[9px] font-bold px-1.5 rounded-full shadow-xs border select-none whitespace-nowrap ${config.className}`}
-                      >
-                        {config.label}
-                      </span>
-                    );
-                  })()}
+                  <Badge
+                    variant={
+                      !drama.isPaid || (drama.plan || '').toLowerCase().includes('free')
+                        ? 'no-plan'
+                        : (drama.plan || '').toLowerCase().includes('annual') || (drama.plan || '').toLowerCase().includes('yearly')
+                        ? 'flix9-premium'
+                        : 'flix9-basic'
+                    }
+                    size="xs"
+                  >
+                    {!drama.isPaid ? 'Free Tier' : drama.plan || 'Flix9 Basic'}
+                  </Badge>
                 </div>
               </div>
 
@@ -791,18 +662,20 @@ export default function DramasPage({
                       </div>
                     </td>
 
-                    {/* Plan Badge (Compact uniform size, non-clickable, text-only) */}
+                    {/* Plan Badge */}
                     <td className="py-2 px-4 align-middle">
-                      {(() => {
-                        const config = getPlanBadgeConfig(drama.plan, drama.isPaid);
-                        return (
-                          <span
-                            className={`w-[84px] h-[21px] inline-flex items-center justify-center px-2 rounded-full text-[10px] font-bold border shadow-2xs select-none whitespace-nowrap shrink-0 ${config.className}`}
-                          >
-                            {config.label}
-                          </span>
-                        );
-                      })()}
+                      <Badge
+                        variant={
+                          !drama.isPaid || (drama.plan || '').toLowerCase().includes('free')
+                            ? 'no-plan'
+                            : (drama.plan || '').toLowerCase().includes('annual') || (drama.plan || '').toLowerCase().includes('yearly')
+                            ? 'flix9-premium'
+                            : 'flix9-basic'
+                        }
+                        size="xs"
+                      >
+                        {!drama.isPaid ? 'Free Tier' : drama.plan || 'Flix9 Basic'}
+                      </Badge>
                     </td>
 
                     {/* Genres */}
@@ -825,25 +698,16 @@ export default function DramasPage({
                       {drama.releaseDate || '—'}
                     </td>
 
-                    {/* Status Badge: ACTIVE OR INACTIVE (Compact uniform size) */}
+                    {/* Status Badge: ACTIVE OR INACTIVE */}
                     <td className="py-2 px-4 align-middle text-center">
-                      <button
-                        type="button"
+                      <Badge
+                        variant={drama.isActive ? 'active' : 'inactive'}
+                        size="xs"
                         onClick={() => handleToggleActive(drama.id)}
-                        className={`w-[74px] h-[21px] inline-flex items-center justify-center gap-1 rounded-full text-[9.5px] font-extrabold tracking-wide transition-all shrink-0 cursor-pointer shadow-2xs ${
-                          drama.isActive
-                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-500/25 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
-                            : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200/80 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/[0.1]'
-                        }`}
-                        title={`Status: ${drama.isActive ? 'ACTIVE' : 'INACTIVE'} (Click to toggle)`}
+                        title={`Status: ${drama.isActive ? 'Active' : 'Inactive'} (Click to toggle)`}
                       >
-                        <span
-                          className={`w-1 h-1 rounded-full ${
-                            drama.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400 dark:bg-slate-500'
-                          }`}
-                        />
-                        <span>{drama.isActive ? 'ACTIVE' : 'INACTIVE'}</span>
-                      </button>
+                        {drama.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
                     </td>
 
                     {/* Action */}
@@ -909,14 +773,10 @@ export default function DramasPage({
           setManagingDrama(null);
           if (onClearSelectedDrama) onClearSelectedDrama();
         }}
-        onSave={(updatedDrama) => {
-          if (updatedDrama.priority) {
-            setDramas(prev => reassignPriority(prev, updatedDrama.id, updatedDrama.priority));
-          } else {
-            setDramas(prev => prev.map(d => (d.id === updatedDrama.id ? updatedDrama : d)));
-          }
+        onSave={() => {
           setManagingDrama(null);
           if (onClearSelectedDrama) onClearSelectedDrama();
+          loadDramas();
         }}
       />
 

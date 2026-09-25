@@ -43,7 +43,7 @@ const SYSTEM_PAGES = [
   { id: 'page-genres', tab: 'genres', title: 'Genres & Categories', category: 'Navigation', icon: Tag, desc: 'OTT genre tags and viewer interest categories' },
   { id: 'page-users', tab: 'users', title: 'User Management', category: 'Navigation', icon: Users, desc: 'Registered mobile accounts, watch times & subscription tiers' },
   { id: 'page-subscribers', tab: 'subscribers', title: 'Subscribers Ledger', category: 'Navigation', icon: Crown, desc: 'Active paid members and subscription terms' },
-  { id: 'page-subscriptions', tab: 'subscriptions', title: 'Subscription Plans', category: 'Navigation', icon: CreditCard, desc: 'Monthly (₹199) and Yearly (₹1,499) plan pricing' },
+  { id: 'page-subscriptions', tab: 'subscriptions', title: 'Subscription Plans', category: 'Navigation', icon: CreditCard, desc: '1 Month (₹99), 6 Months (₹499), 12 Months (₹899) & 7-Day Trial (₹2)' },
   { id: 'page-promos', tab: 'promos', title: 'Promos & Coupon Vouchers', category: 'Navigation', icon: Ticket, desc: 'Discount coupons, trial codes & referral campaigns' },
   { id: 'page-transactions', tab: 'transactions', title: 'Transactions & Payments', category: 'Navigation', icon: Receipt, desc: 'UPI, Razorpay & Card payment gateway logs' },
   { id: 'page-admob', tab: 'admob', title: 'AdMob Ad Monetization', category: 'Navigation', icon: TrendingUp, desc: 'Rewarded video eCPM, ad units & daily impression revenue' },

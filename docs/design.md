@@ -39,7 +39,7 @@ The **E² Stories Admin Panel** is designed as a sleek, high-precision, desktop-
 --color-brand-primary-h: #FDE047;  /* Hover state for primary buttons */
 --color-brand-secondary: #8FFE01;  /* Neon Lime (positive growth, active status, badges) */
 --color-brand-accent:    #E50914;  /* E² Crimson Red (critical actions, play badges) */
---color-gold-accent:     #E5A93C;  /* E² Stories Gold (VIP status highlight) */
+--color-gold-accent:     #E5A93C;  /* E² Stories Gold (Subscription status highlight) */
 
 /* Text & "On-Surface" Neutrals (WCAG AA Compliant) */
 --text-primary:          #0F172A;      /* Dark text on light mode */
@@ -57,7 +57,7 @@ The **E² Stories Admin Panel** is designed as a sleek, high-precision, desktop-
 
 ### 2.2 Typography Scale
 - **Font Family**: `'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif`
-- **Display 1**: `48px / 1.1 / Bold (700)` — Big metric counters (e.g. `1,395 VIPs`)
+- **Display 1**: `48px / 1.1 / Bold (700)` — Big metric counters (e.g. `1,395 Subscribers`)
 - **Heading 1**: `28px / 1.2 / SemiBold (600)` — Page titles (e.g. `Auditlog Overview`, `Drama Library`)
 - **Heading 2**: `20px / 1.3 / SemiBold (600)` — Section headers & modal titles
 - **Body Regular**: `14px / 1.5 / Regular (400)` — Table cells & body copy
@@ -120,7 +120,7 @@ Following the Nodus architecture (`ui SS/76acc4e04f1465ab59eb0e7c889e3300.webp`)
 ### 4.1 Dashboard Overview (`/admin/summary`)
 - **Top Metrics Row**:
   - Total Registered Users (+% monthly delta pill).
-  - Active VIP Members (Revenue-generating subscribers).
+  - Active Paid Members (Revenue-generating subscribers).
   - Total Video Views & Completion Rate.
   - Monthly Recurring Revenue (MRR in ₹ INR).
 - **Trend Charts**:
@@ -148,20 +148,20 @@ Following the Nodus architecture (`ui SS/76acc4e04f1465ab59eb0e7c889e3300.webp`)
 - **Filter by Drama**: Dropdown selector to isolate a specific drama's episodes.
 - **Episode List**:
   - Reorderable list (drag-to-sort episode number).
-  - Columns: Ep #, Title, Duration, Paywall Status (`Free` vs `VIP Locked`), Subtitles (`Hindi`, `English`), Video Status.
+  - Columns: Ep #, Title, Duration, Paywall Status (`Free` vs `Premium Locked`), Subtitles (`Hindi`, `English`), Video Status.
 - **Episode Uploader**:
   - Video file uploader with chunked upload progress bar.
   - Subtitle manager: Add multi-lingual tracks (`.vtt` or `.srt`).
-  - `Is Free Preview` switch (determines if episode unlocks without VIP).
+  - `Is Free Preview` switch (determines if episode unlocks without subscription).
 
-### 4.4 User & VIP Subscriber Manager (`/admin/users`)
+### 4.4 User & Subscriber Manager (`/admin/users`)
 - **Search & Filter**: Search by phone number (+91...), email, or user name.
-- **Filter Pills**: `All Users`, `VIP Members`, `Free Users`, `Suspended`.
+- **Filter Pills**: `All Users`, `Subscribed`, `Free Users`, `Suspended`.
 - **User Detail Modal**:
   - Joined date, Last active timestamp, Device info.
   - Preferred content languages & selected genre interests.
   - Active subscription details (Plan code, Starts at, Expires at, Razorpay Payment ID).
-  - Action: `Override VIP Status` (Grant 30 days VIP or Revoke).
+  - Action: `Override Subscription Status` (Grant 30 days access or Revoke).
 
 ### 4.5 Subscription & Revenue Tracker (`/admin/subscriptions`)
 - **Plan Configuration**: Manage Monthly (₹199) and Yearly (₹1,499) plan pricing, status, and perk bullet points.
@@ -176,7 +176,7 @@ Following the Nodus architecture (`ui SS/76acc4e04f1465ab59eb0e7c889e3300.webp`)
   - Activity Histogram: Hourly/daily action density.
   - Filterable Table:
     - Status pill (`Finished` with green check, `Failed` with red alert).
-    - Action type (`CREATE_DRAMA`, `UPDATE_EPISODE`, `OVERRIDE_VIP`).
+    - Action type (`CREATE_DRAMA`, `UPDATE_EPISODE`, `OVERRIDE_SUBSCRIPTION`).
     - Admin User (`Greg B / Admin`).
     - Target Entity & ID.
     - Timestamp & Duration.

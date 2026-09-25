@@ -40,7 +40,7 @@ export const mockDramas = [
     status: 'PUBLISHED',
     isActive: true,
     isPaid: true,
-    plan: 'VIP Plan',
+    plan: 'Premium Plan',
     isTrending: true,
     trendingRank: 1,
     isFeatured: true,
@@ -148,7 +148,7 @@ export const mockDramas = [
     status: 'PUBLISHED',
     isActive: true,
     isPaid: true,
-    plan: 'VIP Plan',
+    plan: 'Premium Plan',
     isTrending: true,
     trendingRank: 5,
     isFeatured: true,
@@ -212,60 +212,117 @@ export const mockGenres = [
 ];
 
 export const mockUsers = [
-  { id: 'USR-8910', phone: '+91 98201 44582', firstName: 'Aarav',  lastName: 'Sharma',   name: 'Aarav Sharma',    email: 'aarav.sharma@gmail.com',   isVip: true,  plan: 'Monthly ₹199',     vipExpiresAt: '18 Oct 2026', joinedAt: '12 Jan 2025', totalWatchTime: '48.2 hrs',  lastActive: '5 min ago',    status: 'ACTIVE'    },
-  { id: 'USR-8911', phone: '+91 97112 39810', firstName: 'Priya',  lastName: 'Mehra',    name: 'Priya Mehra',     email: 'priya.m22@yahoo.com',      isVip: true,  plan: 'Yearly ₹1,499',    vipExpiresAt: '24 Jul 2027', joinedAt: '03 Mar 2025', totalWatchTime: '112.4 hrs', lastActive: '12 min ago',   status: 'ACTIVE'    },
+  { id: 'USR-8910', phone: '+91 98201 44582', firstName: 'Aarav',  lastName: 'Sharma',   name: 'Aarav Sharma',    email: 'aarav.sharma@gmail.com',   isVip: true,  plan: '1 Month ₹99',     vipExpiresAt: '18 Oct 2026', joinedAt: '12 Jan 2025', totalWatchTime: '48.2 hrs',  lastActive: '5 min ago',    status: 'ACTIVE'    },
+  { id: 'USR-8911', phone: '+91 97112 39810', firstName: 'Priya',  lastName: 'Mehra',    name: 'Priya Mehra',     email: 'priya.m22@yahoo.com',      isVip: true,  plan: '12 Months ₹899',   vipExpiresAt: '24 Jul 2027', joinedAt: '03 Mar 2025', totalWatchTime: '112.4 hrs', lastActive: '12 min ago',   status: 'ACTIVE'    },
   { id: 'USR-8912', phone: '+91 98450 12893', firstName: 'Rohan',  lastName: 'Verma',    name: 'Rohan Verma',     email: 'rohan.v@outlook.com',      isVip: false, plan: 'Free Tier',         vipExpiresAt: '—',           joinedAt: '28 Apr 2025', totalWatchTime: '14.5 hrs',  lastActive: '45 min ago',   status: 'ACTIVE'    },
-  { id: 'USR-8913', phone: '+91 91670 88231', firstName: 'Sneha',  lastName: 'Patel',    name: 'Sneha Patel',     email: 'sneha.patel@gmail.com',    isVip: true,  plan: 'Monthly ₹199',     vipExpiresAt: '04 Oct 2026', joinedAt: '17 Jun 2025', totalWatchTime: '62.0 hrs',  lastActive: '2 hours ago',  status: 'ACTIVE'    },
+  { id: 'USR-8913', phone: '+91 91670 88231', firstName: 'Sneha',  lastName: 'Patel',    name: 'Sneha Patel',     email: 'sneha.patel@gmail.com',    isVip: true,  plan: '6 Months ₹499',    vipExpiresAt: '04 Mar 2027', joinedAt: '17 Jun 2025', totalWatchTime: '62.0 hrs',  lastActive: '2 hours ago',  status: 'ACTIVE'    },
   { id: 'USR-8914', phone: '+91 99234 56123', firstName: 'Vikram', lastName: 'Sengupta', name: 'Vikram Sengupta', email: 'vikram.sen@gmail.com',     isVip: false, plan: 'Expired Subscription', vipExpiresAt: '01 Sep 2026', joinedAt: '05 Feb 2025', totalWatchTime: '88.1 hrs',  lastActive: 'Yesterday',    status: 'SUSPENDED' },
-  { id: 'USR-8915', phone: '+91 94220 99112', firstName: 'Ananya', lastName: 'Roy',      name: 'Ananya Roy',      email: 'ananya.roy@hotmail.com',   isVip: true,  plan: 'Yearly ₹1,499',    vipExpiresAt: '12 Aug 2027', joinedAt: '21 Aug 2024', totalWatchTime: '140.8 hrs', lastActive: '3 min ago',    status: 'ACTIVE'    },
+  { id: 'USR-8915', phone: '+91 94220 99112', firstName: 'Ananya', lastName: 'Roy',      name: 'Ananya Roy',      email: 'ananya.roy@hotmail.com',   isVip: true,  plan: '12 Months ₹899',   vipExpiresAt: '12 Aug 2027', joinedAt: '21 Aug 2024', totalWatchTime: '140.8 hrs', lastActive: '3 min ago',    status: 'ACTIVE'    },
 ];
 
 export const mockSubscriptions = [
   {
-    code: 'PLAN_MONTHLY',
-    name: 'Monthly Pass',
-    price: 199,
+    id: 'plan_1m',
+    code: 'PLAN_1M',
+    name: '1 Month Pass',
+    price: 99,
+    originalPrice: 99,
     period: '30 Days',
-    badge: 'Popular',
+    durationDays: 30,
+    durationMonths: 1,
+    badge: 'Popular Starter',
+    savingsText: 'Flexible monthly billing',
+    trialEligible: true,
+    trialFee: 2,
+    trialDays: 7,
     activeSubscribers: 8940,
-    mrrContribution: '₹17.79 Lakh',
+    mrrContribution: '₹8.85 Lakh',
+    status: 'ACTIVE',
     features: [
       'Unlock all paywalled episodes (Episode 4+)',
       '1080p Full HD vertical streaming',
       'Ad-free uninterrupted viewing',
-      'Hindi & English subtitles'
+      'Hindi & English subtitles',
+      '7-Day Free Trial eligible for just ₹2'
     ]
   },
   {
-    code: 'PLAN_YEARLY',
-    name: 'Annual All-Access',
-    price: 1499,
-    period: '365 Days',
-    badge: 'Best Value (Save 37%)',
-    activeSubscribers: 3510,
-    mrrContribution: '₹7.01 Lakh (Amortized)',
+    id: 'plan_6m',
+    code: 'PLAN_6M',
+    name: '6 Months Pass',
+    price: 499,
+    originalPrice: 594,
+    period: '180 Days',
+    durationDays: 180,
+    durationMonths: 6,
+    badge: 'Save 16%',
+    savingsText: 'Save ₹95 compared to monthly',
+    trialEligible: true,
+    trialFee: 2,
+    trialDays: 7,
+    activeSubscribers: 4210,
+    mrrContribution: '₹3.50 Lakh (Amortized)',
+    status: 'ACTIVE',
     features: [
-      'Everything in Monthly Pass',
-      'Early access to new series drops',
+      'Everything in 1 Month Pass',
+      'Save ₹95 compared to monthly renewal',
+      'Early access to weekly series premiere drops',
+      'Stream on up to 2 concurrent devices',
+      '7-Day Free Trial eligible for just ₹2'
+    ]
+  },
+  {
+    id: 'plan_12m',
+    code: 'PLAN_12M',
+    name: '12 Months Annual All-Access',
+    price: 899,
+    originalPrice: 1188,
+    period: '365 Days',
+    durationDays: 365,
+    durationMonths: 12,
+    badge: 'Best Value (Save ₹289)',
+    savingsText: 'Yearly savings: ₹289 vs ₹99/mo (₹1,188)',
+    trialEligible: true,
+    trialFee: 2,
+    trialDays: 7,
+    activeSubscribers: 5120,
+    mrrContribution: '₹3.84 Lakh (Amortized)',
+    status: 'ACTIVE',
+    features: [
+      'Everything in 6 Months Pass',
+      'Yearly savings: ₹289 compared with paying ₹99 monthly for 12 months (₹1,188)',
       'Subscriber badge in community comments',
-      'Download episodes for offline playback'
+      'Offline episode downloads for travel',
+      'Guaranteed access to all premium originals'
     ]
   }
 ];
 
+export const mockTrialConfig = {
+  enabled: true,
+  trialFee: 2,
+  trialDurationDays: 7,
+  refundable: false,
+  autoPayMandate: true,
+  gateway: 'Razorpay UPI e-Mandate',
+  conversionRate: '14.8%',
+  activeTrialUsers: 1420,
+  termsText: 'Enjoy a 7-day free trial for just ₹2. The ₹2 trial payment is non-refundable. After the 7-day trial period ends, your subscription will automatically renew as a paid subscription through the enabled AutoPay option. The applicable subscription fee will be charged automatically unless you cancel the subscription before the trial period ends.'
+};
+
 export const mockTransactions = [
-  { id: 'pay_P89xKmQ1', orderId: 'order_Nx881A', user: 'Aarav Sharma', phone: '+91 98201 44582', plan: 'Monthly Pass', amount: '₹199', method: 'UPI (PhonePe)', status: 'SUCCESS', date: '16 Sep 2026, 15:42' },
-  { id: 'pay_P89xLmB2', orderId: 'order_Nx882B', user: 'Priya Mehra', phone: '+91 97112 39810', plan: 'Yearly All-Access', amount: '₹1,499', method: 'Credit Card (HDFC)', status: 'SUCCESS', date: '16 Sep 2026, 15:10' },
-  { id: 'pay_P89xMoC3', orderId: 'order_Nx883C', user: 'Sneha Patel', phone: '+91 91670 88231', plan: 'Monthly Pass', amount: '₹199', method: 'UPI (GPay)', status: 'SUCCESS', date: '16 Sep 2026, 14:28' },
-  { id: 'pay_P89xNpD4', orderId: 'order_Nx884D', user: 'Rakesh Yadav', phone: '+91 98199 00124', plan: 'Monthly Pass', amount: '₹199', method: 'Paytm Wallet', status: 'FAILED', date: '16 Sep 2026, 13:55' },
-  { id: 'pay_P89xOqE5', orderId: 'order_Nx885E', user: 'Ananya Roy', phone: '+91 94220 99112', plan: 'Yearly All-Access', amount: '₹1,499', method: 'UPI (BHIM)', status: 'SUCCESS', date: '16 Sep 2026, 12:40' },
-  { id: 'pay_P89xPrF6', orderId: 'order_Nx886F', user: 'Devendra K', phone: '+91 98765 43210', plan: 'Monthly Pass', amount: '₹199', method: 'Netbanking (ICICI)', status: 'SUCCESS', date: '16 Sep 2026, 11:15' },
+  { id: 'pay_P89xKmQ1', orderId: 'order_Nx881A', user: 'Aarav Sharma', phone: '+91 98201 44582', plan: '1 Month Pass', amount: '₹99', method: 'UPI (PhonePe)', status: 'SUCCESS', date: '16 Sep 2026, 15:42' },
+  { id: 'pay_P89xLmB2', orderId: 'order_Nx882B', user: 'Priya Mehra', phone: '+91 97112 39810', plan: '12 Months All-Access', amount: '₹899', method: 'Credit Card (HDFC)', status: 'SUCCESS', date: '16 Sep 2026, 15:10' },
+  { id: 'pay_P89xMoC3', orderId: 'order_Nx883C', user: 'Sneha Patel', phone: '+91 91670 88231', plan: '6 Months Pass', amount: '₹499', method: 'UPI (GPay)', status: 'SUCCESS', date: '16 Sep 2026, 14:28' },
+  { id: 'pay_P89xNpD4', orderId: 'order_Nx884D', user: 'Rakesh Yadav', phone: '+91 98199 00124', plan: '7-Day Trial (₹2)', amount: '₹2', method: 'UPI AutoPay (Paytm)', status: 'SUCCESS', date: '16 Sep 2026, 13:55' },
+  { id: 'pay_P89xOqE5', orderId: 'order_Nx885E', user: 'Ananya Roy', phone: '+91 94220 99112', plan: '12 Months All-Access', amount: '₹899', method: 'UPI (BHIM)', status: 'SUCCESS', date: '16 Sep 2026, 12:40' },
+  { id: 'pay_P89xPrF6', orderId: 'order_Nx886F', user: 'Devendra K', phone: '+91 98765 43210', plan: '1 Month Pass', amount: '₹99', method: 'Netbanking (ICICI)', status: 'SUCCESS', date: '16 Sep 2026, 11:15' },
 ];
 
 export const mockAuditLogs = [
   { id: 'AUD-901', action: 'UPLOAD_SERIES', entity: 'Drama', targetId: 'DRM-105 (The Secret Billionaire Heir)', admin: 'Greg B. (Admin)', time: '14:20:12', duration: '320ms', status: 'SUCCESS', diff: { before: null, after: { title: 'The Secret Billionaire Heir', totalEpisodes: 30, status: 'PUBLISHED' } } },
   { id: 'AUD-902', action: 'UPDATE_PRICING', entity: 'Subscription', targetId: 'PLAN-YEARLY', admin: 'Priya K. (Billing)', time: '13:05:44', duration: '110ms', status: 'SUCCESS', diff: { before: { price: 1299 }, after: { price: 1499 } } },
-  { id: 'AUD-903', action: 'OVERRIDE_VIP', entity: 'User', targetId: 'USR-8910 (Aarav Sharma)', admin: 'Greg B. (Admin)', time: '12:30:10', duration: '190ms', status: 'SUCCESS', diff: { before: { isVip: false }, after: { isVip: true, daysGranted: 30 } } },
+  { id: 'AUD-903', action: 'OVERRIDE_SUBSCRIPTION', entity: 'User', targetId: 'USR-8910 (Aarav Sharma)', admin: 'Greg B. (Admin)', time: '12:30:10', duration: '190ms', status: 'SUCCESS', diff: { before: { isVip: false }, after: { isVip: true, daysGranted: 30 } } },
   { id: 'AUD-904', action: 'BROADCAST_NOTIFICATION', entity: 'PushNotification', targetId: 'FCM-4921 ("Episode 24 Dropped")', admin: 'Aman S. (Marketing)', time: '11:15:00', duration: '890ms', status: 'SUCCESS', diff: { before: null, after: { sentTo: '148,920 users', status: 'DELIVERED' } } },
   { id: 'AUD-905', action: 'ENCODING_FAILURE_RETRY', entity: 'Transcoder', targetId: 'DRM-104 (The Last Promise - Ep 17)', admin: 'System Transcoder', time: '10:05:22', duration: '4100ms', status: 'FAILED', diff: { error: 'Transcoding timeout at frame 4200 (1080p ladder)' } },
 ];

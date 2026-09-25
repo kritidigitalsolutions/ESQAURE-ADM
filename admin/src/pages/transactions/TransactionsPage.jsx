@@ -1,27 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { mockTransactions } from '../../data/mockOttData';
-import { Receipt, Search, X, Download, FileText, CheckCircle2, XCircle, ArrowUpRight, IndianRupee } from 'lucide-react';
+import { subscriptionService } from '../../services/subscriptionService';
+import Badge from '../../components/common/Badge';
+import { Receipt, Search, X, Download, FileText, CheckCircle2, XCircle, RefreshCw, AlertCircle } from 'lucide-react';
 
 export default function TransactionsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [transactions, setTransactions] = useState(mockTransactions);
+  const [transactions, setTransactions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const filteredTxns = transactions.filter(t => {
-    const term = searchTerm.toLowerCase();
-    const matchesSearch = !term ||
-                          t.id.toLowerCase().includes(term) ||
-                          t.user.toLowerCase().includes(term) ||
-                          t.phone.includes(term) ||
-                          t.orderId.toLowerCase().includes(term) ||
-                          t.amount.toLowerCase().includes(term) ||
-                          t.plan.toLowerCase().includes(term) ||
-                          t.method.toLowerCase().includes(term);
-    const matchesStatus = statusFilter === 'ALL' || t.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const loadTransactions = async (showLoading = false) => {
+    if (showLoading) setIsLoading(true);
+    setIsRefreshing(true);
+    try {
+      const res = await subscriptionService.getTransactions({ limit: 100 });
+      if (res?.transactions && Array.isArray(res.transactions)) {
+        setTransactions(res.transactions);
+      }
+    } catch (err) {
+      console.warn('Transactions load fallback:', err);
+    } finally {
+      if (showLoading) setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadTransactions(true);
+  }, []);
+
+  const filteredTxns = useMemo(() => {
+    return transactions.filter((t) => {
+      const term = searchTerm.toLowerCase();
+      const matchesSearch =
+        !term ||
+        (t.id && t.id.toLowerCase().includes(term)) ||
+        (t.user && t.user.toLowerCase().includes(term)) ||
+        (t.phone && t.phone.includes(term)) ||
+        (t.orderId && t.orderId.toLowerCase().includes(term)) ||
+        (t.amount && t.amount.toLowerCase().includes(term)) ||
+        (t.plan && t.plan.toLowerCase().includes(term)) ||
+        (t.method && t.method.toLowerCase().includes(term));
+
+      const matchesStatus = statusFilter === 'ALL' || t.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [transactions, searchTerm, statusFilter]);
 
   const handleExportCSV = () => {
     const headers = ['Payment ID,Order ID,Customer Name,Phone,Plan,Gateway Method,Amount,Status,Timestamp'];
@@ -181,11 +208,9 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="space-y-6 font-urbanist">
-      
+    <div className="space-y-6 font-urbanist pb-16 selection:bg-[#FEF08A] selection:text-black">
       {/* Top Filter & Search Bar */}
       <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        
         {/* Search */}
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -208,9 +233,9 @@ export default function TransactionsPage() {
         </div>
 
         {/* Status Filters & Export Buttons */}
-        <div className="flex items-center space-x-2.5">
+        <div className="flex items-center space-x-2.5 flex-wrap gap-y-2">
           <div className="flex items-center space-x-1 bg-slate-100 dark:bg-[#161B16] p-1 rounded-xl border border-slate-200 dark:border-white/10">
-            {['ALL', 'SUCCESS', 'FAILED'].map((st) => (
+            {['ALL', 'SUCCESS', 'PENDING', 'FAILED'].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
@@ -224,6 +249,17 @@ export default function TransactionsPage() {
               </button>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={() => loadTransactions(false)}
+            disabled={isRefreshing}
+            className="py-2 px-3 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-white/10 shadow-xs cursor-pointer"
+            title="Refresh transactions"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
+            <span>{isRefreshing ? 'Syncing...' : 'Sync'}</span>
+          </button>
 
           <button
             type="button"
@@ -245,7 +281,6 @@ export default function TransactionsPage() {
             <span>Export PDF</span>
           </button>
         </div>
-
       </div>
 
       {/* Transactions Table */}
@@ -256,7 +291,7 @@ export default function TransactionsPage() {
               <tr>
                 <th className="py-3.5 px-4">Payment ID & Order</th>
                 <th className="py-3.5 px-4">Customer Phone & Name</th>
-                <th className="py-3.5 px-4">Plan Code</th>
+                <th className="py-3.5 px-4">Subscription Plan</th>
                 <th className="py-3.5 px-4">Payment Gateway</th>
                 <th className="py-3.5 px-4">Amount</th>
                 <th className="py-3.5 px-4">Status</th>
@@ -264,16 +299,28 @@ export default function TransactionsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
-              {filteredTxns.length === 0 ? (
+              {isLoading && transactions.length === 0 ? (
+                Array.from({ length: 4 }).map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="py-4 px-4"><div className="h-4 w-28 bg-slate-200 dark:bg-white/10 rounded" /></td>
+                    <td className="py-4 px-4"><div className="h-4 w-24 bg-slate-200 dark:bg-white/10 rounded" /></td>
+                    <td className="py-4 px-4"><div className="h-4 w-20 bg-slate-200 dark:bg-white/10 rounded" /></td>
+                    <td className="py-4 px-4"><div className="h-4 w-24 bg-slate-200 dark:bg-white/10 rounded" /></td>
+                    <td className="py-4 px-4"><div className="h-4 w-16 bg-slate-200 dark:bg-white/10 rounded" /></td>
+                    <td className="py-4 px-4"><div className="h-5 w-16 bg-slate-200 dark:bg-white/10 rounded-full" /></td>
+                    <td className="py-4 px-4 text-right"><div className="h-4 w-24 bg-slate-200 dark:bg-white/10 rounded ml-auto" /></td>
+                  </tr>
+                ))
+              ) : filteredTxns.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="py-12 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/[0.06] flex items-center justify-center text-slate-400">
-                        <Search className="w-5 h-5" />
+                        <Receipt className="w-5 h-5" />
                       </div>
-                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">No transactions match your query</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">No transactions found</p>
                       <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                        {searchTerm ? `No payments found matching "${searchTerm}".` : 'No transactions found with this status filter.'}
+                        {searchTerm ? `No payments found matching "${searchTerm}".` : 'No transactions recorded in database.'}
                       </p>
                       <button
                         onClick={() => { setSearchTerm(''); setStatusFilter('ALL'); }}
@@ -286,45 +333,60 @@ export default function TransactionsPage() {
                 </tr>
               ) : (
                 filteredTxns.map((txn) => (
-                <tr key={txn.id} className="hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors">
-                  <td className="py-3.5 px-4 font-mono">
-                    <p className="font-bold text-slate-900 dark:text-white">{txn.id}</p>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-400">{txn.orderId}</p>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <p className="font-bold text-slate-900 dark:text-white">{txn.user}</p>
-                    <p className="text-[11px] text-slate-400 dark:text-slate-400 font-mono">{txn.phone}</p>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className="px-2 py-0.5 rounded bg-[#FEF08A]/40 dark:bg-[#FEF08A]/30 text-slate-950 dark:text-amber-300 font-extrabold text-[10px] border border-amber-200/50 dark:border-amber-700/40">
-                      {txn.plan}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400 font-medium">
-                    {txn.method}
-                  </td>
-                  <td className="py-3.5 px-4 font-extrabold text-slate-900 dark:text-white">
-                    {txn.amount}
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                      txn.status === 'SUCCESS' ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/50' : 'bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-200/60 dark:border-red-800/50'
-                    }`}>
-                      {txn.status === 'SUCCESS' ? <CheckCircle2 className="w-3 h-3 mr-0.5" /> : <XCircle className="w-3 h-3 mr-0.5" />}
-                      <span>{txn.status}</span>
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-right text-slate-400 dark:text-slate-400 text-[11px]">
-                    {txn.date}
-                  </td>
-                </tr>
-              ))
-            )}
+                  <tr key={txn.id} className="hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors">
+                    <td className="py-3.5 px-4 font-mono">
+                      <p className="font-bold text-slate-900 dark:text-white">{txn.id}</p>
+                      {txn.orderId && txn.orderId !== 'N/A' && (
+                        <p className="text-[10px] text-slate-400 dark:text-slate-400">{txn.orderId}</p>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <p className="font-bold text-slate-900 dark:text-white">{txn.user}</p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-400 font-mono">{txn.phone}</p>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <Badge plan={txn.plan} size="xs">
+                        {txn.plan}
+                      </Badge>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      {txn.method?.toLowerCase().includes('razorpay') || txn.method?.toLowerCase().includes('upi') ? (
+                        <Badge variant="razorpay" size="xs">
+                          {txn.method}
+                        </Badge>
+                      ) : (
+                        <span className="text-slate-600 dark:text-slate-400 font-medium text-xs">
+                          {txn.method}
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4 font-extrabold text-slate-900 dark:text-white">
+                      {txn.amount}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <Badge
+                        variant={
+                          txn.status === 'SUCCESS'
+                            ? 'active'
+                            : txn.status === 'PENDING'
+                            ? 'flix9-trial'
+                            : 'inactive'
+                        }
+                        size="xs"
+                      >
+                        {txn.status === 'SUCCESS' ? 'Success' : txn.status === 'PENDING' ? 'Pending' : 'Failed'}
+                      </Badge>
+                    </td>
+                    <td className="py-3.5 px-4 text-right text-slate-400 dark:text-slate-400 text-[11px] whitespace-nowrap">
+                      {txn.date}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
-
     </div>
   );
 }

@@ -35,12 +35,12 @@ export default function MobileAppDrawer({ isOpen, onClose }) {
         <div class="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
           
           <div class="bg-amber-950/30 border border-amber-800/40 rounded-xl p-4">
-            <div class="flex items-center space-x-2 text-amber-400 font-bold text-xs mb-1">
-              <Smartphone class="w-4 h-4" />
+            <div className="flex items-center space-x-2 text-amber-400 font-bold text-xs mb-1">
+              <Smartphone className="w-4 h-4" />
               <span>Combined Design Reference</span>
             </div>
-            <p class="text-slate-300 text-xs leading-relaxed">
-              This Admin Panel directly feeds the E² Stories Mobile App (`+91` Phone Auth, Short-dramas, Episode drawers, ₹199/₹1,499 Subscriptions).
+            <p className="text-slate-300 text-xs leading-relaxed">
+              This Admin Panel directly feeds the E² Stories Mobile App (`+91` Phone Auth, Short-dramas, Episode drawers, ₹99/₹499/₹899 Subscriptions &amp; ₹2 Trial).
             </p>
           </div>
 

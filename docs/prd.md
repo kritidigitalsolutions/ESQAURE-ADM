@@ -40,7 +40,7 @@ Based on the 29 screens reverse-engineered from the mobile client (`ui SS/`):
   - Episode Title, Duration (e.g., `2:15`).
   - Video stream URL (HLS / MP4 with multi-bitrate support: 1080p, 720p, Auto).
   - Subtitle tracks: Multi-language SRT/VTT (`Hindi`, `English`, `Off`).
-  - Access Control: `is_free` (e.g., Episodes 1–3 free teaser, Episode 4+ requires VIP Membership).
+  - Access Control: `is_free` (e.g., Episodes 1–3 free teaser, Episode 4+ requires Premium Subscription).
 
 ### 2.3 Home Feed & Discovery Engine
 - **Hero Featured Carousel**: Curated list of high-impact drama posters with play counts (e.g., `3.5k views`).
@@ -71,18 +71,18 @@ Based on the 29 screens reverse-engineered from the mobile client (`ui SS/`):
     - Autoplay next episode toggle.
 - Heartbeat / Progress tracking API: Reports playback timestamp every 5-10 seconds to maintain accurate "Continue Watching" state.
 
-### 2.6 Monetization & VIP Subscriptions
+### 2.6 Monetization & Subscriptions
 - **Subscription Tiers**:
   - **Monthly Plan**: ₹199 / month.
   - **Yearly Plan**: ₹1,499 / year (high-value saving).
-- **VIP Benefits**:
+- **Subscription Benefits**:
   - Unlimited episodes (unlock all paywalled episodes).
   - Ad-free streaming experience.
   - High-Definition (HD 1080p) streaming access.
   - Early access to newly added micro-drama series.
 - **Payment Flow**:
   - Order creation via Payment Gateway (Razorpay / Cashfree).
-  - Webhook verification for instant VIP activation.
+  - Webhook verification for instant subscription activation.
   - Transaction history & invoice receipt generation.
   - Grace periods and membership renewal tracking.
 
@@ -93,7 +93,7 @@ Based on the 29 screens reverse-engineered from the mobile client (`ui SS/`):
 - **Recommended for You**: Fallback feed on empty search query.
 
 ### 2.8 User Profile & Library
-- **VIP Status Badge**: Visual indicator (`VIP`) on user profile header.
+- **Subscription Status Badge**: Visual indicator (`Subscribed`) on user profile header.
 - **Saved Series (Watchlist)**: List of bookmarked dramas with poster, episode count, and quick "Watch" trigger.
 - **Watch History**: Chronological list of started series with "Continue" action and resume position.
 - **Account & App Settings**:
@@ -114,7 +114,7 @@ Based on the 29 screens reverse-engineered from the mobile client (`ui SS/`):
 The Admin Panel is a desktop-first SaaS dashboard for administrators and content curators (inspired by the clean, modern Nodus design reference):
 
 ### 3.1 Analytics & Overview Dashboard
-- High-level KPIs: Total Users, Active VIP Subscribers, Daily Active Users (DAU), Total Watch Hours, Monthly Recurring Revenue (MRR).
+- High-level KPIs: Total Users, Active Paid Subscribers, Daily Active Users (DAU), Total Watch Hours, Monthly Recurring Revenue (MRR).
 - Visual trend charts (Daily views, Revenue growth, Episode completion rates).
 - Quick alerts for failed payment webhooks, encoding errors, or user reports.
 
@@ -128,9 +128,9 @@ The Admin Panel is a desktop-first SaaS dashboard for administrators and content
 - **Feed Curator**: Drag-and-drop ordering for "Hero Carousel", "Trending", and "Featured" lists.
 
 ### 3.3 User & Subscription Management
-- Searchable user table with filters (All, Free Users, VIP Members, Inactive).
+- Searchable user table with filters (All, Free Users, Subscribed Members, Inactive).
 - View individual user profile, device info, watch history, and active subscription details.
-- Manual VIP override (grant complimentary access or revoke).
+- Manual subscription override (grant complimentary access or revoke).
 - Transaction logs with Razorpay payment ID, status, amount, and invoice download.
 
 ### 3.4 Notification Dispatcher

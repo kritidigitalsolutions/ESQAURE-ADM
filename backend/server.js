@@ -2,6 +2,8 @@ import app from './app.js';
 import { env } from './config/env.js';
 import { connectDB, closeDB } from './config/db.js';
 import { seedDefaultGenres } from './config/seedGenres.js';
+import { seedDefaultLegalDocs } from './config/seedLegalDocs.js';
+import { seedDefaultDramas } from './config/seedDramas.js';
 import { removeDummyUsers } from './config/seedUsers.js';
 import { initializeFirebase } from './config/firebase.js';
 
@@ -9,6 +11,8 @@ const startServer = async () => {
   // Connect to database
   await connectDB();
   await seedDefaultGenres();
+  await seedDefaultLegalDocs();
+  await seedDefaultDramas();
   await removeDummyUsers();
   initializeFirebase();
 

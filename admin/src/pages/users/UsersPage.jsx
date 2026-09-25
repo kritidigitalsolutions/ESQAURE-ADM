@@ -4,6 +4,8 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { userService } from '../../services/userService';
 import AnimatedNumber from '../../components/common/AnimatedNumber';
+import Badge from '../../components/common/Badge';
+import KpiStatCard from '../../components/common/KpiStatCard';
 import {
   Users,
   Search,
@@ -43,24 +45,32 @@ import {
 const SUBSCRIPTION_PLANS = [
   {
     id: 'monthly',
-    name: 'Monthly Pass',
-    price: '₹199 / mo',
+    name: '1 Month Pass',
+    price: '₹99 / mo',
     days: 30,
-    planTitle: 'Monthly Pass (₹199)',
+    planTitle: '1 Month Pass',
+    isVip: true,
+  },
+  {
+    id: 'six_months',
+    name: '6 Months Pass',
+    price: '₹499 / 6 mo',
+    days: 180,
+    planTitle: '6 Months Pass',
     isVip: true,
   },
   {
     id: 'annual',
-    name: 'Annual Pass',
-    price: '₹1,499 / yr',
+    name: '12 Months All-Access',
+    price: '₹899 / yr',
     days: 365,
-    planTitle: 'Yearly All-Access (₹1,499)',
+    planTitle: '12 Months All-Access',
     isVip: true,
   },
   {
     id: 'trial',
     name: '7-Day Free Trial',
-    price: 'Free (7 Days)',
+    price: '₹2 (7 Days AutoPay)',
     days: 7,
     planTitle: '7-Day Free Trial',
     isVip: true,
@@ -82,7 +92,7 @@ export default function UsersPage({ onNavigate }) {
   const [isSaving, setIsSaving] = useState(false);
   const [apiError, setApiError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('ALL'); // 'ALL' | 'VIP' | 'FREE' | 'SUSPENDED'
+  const [filterType, setFilterType] = useState('ALL'); // 'ALL' | 'SUBSCRIBED' | 'FREE' | 'SUSPENDED'
   const [overrideUser, setOverrideUser] = useState(null);
   const [viewUser, setViewUser] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
@@ -159,11 +169,42 @@ export default function UsersPage({ onNavigate }) {
     };
   }, [overrideUser, viewUser, userToDelete]);
 
+  // Helper to remove parenthetical prices like (₹499) from plan display labels
+  const cleanPlanName = (planStr) => {
+    if (!planStr) return 'Free Tier';
+    const cleaned = planStr.replace(/\s*\([^)]*₹[^)]*\)/gi, '').replace(/\s*\(\s*₹.*?\)/gi, '').trim();
+    return cleaned || 'Free Tier';
+  };
+
+  // Helper for friendly default username fallback
+  const getUserDisplayName = (user) => {
+    if (!user) return 'User';
+    const rawName = (user.name || '').trim();
+    const phoneStr = (user.phone || '').trim();
+
+    if (rawName && rawName !== phoneStr && !rawName.startsWith('+91')) {
+      return rawName;
+    }
+
+    const digits = phoneStr.replace(/\D/g, '');
+    const last4 = digits ? digits.slice(-4) : (user.id ? String(user.id).slice(-4) : '1001');
+    return `User #${last4}`;
+  };
+
   const handleOpenEditUser = (user) => {
     setOverrideUser(user);
-    const nameParts = (user.name || '').trim().split(' ');
-    const firstName = user.firstName || nameParts[0] || '';
-    const lastName = user.lastName || nameParts.slice(1).join(' ') || '';
+    const displayName = getUserDisplayName(user);
+    let firstName = user.firstName || '';
+    let lastName = user.lastName || '';
+    if (!firstName && !lastName) {
+      if (displayName.includes(' ')) {
+        const parts = displayName.split(' ');
+        firstName = parts[0];
+        lastName = parts.slice(1).join(' ');
+      } else {
+        firstName = displayName;
+      }
+    }
     setEditForm({
       firstName,
       lastName,
@@ -178,10 +219,20 @@ export default function UsersPage({ onNavigate }) {
   const handleSaveUser = async (e) => {
     if (e) e.preventDefault();
     if (!overrideUser) return;
-    const fullName = `${editForm.firstName.trim()} ${editForm.lastName.trim()}`.trim() || overrideUser.name;
+    let fName = editForm.firstName.trim();
+    let lName = editForm.lastName.trim();
+
+    if (!fName && !lName) {
+      const digits = (editForm.phone || overrideUser.phone || '').replace(/\D/g, '');
+      const last4 = digits ? digits.slice(-4) : '1001';
+      fName = 'User';
+      lName = `#${last4}`;
+    }
+
+    const fullName = `${fName} ${lName}`.trim();
     const payload = {
-      firstName: editForm.firstName.trim(),
-      lastName: editForm.lastName.trim(),
+      firstName: fName,
+      lastName: lName,
       phone: editForm.phone.trim(),
       email: editForm.email.trim(),
       avatarUrl: editForm.avatarUrl.trim(),
@@ -256,7 +307,7 @@ export default function UsersPage({ onNavigate }) {
 
       const matchesFilter =
         filterType === 'ALL' ||
-        (filterType === 'VIP' && isVip) ||
+        (filterType === 'SUBSCRIBED' && isVip) ||
         (filterType === 'FREE' && isFree) ||
         (filterType === 'SUSPENDED' && isSuspended);
 
@@ -277,8 +328,8 @@ export default function UsersPage({ onNavigate }) {
     };
   }, [serverCounts, users]);
 
-  // VIP Grant Action
-  const handleGrantVip = async (userId, days = 30, planTitle = 'Monthly Pass (₹199)') => {
+  // Subscription Grant Action
+  const handleGrantVip = async (userId, days = 30, planTitle = '1 Month Pass (₹99)') => {
     try {
       const res = await userService.updateUserVip(userId, { isVip: true, days, planName: planTitle });
       const updatedUser = res?.user;
@@ -329,7 +380,7 @@ export default function UsersPage({ onNavigate }) {
     setIsPlanDropdownOpen(false);
   };
 
-  // VIP Revoke Action
+  // Subscription Revoke Action
   const handleRevokeVip = async (userId) => {
     try {
       const res = await userService.updateUserVip(userId, { isVip: false });
@@ -351,7 +402,7 @@ export default function UsersPage({ onNavigate }) {
       showToast(`Subscription revoked. Reverted to Free Tier.`);
       loadUsers(true);
     } catch (err) {
-      console.error('Failed to revoke VIP:', err);
+      console.error('Failed to revoke subscription:', err);
       showToast(err.message || 'Failed to revoke subscription in database');
     }
   };
@@ -426,11 +477,12 @@ export default function UsersPage({ onNavigate }) {
 
   // Export filtered users to CSV
   const handleExportCSV = () => {
-    const headers = ['User ID,Name,Phone,Email,Plan,Subscription Status,Voucher / Code,Expires At,Total Watch Time,Last Active,Status'];
-    const rows = filteredUsers.map((u) =>
+    const headers = ['#,User ID,Name,Phone,Email,Plan,Subscription Status,Voucher / Code,Expires At,Total Watch Time,Last Active,Status'];
+    const rows = filteredUsers.map((u, idx) =>
       [
+        `"${idx + 1}"`,
         `"${u.id}"`,
-        `"${u.name}"`,
+        `"${getUserDisplayName(u)}"`,
         `"${u.phone}"`,
         `"${u.email}"`,
         `"${u.plan}"`,
@@ -483,7 +535,7 @@ export default function UsersPage({ onNavigate }) {
       doc.setFontSize(9);
       doc.setTextColor(100, 116, 139);
       const activeFilterLabel =
-        filterType === 'VIP'
+        filterType === 'SUBSCRIBED'
           ? 'Subscribed'
           : filterType === 'FREE'
           ? 'Free Tier'
@@ -515,12 +567,12 @@ export default function UsersPage({ onNavigate }) {
       const tableRows = filteredUsers.map((u, idx) => ({
         index: idx + 1,
         id: u.id,
-        name: u.name,
+        name: getUserDisplayName(u),
         phone: u.phone,
         email: u.email,
         plan: u.plan,
         isVip: u.isVip ? 'Subscribed' : 'Free Tier',
-        promoCode: u.promoCode || 'Direct',
+        promoCode: u.promoCode || '—',
         vipExpiresAt: u.vipExpiresAt || '—',
         totalWatchTime: u.totalWatchTime || '0h',
         status: u.status,
@@ -631,154 +683,52 @@ export default function UsersPage({ onNavigate }) {
 
       {/* 4 Core OTT User KPI Metric Cards (Dashboard Aesthetic) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
         {/* Metric 1: Total Registered Base */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-                  <Users className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block">
-                    Total Users
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
-                    Registered Base
-                  </span>
-                </div>
-              </div>
-
-              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 shadow-xs">
-                Total
-              </span>
-            </div>
-
-            <div className="mt-4 flex items-baseline space-x-2">
-              <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
-                <AnimatedNumber value={counts.all.toLocaleString()} />
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-            <span>{counts.vip} paid subscribers</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-              {counts.all > 0 ? ((counts.vip / counts.all) * 100).toFixed(1) : '0.0'}% Subscribed share
-            </span>
-          </div>
-        </div>
+        <KpiStatCard
+          icon={Users}
+          title="Total Users"
+          subtitle="Registered Base"
+          value={counts.all}
+          animateNumber
+          footerLeft={`${counts.vip} paid subscribers`}
+          footerRight={`${counts.all > 0 ? ((counts.vip / counts.all) * 100).toFixed(1) : '0.0'}% Subscribed share`}
+          footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
+        />
 
         {/* Metric 2: Paid Subscribers */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-                  <ShieldCheck className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block">
-                    Subscribers
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
-                    Active Subscriptions
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 flex items-baseline space-x-2">
-              <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
-                <AnimatedNumber value={counts.vip.toLocaleString()} />
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-            <span>{counts.free} free tier accounts</span>
-            <span className="text-amber-500 dark:text-amber-400 font-bold">{counts.suspended} suspended</span>
-          </div>
-        </div>
+        <KpiStatCard
+          icon={ShieldCheck}
+          title="Subscribers"
+          subtitle="Active Subscriptions"
+          value={counts.vip}
+          animateNumber
+          footerLeft={`${counts.free} free tier accounts`}
+          footerRight={`${counts.suspended} suspended`}
+          footerRightColor="text-amber-500 dark:text-amber-400 font-bold"
+        />
 
         {/* Metric 3: Daily Active Users (DAU) */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-                  <Flame className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block">
-                    Active Today
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
-                    Daily Sessions (DAU)
-                  </span>
-                </div>
-              </div>
-
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500 text-white shadow-xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Live
-              </span>
-            </div>
-
-            <div className="mt-4 flex items-baseline space-x-2">
-              <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
-                <AnimatedNumber value={counts.activeToday.toLocaleString()} />
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-            <span>{counts.activeToday} active in last 24 hrs</span>
-            <span className="text-slate-700 dark:text-slate-300 font-bold">
-              {counts.all > 0 ? ((counts.activeToday / counts.all) * 100).toFixed(0) : '0'}% active rate
-            </span>
-          </div>
-        </div>
+        <KpiStatCard
+          icon={Flame}
+          title="Active Today"
+          subtitle="Daily Sessions (DAU)"
+          value={counts.activeToday}
+          animateNumber
+          footerLeft={`${counts.activeToday} active in last 24 hrs`}
+          footerRight={`${counts.all > 0 ? ((counts.activeToday / counts.all) * 100).toFixed(0) : '0'}% active rate`}
+          footerRightColor="text-slate-700 dark:text-slate-300 font-bold"
+        />
 
         {/* Metric 4: Average Watch Time */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-                  <PlayCircle className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block">
-                    Avg Watch Time
-                  </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
-                    Catalog Engagement
-                  </span>
-                </div>
-              </div>
-
-              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full bg-[#FEF08A] text-slate-950 border border-amber-300/80 shadow-xs">
-                Avg
-              </span>
-            </div>
-
-            <div className="mt-4 flex items-baseline space-x-2">
-              <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
-                <AnimatedNumber value={counts.avgWatchTime} />
-              </span>
-              <span className="text-sm font-bold text-slate-400 dark:text-slate-400">
-                hrs / user
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-            <span>Peak: {counts.peakWatchTime} hrs</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold">Live DB metric</span>
-          </div>
-        </div>
-
+        <KpiStatCard
+          icon={PlayCircle}
+          title="Avg Watch Time"
+          subtitle="Catalog Engagement"
+          value={`${counts.avgWatchTime} hrs / user`}
+          footerLeft={`Peak: ${counts.peakWatchTime} hrs`}
+          footerRight="Live DB metric"
+          footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
+        />
       </div>
 
       {/* Unified Controls Toolbar: Filter Pills (Left) & Search + Export (Right) */}
@@ -795,7 +745,7 @@ export default function UsersPage({ onNavigate }) {
                 transform: `translateX(${
                   filterType === 'ALL'
                     ? '0%'
-                    : filterType === 'VIP'
+                    : filterType === 'SUBSCRIBED'
                     ? '100%'
                     : filterType === 'FREE'
                     ? '200%'
@@ -808,7 +758,7 @@ export default function UsersPage({ onNavigate }) {
             <div className="grid grid-cols-4 relative z-10 w-full items-center">
               {[
                 { id: 'ALL', label: 'All Users' },
-                { id: 'VIP', label: 'Subscribed' },
+                { id: 'SUBSCRIBED', label: 'Subscribed' },
                 { id: 'FREE', label: 'Free Tier' },
                 { id: 'SUSPENDED', label: 'Suspended' },
               ].map((tab) => {
@@ -900,54 +850,54 @@ export default function UsersPage({ onNavigate }) {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 dark:bg-[#161B16] border-b border-slate-100 dark:border-white/10 text-slate-400 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="py-3.5 px-4 sm:px-6">User Account</th>
-                <th className="py-3.5 px-4">Phone & Email</th>
-                <th className="py-3.5 px-4">Subscription Plan</th>
-                <th className="py-3.5 px-4">Voucher / Code</th>
-                <th className="py-3.5 px-4">Joined</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
+                <th className="py-3 px-3 text-center w-10">#</th>
+                <th className="py-3 px-3.5 whitespace-nowrap">User Account</th>
+                <th className="py-3 px-3.5 whitespace-nowrap">Phone & Email</th>
+                <th className="py-3 px-3.5 whitespace-nowrap">Subscription Plan</th>
+                <th className="py-3 px-3.5 whitespace-nowrap">Joined</th>
+                <th className="py-3 px-3.5 whitespace-nowrap">Voucher / Code</th>
+                <th className="py-3 px-3.5 whitespace-nowrap">Status</th>
+                <th className="py-3 px-3.5 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/80 dark:divide-white/5 font-medium">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, idx) => (
                   <tr key={`user-skel-${idx}`} className="animate-pulse">
-                    <td className="py-4 px-4 sm:px-6">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-800" />
-                        <div className="space-y-1.5">
-                          <div className="w-28 h-3.5 bg-slate-200 dark:bg-slate-800 rounded" />
-                          <div className="w-16 h-2 bg-slate-100 dark:bg-slate-800/60 rounded" />
+                    <td className="py-3 px-3 text-center">
+                      <div className="w-4 h-3 bg-slate-200 dark:bg-slate-800 rounded mx-auto" />
+                    </td>
+                    <td className="py-3 px-3.5">
+                      <div className="flex items-center space-x-2.5">
+                        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0" />
+                        <div className="space-y-1">
+                          <div className="w-24 h-3.5 bg-slate-200 dark:bg-slate-800 rounded" />
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 px-4">
-                      <div className="space-y-1.5">
-                        <div className="w-24 h-3 bg-slate-200 dark:bg-slate-800 rounded" />
-                        <div className="w-32 h-2.5 bg-slate-100 dark:bg-slate-800/60 rounded" />
-                      </div>
+                    <td className="py-3 px-3.5">
+                      <div className="w-48 h-3 bg-slate-200 dark:bg-slate-800 rounded" />
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="py-3 px-3.5">
                       <div className="w-24 h-5 bg-slate-200 dark:bg-slate-800 rounded-full" />
                     </td>
-                    <td className="py-4 px-4">
-                      <div className="w-20 h-5 bg-slate-200 dark:bg-slate-800 rounded-lg" />
-                    </td>
-                    <td className="py-4 px-4">
+                    <td className="py-3 px-3.5">
                       <div className="w-20 h-3 bg-slate-200 dark:bg-slate-800 rounded" />
                     </td>
-                    <td className="py-4 px-4">
-                      <div className="w-16 h-5 bg-slate-200 dark:bg-slate-800 rounded-full" />
+                    <td className="py-3 px-3.5">
+                      <div className="w-16 h-5 bg-slate-200 dark:bg-slate-800 rounded-lg" />
                     </td>
-                    <td className="py-4 px-4 sm:px-6 text-right">
+                    <td className="py-3 px-3.5">
+                      <div className="w-14 h-5 bg-slate-200 dark:bg-slate-800 rounded-full" />
+                    </td>
+                    <td className="py-3 px-3.5 text-right">
                       <div className="w-20 h-7 bg-slate-100 dark:bg-slate-800 rounded-lg ml-auto" />
                     </td>
                   </tr>
                 ))
               ) : apiError && filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="py-12 text-center">
+                  <td colSpan="8" className="py-12 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/40 flex items-center justify-center text-rose-500">
                         <AlertCircle className="w-6 h-6" />
@@ -971,7 +921,7 @@ export default function UsersPage({ onNavigate }) {
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="py-12 text-center">
+                  <td colSpan="8" className="py-12 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center text-slate-400 dark:text-slate-500">
                         <Search className="w-6 h-6" />
@@ -998,28 +948,34 @@ export default function UsersPage({ onNavigate }) {
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => {
+                filteredUsers.map((user, idx) => {
                   const isVip = user.isVip;
                   const isActive = user.status === 'ACTIVE';
+                  const displayName = getUserDisplayName(user);
 
                   return (
                     <tr
                       key={user.id}
                       className="hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors group"
                     >
+                      {/* Index Serial No. */}
+                      <td className="py-3 px-3 text-center font-mono font-medium text-[11px] text-slate-400 dark:text-slate-500 select-none">
+                        {idx + 1}
+                      </td>
+
                       {/* User Account */}
-                      <td className="py-3.5 px-4 sm:px-6">
+                      <td className="py-3 px-3.5">
                         <button
                           type="button"
                           onClick={() => setViewUser(user)}
-                          className="flex items-center space-x-3 text-left group/user cursor-pointer"
+                          className="flex items-center space-x-2.5 text-left group/user cursor-pointer"
                         >
-                          {/* Profile Picture */}
-                          <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 shadow-2xs border border-slate-200/80 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover/user:border-amber-300 transition-colors relative">
+                          {/* Profile Picture in Circle */}
+                          <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 shadow-2xs border border-slate-200/80 dark:border-white/10 bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover/user:border-amber-300 transition-colors relative">
                             {user.avatarUrl ? (
                               <img
                                 src={user.avatarUrl}
-                                alt={user.name}
+                                alt={displayName}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
@@ -1033,99 +989,75 @@ export default function UsersPage({ onNavigate }) {
                               className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500"
                               style={{ display: user.avatarUrl ? 'none' : 'flex' }}
                             >
-                              <UserIcon className="w-4 h-4 stroke-[2.2]" />
+                              <UserIcon className="w-3.5 h-3.5 stroke-[2.2]" />
                             </div>
                           </div>
 
-                          <span className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 truncate group-hover/user:text-amber-500 transition-colors">
-                            {user.name}
+                          <span className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate group-hover/user:text-amber-500 transition-colors">
+                            {displayName}
                           </span>
                         </button>
                       </td>
 
-                      {/* Phone & Email */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center space-x-1.5">
-                          <Smartphone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="font-mono font-bold text-xs text-slate-800 dark:text-slate-200">{user.phone}</span>
-                        </div>
-                        <div className="flex items-center space-x-1.5 mt-0.5">
-                          <Mail className="w-3 h-3 text-slate-300 dark:text-slate-600 shrink-0" />
-                          <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium truncate">{user.email}</span>
+                      {/* Phone & Email (Single Line Side-by-Side) */}
+                      <td className="py-3 px-3.5 whitespace-nowrap">
+                        <div className="flex items-center space-x-2.5">
+                          <span className="font-mono font-medium text-xs text-slate-700 dark:text-slate-300">
+                            {user.phone || '—'}
+                          </span>
+                          {user.email && user.email !== '—' && (
+                            <>
+                              <span className="text-slate-300 dark:text-slate-600 text-[10px] select-none">•</span>
+                              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                                {user.email}
+                              </span>
+                            </>
+                          )}
                         </div>
                       </td>
 
                       {/* Subscription Plan */}
-                      <td className="py-3.5 px-4">
-                        {isVip ? (
-                          <div>
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40 shadow-2xs">
-                              <CheckCircle2 className="w-3 h-3 stroke-[2.5]" />
-                              <span>{user.plan}</span>
-                            </span>
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1 mt-0.5">
-                              <Calendar className="w-2.5 h-2.5" />
-                              <span>Expires: {user.vipExpiresAt}</span>
-                            </p>
-                          </div>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700">
-                            {user.plan}
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Voucher / Promo Code */}
-                      <td className="py-3.5 px-4">
-                        {user.promoCode ? (
-                          <div className="flex flex-col items-start gap-0.5">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#FEF08A]/40 text-slate-950 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700/50 shadow-2xs">
-                              <Ticket className="w-3 h-3 text-amber-700 dark:text-amber-400 stroke-[2.2]" />
-                              <span>{user.promoCode}</span>
-                            </span>
-                            <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
-                              Promo Applied
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700" />
-                            <span>Direct</span>
-                          </span>
-                        )}
+                      <td className="py-3 px-3.5">
+                        <Badge plan={user.plan || (isVip ? '1 Month Pass' : 'Free Tier')} size="xs">
+                          {cleanPlanName(user.plan || (isVip ? '1 Month Pass' : 'Free Tier'))}
+                        </Badge>
                       </td>
 
                       {/* Joined Date */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="w-3 h-3 text-slate-300 dark:text-slate-600 shrink-0" />
-                          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{user.joinedAt || '—'}</span>
-                        </div>
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold transition-colors shrink-0 ${
-                            isActive
-                              ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40'
-                              : 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/40'
-                          }`}
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              isActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
-                            }`}
-                          />
-                          {user.status}
+                      <td className="py-3 px-3.5">
+                        <span className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">
+                          {user.joinedAt || '25 Sept 2026'}
                         </span>
                       </td>
 
-                      {/* Actions */}
-                      <td className="py-3.5 px-4 sm:px-6">
-                        <div className="flex items-center justify-end gap-1">
+                      {/* Voucher / Promo Code */}
+                      <td className="py-3 px-3.5">
+                        {user.promoCode ? (
+                          <div className="flex flex-col items-start gap-0.5">
+                            <Badge variant="given-by-admin" size="xs">
+                              {user.promoCode}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-500 font-mono text-xs select-none">
+                            —
+                          </span>
+                        )}
+                      </td>
 
-                          {/* View Profile */}
+                      {/* Status */}
+                      <td className="py-3 px-3.5">
+                        <Badge
+                          variant={isActive ? 'active' : 'inactive'}
+                          size="xs"
+                        >
+                          {isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-3 px-3.5 text-right">
+                        <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
                             title="View Profile"
@@ -1134,8 +1066,6 @@ export default function UsersPage({ onNavigate }) {
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
-
-                          {/* Edit User & Grant Access */}
                           <button
                             type="button"
                             title="Edit User & Access"
@@ -1144,8 +1074,6 @@ export default function UsersPage({ onNavigate }) {
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
-
-                          {/* Suspend / Block */}
                           <button
                             type="button"
                             title={isActive ? 'Suspend User' : 'Unblock User'}
@@ -1158,8 +1086,6 @@ export default function UsersPage({ onNavigate }) {
                           >
                             <Ban className="w-3.5 h-3.5" />
                           </button>
-
-                          {/* Delete */}
                           <button
                             type="button"
                             title="Delete User"
@@ -1168,7 +1094,6 @@ export default function UsersPage({ onNavigate }) {
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
-
                         </div>
                       </td>
                     </tr>
@@ -1224,11 +1149,11 @@ export default function UsersPage({ onNavigate }) {
                 {/* User Identity Preview Banner */}
                 <div className="p-3 bg-slate-50/90 dark:bg-[#161B16] rounded-xl border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3">
                   <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 dark:bg-[#121612] shadow-xs border border-slate-200/80 dark:border-white/10 shrink-0 flex items-center justify-center relative">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 dark:bg-[#121612] shadow-xs border border-slate-200/80 dark:border-white/10 shrink-0 flex items-center justify-center relative">
                       {(editForm.avatarUrl || overrideUser.avatarUrl) ? (
                         <img
                           src={editForm.avatarUrl || overrideUser.avatarUrl}
-                          alt={overrideUser.name}
+                          alt={getUserDisplayName(overrideUser)}
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
@@ -1247,7 +1172,7 @@ export default function UsersPage({ onNavigate }) {
                     </div>
                     <div className="min-w-0">
                       <span className="text-xs font-black text-slate-950 dark:text-white block truncate">
-                        {overrideUser.name}
+                        {getUserDisplayName(overrideUser)}
                       </span>
                       <span className="text-[10px] text-slate-400 dark:text-slate-500 block truncate">
                         {overrideUser.email || overrideUser.phone || 'Registered User'}
@@ -1558,11 +1483,11 @@ export default function UsersPage({ onNavigate }) {
               {/* Minimal Hero User Identity */}
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center space-x-3.5">
-                  <div className="w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-xs border border-slate-200/80 dark:border-slate-700 shrink-0 flex items-center justify-center relative">
+                  <div className="w-14 h-14 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-xs border border-slate-200/80 dark:border-slate-700 shrink-0 flex items-center justify-center relative">
                     {viewUser.avatarUrl ? (
                       <img
                         src={viewUser.avatarUrl}
-                        alt={viewUser.name}
+                        alt={getUserDisplayName(viewUser)}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
@@ -1582,23 +1507,15 @@ export default function UsersPage({ onNavigate }) {
 
                   <div>
                     <h4 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight leading-tight">
-                      {viewUser.name}
+                      {getUserDisplayName(viewUser)}
                     </h4>
                     <div className="flex items-center gap-2 mt-1">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                          viewUser.status === 'ACTIVE'
-                            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40'
-                            : 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/40'
-                        }`}
+                      <Badge
+                        variant={viewUser.status === 'ACTIVE' ? 'active' : 'inactive'}
+                        size="xs"
                       >
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            viewUser.status === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
-                          }`}
-                        />
-                        {viewUser.status}
-                      </span>
+                        {viewUser.status === 'ACTIVE' ? 'Active' : 'Inactive'}
+                      </Badge>
                     </div>
                     <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">
                       Joined {viewUser.joinedAt || '2025'}
@@ -1702,15 +1619,12 @@ export default function UsersPage({ onNavigate }) {
                         Access Level
                       </span>
                     </div>
-                    <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black ${
-                        viewUser.isVip
-                          ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700/50'
-                          : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                      }`}
+                    <Badge
+                      variant={viewUser.isVip ? 'flix9-premium' : 'no-plan'}
+                      size="xs"
                     >
-                      {viewUser.isVip ? 'SUBSCRIBED' : 'FREE TIER'}
-                    </span>
+                      {viewUser.isVip ? 'Subscribed' : 'No Plan'}
+                    </Badge>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 pt-0.5 text-xs">
@@ -1848,29 +1762,21 @@ export default function UsersPage({ onNavigate }) {
                     </div>
                   </div>
 
-                  <span
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold shrink-0 ${
-                      userToDelete.status === 'ACTIVE'
-                        ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40'
-                        : 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/40'
-                    }`}
+                  <Badge
+                    variant={userToDelete.status === 'ACTIVE' ? 'active' : 'inactive'}
+                    size="xs"
                   >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        userToDelete.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-rose-500'
-                      }`}
-                    />
-                    {userToDelete.status || 'ACTIVE'}
-                  </span>
+                    {userToDelete.status || 'Active'}
+                  </Badge>
                 </div>
 
                 {/* Plan & Details Row */}
                 <div className="pt-2.5 border-t border-slate-200/60 dark:border-slate-800/60 grid grid-cols-2 gap-2 text-[11px]">
                   <div className="flex items-center space-x-1.5 text-slate-500 dark:text-slate-400 min-w-0">
                     <span className="font-medium shrink-0">Plan:</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 truncate">
-                      {userToDelete.plan || 'Free Tier'}
-                    </span>
+                    <Badge plan={userToDelete.plan} size="xs">
+                      {userToDelete.plan || 'No Plan'}
+                    </Badge>
                   </div>
                   {userToDelete.phone && (
                     <div className="flex items-center space-x-1.5 text-slate-500 dark:text-slate-400 min-w-0">

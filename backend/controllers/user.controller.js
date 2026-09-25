@@ -1,10 +1,13 @@
 import mongoose from 'mongoose';
 import { User } from '../models/User.js';
 import { Genre } from '../models/Genre.js';
+import { Subscription } from '../models/Subscription.js';
+import { SubscriptionPlan } from '../models/SubscriptionPlan.js';
 import { removeDummyUsers } from '../config/seedUsers.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { AppError } from '../utils/appError.js';
 import { ERROR_CODES } from '../constants/errorCodes.js';
+import { syncAndCleanSubscriptionData } from '../utils/syncSubscriptionData.js';
 
 export class UserController {
   /**
@@ -15,13 +18,14 @@ export class UserController {
     try {
       // Permanently purge any dummy or mock users so only 100% genuine users are returned
       await removeDummyUsers();
+      await syncAndCleanSubscriptionData();
 
       const { search = '', filter = 'ALL', limit = 100, page = 1 } = req.query;
 
       const query = { status: { $ne: 'DELETED' } };
 
       // Apply filter type
-      if (filter === 'VIP') {
+      if (filter === 'VIP' || filter === 'SUBSCRIBED') {
         query.isVip = true;
       } else if (filter === 'FREE') {
         query.isVip = { $ne: true };
@@ -90,7 +94,7 @@ export class UserController {
             lastName: u.lastName || '',
             phone: `${u.countryCode || '+91'} ${u.phoneNumber}`.trim(),
             email: u.email || '—',
-            plan: u.plan || (u.isVip ? 'Monthly Pass' : 'Free Tier'),
+            plan: u.plan || (u.isVip ? '1 Month Pass' : 'Free Tier'),
             isVip: Boolean(u.isVip),
             vipExpiresAt: u.vipExpiresAt ? new Date(u.vipExpiresAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—',
             status: u.status || 'ACTIVE',
@@ -222,7 +226,7 @@ export class UserController {
 
   /**
    * PATCH /api/v1/users/:id/vip
-   * Grant or revoke VIP tier
+   * Grant or revoke subscription tier
    */
   static async updateUserVip(req, res, next) {
     try {
@@ -242,11 +246,45 @@ export class UserController {
         const expiry = new Date();
         expiry.setDate(expiry.getDate() + Number(days || 30));
         user.vipExpiresAt = expiry;
-        user.plan = planName || (days >= 365 ? 'Annual Pass' : 'Monthly Pass');
+        const resolvedPlanName = planName || (Number(days) >= 365 ? '12 Months Pass' : '1 Month Pass');
+        user.plan = resolvedPlanName;
+
+        // Find or associate matching SubscriptionPlan
+        const planDoc = await SubscriptionPlan.findOne({
+          $or: [{ name: new RegExp(resolvedPlanName, 'i') }, { durationDays: Number(days) }]
+        });
+
+        // Expire older active subscriptions for this user
+        await Subscription.updateMany(
+          { userId: user._id, status: { $in: ['ACTIVE', 'TRIAL'] } },
+          { $set: { status: 'EXPIRED' } }
+        );
+
+        // Create new active Subscription document
+        const newSub = await Subscription.create({
+          userId: user._id,
+          planId: planDoc?._id || null,
+          planCode: planDoc?.code || (Number(days) >= 365 ? 'PLAN_12M' : 'PLAN_1M'),
+          status: 'ACTIVE',
+          isTrial: false,
+          startDate: new Date(),
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: expiry,
+          autoRenew: true,
+          paymentGateway: 'MANUAL_ADMIN_OVERRIDE'
+        });
+
+        user.currentSubscriptionId = newSub._id;
       } else {
         user.isVip = false;
         user.vipExpiresAt = null;
         user.plan = 'Free Tier';
+        user.currentSubscriptionId = null;
+
+        await Subscription.updateMany(
+          { userId: user._id, status: { $in: ['ACTIVE', 'TRIAL'] } },
+          { $set: { status: 'EXPIRED' } }
+        );
       }
 
       await user.save();
@@ -272,6 +310,7 @@ export class UserController {
         return next(new AppError('Invalid User ID', 400, ERROR_CODES.VALIDATION_ERROR));
       }
 
+      await Subscription.deleteMany({ userId: id });
       const user = await User.findByIdAndDelete(id);
       if (!user) {
         return next(new AppError('User not found', 404, ERROR_CODES.USER_NOT_FOUND));

@@ -8,7 +8,7 @@ export default function PromosPage() {
       code: 'WELCOME50',
       discountType: 'PERCENTAGE',
       discountValue: '50%',
-      targetPlan: 'Monthly Pass (₹199)',
+      targetPlan: '1 Month Pass (₹99)',
       maxUses: 10000,
       currentUses: 6420,
       expiryDate: '31 Dec 2026',
@@ -18,8 +18,8 @@ export default function PromosPage() {
       id: 'VOUCH-2',
       code: 'DIWALI99',
       discountType: 'FLAT',
-      discountValue: 'Flat ₹99',
-      targetPlan: 'Monthly Pass (₹199)',
+      discountValue: 'Flat ₹20',
+      targetPlan: '1 Month Pass (₹99)',
       maxUses: 5000,
       currentUses: 4890,
       expiryDate: '15 Nov 2026',
@@ -41,7 +41,7 @@ export default function PromosPage() {
       code: 'EARLYBIRD',
       discountType: 'PERCENTAGE',
       discountValue: '30%',
-      targetPlan: 'Yearly Pass (₹1,499)',
+      targetPlan: '12 Months All-Access (₹899)',
       maxUses: 1000,
       currentUses: 1000,
       expiryDate: '31 Aug 2026',
@@ -53,7 +53,7 @@ export default function PromosPage() {
   const [newCode, setNewCode] = useState('');
   const [discountType, setDiscountType] = useState('PERCENTAGE');
   const [discountValue, setDiscountValue] = useState('20%');
-  const [targetPlan, setTargetPlan] = useState('Monthly Pass (₹199)');
+  const [targetPlan, setTargetPlan] = useState('1 Month Pass (₹99)');
   const [maxUses, setMaxUses] = useState(1000);
   const [copiedCode, setCopiedCode] = useState(null);
 
@@ -277,8 +277,9 @@ export default function PromosPage() {
                   onChange={(e) => setTargetPlan(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] transition-colors"
                 >
-                  <option value="Monthly Pass (₹199)">Monthly Pass (₹199)</option>
-                  <option value="Yearly Pass (₹1,499)">Yearly Pass (₹1,499)</option>
+                  <option value="1 Month Pass (₹99)">1 Month Pass (₹99)</option>
+                  <option value="6 Months Pass (₹499)">6 Months Pass (₹499)</option>
+                  <option value="12 Months All-Access (₹899)">12 Months All-Access (₹899)</option>
                   <option value="All Subscription Plans">All Subscription Plans</option>
                 </select>
               </div>

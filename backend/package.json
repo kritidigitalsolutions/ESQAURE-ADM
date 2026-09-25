@@ -9,7 +9,10 @@
     "dev": "nodemon server.js",
     "test:auth": "node tests/testAuthFlow.js",
     "test:upload": "node tests/testUploads.js",
-    "test:notifications": "node tests/testNotifications.js"
+    "test:notifications": "node tests/testNotifications.js",
+    "test:legal": "node tests/testLegalDocs.js",
+    "test:subscriptions": "node tests/testSubscriptionFlow.js",
+    "test:player": "node tests/testPlayerFlow.js"
   },
   "keywords": [
     "esquare",
@@ -31,7 +34,8 @@
     "joi": "^17.12.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.3.0",
-    "multer": "^2.4.0"
+    "multer": "^2.4.0",
+    "razorpay": "^2.9.8"
   },
   "devDependencies": {
     "mongodb-memory-server": "^11.3.0",

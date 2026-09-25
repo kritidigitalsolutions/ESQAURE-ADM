@@ -1,5 +1,5 @@
 import React, { useState, useId } from 'react';
-import { mockDramas, reassignPriority } from '../../data/mockOttData';
+import { dramaService } from '../../services/dramaService';
 import {
   Upload,
   Video,
@@ -38,6 +38,7 @@ import {
   Search
 } from 'lucide-react';
 import { mockGenres } from '../../data/mockOttData';
+import { genreService } from '../../services/genreService';
 
 // Reusable Dashboard-styled Slide Switch component
 function SlideSwitch({ checked, onChange, label, sublabel, icon: Icon, badge }) {
@@ -131,6 +132,20 @@ export default function UploadContentPage({ onNavigate }) {
   const [newEpDuration, setNewEpDuration] = useState('2:15');
   const [newEpIsFree, setNewEpIsFree] = useState(false);
   const [showAddEpisodeCard, setShowAddEpisodeCard] = useState(false);
+  const [availableGenres, setAvailableGenres] = useState(mockGenres);
+
+  useEffect(() => {
+    genreService
+      .getActiveGenres()
+      .then((res) => {
+        if (res && Array.isArray(res.genres) && res.genres.length > 0) {
+          setAvailableGenres(res.genres);
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not load dynamic genres:', err);
+      });
+  }, []);
 
   // Video Preview Lightbox State
   const [previewVideo, setPreviewVideo] = useState(null); // { title: string, url: string }
@@ -446,7 +461,7 @@ export default function UploadContentPage({ onNavigate }) {
                 status: isPublished ? 'PUBLISHED' : 'DRAFT',
                 isActive: isPublished,
                 isPaid: isVipPaywallActive,
-                plan: isVipPaywallActive ? 'VIP Plan' : 'Free Tier',
+                plan: isVipPaywallActive ? 'Premium Plan' : 'Free Tier',
                 isTrending: true,
                 trendingRank: 1,
                 isFeatured: priority === 1,
@@ -500,7 +515,7 @@ export default function UploadContentPage({ onNavigate }) {
   ];
 
   return (
-    <div className="space-y-6 font-urbanist max-w-5xl mx-auto pb-16 selection:bg-[#FEF08A] selection:text-black">
+    <div className="space-y-6 font-urbanist w-full pb-16 selection:bg-[#FEF08A] selection:text-black">
       
       {/* Top Header Card */}
       <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden transition-all">
@@ -537,8 +552,8 @@ export default function UploadContentPage({ onNavigate }) {
           {/* Progress percentage bar */}
           <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mb-4">
             <div
-              className="bg-amber-400 h-full transition-all duration-500 ease-out"
-              style={{ width: `${((currentStep) / totalSteps) * 100}%` }}
+              className="bg-[#FEF08A] h-full transition-all duration-500 ease-out"
+              style={{ width: `${Math.min(100, Math.max(15, ((currentStep) / totalSteps) * 100))}%` }}
             />
           </div>
 
@@ -794,7 +809,7 @@ export default function UploadContentPage({ onNavigate }) {
                 </span>
               </div>
               <div className="flex flex-wrap gap-2">
-                {mockGenres.map((genre) => {
+                {availableGenres.map((genre) => {
                   const isSelected = selectedGenres.includes(genre.name);
                   return (
                     <button

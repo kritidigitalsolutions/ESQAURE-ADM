@@ -47,7 +47,7 @@ export default function EpisodesPage({ initialDramaId }) {
            String(e.episodeNumber).includes(term);
   });
 
-  // Toggle Paywall status (Free Preview vs VIP Locked)
+  // Toggle Paywall status (Free Preview vs Premium Locked)
   const togglePaywall = (epId) => {
     setEpisodes(prev => prev.map(ep => {
       if (ep.id === epId) {
