@@ -47,6 +47,16 @@ app.use(mongoSanitize());
 // 5. Statically serve uploaded files (/uploads)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Root route welcome/health check
+app.get('/', (req, res) => {
+  return ApiResponse.success(res, 'E² Stories OTT Backend API is running successfully', {
+    service: 'E² Stories OTT API',
+    version: '1.0.0',
+    healthCheck: '/api/v1/health',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // 6. Mount API version 1
 app.use('/api/v1', apiRoutes);
 
