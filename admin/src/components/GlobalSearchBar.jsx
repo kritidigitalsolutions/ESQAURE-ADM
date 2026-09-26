@@ -50,7 +50,6 @@ const SYSTEM_PAGES = [
   { id: 'page-notifications', tab: 'notifications', title: 'Push Notifications', category: 'Navigation', icon: Bell, desc: 'Targeted FCM push campaigns to viewer devices' },
   { id: 'page-app_notifications', tab: 'app_notifications', title: 'In-App System Notices', category: 'Navigation', icon: MessageSquare, desc: 'Maintenance alerts and community broadcasts' },
   { id: 'page-legal', tab: 'legal', title: 'Legal & Compliance', category: 'Navigation', icon: FileText, desc: 'Terms of service, privacy policy and statutory filings' },
-  { id: 'page-auditlog', tab: 'auditlog', title: 'Activity & Audit Log', category: 'Navigation', icon: Shield, desc: 'Immutable administrator audit trail & action diffs' },
   { id: 'page-settings', tab: 'settings', title: 'Platform Settings', category: 'Navigation', icon: Settings, desc: 'Storage CDN keys, payment gateway credentials & system params' },
 ];
 
@@ -588,7 +587,6 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       { tab: 'subscribers', title: 'Subscribers', icon: Crown, count: '₹24.8L MRR' },
                       { tab: 'admob', title: 'AdMob Revenue', icon: TrendingUp, count: '+22.4%' },
                       { tab: 'transactions', title: 'Transactions', icon: Receipt, count: '6 recent' },
-                      { tab: 'auditlog', title: 'Activity Log', icon: Shield, count: '1.3k events' },
                     ].map((item) => {
                       const Icon = item.icon;
                       return (

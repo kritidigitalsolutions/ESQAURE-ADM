@@ -12,7 +12,8 @@
     "test:notifications": "node tests/testNotifications.js",
     "test:legal": "node tests/testLegalDocs.js",
     "test:subscriptions": "node tests/testSubscriptionFlow.js",
-    "test:player": "node tests/testPlayerFlow.js"
+    "test:player": "node tests/testPlayerFlow.js",
+    "test:saved-series": "node tests/testSavedSeriesFlow.js"
   },
   "keywords": [
     "esquare",

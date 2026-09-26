@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Clapperboard,
   Upload,
+  Image as ImageIcon,
   Layers,
   Users,
   BadgeCheck,
@@ -40,6 +41,7 @@ export default function Sidebar({
       items: [
         { id: 'dramas', label: 'Content Library', icon: Clapperboard },
         { id: 'upload', label: 'Upload Content', icon: Upload },
+        { id: 'banners', label: 'Banners', icon: ImageIcon },
         { id: 'genres', label: 'Genres', icon: Layers },
       ]
     },
@@ -69,7 +71,6 @@ export default function Sidebar({
     {
       title: 'SYSTEM',
       items: [
-        { id: 'auditlog', label: 'Activity Log', icon: Clock },
         { id: 'legal', label: 'Legal', icon: Shield },
         { id: 'settings', label: 'Settings', icon: Settings },
       ]

@@ -79,6 +79,48 @@ router.patch(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * 0. Home Content Banners / Hero Carousel Slides
+ * GET /api/v1/home/banners?limit=5&genre=
+ */
+router.get('/banners', optionalAuthenticate, HomeController.getHomeBanners);
+
+/**
+ * Admin: Get all banners with details and stats
+ * GET /api/v1/home/admin/banners
+ */
+router.get('/admin/banners', HomeController.getAdminBanners);
+
+/**
+ * Admin: Batch reorder banner display orders
+ * PATCH /api/v1/home/admin/banners/reorder
+ */
+router.patch('/admin/banners/reorder', HomeController.reorderBanners);
+
+/**
+ * Admin: Toggle banner active/inactive
+ * PATCH /api/v1/home/admin/banners/:id/toggle
+ */
+router.patch('/admin/banners/:id/toggle', HomeController.toggleBannerStatus);
+
+/**
+ * Create New Content Banner
+ * POST /api/v1/home/banners
+ */
+router.post('/banners', HomeController.createBanner);
+
+/**
+ * Update Content Banner
+ * PATCH /api/v1/home/banners/:id
+ */
+router.patch('/banners/:id', HomeController.updateBanner);
+
+/**
+ * Delete Content Banner
+ * DELETE /api/v1/home/banners/:id
+ */
+router.delete('/banners/:id', HomeController.deleteBanner);
+
+/**
  * 1. All Content as per Priority set by Admin
  * GET /api/v1/home/content?page=1&limit=10&genre=&sortOrder=asc
  */

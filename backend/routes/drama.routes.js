@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { DramaController } from '../controllers/drama.controller.js';
 import { PlayerController } from '../controllers/player.controller.js';
 import { HomeController } from '../controllers/home.controller.js';
+import { SavedSeriesController } from '../controllers/savedSeries.controller.js';
 import { authenticate, optionalAuthenticate } from '../middlewares/auth.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { playerValidation } from '../validations/player.validation.js';
@@ -96,6 +97,12 @@ router.get(
  * GET /api/v1/dramas/:id
  */
 router.get('/:id', optionalAuthenticate, DramaController.getDramaById);
+
+/**
+ * Toggle Drama in Saved Series (+ / - Watch Later)
+ * POST /api/v1/dramas/:dramaId/save
+ */
+router.post('/:dramaId/save', authenticate, SavedSeriesController.toggleSavedSeries);
 
 /**
  * Drama Episodes Drawer with Pagination

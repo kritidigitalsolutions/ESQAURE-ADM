@@ -113,6 +113,18 @@
       "value": "romance",
       "type": "string",
       "description": "Slug of a Genre category"
+    },
+    {
+      "key": "dramaId",
+      "value": "",
+      "type": "string",
+      "description": "MongoDB ObjectId or slug of a Drama for testing player, access, and saved-series"
+    },
+    {
+      "key": "bannerId",
+      "value": "",
+      "type": "string",
+      "description": "MongoDB ObjectId of a Banner"
     }
   ],
   "item": [
@@ -1756,6 +1768,147 @@
           "description": "APIs powering the OTT Home Screen feed. Includes prioritized content by admin, continue watching row with playback progress, categories ordered by admin priority, recommended categories as genres, new releases, and dynamic admin-configured category sections. All endpoints support standard pagination.",
           "item": [
             {
+              "name": "7.0a Get Home Content Banners (Hero Carousel)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Optional auth token to check user watchlist bookmark status"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/home/banners?limit=5&genre=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "banners"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "5",
+                      "description": "Number of carousel banners (default 5, max 10)"
+                    },
+                    {
+                      "key": "genre",
+                      "value": "",
+                      "description": "Optional genre filter by slug or ID"
+                    }
+                  ]
+                },
+                "description": "Fetches high-impact Hero Carousel banners for the Home Screen. Returns widescreen 16:9 bannerUrl, 9:16 portrait posterUrl, teaser badges, genres, synopsis hook, and playback CTA (Watch Now + List)."
+              },
+              "response": []
+            },
+            {
+              "name": "7.0b Create Home Content Banner",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Security Guard Ki CEO GF\",\n  \"subtitle\": \"Love, corporate intrigue, and dark secrets collide in this high-intensity serialized romance drama.\",\n  \"bannerUrl\": \"https://images.unsplash.com/photo-1518173946687-a4c8a383392e?auto=format&fit=crop&w=1280&q=80\",\n  \"posterUrl\": \"https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=720&q=80\",\n  \"trailerUrl\": \"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4\",\n  \"dramaId\": \"{{dramaId}}\",\n  \"badge\": \"FEATURED\",\n  \"linkType\": \"DRAMA\",\n  \"displayOrder\": 1,\n  \"isActive\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/home/banners",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "banners"
+                  ]
+                },
+                "description": "Create a new content banner for the home screen carousel."
+              },
+              "response": []
+            },
+            {
+              "name": "7.0c Update Home Content Banner",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"badge\": \"TOP 1\",\n  \"displayOrder\": 1,\n  \"isActive\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/home/banners/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "banners",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "Banner ObjectId"
+                    }
+                  ]
+                },
+                "description": "Update an existing home banner."
+              },
+              "response": []
+            },
+            {
+              "name": "7.0d Delete Home Content Banner",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/banners/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "banners",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "Banner ObjectId"
+                    }
+                  ]
+                },
+                "description": "Delete a home banner."
+              },
+              "response": []
+            },
+            {
               "name": "7.1 All Content by Admin Priority",
               "request": {
                 "method": "GET",
@@ -2088,6 +2241,283 @@
                   ]
                 },
                 "description": "Fetch detailed single genre metadata along with all linked drama series."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "9. User Library & Saved Series (Watch Later)",
+          "description": "Endpoints for managing user-saved series (Watchlist), Watch Later playback triggers, resume state synchronization, and user library settings.",
+          "item": [
+            {
+              "name": "9.1 Get Saved Series (Watch Later)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user/saved-series?page=1&limit=20&sortBy=recent",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "saved-series"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default 1)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Number of series per page (max 100)"
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "Filter saved series by title or synopsis keyword"
+                    },
+                    {
+                      "key": "genre",
+                      "value": "",
+                      "description": "Filter by genre name, slug, or ID"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "recent",
+                      "description": "Sort by recent | rating | title | episodes"
+                    }
+                  ]
+                },
+                "description": "Fetches the authenticated user's saved series (Watchlist) with pagination. Each item includes full drama metadata along with real-time watchProgress (resumeEpisodeNumber, progressPercentage, actionLabel: \"Resume Ep X\" or \"Watch Now\") for seamless \"Watch Later\" functionality."
+              },
+              "response": []
+            },
+            {
+              "name": "9.2 Toggle Save Series (+ / - Watch Later)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const r = pm.response.json();",
+                      "if (r.success && r.data) {",
+                      "    console.log(`[OK] Saved status for ${r.data.dramaTitle}: isSaved=${r.data.isSaved} (${r.data.action})`);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user/saved-series/{{dramaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "saved-series",
+                    "{{dramaId}}"
+                  ]
+                },
+                "description": "Toggles drama in user's saved series watchlist (+ / -). If not saved, adds it (isSaved: true, action: \"ADDED\"). If already saved, removes it (isSaved: false, action: \"REMOVED\"). Supports both drama ObjectId and slug."
+              },
+              "response": []
+            },
+            {
+              "name": "9.3 Check If Series Is Saved",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user/saved-series/check/{{dramaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "saved-series",
+                    "check",
+                    "{{dramaId}}"
+                  ]
+                },
+                "description": "Quickly checks whether a specific drama is saved in the user's watchlist. Returns { isSaved: boolean, addedAt: timestamp }."
+              },
+              "response": []
+            },
+            {
+              "name": "9.4 Remove Series from Watchlist",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user/saved-series/{{dramaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "saved-series",
+                    "{{dramaId}}"
+                  ]
+                },
+                "description": "Explicit REST removal endpoint. Removes a specific drama from the user's saved series."
+              },
+              "response": []
+            },
+            {
+              "name": "9.5 Clear All Saved Series",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user/saved-series",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "saved-series"
+                  ]
+                },
+                "description": "Permanently removes all saved series from the user's watchlist."
+              },
+              "response": []
+            },
+            {
+              "name": "9.6 User Library Profile Overview",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "profile"
+                  ]
+                },
+                "description": "Retrieves user profile info along with library metrics: savedSeriesCount, watchHistoryCount, and completedCount."
+              },
+              "response": []
+            },
+            {
+              "name": "9.7 User Watch History",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user/watch-history?page=1&limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "watch-history"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Records per page"
+                    }
+                  ]
+                },
+                "description": "Chronological watch history listing with resume playback timestamps, duration, and completion flags."
+              },
+              "response": []
+            },
+            {
+              "name": "9.8 Update Playback & App Settings",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"autoplayNext\": true,\n  \"videoQuality\": \"1080p\",\n  \"subtitlesLanguage\": \"Hindi\",\n  \"playbackSpeed\": \"1x\",\n  \"appLanguage\": \"English\",\n  \"preferredContentLanguages\": [\n    \"Hindi\",\n    \"English\"\n  ],\n  \"notifications\": {\n    \"newEpisodes\": true,\n    \"newReleases\": true,\n    \"recommendations\": true\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "settings"
+                  ]
+                },
+                "description": "Updates playback preferences (autoplay, video quality 1080p/720p/Auto, subtitles) and notifications."
               },
               "response": []
             }
@@ -3469,6 +3899,374 @@
                   ]
                 },
                 "description": "Permanently deletes genre and safely unlinks its reference from all drama series."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "8. Content Library & Drama Management",
+          "description": "Admin panel management APIs for Content Library (Dramas/Series). Includes fetching real dynamic drama catalog with stats, creating new series, updating metadata, deleting series, toggling active/inactive status, toggling paid/free access, setting priority ranks, and managing episodes.",
+          "item": [
+            {
+              "name": "8.1 Get Admin Content Library & Catalog Stats",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/admin",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "admin"
+                  ]
+                },
+                "description": "Fetch all drama series for admin with stats (totalSeries, published, totalEpisodes, totalStreams, topDrama, watchTime)."
+              },
+              "response": []
+            },
+            {
+              "name": "8.2 Create New Drama Series",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"New Romantic Drama Series\",\n  \"synopsis\": \"A captivating story of love and fate.\",\n  \"posterUrl\": \"https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=720&q=80\",\n  \"bannerUrl\": \"https://images.unsplash.com/photo-1518173946687-a4c8a383392e?auto=format&fit=crop&w=1280&q=80\",\n  \"trailerUrl\": \"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4\",\n  \"genres\": [\n    \"Romance\",\n    \"Drama\"\n  ],\n  \"totalEpisodes\": 24,\n  \"freeEpisodes\": 3,\n  \"isPaid\": true,\n  \"plan\": \"Premium Plan\",\n  \"status\": \"PUBLISHED\",\n  \"priority\": 1\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/dramas",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas"
+                  ]
+                },
+                "description": "Create a new drama series in the catalog."
+              },
+              "response": []
+            },
+            {
+              "name": "8.3 Update Drama Series Details",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Drama Title\",\n  \"totalEpisodes\": 30,\n  \"freeEpisodes\": 4\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}"
+                  ]
+                },
+                "description": "Update metadata, assets, paywall, or episodes count of a drama."
+              },
+              "response": []
+            },
+            {
+              "name": "8.4 Toggle Drama Active/Inactive Status",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}/toggle-active",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}",
+                    "toggle-active"
+                  ]
+                },
+                "description": "Toggle drama status between PUBLISHED (Active) and DRAFT (Inactive)."
+              },
+              "response": []
+            },
+            {
+              "name": "8.5 Toggle Drama Paid/Free Access",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}/toggle-paid",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}",
+                    "toggle-paid"
+                  ]
+                },
+                "description": "Toggle drama access between Paid (with plan tier) and Free Tier."
+              },
+              "response": []
+            },
+            {
+              "name": "8.6 Set/Update Drama Priority Rank",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"priority\": 1\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}/priority",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}",
+                    "priority"
+                  ]
+                },
+                "description": "Set priority rank for drama. Automatically normalizes remaining catalog priorities."
+              },
+              "response": []
+            },
+            {
+              "name": "8.7 Delete Drama Series",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}"
+                  ]
+                },
+                "description": "Permanently delete a drama series and its associated episodes."
+              },
+              "response": []
+            },
+            {
+              "name": "8.8 Save/Update Drama Episodes & Paywall",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"freeEpisodes\": 3,\n  \"episodes\": [\n    {\n      \"episodeNumber\": 1,\n      \"title\": \"Episode 1: The Beginning\",\n      \"isFree\": true\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}/episodes/admin",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}",
+                    "episodes",
+                    "admin"
+                  ]
+                },
+                "description": "Save or update episodes list and paywall rules for a drama."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "8. Banners & Hero Carousel Management",
+          "description": "Full administrative management for OTT Hero Banners and Carousel slides. Admins can upload 16:9 banners, link to specific drama series, set custom promotional external URLs, reorder display priorities, and toggle active carousel status.",
+          "item": [
+            {
+              "name": "8.1 List All Banners (Admin Catalog & Stats)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/admin/banners",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "admin",
+                    "banners"
+                  ]
+                },
+                "description": "Retrieves all configured banners (both active and inactive) with linked drama details, full media URLs, and catalog summary statistics."
+              },
+              "response": []
+            },
+            {
+              "name": "8.2 Create New Content Banner",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"The Billionaire Secret\",\n  \"subtitle\": \"Watch all new episodes streaming now in 4K HDR\",\n  \"bannerUrl\": \"http://localhost:5001/uploads/images/hero_banner.jpg\",\n  \"posterUrl\": \"http://localhost:5001/uploads/images/poster.jpg\",\n  \"trailerUrl\": \"http://localhost:5001/uploads/videos/teaser.mp4\",\n  \"badge\": \"FEATURED\",\n  \"linkType\": \"DRAMA\",\n  \"dramaId\": \"6ab7a2782b9a6432b168e3e3\",\n  \"episodeNumber\": 1,\n  \"displayOrder\": 1,\n  \"isActive\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/home/banners",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "banners"
+                  ]
+                },
+                "description": "Creates a new banner slide. Can be linked to a drama series or external URL, with customizable badge (FEATURED, TOP 10, TRENDING, EXCLUSIVE) and display order."
+              },
+              "response": []
+            },
+            {
+              "name": "8.3 Update Content Banner",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"The Billionaire Secret — Finale Week\",\n  \"subtitle\": \"The thrilling season conclusion is now live!\",\n  \"badge\": \"EXCLUSIVE\",\n  \"displayOrder\": 1,\n  \"isActive\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/home/banners/{{bannerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "banners",
+                    "{{bannerId}}"
+                  ]
+                },
+                "description": "Updates banner metadata, title, subtitle, badge, linked drama, or display order."
+              },
+              "response": []
+            },
+            {
+              "name": "8.4 Toggle Banner Active/Inactive Status",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/admin/banners/{{bannerId}}/toggle",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "admin",
+                    "banners",
+                    "{{bannerId}}",
+                    "toggle"
+                  ]
+                },
+                "description": "Quickly toggles a banner between active (live on app carousel) and inactive (draft/hidden)."
+              },
+              "response": []
+            },
+            {
+              "name": "8.5 Batch Reorder Banners Display Order",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    {\n      \"id\": \"{{bannerId}}\",\n      \"displayOrder\": 1\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/home/admin/banners/reorder",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "admin",
+                    "banners",
+                    "reorder"
+                  ]
+                },
+                "description": "Updates sequence/ordering of banners in the hero carousel."
+              },
+              "response": []
+            },
+            {
+              "name": "8.6 Delete Banner Permanently",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/banners/{{bannerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "banners",
+                    "{{bannerId}}"
+                  ]
+                },
+                "description": "Deletes a banner permanently from the database."
               },
               "response": []
             }

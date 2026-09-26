@@ -3,8 +3,10 @@ import { Drama } from '../models/Drama.js';
 import { Episode } from '../models/Episode.js';
 import { Genre } from '../models/Genre.js';
 import { WatchHistory } from '../models/WatchHistory.js';
+import { Watchlist } from '../models/Watchlist.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { AppError } from '../utils/appError.js';
+import { resolveMediaUrl } from '../utils/formatters.js';
 
 /**
  * Format numbers into K/M strings (e.g., 35400 -> "35.4k", 4200000 -> "4.2M")
@@ -119,22 +121,37 @@ export class DramaController {
       const formattedDramas = dramas.map((d) => {
         const genreNames = (d.genres || []).map((g) => (typeof g === 'object' ? g.name : g)).filter(Boolean);
         const isActive = d.status === 'PUBLISHED';
+        const poster = resolveMediaUrl(d.posterUrl, req);
+        const banner = resolveMediaUrl(d.bannerUrl, req);
+        const trailer = resolveMediaUrl(d.trailerUrl, req);
+        const idStr = d._id.toString();
+
         return {
-          id: d._id.toString(),
+          id: idStr,
+          _id: idStr,
           title: d.title,
+          name: d.title,
           slug: d.slug,
-          synopsis: d.synopsis,
-          poster: d.posterUrl,
-          posterUrl: d.posterUrl,
-          banner: d.bannerUrl,
-          bannerUrl: d.bannerUrl,
-          trailerUrl: d.trailerUrl,
+          synopsis: d.synopsis || '',
+          description: d.synopsis || '',
+          overview: d.synopsis || '',
+          poster,
+          posterUrl: poster,
+          thumbnailUrl: poster,
+          thumbnail: poster,
+          coverImage: poster,
+          banner,
+          bannerUrl: banner,
+          trailerUrl: trailer,
+          trailer,
           genres: genreNames.length > 0 ? genreNames : ['Drama'],
           genreDisplay: genreNames.join(' / ') || 'Drama',
           totalEpisodes: d.totalEpisodes || 0,
+          episodesCount: d.totalEpisodes || 0,
           freeEpisodes: d.freeEpisodes || 3,
           views: formatViews(d.viewsCount || 0),
           viewsCount: d.viewsCount || 0,
+          viewsFormatted: formatViews(d.viewsCount || 0),
           rating: d.rating || 4.8,
           releaseDate: formatDate(d.releaseDate),
           status: d.status,
@@ -177,17 +194,22 @@ export class DramaController {
       const totalEpisodes = allDramas.reduce((acc, d) => acc + (d.totalEpisodes || 0), 0);
       const totalViewsRaw = allDramas.reduce((acc, d) => acc + (d.viewsCount || 0), 0);
       const totalStreams = formatViews(totalViewsRaw);
+      const totalMinutes = totalViewsRaw * 2.2;
+      const totalHours = Math.round(totalMinutes / 60);
+      const watchTime = totalHours > 0 ? `${formatViews(totalHours)} Hrs` : '0 Hrs';
       
       const topDramaDoc = allDramas.reduce((prev, current) =>
         (current.viewsCount || 0) > (prev?.viewsCount || 0) ? current : prev, allDramas[0]
       );
 
-      const topDrama = topDramaDoc
+      const topDrama = topDramaDoc && (topDramaDoc.viewsCount || 0) > 0
         ? {
             title: topDramaDoc.title,
             views: formatViews(topDramaDoc.viewsCount || 0)
           }
-        : { title: 'Security Guard Ki CEO GF', views: '35.4k' };
+        : (allDramas[0]
+            ? { title: allDramas[0].title, views: formatViews(allDramas[0].viewsCount || 0) }
+            : { title: 'None', views: '0' });
 
       const formattedDramas = allDramas.map((d, index) => {
         const genreNames = (d.genres || []).map((g) => (typeof g === 'object' ? g.name : g)).filter(Boolean);
@@ -216,7 +238,11 @@ export class DramaController {
           plan: d.plan || (d.isPaid === false ? 'Free Tier' : 'Premium Plan'),
           isTrending: Boolean(d.isTrending),
           trendingRank: d.trendingRank || null,
-          priority: d.priority || (index + 1)
+          isFeatured: Boolean(d.isFeatured),
+          priority: d.priority || (index + 1),
+          ageRating: d.ageRating || 'U/A 13+',
+          director: d.director || '',
+          languages: d.languages || ['Hindi']
         };
       });
 
@@ -228,7 +254,7 @@ export class DramaController {
           totalEpisodes,
           totalStreams,
           topDrama,
-          watchTime: '2.04M Hrs'
+          watchTime
         }
       });
     } catch (error) {
@@ -249,13 +275,18 @@ export class DramaController {
         bannerUrl,
         trailerUrl,
         genres = [],
-        totalEpisodes = 24,
+        languages = ['Hindi'],
+        ageRating = 'U/A 13+',
+        director = '',
+        totalEpisodes = 0,
         freeEpisodes = 3,
         isPaid = true,
         plan = 'Premium Plan',
         status = 'PUBLISHED',
         priority,
-        isTrending = false
+        isTrending = false,
+        isFeatured = false,
+        trendingRank = null
       } = req.body;
 
       if (!title || !title.trim()) {
@@ -288,17 +319,22 @@ export class DramaController {
         title: title.trim(),
         slug,
         synopsis: synopsis || '',
-        posterUrl: posterUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=720&q=80',
+        posterUrl: posterUrl || '',
         bannerUrl: bannerUrl || '',
         trailerUrl: trailerUrl || '',
         genres: genreObjectIds,
-        totalEpisodes: Number(totalEpisodes) || 24,
-        freeEpisodes: Number(freeEpisodes) || 3,
+        languages: Array.isArray(languages) ? languages : [languages || 'Hindi'],
+        ageRating,
+        director: director || '',
+        totalEpisodes: Number(totalEpisodes) || 0,
+        freeEpisodes: Number(freeEpisodes) || 0,
         isPaid: Boolean(isPaid),
         plan: isPaid ? (plan || 'Premium Plan') : 'Free Tier',
         status: status === 'DRAFT' ? 'DRAFT' : 'PUBLISHED',
         priority: nextPriority,
-        isTrending: Boolean(isTrending)
+        isTrending: Boolean(isTrending),
+        isFeatured: Boolean(isFeatured),
+        trendingRank: trendingRank ? Number(trendingRank) : null
       });
 
       await normalizePrioritiesInDb();
@@ -347,6 +383,11 @@ export class DramaController {
       if (updates.status !== undefined) drama.status = updates.status;
       if (updates.isTrending !== undefined) drama.isTrending = Boolean(updates.isTrending);
       if (updates.priority !== undefined) drama.priority = Number(updates.priority);
+      if (updates.ageRating !== undefined) drama.ageRating = updates.ageRating;
+      if (updates.director !== undefined) drama.director = updates.director;
+      if (updates.languages !== undefined) drama.languages = Array.isArray(updates.languages) ? updates.languages : [updates.languages];
+      if (updates.isFeatured !== undefined) drama.isFeatured = Boolean(updates.isFeatured);
+      if (updates.trendingRank !== undefined) drama.trendingRank = updates.trendingRank ? Number(updates.trendingRank) : null;
 
       // Resolve genres if updated
       if (Array.isArray(updates.genres)) {
@@ -508,22 +549,46 @@ export class DramaController {
       const episodes = await Episode.find({ dramaId: drama._id }).sort({ episodeNumber: 1 });
       const genreNames = (drama.genres || []).map((g) => (typeof g === 'object' ? g.name : g)).filter(Boolean);
 
+      // Check if current authenticated user has saved this drama to Watchlist
+      let isSaved = false;
+      if (req.userId) {
+        const savedDoc = await Watchlist.exists({
+          userId: req.userId,
+          dramaId: drama._id
+        });
+        isSaved = Boolean(savedDoc);
+      }
+
+      const idStr = drama._id.toString();
+      const poster = resolveMediaUrl(drama.posterUrl, req);
+      const banner = resolveMediaUrl(drama.bannerUrl, req);
+      const trailer = resolveMediaUrl(drama.trailerUrl, req);
+
       return ApiResponse.success(res, 'Drama details retrieved successfully', {
         drama: {
-          id: drama._id.toString(),
+          id: idStr,
+          _id: idStr,
           title: drama.title,
+          name: drama.title,
           slug: drama.slug,
-          synopsis: drama.synopsis,
-          poster: drama.posterUrl,
-          posterUrl: drama.posterUrl,
-          banner: drama.bannerUrl,
-          bannerUrl: drama.bannerUrl,
-          trailerUrl: drama.trailerUrl,
+          synopsis: drama.synopsis || '',
+          description: drama.synopsis || '',
+          overview: drama.synopsis || '',
+          poster,
+          posterUrl: poster,
+          thumbnailUrl: poster,
+          thumbnail: poster,
+          coverImage: poster,
+          banner,
+          bannerUrl: banner,
+          trailerUrl: trailer,
+          trailer,
           genres: genreNames.length > 0 ? genreNames : ['Drama'],
           genreDisplay: genreNames.join(' / ') || 'Drama',
           rating: drama.rating,
           viewsCount: drama.viewsCount,
           totalEpisodes: episodes.length || drama.totalEpisodes,
+          episodesCount: episodes.length || drama.totalEpisodes,
           freeEpisodes: drama.freeEpisodes,
           isPaid: drama.isPaid,
           plan: drama.plan,
@@ -531,21 +596,33 @@ export class DramaController {
           isActive: drama.status === 'PUBLISHED',
           isTrending: drama.isTrending,
           priority: drama.priority,
-          episodes: episodes.map((e) => ({
-            id: e._id.toString(),
-            dramaId: drama._id.toString(),
-            episodeNumber: e.episodeNumber,
-            title: e.title,
-            synopsis: e.synopsis,
-            thumbnailUrl: e.thumbnailUrl,
-            videoStreamUrl: e.videoStreamUrl,
-            duration: e.formattedDuration || '2:15',
-            durationSeconds: e.durationSeconds || 135,
-            isFree: e.isFree,
-            views: formatViews(e.viewsCount || 0),
-            videoFileName: `ep_${e.episodeNumber.toString().padStart(2, '0')}_1080p.mp4`,
-            subtitleTracks: (e.subtitles || []).map((s) => s.language)
-          }))
+          isSaved,
+          isInWatchlist: isSaved,
+          episodes: episodes.map((e) => {
+            const epIdStr = e._id.toString();
+            const epThumb = resolveMediaUrl(e.thumbnailUrl, req);
+            const epVideo = resolveMediaUrl(e.videoStreamUrl, req);
+            return {
+              id: epIdStr,
+              _id: epIdStr,
+              dramaId: idStr,
+              episodeNumber: e.episodeNumber,
+              title: e.title,
+              synopsis: e.synopsis || '',
+              thumbnailUrl: epThumb,
+              thumbnail: epThumb,
+              videoStreamUrl: epVideo,
+              videoUrl: epVideo,
+              streamUrl: epVideo,
+              video: epVideo,
+              duration: e.formattedDuration || '2:15',
+              durationSeconds: e.durationSeconds || 135,
+              isFree: e.isFree,
+              views: formatViews(e.viewsCount || 0),
+              videoFileName: e.videoStreamUrl ? e.videoStreamUrl.split('/').pop() : `ep_${e.episodeNumber.toString().padStart(2, '0')}_1080p.mp4`,
+              subtitleTracks: (e.subtitles || []).map((s) => s.language)
+            };
+          })
         }
       });
     } catch (error) {
@@ -571,11 +648,19 @@ export class DramaController {
         drama.freeEpisodes = Number(freeEpisodes);
       }
 
-      if (Array.isArray(episodes) && episodes.length > 0) {
+      if (Array.isArray(episodes)) {
         drama.totalEpisodes = episodes.length;
 
-        for (const ep of episodes) {
-          const epNum = Number(ep.episodeNumber || 1);
+        // Cleanly delete any removed episodes
+        const incomingEpNumbers = episodes.map((ep, idx) => Number(ep.episodeNumber || (idx + 1)));
+        await Episode.deleteMany({
+          dramaId: drama._id,
+          episodeNumber: { $nin: incomingEpNumbers }
+        });
+
+        for (let idx = 0; idx < episodes.length; idx++) {
+          const ep = episodes[idx];
+          const epNum = Number(ep.episodeNumber || (idx + 1));
           await Episode.findOneAndUpdate(
             { dramaId: drama._id, episodeNumber: epNum },
             {
@@ -583,9 +668,9 @@ export class DramaController {
                 title: ep.title || `Episode ${epNum}`,
                 isFree: ep.isFree !== undefined ? Boolean(ep.isFree) : epNum <= (freeEpisodes || drama.freeEpisodes || 3),
                 durationSeconds: ep.durationSeconds || 135,
-                formattedDuration: ep.duration || '2:15',
-                videoStreamUrl: ep.videoStreamUrl || drama.trailerUrl,
-                thumbnailUrl: ep.thumbnailUrl || drama.posterUrl
+                formattedDuration: ep.duration || ep.formattedDuration || '2:15',
+                videoStreamUrl: ep.videoStreamUrl || ep.videoUrl || drama.trailerUrl || '',
+                thumbnailUrl: ep.thumbnailUrl || drama.posterUrl || ''
               }
             },
             { upsert: true, new: true }

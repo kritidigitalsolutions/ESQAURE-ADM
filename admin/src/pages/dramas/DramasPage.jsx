@@ -149,14 +149,23 @@ export default function DramasPage({
     const published = dramas.filter(d => d.isActive || d.status === 'PUBLISHED').length;
     const totalEpisodes = dramas.reduce((acc, d) => acc + (d.totalEpisodes || 0), 0);
     const topDrama = dramas.reduce((prev, curr) => ((curr.viewsCount || 0) > (prev?.viewsCount || 0) ? curr : prev), dramas[0]);
+    const totalViewsRaw = dramas.reduce((acc, d) => acc + (d.viewsCount || 0), 0);
+    const formatNumber = (num) => {
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+      return (num || 0).toString();
+    };
+    const computedStreams = formatNumber(totalViewsRaw);
+    const computedHours = Math.round((totalViewsRaw * 2.2) / 60);
+    const computedWatchTime = computedHours > 0 ? `${formatNumber(computedHours)} Hrs` : '0 Hrs';
 
     return {
       totalSeries: serverStats?.totalSeries ?? totalSeries,
       published: serverStats?.published ?? published,
       totalEpisodes: serverStats?.totalEpisodes ?? totalEpisodes,
-      totalStreams: serverStats?.totalStreams ?? '18.1M',
+      totalStreams: serverStats?.totalStreams ?? computedStreams,
       topDrama: serverStats?.topDrama ?? topDrama,
-      watchTime: serverStats?.watchTime ?? '2.04M Hrs'
+      watchTime: serverStats?.watchTime ?? computedWatchTime
     };
   }, [dramas, serverStats]);
 
@@ -254,8 +263,8 @@ export default function DramasPage({
           title="Total Streams"
           subtitle="Across All Series"
           value={stats.totalStreams}
-          footerLeft={`Top: ${stats.topDrama?.title || 'Dhokha'}`}
-          footerRight={`${stats.topDrama?.views || '4.2M'} plays`}
+          footerLeft={stats.topDrama?.title ? `Top: ${stats.topDrama.title}` : 'No Series'}
+          footerRight={`${stats.topDrama?.views || '0'} plays`}
           footerRightColor="text-slate-700 dark:text-slate-300 font-bold"
         />
 
@@ -264,8 +273,8 @@ export default function DramasPage({
           icon={Clock}
           title="Watch Time"
           subtitle="Catalog Engagement"
-          value="2.04M Hrs"
-          footerLeft="Avg completion 78%"
+          value={stats.watchTime}
+          footerLeft="Catalog Total"
           footerRight="High Retention"
           footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
         />
@@ -375,8 +384,8 @@ export default function DramasPage({
                 className="bg-transparent text-slate-900 dark:text-white font-bold focus:outline-none cursor-pointer text-xs"
               >
                 <option value="ALL" className="dark:bg-[#1C221C]">All Access</option>
-                <option value="PAID" className="dark:bg-[#1C221C]">Paid (With Plan)</option>
-                <option value="FREE" className="dark:bg-[#1C221C]">Unpaid (Free)</option>
+                <option value="PAID" className="dark:bg-[#1C221C]">Paid</option>
+                <option value="FREE" className="dark:bg-[#1C221C]">Free</option>
               </select>
             </div>
 
@@ -508,7 +517,7 @@ export default function DramasPage({
                   </div>
                 </div>
 
-                {/* Badges on Top Right: Status (Active / Inactive) & Access (Paid / Free) */}
+                {/* Badge on Top Right: Status (Active / Inactive) */}
                 <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                   <Badge
                     variant={drama.isActive ? 'active' : 'inactive'}
@@ -517,19 +526,6 @@ export default function DramasPage({
                     title="Click to toggle Active/Inactive"
                   >
                     {drama.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
-
-                  <Badge
-                    variant={
-                      !drama.isPaid || (drama.plan || '').toLowerCase().includes('free')
-                        ? 'no-plan'
-                        : (drama.plan || '').toLowerCase().includes('annual') || (drama.plan || '').toLowerCase().includes('yearly')
-                        ? 'flix9-premium'
-                        : 'flix9-basic'
-                    }
-                    size="xs"
-                  >
-                    {!drama.isPaid ? 'Free Tier' : drama.plan || 'Flix9 Basic'}
                   </Badge>
                 </div>
               </div>
@@ -593,7 +589,6 @@ export default function DramasPage({
                 <tr>
                   <th className="py-3 px-4 sm:px-6 w-20 text-center">Priority</th>
                   <th className="py-3 px-4 min-w-[220px]">Series Title</th>
-                  <th className="py-3 px-4 w-36">Plan</th>
                   <th className="py-3 px-4 min-w-[160px]">Genres</th>
                   <th className="py-3 px-4 w-24">Episodes</th>
                   <th className="py-3 px-4 w-24">Views</th>
@@ -660,22 +655,6 @@ export default function DramasPage({
                           </button>
                         </div>
                       </div>
-                    </td>
-
-                    {/* Plan Badge */}
-                    <td className="py-2 px-4 align-middle">
-                      <Badge
-                        variant={
-                          !drama.isPaid || (drama.plan || '').toLowerCase().includes('free')
-                            ? 'no-plan'
-                            : (drama.plan || '').toLowerCase().includes('annual') || (drama.plan || '').toLowerCase().includes('yearly')
-                            ? 'flix9-premium'
-                            : 'flix9-basic'
-                        }
-                        size="xs"
-                      >
-                        {!drama.isPaid ? 'Free Tier' : drama.plan || 'Flix9 Basic'}
-                      </Badge>
                     </td>
 
                     {/* Genres */}

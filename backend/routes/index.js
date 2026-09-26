@@ -10,6 +10,8 @@ import dramaRoutes        from './drama.routes.js';
 import searchRoutes       from './search.routes.js';
 import homeRoutes         from './home.routes.js';
 import genreRoutes        from './genre.routes.js';
+import savedSeriesRoutes  from './savedSeries.routes.js';
+import promoRoutes        from './promo.routes.js';
 
 const router = Router();
 
@@ -50,6 +52,11 @@ router.use('/search', searchRoutes);
 
 /** Home Feed, Prioritized Content, Categories & Admin Home Sections */
 router.use('/home', homeRoutes);
+router.use('/banners', homeRoutes);
+
+/** User Library: Saved Series (Watchlist / Watch Later), Watch History & Settings */
+router.use('/user', savedSeriesRoutes);
+router.use('/saved-series', savedSeriesRoutes);
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  ADMIN PANEL ROUTES
@@ -60,6 +67,9 @@ router.use('/users', userRoutes);
 
 /** Genre and category management (CRUD, active toggle, stats) */
 router.use('/genres', genreRoutes);
+
+/** Promos & Vouchers (Admin CRUD + mobile validate) */
+router.use('/promos', promoRoutes);
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  SHARED ROUTES  (used by both Mobile App and Admin Panel)

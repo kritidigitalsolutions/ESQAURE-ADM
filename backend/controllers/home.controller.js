@@ -3,9 +3,11 @@ import { Drama } from '../models/Drama.js';
 import { Genre } from '../models/Genre.js';
 import { WatchHistory } from '../models/WatchHistory.js';
 import { HomeSection } from '../models/HomeSection.js';
+import { Watchlist } from '../models/Watchlist.js';
+import { Banner } from '../models/Banner.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { AppError } from '../utils/appError.js';
-import { formatDramaCard, formatDuration, getPaginationMeta } from '../utils/formatters.js';
+import { formatDramaCard, formatDuration, getPaginationMeta, formatViewsCount, resolveMediaUrl } from '../utils/formatters.js';
 
 /**
  * Helper to slugify string
@@ -19,6 +21,415 @@ const slugify = (text = '') =>
     .replace(/^-+|-+$/g, '');
 
 export class HomeController {
+  // ───────────────────────────────────────────────────────────────────────────
+  //  0. HOME CONTENT BANNERS / HERO CAROUSEL
+  //  GET /api/v1/home/banners?limit=5&genre=
+  // ───────────────────────────────────────────────────────────────────────────
+  // ───────────────────────────────────────────────────────────────────────────
+  //  0. HOME CONTENT BANNERS / HERO CAROUSEL
+  //  GET /api/v1/home/banners?limit=5&genre=
+  // ───────────────────────────────────────────────────────────────────────────
+  static async getHomeBanners(req, res, next) {
+    try {
+      const limit = Math.min(10, Math.max(1, Number(req.query.limit || 5)));
+      const { genre } = req.query;
+      const user = req.user;
+
+      // 1. Check if custom admin-configured banners exist in Banner collection
+      const customBanners = await Banner.find({ isActive: true })
+        .populate({
+          path: 'dramaId',
+          populate: { path: 'genres', select: 'name slug' }
+        })
+        .sort({ displayOrder: 1, createdAt: -1 })
+        .limit(limit)
+        .lean();
+
+      // Collect drama IDs to check user watchlist if authenticated
+      let savedSet = new Set();
+      if (user) {
+        const watchlistEntries = await Watchlist.find({ userId: user._id }).select('dramaId').lean();
+        savedSet = new Set(watchlistEntries.map((w) => w.dramaId.toString()));
+      }
+
+      if (customBanners.length > 0) {
+        const banners = customBanners.map((b) => {
+          const drama = b.dramaId || {};
+          const genreNames = Array.isArray(drama.genres)
+            ? drama.genres.map((g) => (typeof g === 'object' && g.name ? g.name : String(g))).filter(Boolean)
+            : [];
+          const isSaved = drama._id ? savedSet.has(drama._id.toString()) : false;
+
+          return {
+            id: b._id.toString(),
+            bannerId: `banner_${b._id.toString()}`,
+            dramaId: drama._id ? drama._id.toString() : null,
+            title: b.title,
+            slug: drama.slug || '',
+            tagline: b.subtitle || drama.synopsis?.slice(0, 120) || '',
+            synopsis: b.subtitle || drama.synopsis || '',
+            bannerUrl: resolveMediaUrl(b.bannerUrl || drama.bannerUrl || drama.posterUrl, req),
+            posterUrl: resolveMediaUrl(b.posterUrl || drama.posterUrl || '', req),
+            trailerUrl: resolveMediaUrl(b.trailerUrl || drama.trailerUrl || '', req),
+            badge: b.badge || 'FEATURED',
+            genres: genreNames.length > 0 ? genreNames : ['Drama'],
+            genreDisplay: genreNames.join(' / ') || 'Drama',
+            rating: drama.rating || 4.8,
+            views: formatViewsCount(drama.viewsCount || 0),
+            viewsCount: drama.viewsCount || 0,
+            totalEpisodes: drama.totalEpisodes || 0,
+            freeEpisodes: drama.freeEpisodes !== undefined ? drama.freeEpisodes : 3,
+            isPaid: drama.isPaid !== undefined ? drama.isPaid : true,
+            plan: drama.plan || (drama.isPaid === false ? 'Free Tier' : 'Premium Plan'),
+            isSaved,
+            isInWatchlist: isSaved,
+            cta: {
+              primaryLabel: 'Watch Now',
+              primaryAction: 'PLAY_EPISODE',
+              episodeNumber: b.episodeNumber || 1,
+              secondaryLabel: isSaved ? 'In Watchlist' : '+ List',
+              secondaryAction: 'TOGGLE_WATCHLIST'
+            }
+          };
+        });
+
+        return ApiResponse.success(res, 'Home banners fetched successfully', {
+          banners,
+          total: banners.length
+        });
+      }
+
+      // 2. Fallback: dynamically generate banners from featured / top priority published dramas
+      const query = { status: 'PUBLISHED' };
+
+      if (genre && genre !== 'ALL') {
+        if (mongoose.Types.ObjectId.isValid(genre) && genre.length === 24) {
+          query.genres = genre;
+        } else {
+          const genreDoc = await Genre.findOne({ slug: genre.toLowerCase().trim() });
+          if (genreDoc) {
+            query.genres = genreDoc._id;
+          }
+        }
+      }
+
+      let dramas = await Drama.find({ ...query, isFeatured: true })
+        .populate('genres', 'name slug')
+        .sort({ priority: 1, viewsCount: -1, createdAt: -1 })
+        .limit(limit)
+        .lean();
+
+      if (dramas.length < limit) {
+        const existingIds = dramas.map((d) => d._id);
+        const fillDramas = await Drama.find({ ...query, _id: { $nin: existingIds } })
+          .populate('genres', 'name slug')
+          .sort({ priority: 1, isTrending: -1, viewsCount: -1, createdAt: -1 })
+          .limit(limit - dramas.length)
+          .lean();
+        dramas = [...dramas, ...fillDramas];
+      }
+
+      const banners = dramas.map((d, index) => {
+        const genreNames = Array.isArray(d.genres)
+          ? d.genres.map((g) => (typeof g === 'object' && g.name ? g.name : String(g))).filter(Boolean)
+          : [];
+
+        const isSaved = savedSet.has(d._id.toString());
+
+        let badge = 'FEATURED';
+        if (d.trendingRank) badge = `TOP ${d.trendingRank}`;
+        else if (d.isTrending) badge = 'TRENDING';
+        else if (d.isNewRelease) badge = 'NEW RELEASE';
+        else if (index === 0) badge = 'TOP PICK';
+
+        return {
+          id: d._id.toString(),
+          bannerId: `banner_${d._id.toString()}`,
+          dramaId: d._id.toString(),
+          title: d.title,
+          slug: d.slug,
+          tagline: d.synopsis ? d.synopsis.slice(0, 120) + (d.synopsis.length > 120 ? '...' : '') : '',
+          synopsis: d.synopsis || '',
+          bannerUrl: resolveMediaUrl(d.bannerUrl || d.posterUrl, req),
+          posterUrl: resolveMediaUrl(d.posterUrl, req),
+          trailerUrl: resolveMediaUrl(d.trailerUrl || '', req),
+          badge,
+          genres: genreNames.length > 0 ? genreNames : ['Drama'],
+          genreDisplay: genreNames.join(' / ') || 'Drama',
+          rating: d.rating || 4.8,
+          views: formatViewsCount(d.viewsCount || 0),
+          viewsCount: d.viewsCount || 0,
+          totalEpisodes: d.totalEpisodes || 0,
+          freeEpisodes: d.freeEpisodes !== undefined ? d.freeEpisodes : 3,
+          isPaid: d.isPaid !== undefined ? d.isPaid : true,
+          plan: d.plan || (d.isPaid === false ? 'Free Tier' : 'Premium Plan'),
+          isSaved,
+          isInWatchlist: isSaved,
+          cta: {
+            primaryLabel: 'Watch Now',
+            primaryAction: 'PLAY_EPISODE',
+            episodeNumber: 1,
+            secondaryLabel: isSaved ? 'In Watchlist' : '+ List',
+            secondaryAction: 'TOGGLE_WATCHLIST'
+          }
+        };
+      });
+
+      return ApiResponse.success(res, 'Home banners fetched successfully', {
+        banners,
+        total: banners.length
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Admin / Content Management: Create New Content Banner
+   * POST /api/v1/home/banners
+   * Body: { title, subtitle, bannerUrl, posterUrl, trailerUrl, badge, linkType, dramaId, episodeNumber, externalUrl, displayOrder, isActive }
+   */
+  static async createBanner(req, res, next) {
+    try {
+      const {
+        title,
+        subtitle = '',
+        bannerUrl,
+        posterUrl,
+        trailerUrl,
+        badge = 'FEATURED',
+        linkType = 'DRAMA',
+        dramaId,
+        episodeNumber = 1,
+        externalUrl = '',
+        displayOrder = 0,
+        isActive = true
+      } = req.body;
+
+      if (!title || !title.trim()) {
+        throw new AppError('Banner title is required.', 400, 'VALIDATION_ERROR');
+      }
+
+      let resolvedDrama = null;
+      if (dramaId) {
+        if (mongoose.Types.ObjectId.isValid(dramaId) && dramaId.length === 24) {
+          resolvedDrama = await Drama.findById(dramaId);
+        } else {
+          resolvedDrama = await Drama.findOne({ slug: String(dramaId).toLowerCase().trim() });
+        }
+      }
+
+      const finalBannerUrl = bannerUrl || resolvedDrama?.bannerUrl || resolvedDrama?.posterUrl;
+      if (!finalBannerUrl) {
+        throw new AppError('Banner image URL (bannerUrl) is required.', 400, 'VALIDATION_ERROR');
+      }
+
+      const banner = await Banner.create({
+        title: title.trim(),
+        subtitle: subtitle || resolvedDrama?.synopsis || '',
+        bannerUrl: finalBannerUrl,
+        posterUrl: posterUrl || resolvedDrama?.posterUrl || '',
+        trailerUrl: trailerUrl || resolvedDrama?.trailerUrl || '',
+        badge,
+        linkType,
+        dramaId: resolvedDrama ? resolvedDrama._id : null,
+        episodeNumber: Number(episodeNumber || 1),
+        externalUrl,
+        displayOrder: Number(displayOrder || 0),
+        isActive: Boolean(isActive !== false)
+      });
+
+      return ApiResponse.success(
+        res,
+        'Home content banner created successfully',
+        { banner },
+        201
+      );
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Admin / Content Management: Update Content Banner
+   * PATCH /api/v1/home/banners/:id
+   */
+  static async updateBanner(req, res, next) {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+
+      const banner = await Banner.findById(id);
+      if (!banner) {
+        throw new AppError('Banner not found.', 404, 'BANNER_NOT_FOUND');
+      }
+
+      if (updates.title) banner.title = updates.title.trim();
+      if (updates.subtitle !== undefined) banner.subtitle = updates.subtitle;
+      if (updates.bannerUrl) banner.bannerUrl = updates.bannerUrl.trim();
+      if (updates.posterUrl !== undefined) banner.posterUrl = updates.posterUrl;
+      if (updates.trailerUrl !== undefined) banner.trailerUrl = updates.trailerUrl;
+      if (updates.badge !== undefined) banner.badge = updates.badge;
+      if (updates.linkType !== undefined) banner.linkType = updates.linkType;
+      if (updates.episodeNumber !== undefined) banner.episodeNumber = Number(updates.episodeNumber);
+      if (updates.externalUrl !== undefined) banner.externalUrl = updates.externalUrl;
+      if (updates.displayOrder !== undefined) banner.displayOrder = Number(updates.displayOrder);
+      if (updates.isActive !== undefined) banner.isActive = Boolean(updates.isActive);
+
+      if (updates.dramaId !== undefined) {
+        if (updates.dramaId) {
+          const drama = mongoose.Types.ObjectId.isValid(updates.dramaId) && updates.dramaId.length === 24
+            ? await Drama.findById(updates.dramaId)
+            : await Drama.findOne({ slug: String(updates.dramaId).toLowerCase().trim() });
+          banner.dramaId = drama ? drama._id : null;
+        } else {
+          banner.dramaId = null;
+        }
+      }
+
+      await banner.save();
+
+      return ApiResponse.success(res, 'Banner updated successfully', { banner });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Admin / Content Management: Delete Content Banner
+   * DELETE /api/v1/home/banners/:id
+   */
+  static async deleteBanner(req, res, next) {
+    try {
+      const { id } = req.params;
+      const banner = await Banner.findByIdAndDelete(id);
+      if (!banner) {
+        throw new AppError('Banner not found.', 404, 'BANNER_NOT_FOUND');
+      }
+
+      return ApiResponse.success(res, 'Banner deleted successfully', { id });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Admin: Get all banners with details, drama populate, statistics
+   * GET /api/v1/home/admin/banners
+   */
+  static async getAdminBanners(req, res, next) {
+    try {
+      const banners = await Banner.find()
+        .populate({
+          path: 'dramaId',
+          select: 'title slug posterUrl bannerUrl trailerUrl viewsCount totalEpisodes genres status isActive',
+          populate: { path: 'genres', select: 'name slug' }
+        })
+        .sort({ displayOrder: 1, createdAt: -1 })
+        .lean();
+
+      const formattedBanners = banners.map((b) => {
+        const drama = b.dramaId || null;
+        return {
+          id: b._id.toString(),
+          title: b.title,
+          subtitle: b.subtitle || '',
+          bannerUrl: resolveMediaUrl(b.bannerUrl, req),
+          posterUrl: resolveMediaUrl(b.posterUrl, req),
+          trailerUrl: resolveMediaUrl(b.trailerUrl, req),
+          badge: b.badge || 'FEATURED',
+          linkType: b.linkType || 'DRAMA',
+          dramaId: drama ? drama._id.toString() : null,
+          drama: drama ? {
+            id: drama._id.toString(),
+            title: drama.title,
+            slug: drama.slug,
+            posterUrl: resolveMediaUrl(drama.posterUrl, req),
+            bannerUrl: resolveMediaUrl(drama.bannerUrl, req),
+            totalEpisodes: drama.totalEpisodes || 0,
+            viewsCount: drama.viewsCount || 0,
+            genres: Array.isArray(drama.genres) ? drama.genres.map(g => g.name || g) : []
+          } : null,
+          episodeNumber: b.episodeNumber || 1,
+          externalUrl: b.externalUrl || '',
+          displayOrder: b.displayOrder || 0,
+          isActive: Boolean(b.isActive),
+          createdAt: b.createdAt,
+          updatedAt: b.updatedAt
+        };
+      });
+
+      const totalBanners = formattedBanners.length;
+      const activeBanners = formattedBanners.filter(b => b.isActive).length;
+      const dramaLinkedBanners = formattedBanners.filter(b => b.linkType === 'DRAMA' && b.dramaId).length;
+      const externalBanners = formattedBanners.filter(b => b.linkType === 'EXTERNAL_URL' || !b.dramaId).length;
+
+      return ApiResponse.success(res, 'Admin banners fetched successfully', {
+        banners: formattedBanners,
+        stats: {
+          totalBanners,
+          activeBanners,
+          dramaLinkedBanners,
+          externalBanners
+        }
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Admin: Quick toggle banner active/inactive
+   * PATCH /api/v1/home/admin/banners/:id/toggle
+   */
+  static async toggleBannerStatus(req, res, next) {
+    try {
+      const { id } = req.params;
+      const banner = await Banner.findById(id);
+      if (!banner) {
+        throw new AppError('Banner not found.', 404, 'BANNER_NOT_FOUND');
+      }
+
+      banner.isActive = !banner.isActive;
+      await banner.save();
+
+      return ApiResponse.success(
+        res,
+        `Banner "${banner.title}" is now ${banner.isActive ? 'active' : 'inactive'}`,
+        { banner }
+      );
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Admin: Batch reorder banner display orders
+   * PATCH /api/v1/home/admin/banners/reorder
+   */
+  static async reorderBanners(req, res, next) {
+    try {
+      const { items } = req.body; // [{ id: "...", displayOrder: 1 }]
+      if (!Array.isArray(items)) {
+        throw new AppError('Items array is required for reordering.', 400, 'VALIDATION_ERROR');
+      }
+
+      const bulkOps = items.map((item) => ({
+        updateOne: {
+          filter: { _id: item.id },
+          update: { $set: { displayOrder: Number(item.displayOrder) } }
+        }
+      }));
+
+      await Banner.bulkWrite(bulkOps);
+
+      return ApiResponse.success(res, 'Banners display order updated successfully');
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+
   // ───────────────────────────────────────────────────────────────────────────
   //  1. ALL CONTENT AS PER PRIORITY SET BY ADMIN
   //  GET /api/v1/home/content?page=1&limit=10&genre=&sortOrder=asc
@@ -63,7 +474,7 @@ export class HomeController {
         .skip(skip)
         .limit(limit);
 
-      const formattedDramas = dramas.map(formatDramaCard);
+      const formattedDramas = dramas.map((d) => formatDramaCard(d, req));
 
       return ApiResponse.success(res, 'Content fetched as per admin priority successfully', {
         dramas: formattedDramas,
@@ -214,7 +625,7 @@ export class HomeController {
               .sort({ priority: 1, viewsCount: -1, createdAt: -1 })
               .limit(dramasLimit);
 
-            dramas = previewDramas.map(formatDramaCard);
+            dramas = previewDramas.map((d) => formatDramaCard(d, req));
           }
 
           return {
@@ -325,7 +736,7 @@ export class HomeController {
               .sort({ priority: 1, viewsCount: -1, createdAt: -1 })
               .limit(dramasLimit);
 
-            dramas = previewDramas.map(formatDramaCard);
+            dramas = previewDramas.map((d) => formatDramaCard(d, req));
           }
 
           return {
@@ -393,7 +804,7 @@ export class HomeController {
         .skip(skip)
         .limit(limit);
 
-      const formattedDramas = dramas.map(formatDramaCard);
+      const formattedDramas = dramas.map((d) => formatDramaCard(d, req));
 
       return ApiResponse.success(res, 'New releases section fetched successfully', {
         dramas: formattedDramas,
@@ -439,7 +850,7 @@ export class HomeController {
               .populate('genres', 'name slug')
               .sort({ priority: 1, viewsCount: -1, createdAt: -1 })
               .limit(maxItems);
-            dramas = rawDramas.map(formatDramaCard);
+            dramas = rawDramas.map((d) => formatDramaCard(d, req));
           } else if (section.sectionType === 'CUSTOM_CURATED' && section.dramaIds?.length > 0) {
             const rawDramas = await Drama.find({
               _id: { $in: section.dramaIds },
@@ -447,7 +858,7 @@ export class HomeController {
             })
               .populate('genres', 'name slug')
               .limit(maxItems);
-            dramas = rawDramas.map(formatDramaCard);
+            dramas = rawDramas.map((d) => formatDramaCard(d, req));
           } else if (section.sectionType === 'NEW_RELEASES') {
             const rawDramas = await Drama.find({
               status: 'PUBLISHED',
@@ -456,7 +867,7 @@ export class HomeController {
               .populate('genres', 'name slug')
               .sort({ releaseDate: -1, createdAt: -1 })
               .limit(maxItems);
-            dramas = rawDramas.map(formatDramaCard);
+            dramas = rawDramas.map((d) => formatDramaCard(d, req));
           } else if (section.sectionType === 'TRENDING') {
             const rawDramas = await Drama.find({
               status: 'PUBLISHED',
@@ -465,13 +876,13 @@ export class HomeController {
               .populate('genres', 'name slug')
               .sort({ trendingRank: 1, viewsCount: -1 })
               .limit(maxItems);
-            dramas = rawDramas.map(formatDramaCard);
+            dramas = rawDramas.map((d) => formatDramaCard(d, req));
           } else if (section.sectionType === 'PRIORITY_CONTENT') {
             const rawDramas = await Drama.find({ status: 'PUBLISHED' })
               .populate('genres', 'name slug')
               .sort({ priority: 1, viewsCount: -1, createdAt: -1 })
               .limit(maxItems);
-            dramas = rawDramas.map(formatDramaCard);
+            dramas = rawDramas.map((d) => formatDramaCard(d, req));
           }
 
           return {
@@ -559,7 +970,7 @@ export class HomeController {
           sectionType: section.sectionType,
           layout: section.layout
         },
-        dramas: dramas.map(formatDramaCard),
+        dramas: dramas.map((d) => formatDramaCard(d, req)),
         pagination
       });
     } catch (error) {
@@ -582,13 +993,13 @@ export class HomeController {
         .limit(5);
 
       // Fallback if none flagged isFeatured
-      let heroCarousel = heroDramas.map(formatDramaCard);
+      let heroCarousel = heroDramas.map((d) => formatDramaCard(d, req));
       if (heroCarousel.length === 0) {
         const fallbackHero = await Drama.find({ status: 'PUBLISHED' })
           .populate('genres', 'name slug')
           .sort({ priority: 1, viewsCount: -1 })
           .limit(5);
-        heroCarousel = fallbackHero.map(formatDramaCard);
+        heroCarousel = fallbackHero.map((d) => formatDramaCard(d, req));
       }
 
       // 2. Continue Watching (if authenticated)
@@ -657,12 +1068,12 @@ export class HomeController {
               .populate('genres', 'name slug')
               .sort({ priority: 1, viewsCount: -1 })
               .limit(sec.maxItems || 6);
-            items = raw.map(formatDramaCard);
+            items = raw.map((d) => formatDramaCard(d, req));
           } else if (sec.sectionType === 'CUSTOM_CURATED') {
             const raw = await Drama.find({ _id: { $in: sec.dramaIds }, status: 'PUBLISHED' })
               .populate('genres', 'name slug')
               .limit(sec.maxItems || 6);
-            items = raw.map(formatDramaCard);
+            items = raw.map((d) => formatDramaCard(d, req));
           }
           return {
             id: sec._id.toString(),
@@ -680,8 +1091,8 @@ export class HomeController {
         heroCarousel,
         continueWatching,
         categories: topCategories,
-        prioritizedContent: prioritizedDramas.map(formatDramaCard),
-        newReleases: newReleases.map(formatDramaCard),
+        prioritizedContent: prioritizedDramas.map((d) => formatDramaCard(d, req)),
+        newReleases: newReleases.map((d) => formatDramaCard(d, req)),
         sections: dynamicSections
       });
     } catch (error) {

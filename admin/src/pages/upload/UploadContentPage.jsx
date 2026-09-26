@@ -1,4 +1,4 @@
-import React, { useState, useId } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { dramaService } from '../../services/dramaService';
 import {
   Upload,
@@ -37,7 +37,7 @@ import {
   Globe,
   Search
 } from 'lucide-react';
-import { mockGenres } from '../../data/mockOttData';
+import { uploadService } from '../../services/uploadService';
 import { genreService } from '../../services/genreService';
 
 // Reusable Dashboard-styled Slide Switch component
@@ -97,11 +97,34 @@ export default function UploadContentPage({ onNavigate }) {
   // Step 1: Basic Series Info
   const [title, setTitle] = useState('');
   const [synopsis, setSynopsis] = useState('');
-  const [selectedGenres, setSelectedGenres] = useState(['Romance', 'Drama']);
+  const [selectedGenres, setSelectedGenres] = useState([]);
   const [ageRating, setAgeRating] = useState('U/A 13+');
   const [language, setLanguage] = useState('Hindi');
   const [director, setDirector] = useState('');
   const [priority, setPriority] = useState(1);
+
+  // Dynamic genres loaded directly from backend DB
+  const [availableGenres, setAvailableGenres] = useState([]);
+  const [isGenresLoading, setIsGenresLoading] = useState(true);
+
+  useEffect(() => {
+    genreService
+      .getActiveGenres()
+      .then((res) => {
+        if (res && Array.isArray(res.genres) && res.genres.length > 0) {
+          setAvailableGenres(res.genres);
+          if (res.genres[0]?.name) {
+            setSelectedGenres([res.genres[0].name]);
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not load dynamic genres:', err);
+      })
+      .finally(() => {
+        setIsGenresLoading(false);
+      });
+  }, []);
 
   // Step 2: Media & Artwork
   const [posterUrl, setPosterUrl] = useState('');
@@ -121,52 +144,26 @@ export default function UploadContentPage({ onNavigate }) {
   const [isBannerUploading, setIsBannerUploading] = useState(false);
   const [isTrailerUploading, setIsTrailerUploading] = useState(false);
 
-  // Episode Ingestion Mode & Search
-  const [episodeIngestMode, setEpisodeIngestMode] = useState('batch'); // 'batch' | 'single'
+  // Episode Search & Filter
   const [episodeSearchQuery, setEpisodeSearchQuery] = useState('');
 
-  // Single Episode Ingestion Builder State
+  // Episode Ingestion Builder State (Single Episode: Upload File or Direct URL)
   const [newEpTitle, setNewEpTitle] = useState('');
-  const [newEpSourceType, setNewEpSourceType] = useState('url'); // 'url' | 'file'
+  const [newEpSourceType, setNewEpSourceType] = useState('file'); // 'file' | 'url'
   const [newEpVideoUrl, setNewEpVideoUrl] = useState('');
+  const [newEpFileName, setNewEpFileName] = useState('');
+  const [newEpFileSize, setNewEpFileSize] = useState('');
   const [newEpDuration, setNewEpDuration] = useState('2:15');
   const [newEpIsFree, setNewEpIsFree] = useState(false);
-  const [showAddEpisodeCard, setShowAddEpisodeCard] = useState(false);
-  const [availableGenres, setAvailableGenres] = useState(mockGenres);
-
-  useEffect(() => {
-    genreService
-      .getActiveGenres()
-      .then((res) => {
-        if (res && Array.isArray(res.genres) && res.genres.length > 0) {
-          setAvailableGenres(res.genres);
-        }
-      })
-      .catch((err) => {
-        console.warn('Could not load dynamic genres:', err);
-      });
-  }, []);
+  const [singleEpFileUploading, setSingleEpFileUploading] = useState(false);
 
   // Video Preview Lightbox State
   const [previewVideo, setPreviewVideo] = useState(null); // { title: string, url: string }
 
-  // Step 3: Episodes
+  // Step 3: Episodes (Clean, real array - starts empty)
   const [freeEpisodes, setFreeEpisodes] = useState(3);
-  const [episodes, setEpisodes] = useState([
-    { id: 1, title: 'Episode 1: The Incognito Meeting', sourceType: 'file', fileName: 'ep_01_the_incognito_meeting_9x16.mp4', videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', fileSize: '28.4 MB', duration: '2:15', isFree: true, status: 'Ready' },
-    { id: 2, title: 'Episode 2: Contractual Sparks', sourceType: 'url', videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', fileName: '', fileSize: 'Remote Stream', duration: '2:30', isFree: true, status: 'Ready' },
-    { id: 3, title: 'Episode 3: The Boardroom Surprise', sourceType: 'file', fileName: 'ep_03_the_boardroom_surprise_9x16.mp4', videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', fileSize: '26.8 MB', duration: '1:58', isFree: true, status: 'Ready' },
-    { id: 4, title: 'Episode 4: Behind Closed Doors', sourceType: 'file', fileName: 'ep_04_behind_closed_doors_9x16.mp4', videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', fileSize: '34.5 MB', duration: '2:45', isFree: false, status: 'Subscriber Locked' },
-    { id: 5, title: 'Episode 5: High Society Gala', sourceType: 'url', videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', fileName: '', fileSize: 'Remote Stream', duration: '2:10', isFree: false, status: 'Subscriber Locked' },
-  ]);
-
-  // Total episodes is automatically computed from the content episodes queue
+  const [episodes, setEpisodes] = useState([]);
   const totalEpisodes = episodes.length;
-
-  // Step 3 Episode Video Ingestion State
-  const [isDragOverBatch, setIsDragOverBatch] = useState(false);
-  const [isUploadingBatch, setIsUploadingBatch] = useState(false);
-  const [batchUploadSuccessMsg, setBatchUploadSuccessMsg] = useState('');
 
   // Step 4: Paywall, DRM & Distribution Switches
   const [isPublished, setIsPublished] = useState(true);
@@ -174,15 +171,16 @@ export default function UploadContentPage({ onNavigate }) {
   const [isAutoplayEnabled, setIsAutoplayEnabled] = useState(true);
   const [isDrmProtected, setIsDrmProtected] = useState(true);
   const [isFeatured, setIsFeatured] = useState(true);
-  const [isTrending, setIsTrending] = useState(true);
+  const [isTrending, setIsTrending] = useState(false);
   const [pricePerEpisode, setPricePerEpisode] = useState('10 Coins');
 
   // Step 5: Publishing status
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishingStage, setPublishingStage] = useState(0);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [publishError, setPublishError] = useState(null);
 
-  // Age rating badge colors
+  // Age rating badge options
   const ageRatings = [
     { value: 'U (All Ages)', label: 'U', desc: 'Universal — All Ages', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' },
     { value: 'U/A 7+', label: '7+', desc: 'Mild fantasy / comedy', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' },
@@ -190,31 +188,6 @@ export default function UploadContentPage({ onNavigate }) {
     { value: 'U/A 16+', label: '16+', desc: 'Mature Themes / Intense', color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300' },
     { value: 'A 18+', label: '18+', desc: 'Adults Only Content', color: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300' },
   ];
-
-  // Quick Demo Autofill handler
-  const handleAutofillDemo = () => {
-    setTitle("The Billionaire's Secret Nanny");
-    setSynopsis('Down on her luck, Tara accepts a high-paying nanny job at a mysterious Mumbai penthouse. She soon discovers the cold single billionaire is harboring a secret that could destroy his family empire—and her heart.');
-    setSelectedGenres(['Romance', 'CEO', 'Drama']);
-    setAgeRating('U/A 13+');
-    setLanguage('Hindi (Dubbed)');
-    setDirector('Vikramaditya Roy');
-    setPriority(1);
-    setPosterUrl('https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80');
-    setBannerUrl('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80');
-    setTrailerFileName('secret_nanny_official_teaser_9x16.mp4');
-    setFreeEpisodes(3);
-    setEpisodes([
-      { id: 1, title: 'Episode 1: The Penthouse Interview', fileName: 'ep_01_the_penthouse_interview_9x16.mp4', fileSize: '28.4 MB', duration: '2:15', isFree: true, status: 'Ready' },
-      { id: 2, title: 'Episode 2: Midnight Encounter', fileName: 'ep_02_midnight_encounter_9x16.mp4', fileSize: '32.1 MB', duration: '2:40', isFree: true, status: 'Ready' },
-      { id: 3, title: 'Episode 3: The Golden Locket', fileName: 'ep_03_the_golden_locket_9x16.mp4', fileSize: '24.9 MB', duration: '1:58', isFree: true, status: 'Ready' },
-      { id: 4, title: 'Episode 4: Whispers in the Boardroom', fileName: 'ep_04_whispers_in_boardroom_9x16.mp4', fileSize: '33.5 MB', duration: '2:32', isFree: false, status: 'Subscriber Locked' },
-      { id: 5, title: 'Episode 5: False Identity', fileName: 'ep_05_false_identity_exposed_9x16.mp4', fileSize: '29.7 MB', duration: '2:14', isFree: false, status: 'Subscriber Locked' },
-      { id: 6, title: 'Episode 6: The Heiress Strikes Back', fileName: 'ep_06_heiress_strikes_back_9x16.mp4', fileSize: '31.0 MB', duration: '2:20', isFree: false, status: 'Subscriber Locked' },
-      { id: 7, title: 'Episode 7: Locked in the Wine Cellar', fileName: 'ep_07_locked_in_cellar_9x16.mp4', fileSize: '35.4 MB', duration: '2:45', isFree: false, status: 'Subscriber Locked' },
-      { id: 8, title: 'Episode 8: Truth Unveiled', fileName: 'ep_08_truth_unveiled_9x16.mp4', fileSize: '27.8 MB', duration: '2:05', isFree: false, status: 'Subscriber Locked' },
-    ]);
-  };
 
   const toggleGenre = (genreName) => {
     if (selectedGenres.includes(genreName)) {
@@ -226,74 +199,108 @@ export default function UploadContentPage({ onNavigate }) {
     }
   };
 
-  // Batch Video Files Processing (Drag & drop or file dialog)
-  const handleProcessVideoFiles = (fileList) => {
-    const files = Array.from(fileList || []).filter(
-      (f) => f.type.startsWith('video/') || /\.(mp4|mov|m4v|mkv|webm)$/i.test(f.name)
-    );
-    if (files.length === 0) {
-      alert('Please select valid video files (.mp4, .mov, etc.)');
-      return;
+  // Real Poster Upload Handler
+  const handlePosterFileSelect = async (file) => {
+    if (!file) return;
+    setIsPosterUploading(true);
+    try {
+      const res = await uploadService.uploadSingle(file, 'images');
+      setPosterUrl(res.url);
+    } catch (err) {
+      console.error('Poster upload failed:', err);
+      alert(err.message || 'Failed to upload poster image to server.');
+    } finally {
+      setIsPosterUploading(false);
     }
+  };
 
-    setIsUploadingBatch(true);
-    setTimeout(() => {
-      const startIndex = episodes.length;
-      const added = files.map((file, idx) => {
-        const epNum = startIndex + idx + 1;
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+  // Real Banner Upload Handler
+  const handleBannerFileSelect = async (file) => {
+    if (!file) return;
+    setIsBannerUploading(true);
+    try {
+      const res = await uploadService.uploadSingle(file, 'images');
+      setBannerUrl(res.url);
+    } catch (err) {
+      console.error('Banner upload failed:', err);
+      alert(err.message || 'Failed to upload banner image to server.');
+    } finally {
+      setIsBannerUploading(false);
+    }
+  };
+
+  // Real Trailer Upload Handler
+  const handleTrailerFileSelect = async (file) => {
+    if (!file) return;
+    setIsTrailerUploading(true);
+    try {
+      const res = await uploadService.uploadSingle(file, 'videos');
+      setTrailerUrl(res.url);
+      setTrailerFileName(res.originalName || file.name);
+    } catch (err) {
+      console.error('Trailer upload failed:', err);
+      alert(err.message || 'Failed to upload trailer video to server.');
+    } finally {
+      setIsTrailerUploading(false);
+    }
+  };
+
+  // Real Single Episode File Upload Handler
+  const handleSingleEpFileSelect = async (file) => {
+    if (!file) return;
+    setSingleEpFileUploading(true);
+    try {
+      const res = await uploadService.uploadSingle(file, 'videos');
+      setNewEpVideoUrl(res.url);
+      setNewEpFileName(res.originalName || file.name);
+      setNewEpFileSize(`${(file.size / (1024 * 1024)).toFixed(1)} MB`);
+      if (!newEpTitle.trim()) {
         const cleanName = file.name
           .replace(/\.[^/.]+$/, '')
           .replace(/[-_]/g, ' ')
-          .replace(/^(ep|episode)\s*\d+\s*[:\-_]?\s*/i, '');
-
-        return {
-          id: epNum,
-          title: cleanName ? `Episode ${epNum}: ${cleanName}` : `Episode ${epNum}: Vertical Drama Chapter`,
-          fileName: file.name,
-          fileSize: `${sizeMB} MB`,
-          duration: `${Math.floor(Math.random() * 2) + 1}:${String(Math.floor(Math.random() * 50) + 10).padStart(2, '0')}`,
-          isFree: epNum <= freeEpisodes,
-          status: 'Ready',
-        };
-      });
-
-      const updated = [...episodes, ...added];
-      setEpisodes(updated);
-      setIsUploadingBatch(false);
-      setBatchUploadSuccessMsg(`Successfully imported ${files.length} episode video files!`);
-      setTimeout(() => setBatchUploadSuccessMsg(''), 4000);
-    }, 600);
+          .replace(/^(ep|episode)\s*\d+\s*[:\-_]?\s*/i, '')
+          .trim();
+        setNewEpTitle(`Episode ${episodes.length + 1}: ${cleanName || 'Chapter'}`);
+      }
+    } catch (err) {
+      console.error('Episode video upload failed:', err);
+      alert(err.message || 'Failed to upload episode video to server.');
+    } finally {
+      setSingleEpFileUploading(false);
+    }
   };
 
-
-  // Add individual episode with custom name & media
+  // Add individual episode with real media
   const handleAddNewEpisode = (e) => {
     if (e) e.preventDefault();
     const nextNum = episodes.length + 1;
-    const finalTitle = newEpTitle.trim() || `Episode ${nextNum}: New Drama Chapter`;
+    const finalTitle = newEpTitle.trim() || `Episode ${nextNum}: Chapter`;
+    const videoStreamUrl = newEpVideoUrl.trim();
+    if (!videoStreamUrl) {
+      alert('Please select an episode video file or enter a video stream URL.');
+      return;
+    }
     const newEpisode = {
       id: nextNum,
+      episodeNumber: nextNum,
       title: finalTitle,
       sourceType: newEpSourceType,
-      fileName: newEpSourceType === 'file' ? (newEpVideoUrl || `ep_${String(nextNum).padStart(2, '0')}_vertical_1080p.mp4`) : '',
-      videoUrl: newEpSourceType === 'url' ? (newEpVideoUrl.trim() || 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4') : 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
-      fileSize: newEpSourceType === 'file' ? '28.5 MB' : 'Remote Stream',
+      fileName: newEpFileName || (newEpSourceType === 'url' ? 'Direct Stream URL' : `ep_${String(nextNum).padStart(2, '0')}.mp4`),
+      videoUrl: videoStreamUrl,
+      fileSize: newEpFileSize || (newEpSourceType === 'url' ? 'Remote Stream' : 'Video File'),
       duration: newEpDuration || '2:15',
+      durationSeconds: 135,
       isFree: nextNum <= freeEpisodes,
       status: nextNum <= freeEpisodes ? 'Ready' : 'Subscriber Locked'
     };
-    setEpisodes([...episodes, newEpisode]);
+    setEpisodes((prev) => [...prev, newEpisode]);
     setNewEpTitle('');
     setNewEpVideoUrl('');
-    setShowAddEpisodeCard(false);
+    setNewEpFileName('');
+    setNewEpFileSize('');
   };
 
-  // Add individual episode with video placeholder
-  const handleAddEpisode = () => {
-    setNewEpTitle(`Episode ${episodes.length + 1}: `);
-    setShowAddEpisodeCard(true);
-  };
+
 
   // Inline update episode title
   const handleUpdateEpisodeTitle = (id, newTitle) => {
@@ -301,41 +308,48 @@ export default function UploadContentPage({ onNavigate }) {
   };
 
   // Attach or replace video file for single episode
-  const handleAttachVideoToEpisode = (epId, file) => {
+  const handleAttachVideoToEpisode = async (epId, file) => {
     if (!file) return;
-    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-    setEpisodes(episodes.map(ep => {
-      if (ep.id === epId) {
-        return {
-          ...ep,
-          fileName: file.name,
-          fileSize: `${sizeMB} MB`,
-          status: 'Ready'
-        };
-      }
-      return ep;
-    }));
+    try {
+      const res = await uploadService.uploadSingle(file, 'videos');
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      setEpisodes(episodes.map(ep => {
+        if (ep.id === epId) {
+          return {
+            ...ep,
+            fileName: file.name,
+            fileSize: `${sizeMB} MB`,
+            videoUrl: res.url,
+            status: 'Ready',
+            sourceType: 'file'
+          };
+        }
+        return ep;
+      }));
+    } catch (err) {
+      alert(`Failed to replace video: ${err.message}`);
+    }
   };
 
   // Clear episode queue
   const handleClearEpisodes = () => {
-    if (confirm('Are you sure you want to clear the episode queue?')) {
+    if (confirm('Are you sure you want to clear all episodes from the queue?')) {
       setEpisodes([]);
     }
   };
-
 
   const handleRemoveEpisode = (id) => {
     const remaining = episodes.filter((ep) => ep.id !== id);
     const reindexed = remaining.map((ep, idx) => ({
       ...ep,
       id: idx + 1,
+      episodeNumber: idx + 1,
       title: ep.title.replace(/^Episode \d+:/i, `Episode ${idx + 1}:`),
     }));
     setEpisodes(reindexed);
   };
 
-  // Free episode slider adjustment updates episode free statuses
+  // Free episode adjustment updates episode free statuses
   const handleFreeEpisodesChange = (val) => {
     const count = Number(val);
     setFreeEpisodes(count);
@@ -366,35 +380,21 @@ export default function UploadContentPage({ onNavigate }) {
     }));
   };
 
-
-  // Simulated dropzone upload triggers
-  const triggerMockUpload = (type) => {
-    if (type === 'poster') {
-      setIsPosterUploading(true);
-      setTimeout(() => {
-        setPosterUrl('https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80');
-        setIsPosterUploading(false);
-      }, 1000);
-    } else if (type === 'banner') {
-      setIsBannerUploading(true);
-      setTimeout(() => {
-        setBannerUrl('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80');
-        setIsBannerUploading(false);
-      }, 1000);
-    } else if (type === 'trailer') {
-      setIsTrailerUploading(true);
-      setTimeout(() => {
-        setTrailerFileName('vertical_short_trailer_1080p.mp4');
-        setIsTrailerUploading(false);
-      }, 1200);
-    }
-  };
-
   // Validation before advancing
   const handleNextStep = () => {
     if (currentStep === 1) {
       if (!title.trim()) {
         alert('Please enter a series title to proceed.');
+        return;
+      }
+      if (!synopsis.trim()) {
+        alert('Please provide a storyline synopsis.');
+        return;
+      }
+    }
+    if (currentStep === 2) {
+      if (!posterUrl.trim()) {
+        alert('Please upload or provide a 9:16 vertical poster image.');
         return;
       }
     }
@@ -411,100 +411,79 @@ export default function UploadContentPage({ onNavigate }) {
     }
   };
 
-  // Multi-stage publishing process
-  const handlePublish = () => {
+  // Real Multi-stage Publishing to Backend Database
+  const handlePublish = async () => {
+    if (!title.trim()) {
+      alert('Please enter a series title in Step 1.');
+      setCurrentStep(1);
+      return;
+    }
+
     setIsPublishing(true);
+    setPublishError(null);
     setPublishingStage(1);
 
-    setTimeout(() => {
+    try {
+      // Stage 2: Register Drama Series in MongoDB Database
       setPublishingStage(2);
+      const dramaPayload = {
+        title: title.trim(),
+        synopsis: synopsis.trim(),
+        posterUrl: posterUrl.trim(),
+        bannerUrl: bannerUrl.trim(),
+        trailerUrl: trailerUrl.trim(),
+        genres: selectedGenres,
+        languages: [language],
+        ageRating,
+        director: director.trim(),
+        totalEpisodes: episodes.length,
+        freeEpisodes: Number(freeEpisodes) || 0,
+        isPaid: Boolean(isVipPaywallActive),
+        plan: isVipPaywallActive ? 'Premium Plan' : 'Free Tier',
+        status: isPublished ? 'PUBLISHED' : 'DRAFT',
+        priority: Number(priority) || 1,
+        isTrending: Boolean(isTrending),
+        isFeatured: Boolean(isFeatured)
+      };
+
+      const createRes = await dramaService.createDrama(dramaPayload);
+      const createdDrama = createRes?.drama || createRes;
+      const createdDramaId = createdDrama?._id || createdDrama?.id;
+
+      // Stage 3: Ingest All Episode Video Files & Paywall Rules
+      setPublishingStage(3);
+      if (episodes.length > 0 && createdDramaId) {
+        const episodePayload = episodes.map((ep, idx) => ({
+          episodeNumber: idx + 1,
+          title: ep.title?.trim() || `Episode ${idx + 1}`,
+          isFree: Boolean(ep.isFree),
+          duration: ep.duration || '2:15',
+          durationSeconds: ep.durationSeconds || 135,
+          videoStreamUrl: ep.videoUrl || trailerUrl || '',
+          thumbnailUrl: posterUrl || ''
+        }));
+
+        await dramaService.saveEpisodes(createdDramaId, {
+          episodes: episodePayload,
+          freeEpisodes: Number(freeEpisodes) || 0
+        });
+      }
+
+      // Stage 4: Finalizing & live indexing
+      setPublishingStage(4);
+      await new Promise(r => setTimeout(r, 600));
+
+      setUploadSuccess(true);
+      setIsPublishing(false);
+
       setTimeout(() => {
-        setPublishingStage(3);
-        setTimeout(() => {
-          setPublishingStage(4);
-          setTimeout(() => {
-            // Save new drama with assigned priority into localStorage
-            try {
-              const existingJson = localStorage.getItem('esquare_dramas');
-              const existingList = existingJson ? JSON.parse(existingJson) : mockDramas;
-              const newId = `DRM-${Date.now().toString().slice(-3)}`;
-
-              // Compile all episodes with exact user-configured titles, media URLs, and paywall flags
-              const publishedEpisodes = episodes.map((ep, idx) => ({
-                id: `EP-${newId.replace('DRM-', '')}-${String(idx + 1).padStart(2, '0')}`,
-                dramaId: newId,
-                episodeNumber: idx + 1,
-                title: ep.title?.trim() || `Episode ${idx + 1}: Chapter`,
-                duration: ep.duration || '2:15',
-                isFree: Boolean(ep.isFree),
-                views: '0',
-                subtitles: ['Hindi', 'English'],
-                videoUrl: ep.videoUrl || (ep.sourceType === 'url' ? 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4' : 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4'),
-                thumbnail: posterUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=200&q=80',
-                fileName: ep.fileName || (ep.sourceType === 'url' ? 'Direct Stream URL' : `ep_${String(idx + 1).padStart(2, '0')}.mp4`),
-                fileSize: ep.fileSize || '28.0 MB',
-                sourceType: ep.sourceType || (ep.videoUrl ? 'url' : 'file'),
-              }));
-
-              const newDramaObj = {
-                id: newId,
-                title: title.trim() || 'New Micro-Drama',
-                priority: Number(priority) || 1,
-                slug: (title.trim() || 'new-drama').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-                synopsis: synopsis || '',
-                genres: selectedGenres.length > 0 ? selectedGenres : ['Romance', 'Drama'],
-                totalEpisodes: publishedEpisodes.length,
-                publishedEpisodes: publishedEpisodes.length,
-                freeEpisodes: publishedEpisodes.filter(e => e.isFree).length,
-                views: '0',
-                rating: 5.0,
-                status: isPublished ? 'PUBLISHED' : 'DRAFT',
-                isActive: isPublished,
-                isPaid: isVipPaywallActive,
-                plan: isVipPaywallActive ? 'Premium Plan' : 'Free Tier',
-                isTrending: true,
-                trendingRank: 1,
-                isFeatured: priority === 1,
-                releaseDate: 'Just Now',
-                poster: posterUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=400&q=80',
-                banner: bannerUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
-                trailerUrl: trailerUrl || trailerFileName || '',
-                watchHours: '0 Hrs',
-                completionRate: '0%',
-                episodes: publishedEpisodes, // <--- FULL EPISODES WITH NAMES & URLS ATTACHED
-              };
-              
-              const updatedList = reassignPriority(
-                [newDramaObj, ...existingList.filter(d => d.id !== newId)],
-                newId,
-                Number(priority) || 1
-              );
-              localStorage.setItem('esquare_dramas', JSON.stringify(updatedList));
-
-              // Persist episodes in global esquare_episodes list so they show in EpisodesPage & Modals
-              try {
-                const existingEpsJson = localStorage.getItem('esquare_episodes');
-                const existingEps = existingEpsJson ? JSON.parse(existingEpsJson) : mockEpisodes;
-                localStorage.setItem(
-                  'esquare_episodes',
-                  JSON.stringify([...publishedEpisodes, ...existingEps.filter(e => e.dramaId !== newId)])
-                );
-              } catch (epsErr) {
-                console.error('Error saving episodes to localStorage:', epsErr);
-              }
-            } catch (err) {
-              console.error('Error saving drama to localStorage:', err);
-            }
-
-            setIsPublishing(false);
-            setUploadSuccess(true);
-            setTimeout(() => {
-              if (onNavigate) onNavigate('dramas');
-            }, 1800);
-          }, 800);
-        }, 900);
-      }, 900);
-    }, 800);
+        if (onNavigate) onNavigate('dramas');
+      }, 1500);
+    } catch (err) {
+      console.error('Publish drama failed:', err);
+      setIsPublishing(false);
+      setPublishError(err.message || 'Failed to publish drama series.');
+    }
   };
 
   // Steps configuration
@@ -809,24 +788,34 @@ export default function UploadContentPage({ onNavigate }) {
                 </span>
               </div>
               <div className="flex flex-wrap gap-2">
-                {availableGenres.map((genre) => {
-                  const isSelected = selectedGenres.includes(genre.name);
-                  return (
-                    <button
-                      type="button"
-                      key={genre.id}
-                      onClick={() => toggleGenre(genre.name)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
-                        isSelected
-                          ? 'bg-[#FEF08A] text-slate-950 font-extrabold shadow-2xs border border-amber-300'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-transparent'
-                      }`}
-                    >
-                      {isSelected && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
-                      <span>{genre.name}</span>
-                    </button>
-                  );
-                })}
+                {isGenresLoading ? (
+                  <div className="flex items-center space-x-2 text-xs text-slate-400 py-2">
+                    <RotateCcw className="w-3.5 h-3.5 animate-spin text-[#FEF08A]" />
+                    <span>Loading live catalog genres from database...</span>
+                  </div>
+                ) : availableGenres.length === 0 ? (
+                  <span className="text-xs text-slate-400 italic">No genres found in database.</span>
+                ) : (
+                  availableGenres.map((genre) => {
+                    const genreKey = genre.id || genre._id || genre.name;
+                    const isSelected = selectedGenres.includes(genre.name);
+                    return (
+                      <button
+                        type="button"
+                        key={genreKey}
+                        onClick={() => toggleGenre(genre.name)}
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
+                          isSelected
+                            ? 'bg-[#FEF08A] text-slate-950 font-extrabold shadow-2xs border border-amber-300'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-transparent'
+                        }`}
+                      >
+                        {isSelected && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
+                        <span>{genre.name}</span>
+                      </button>
+                    );
+                  })
+                )}
               </div>
             </div>
 
@@ -980,14 +969,21 @@ export default function UploadContentPage({ onNavigate }) {
                           </button>
                         </div>
                       ) : (
-                        <div
-                          onClick={() => triggerMockUpload('poster')}
-                          className="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-amber-50/20 dark:hover:bg-amber-950/20 rounded-lg transition-colors p-2"
-                        >
+                        <label className="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-amber-50/20 dark:hover:bg-amber-950/20 rounded-lg transition-colors p-2">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={isPosterUploading}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handlePosterFileSelect(file);
+                            }}
+                          />
                           {isPosterUploading ? (
                             <div className="flex flex-col items-center">
                               <RotateCcw className="w-5 h-5 text-amber-500 animate-spin mb-1.5" />
-                              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Uploading...</span>
+                              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Uploading to Server...</span>
                             </div>
                           ) : (
                             <>
@@ -1001,7 +997,7 @@ export default function UploadContentPage({ onNavigate }) {
                               </span>
                             </>
                           )}
-                        </div>
+                        </label>
                       )}
                     </div>
                   </div>
@@ -1050,34 +1046,38 @@ export default function UploadContentPage({ onNavigate }) {
                       {trailerFileName || trailerUrl ? (
                         <div className="w-full h-full rounded-lg bg-slate-900 text-white p-3 flex flex-col items-center justify-center text-center relative border border-slate-700">
                           <div
-                            onClick={() =>
-                              setPreviewVideo({
-                                title: `${title || 'Series'} — Teaser Trailer`,
-                                url: trailerUrl || 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                              })
-                            }
-                            className="w-10 h-10 rounded-full bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 flex items-center justify-center mb-2 cursor-pointer hover:scale-105 transition-transform"
-                            title="Play trailer preview"
+                            onClick={() => {
+                              if (trailerUrl) {
+                                setPreviewVideo({
+                                  title: `${title || 'Series'} — Teaser Trailer`,
+                                  url: trailerUrl,
+                                });
+                              }
+                            }}
+                            className={`w-10 h-10 rounded-full ${trailerUrl ? 'bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 cursor-pointer hover:scale-105' : 'bg-slate-700 text-slate-400 cursor-not-allowed'} flex items-center justify-center mb-2 transition-transform`}
+                            title={trailerUrl ? "Play trailer preview" : "No trailer uploaded"}
                           >
-                            <Play className="w-4 h-4 fill-slate-950 ml-0.5" />
+                            <Play className="w-4 h-4 fill-current ml-0.5" />
                           </div>
                           <p className="text-xs font-bold text-white truncate max-w-[150px]">
                             {trailerFileName || 'Trailer Video Stream'}
                           </p>
                           <span className="text-[10px] text-emerald-400 font-semibold mt-1">✓ Transcode Ready (1080p)</span>
                           <div className="mt-3 flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setPreviewVideo({
-                                  title: `${title || 'Series'} — Teaser Trailer`,
-                                  url: trailerUrl || 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                                })
-                              }
-                              className="px-2.5 py-1 text-[11px] rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold transition-colors"
-                            >
-                              Preview
-                            </button>
+                            {trailerUrl && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPreviewVideo({
+                                    title: `${title || 'Series'} — Teaser Trailer`,
+                                    url: trailerUrl,
+                                  })
+                                }
+                                className="px-2.5 py-1 text-[11px] rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold transition-colors cursor-pointer"
+                              >
+                                Preview
+                              </button>
+                            )}
                             <button
                               type="button"
                               onClick={() => {
@@ -1117,14 +1117,21 @@ export default function UploadContentPage({ onNavigate }) {
                           </button>
                         </div>
                       ) : (
-                        <div
-                          onClick={() => triggerMockUpload('trailer')}
-                          className="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-amber-50/20 dark:hover:bg-amber-950/20 rounded-lg transition-colors p-2"
-                        >
+                        <label className="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-amber-50/20 dark:hover:bg-amber-950/20 rounded-lg transition-colors p-2">
+                          <input
+                            type="file"
+                            accept="video/*,.mp4,.mov,.m4v"
+                            className="hidden"
+                            disabled={isTrailerUploading}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleTrailerFileSelect(file);
+                            }}
+                          />
                           {isTrailerUploading ? (
                             <div className="flex flex-col items-center">
                               <RotateCcw className="w-5 h-5 text-amber-500 animate-spin mb-1.5" />
-                              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Uploading...</span>
+                              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Uploading Video...</span>
                             </div>
                           ) : (
                             <>
@@ -1132,13 +1139,13 @@ export default function UploadContentPage({ onNavigate }) {
                                 <Video className="w-4 h-4" />
                               </div>
                               <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Teaser</p>
-                              <p className="text-[11px] text-slate-400 mt-0.5">MP4 H.264 (Up to 60MB)</p>
+                              <p className="text-[11px] text-slate-400 mt-0.5">Vertical 9:16 (MP4/MOV)</p>
                               <span className="mt-2.5 text-[10px] font-bold px-2.5 py-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
                                 Browse Video
                               </span>
                             </>
                           )}
-                        </div>
+                        </label>
                       )}
                     </div>
                   </div>
@@ -1224,14 +1231,21 @@ export default function UploadContentPage({ onNavigate }) {
                           </button>
                         </div>
                       ) : (
-                        <div
-                          onClick={() => triggerMockUpload('banner')}
-                          className="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-amber-50/20 dark:hover:bg-amber-950/20 rounded-lg transition-colors p-2"
-                        >
+                        <label className="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-amber-50/20 dark:hover:bg-amber-950/20 rounded-lg transition-colors p-2">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={isBannerUploading}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleBannerFileSelect(file);
+                            }}
+                          />
                           {isBannerUploading ? (
                             <div className="flex flex-col items-center">
                               <RotateCcw className="w-5 h-5 text-amber-500 animate-spin mb-1.5" />
-                              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Uploading...</span>
+                              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Uploading to Server...</span>
                             </div>
                           ) : (
                             <>
@@ -1245,7 +1259,7 @@ export default function UploadContentPage({ onNavigate }) {
                               </span>
                             </>
                           )}
-                        </div>
+                        </label>
                       )}
                     </div>
                   </div>
@@ -1262,236 +1276,253 @@ export default function UploadContentPage({ onNavigate }) {
             {/* Section B: Episode Video Files & Ingestion */}
             <div className="pt-6 border-t border-slate-100 dark:border-white/10 space-y-4">
               
-              <div className="flex items-center space-x-2">
-                <Film className="w-4 h-4 text-amber-500" />
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Episodes &amp; Video Content ({episodes.length})
-                </h4>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Film className="w-4 h-4 text-amber-500" />
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Episodes &amp; Video Content ({episodes.length})
+                  </h4>
+                </div>
               </div>
 
-              {/* Episode Ingestion Card */}
+              {/* Single Episode Ingestion Builder */}
               <div className="rounded-2xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 p-4 sm:p-5 space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-200/70 dark:border-white/10 pb-2.5">
-                  <div className="flex items-center space-x-2">
-                    <span className="w-5 h-5 rounded-md bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center">
-                      {episodes.length + 1}
-                    </span>
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">
-                      Add Episode {episodes.length + 1}
-                    </span>
+                  <div className="flex items-center justify-between border-b border-slate-200/70 dark:border-white/10 pb-2.5">
+                    <div className="flex items-center space-x-2">
+                      <span className="w-5 h-5 rounded-md bg-[#FEF08A] text-slate-950 font-black text-xs flex items-center justify-center">
+                        {episodes.length + 1}
+                      </span>
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">
+                        Add Episode {episodes.length + 1}
+                      </span>
+                    </div>
+                    {(newEpTitle || newEpVideoUrl) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewEpTitle('');
+                          setNewEpVideoUrl('');
+                          setNewEpFileName('');
+                          setNewEpFileSize('');
+                        }}
+                        className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                        title="Clear fields"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
-                  {(newEpTitle || newEpVideoUrl) && (
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Episode Title
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Episode 1: The Incognito Meeting"
+                        value={newEpTitle}
+                        onChange={(e) => setNewEpTitle(e.target.value)}
+                        className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-400 text-slate-900 dark:text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Duration
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="2:15"
+                        value={newEpDuration}
+                        onChange={(e) => setNewEpDuration(e.target.value)}
+                        className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-400 text-slate-950 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <label className="text-xs font-bold text-slate-900 dark:text-white">
+                          Episode Media Source
+                        </label>
+                        <p className="text-[11px] text-slate-400">
+                          Choose local video file upload or enter a direct video stream URL
+                        </p>
+                      </div>
+
+                      <div className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/70 text-xs font-bold shadow-2xs shrink-0 self-start sm:self-auto">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNewEpSourceType('file');
+                            if (newEpVideoUrl?.startsWith('http')) setNewEpVideoUrl('');
+                          }}
+                          className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
+                            newEpSourceType === 'file'
+                              ? 'bg-[#FEF08A] text-slate-950 shadow-xs font-extrabold'
+                              : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                          }`}
+                        >
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Media Upload</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNewEpSourceType('url');
+                          }}
+                          className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
+                            newEpSourceType === 'url'
+                              ? 'bg-[#FEF08A] text-slate-950 shadow-xs font-extrabold'
+                              : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                          }`}
+                        >
+                          <Link className="w-3.5 h-3.5" />
+                          <span>URL Upload</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {newEpSourceType === 'url' ? (
+                      <div className="space-y-1.5">
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <Link className="w-4 h-4 text-amber-500" />
+                          </div>
+                          <input
+                            type="url"
+                            placeholder="https://cdn.example.com/episodes/ep_01_vertical_1080p.mp4"
+                            value={newEpVideoUrl}
+                            onChange={(e) => setNewEpVideoUrl(e.target.value)}
+                            className="w-full pl-10 pr-20 py-2.5 text-xs font-mono bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-400 text-slate-950 dark:text-white shadow-2xs"
+                          />
+                          {newEpVideoUrl && (
+                            <button
+                              type="button"
+                              onClick={() => setNewEpVideoUrl('')}
+                              className="absolute inset-y-0 right-2 my-auto h-6 px-2 text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-400 pl-1">
+                          Direct HTTPS stream links supported (MP4, HLS .m3u8).
+                        </p>
+                      </div>
+                    ) : newEpVideoUrl ? (
+                      /* Attached Video File Card */
+                      <div className="p-3.5 rounded-xl bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700/80 flex items-center justify-between shadow-2xs">
+                        <div className="flex items-center space-x-3 min-w-0">
+                          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                            <CheckCircle2 className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                              {newEpFileName || newEpVideoUrl}
+                            </p>
+                            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
+                              ✓ Uploaded to Server storage {newEpFileSize ? `(${newEpFileSize})` : ''}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 shrink-0">
+                          <label
+                            htmlFor="single-ep-file-replace"
+                            className="px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-colors shadow-2xs"
+                          >
+                            Replace
+                            <input
+                              type="file"
+                              id="single-ep-file-replace"
+                              accept="video/*,.mp4,.mov,.m4v"
+                              className="hidden"
+                              disabled={singleEpFileUploading}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleSingleEpFileSelect(file);
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNewEpVideoUrl('');
+                              setNewEpFileName('');
+                              setNewEpFileSize('');
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer"
+                            title="Remove file"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Interactive Video File Upload Dropzone */
+                      <label
+                        htmlFor="single-ep-file-input"
+                        className="border border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-400 dark:hover:border-amber-400/80 rounded-xl p-4 sm:p-5 bg-white dark:bg-[#151515] hover:bg-amber-50/20 dark:hover:bg-amber-950/10 transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-between gap-3 group"
+                      >
+                        <input
+                          type="file"
+                          id="single-ep-file-input"
+                          accept="video/*,.mp4,.mov,.m4v"
+                          className="hidden"
+                          disabled={singleEpFileUploading}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleSingleEpFileSelect(file);
+                          }}
+                        />
+                        <div className="flex items-center space-x-3 text-center sm:text-left">
+                          <div className="w-10 h-10 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                            {singleEpFileUploading ? (
+                              <RotateCcw className="w-5 h-5 animate-spin" />
+                            ) : (
+                              <FileVideo className="w-5 h-5" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-slate-900 dark:text-white">
+                              {singleEpFileUploading ? 'Uploading Video to Server...' : 'Choose Episode Video File'}
+                            </p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
+                              Vertical format recommended: 1080×1920 (.mp4, .mov)
+                            </p>
+                          </div>
+                        </div>
+                        <span className="px-4 py-2 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all shadow-2xs shrink-0">
+                          {singleEpFileUploading ? 'Uploading...' : 'Select Video File'}
+                        </span>
+                      </label>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-200/70 dark:border-slate-800">
                     <button
                       type="button"
                       onClick={() => {
                         setNewEpTitle('');
                         setNewEpVideoUrl('');
+                        setNewEpFileName('');
+                        setNewEpFileSize('');
                       }}
-                      className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-white"
-                      title="Clear fields"
+                      className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                     >
-                      <X className="w-4 h-4" />
+                      Cancel
                     </button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      Episode Title
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Episode 1: The Incognito Meeting"
-                      value={newEpTitle}
-                      onChange={(e) => setNewEpTitle(e.target.value)}
-                      className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-400 text-slate-900 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      Duration
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="2:15"
-                      value={newEpDuration}
-                      onChange={(e) => setNewEpDuration(e.target.value)}
-                      className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-400 text-slate-950 dark:text-white"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2.5">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                      <label className="text-xs font-bold text-slate-900 dark:text-white">
-                        Episode Media Source
-                      </label>
-                      <p className="text-[11px] text-slate-400">
-                        Choose local file upload or direct video stream URL
-                      </p>
-                    </div>
-
-                    <div className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/70 text-xs font-bold shadow-2xs shrink-0 self-start sm:self-auto">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setNewEpSourceType('file');
-                          if (newEpVideoUrl?.startsWith('http')) setNewEpVideoUrl('');
-                        }}
-                        className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
-                          newEpSourceType === 'file'
-                            ? 'bg-slate-950 dark:bg-[#FEF08A] text-white dark:text-slate-950 shadow-xs font-extrabold'
-                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                        }`}
-                      >
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>Media Upload</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setNewEpSourceType('url');
-                        }}
-                        className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
-                          newEpSourceType === 'url'
-                            ? 'bg-slate-950 dark:bg-[#FEF08A] text-white dark:text-slate-950 shadow-xs font-extrabold'
-                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                        }`}
-                      >
-                        <Link className="w-3.5 h-3.5" />
-                        <span>URL Upload</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {newEpSourceType === 'url' ? (
-                    <div className="space-y-1.5">
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                          <Link className="w-4 h-4 text-amber-500" />
-                        </div>
-                        <input
-                          type="url"
-                          placeholder="https://cdn.example.com/episodes/ep_01_vertical_1080p.mp4"
-                          value={newEpVideoUrl}
-                          onChange={(e) => setNewEpVideoUrl(e.target.value)}
-                          className="w-full pl-10 pr-20 py-2.5 text-xs font-mono bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-400 text-slate-950 dark:text-white shadow-2xs"
-                        />
-                        {newEpVideoUrl && (
-                          <button
-                            type="button"
-                            onClick={() => setNewEpVideoUrl('')}
-                            className="absolute inset-y-0 right-2 my-auto h-6 px-2 text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                          >
-                            Clear
-                          </button>
-                        )}
-                      </div>
-                      <p className="text-[11px] text-slate-400 pl-1">
-                        Direct HTTPS stream links supported (MP4, HLS .m3u8).
-                      </p>
-                    </div>
-                  ) : newEpVideoUrl && !newEpVideoUrl.startsWith('http') ? (
-                    /* Attached Video File Card */
-                    <div className="p-3.5 rounded-xl bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700/80 flex items-center justify-between shadow-2xs">
-                      <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
-                          <CheckCircle2 className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                            {newEpVideoUrl}
-                          </p>
-                          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
-                            ✓ Ready for video transcode &amp; packaging
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2 shrink-0">
-                        <label
-                          htmlFor="single-ep-file-replace"
-                          className="px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-colors shadow-2xs"
-                        >
-                          Replace
-                          <input
-                            type="file"
-                            id="single-ep-file-replace"
-                            accept="video/*,.mp4,.mov,.m4v"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) setNewEpVideoUrl(file.name);
-                            }}
-                          />
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => setNewEpVideoUrl('')}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
-                          title="Remove file"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Clean Interactive File Dropzone */
-                    <label
-                      htmlFor="single-ep-file-input"
-                      className="border border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-400 dark:hover:border-amber-400/80 rounded-xl p-4 sm:p-5 bg-white dark:bg-[#151515] hover:bg-amber-50/20 dark:hover:bg-amber-950/10 transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-between gap-3 group"
+                    <button
+                      type="button"
+                      onClick={handleAddNewEpisode}
+                      disabled={!newEpVideoUrl || singleEpFileUploading}
+                      className="px-4 py-1.5 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all shadow-2xs disabled:opacity-40 cursor-pointer"
                     >
-                      <input
-                        type="file"
-                        id="single-ep-file-input"
-                        accept="video/*,.mp4,.mov,.m4v"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) setNewEpVideoUrl(file.name);
-                        }}
-                      />
-                      <div className="flex items-center space-x-3 text-center sm:text-left">
-                        <div className="w-10 h-10 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                          <FileVideo className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-900 dark:text-white">
-                            Choose Episode Video File
-                          </p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
-                            Vertical format recommended: 1080×1920 (.mp4, .mov)
-                          </p>
-                        </div>
-                      </div>
-                      <span className="px-4 py-2 rounded-xl bg-slate-950 dark:bg-[#FEF08A] hover:bg-black text-white dark:text-slate-950 text-xs font-bold transition-all shadow-2xs shrink-0">
-                        Select Video File
-                      </span>
-                    </label>
-                  )}
+                      Add Episode
+                    </button>
+                  </div>
                 </div>
-
-                <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-200/70 dark:border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setNewEpTitle('');
-                      setNewEpVideoUrl('');
-                    }}
-                    className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleAddNewEpisode}
-                    className="px-4 py-1.5 rounded-lg bg-slate-950 dark:bg-[#FEF08A] hover:bg-black text-white dark:text-slate-950 text-xs font-bold transition-all shadow-2xs"
-                  >
-                    Add to List
-                  </button>
-                </div>
-              </div>
 
               {/* Episodes Queue Table */}
               <div className="border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs bg-white dark:bg-[#121612]">
@@ -1567,7 +1598,7 @@ export default function UploadContentPage({ onNavigate }) {
                   <div className="p-8 text-center">
                     <FileVideo className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
                     <p className="text-xs font-bold text-slate-700 dark:text-slate-300">No episodes in queue</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Use Batch Upload or Add by URL above to add episodes.</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Use File Upload or Direct URL above to add episodes.</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto max-h-[380px] overflow-y-auto">
@@ -1602,14 +1633,21 @@ export default function UploadContentPage({ onNavigate }) {
                                 <div className="flex items-center space-x-2.5">
                                   <button
                                     type="button"
-                                    onClick={() =>
-                                      setPreviewVideo({
-                                        title: ep.title,
-                                        url: ep.videoUrl || 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                                      })
-                                    }
-                                    className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-[#FEF08A] hover:text-slate-950 text-slate-600 dark:text-slate-400 flex items-center justify-center transition-colors shrink-0 shadow-2xs"
-                                    title="Play preview"
+                                    disabled={!ep.videoUrl}
+                                    onClick={() => {
+                                      if (ep.videoUrl) {
+                                        setPreviewVideo({
+                                          title: ep.title,
+                                          url: ep.videoUrl,
+                                        });
+                                      }
+                                    }}
+                                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0 shadow-2xs ${
+                                      ep.videoUrl
+                                        ? 'bg-slate-100 dark:bg-slate-800 hover:bg-[#FEF08A] hover:text-slate-950 text-slate-600 dark:text-slate-400 cursor-pointer'
+                                        : 'bg-slate-100/40 dark:bg-slate-800/30 text-slate-300 dark:text-slate-600 cursor-not-allowed'
+                                    }`}
+                                    title={ep.videoUrl ? "Play preview" : "No video uploaded for this episode"}
                                   >
                                     <Play className="w-3 h-3 fill-current ml-0.5" />
                                   </button>

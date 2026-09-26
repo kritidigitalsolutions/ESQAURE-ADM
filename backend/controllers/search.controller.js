@@ -2,34 +2,7 @@ import mongoose from 'mongoose';
 import { Drama } from '../models/Drama.js';
 import { Genre } from '../models/Genre.js';
 import { ApiResponse } from '../utils/apiResponse.js';
-import { formatViewsCount, padRank } from '../utils/formatters.js';
-
-/**
- * Format drama document for OTT cards and trays
- */
-const formatDramaCard = (drama) => {
-  const genreNames = Array.isArray(drama.genres)
-    ? drama.genres.map((g) => (typeof g === 'object' && g.name ? g.name : String(g)))
-    : [];
-
-  return {
-    id: drama._id ? drama._id.toString() : drama.id,
-    title: drama.title,
-    slug: drama.slug,
-    synopsis: drama.synopsis || '',
-    posterUrl: drama.posterUrl,
-    bannerUrl: drama.bannerUrl || '',
-    trailerUrl: drama.trailerUrl || '',
-    genres: genreNames,
-    genreDisplay: genreNames.join(' / ') || 'Drama',
-    totalEpisodes: drama.totalEpisodes || 0,
-    viewsCount: drama.viewsCount || 0,
-    viewsFormatted: formatViewsCount(drama.viewsCount || 0),
-    rating: drama.rating || 4.8,
-    isTrending: !!drama.isTrending,
-    isNewRelease: !!drama.isNewRelease
-  };
-};
+import { formatViewsCount, padRank, formatDramaCard } from '../utils/formatters.js';
 
 /**
  * Helper to get ranked popular searches list

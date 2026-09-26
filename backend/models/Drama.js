@@ -51,6 +51,14 @@ const DramaSchema = new mongoose.Schema(
       type: [String],
       default: ['Hindi']
     },
+    ageRating: {
+      type: String,
+      default: 'U/A 13+'
+    },
+    director: {
+      type: String,
+      default: ''
+    },
     tags: {
       type: [String],
       default: []

@@ -57,12 +57,12 @@
   - `GET /api/v1/dramas/:id/episodes/:episodeNumber/stream` (checks if episode is free or user has active subscription; returns video stream URL and subtitles).
   - `POST /api/v1/dramas/:id/episodes/:episodeNumber/progress` (updates `WatchHistory` with watched seconds, duration, and completion flag).
 - [ ] **User Library & Search**:
-  - `GET /api/v1/user/saved-series` & `POST /api/v1/user/saved-series/:dramaId` (toggle watchlist).
-  - `GET /api/v1/user/watch-history` (user's recent watch history).
-  - `GET /api/v1/search` (text search across titles and genres).
-  - `GET /api/v1/search/recent` & `DELETE /api/v1/search/recent` (search history management).
-  - `GET /api/v1/search/popular` (top trending search queries).
-  - `PUT /api/v1/user/settings` (language, video quality, autoplay preferences).
+  - [x] `GET /api/v1/user/saved-series` & `POST /api/v1/user/saved-series/:dramaId` (toggle watchlist / saved series with watch later resume integration).
+  - [x] `GET /api/v1/user/watch-history` (user's recent watch history).
+  - [ ] `GET /api/v1/search` (text search across titles and genres).
+  - [ ] `GET /api/v1/search/recent` & `DELETE /api/v1/search/recent` (search history management).
+  - [ ] `GET /api/v1/search/popular` (top trending search queries).
+  - [x] `PUT /api/v1/user/settings` (language, video quality, autoplay preferences).
 
 ---
 

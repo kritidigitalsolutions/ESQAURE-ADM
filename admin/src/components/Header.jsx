@@ -4,7 +4,6 @@ import { Plus, Bell, ChevronDown, User, Shield, Sparkles } from 'lucide-react';
 export default function Header({ activeTab, setActiveTab, onOpenIngestModal }) {
   const tabs = [
     { id: 'summary', label: 'Summary' },
-    { id: 'auditlog', label: 'Activity Log' },
     { id: 'dramas', label: 'Series' },
     { id: 'episodes', label: 'Episodes' },
     { id: 'users', label: 'Users' },

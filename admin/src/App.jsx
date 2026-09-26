@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import PageHeader from './components/PageHeader';
-import DramaIngestModal from './components/DramaIngestModal';
 import MobileAppDrawer from './components/MobileAppDrawer';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Dedicated OTT Pages
 import LoginPage from './pages/auth/LoginPage';
@@ -15,13 +15,13 @@ import SubscriptionsPage from './pages/subscriptions/SubscriptionsPage';
 import TransactionsPage from './pages/transactions/TransactionsPage';
 import AdmobPage from './pages/admob/AdmobPage';
 import NotificationsPage from './pages/notifications/NotificationsPage';
-import AuditlogPage from './pages/auditlog/AuditlogPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import UploadContentPage from './pages/upload/UploadContentPage';
 import SubscribersPage from './pages/subscribers/SubscribersPage';
 import PromosPage from './pages/promos/PromosPage';
 import LegalPage from './pages/legal/LegalPage';
 import AppNotificationsPage from './pages/notifications/AppNotificationsPage';
+import BannersPage from './pages/banners/BannersPage';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -116,6 +116,11 @@ export default function App() {
           title: "Episodes",
           subtitle: "Upload episode videos, subtitle files, and set free or locked episodes."
         };
+      case 'banners':
+        return {
+          title: "Banners & Hero Carousel",
+          subtitle: "Upload 16:9 landscape hero banners, promo slides, and manage top carousel placements."
+        };
       case 'genres':
         return {
           title: "Genres",
@@ -166,15 +171,10 @@ export default function App() {
           title: "Legal",
           subtitle: "Manage terms of service, privacy policy, and statutory compliance."
         };
-      case 'auditlog':
-        return {
-          title: "Activity Log",
-          subtitle: "Track recent changes, uploads, and actions taken by admins."
-        };
       case 'settings':
         return {
-          title: "Settings",
-          subtitle: "Manage default video quality, cloud storage, payment keys, and system rules."
+          title: "Admin Settings",
+          subtitle: "Manage your admin profile name, login email address, and account password."
         };
       default:
         return {
@@ -224,81 +224,84 @@ export default function App() {
             setSelectedDramaId(id);
             setActiveTab('dramas');
           }}
-          onOpenIngestModal={() => setIsIngestModalOpen(true)}
+          onOpenIngestModal={() => {
+            setSelectedDramaId(null);
+            setActiveTab('upload');
+          }}
         />
 
         {/* Dynamic Page Container */}
         <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
+          <ErrorBoundary key={activeTab}>
+            {/* Active Page View */}
+            {activeTab === 'summary' && (
+              <DashboardPage
+                onOpenIngestModal={() => setActiveTab('upload')}
+                onNavigate={setActiveTab}
+              />
+            )}
 
-          {/* Active Page View */}
-          {activeTab === 'summary' && (
-            <DashboardPage
-              onOpenIngestModal={() => setIsIngestModalOpen(true)}
-              onNavigate={setActiveTab}
-            />
-          )}
+            {(activeTab === 'dramas' || activeTab === 'episodes') && (
+              <DramasPage
+                onOpenIngestModal={() => setActiveTab('upload')}
+                onNavigate={setActiveTab}
+                selectedDramaId={selectedDramaId}
+                onClearSelectedDrama={() => setSelectedDramaId(null)}
+              />
+            )}
 
-          {(activeTab === 'dramas' || activeTab === 'episodes') && (
-            <DramasPage
-              onOpenIngestModal={() => setIsIngestModalOpen(true)}
-              onNavigate={setActiveTab}
-              selectedDramaId={selectedDramaId}
-              onClearSelectedDrama={() => setSelectedDramaId(null)}
-            />
-          )}
+            {activeTab === 'upload' && (
+              <UploadContentPage onNavigate={setActiveTab} />
+            )}
 
-          {activeTab === 'upload' && (
-            <UploadContentPage onNavigate={setActiveTab} />
-          )}
+            {activeTab === 'banners' && (
+              <BannersPage onNavigate={setActiveTab} />
+            )}
 
-          {activeTab === 'genres' && (
-            <GenresPage onNavigate={setActiveTab} />
-          )}
+            {activeTab === 'genres' && (
+              <GenresPage onNavigate={setActiveTab} />
+            )}
 
-          {activeTab === 'users' && (
-            <UsersPage onNavigate={setActiveTab} />
-          )}
+            {activeTab === 'users' && (
+              <UsersPage onNavigate={setActiveTab} />
+            )}
 
-          {activeTab === 'subscribers' && (
-            <SubscribersPage />
-          )}
+            {activeTab === 'subscribers' && (
+              <SubscribersPage />
+            )}
 
-          {activeTab === 'subscriptions' && (
-            <SubscriptionsPage />
-          )}
+            {activeTab === 'subscriptions' && (
+              <SubscriptionsPage />
+            )}
 
-          {activeTab === 'promos' && (
-            <PromosPage />
-          )}
+            {activeTab === 'promos' && (
+              <PromosPage />
+            )}
 
-          {activeTab === 'transactions' && (
-            <TransactionsPage />
-          )}
+            {activeTab === 'transactions' && (
+              <TransactionsPage />
+            )}
 
-          {activeTab === 'admob' && (
-            <AdmobPage />
-          )}
+            {activeTab === 'admob' && (
+              <AdmobPage />
+            )}
 
-          {activeTab === 'notifications' && (
-            <NotificationsPage />
-          )}
+            {activeTab === 'notifications' && (
+              <NotificationsPage />
+            )}
 
-          {activeTab === 'app_notifications' && (
-            <AppNotificationsPage />
-          )}
+            {activeTab === 'app_notifications' && (
+              <AppNotificationsPage />
+            )}
 
-          {activeTab === 'legal' && (
-            <LegalPage />
-          )}
+            {activeTab === 'legal' && (
+              <LegalPage />
+            )}
 
-          {activeTab === 'auditlog' && (
-            <AuditlogPage />
-          )}
-
-          {activeTab === 'settings' && (
-            <SettingsPage />
-          )}
-
+            {activeTab === 'settings' && (
+              <SettingsPage />
+            )}
+          </ErrorBoundary>
         </main>
 
         {/* Footer */}
@@ -308,12 +311,6 @@ export default function App() {
 
 
       </div>
-
-      {/* Drama Ingestion Modal */}
-      <DramaIngestModal
-        isOpen={isIngestModalOpen}
-        onClose={() => setIsIngestModalOpen(false)}
-      />
 
       {/* Mobile App UI Reference Drawer */}
       <MobileAppDrawer

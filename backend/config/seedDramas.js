@@ -1,6 +1,8 @@
 import { Drama } from '../models/Drama.js';
 import { Episode } from '../models/Episode.js';
 import { Genre } from '../models/Genre.js';
+import { Banner } from '../models/Banner.js';
+import { HomeSection } from '../models/HomeSection.js';
 
 export const seedDefaultDramas = async () => {
   try {
@@ -237,7 +239,85 @@ export const seedDefaultDramas = async () => {
       }
     }
 
-    console.log('[Database] Default Dramas and Episodes seeded successfully.');
+    // 3. Seed Default Banners if none exist
+    const bannerCount = await Banner.countDocuments();
+    if (bannerCount === 0) {
+      const topDramas = await Drama.find({ status: 'PUBLISHED' }).sort({ priority: 1 }).limit(3);
+      for (let i = 0; i < topDramas.length; i++) {
+        const d = topDramas[i];
+        await Banner.create({
+          title: d.title,
+          subtitle: (d.synopsis || '').slice(0, 80) + '...',
+          bannerUrl: d.bannerUrl,
+          posterUrl: d.posterUrl,
+          trailerUrl: d.trailerUrl,
+          badge: i === 0 ? 'TOP 10' : (i === 1 ? 'TRENDING' : 'FEATURED'),
+          linkType: 'DRAMA',
+          dramaId: d._id,
+          displayOrder: i + 1,
+          isActive: true
+        });
+      }
+    }
+
+    // 4. Seed Default Dynamic Home Sections if none exist
+    const sectionCount = await HomeSection.countDocuments();
+    if (sectionCount === 0) {
+      const defaultSections = [
+        {
+          title: '🔥 Trending This Week',
+          slug: 'trending-this-week',
+          subtitle: 'The most-watched vertical micro-dramas',
+          sectionType: 'TRENDING',
+          layout: 'PORTRAIT_GRID',
+          displayOrder: 1,
+          maxItems: 6,
+          viewAllEnabled: true,
+          isActive: true
+        },
+        {
+          title: '✨ New Releases',
+          slug: 'new-releases',
+          subtitle: 'Fresh episodes added daily',
+          sectionType: 'NEW_RELEASES',
+          layout: 'HORIZONTAL_CARD',
+          displayOrder: 2,
+          maxItems: 6,
+          viewAllEnabled: true,
+          isActive: true
+        },
+        {
+          title: '❤️ Romantic Escapes',
+          slug: 'romantic-escapes',
+          subtitle: 'Love, passion, and high society secrets',
+          sectionType: 'GENRE',
+          genreId: romance._id,
+          layout: 'HORIZONTAL_CARD',
+          displayOrder: 3,
+          maxItems: 6,
+          viewAllEnabled: true,
+          isActive: true
+        },
+        {
+          title: '⚡ Thriller & Suspense',
+          slug: 'thriller-suspense',
+          subtitle: 'Edge-of-your-seat gripping twists',
+          sectionType: 'GENRE',
+          genreId: thriller._id,
+          layout: 'PORTRAIT_GRID',
+          displayOrder: 4,
+          maxItems: 6,
+          viewAllEnabled: true,
+          isActive: true
+        }
+      ];
+
+      for (const s of defaultSections) {
+        await HomeSection.findOneAndUpdate({ slug: s.slug }, { $set: s }, { upsert: true, new: true });
+      }
+    }
+
+    console.log('[Database] Default Dramas, Episodes, Banners, and Home Sections seeded successfully.');
   } catch (error) {
     console.warn('[Database] Could not seed default dramas:', error.message);
   }
