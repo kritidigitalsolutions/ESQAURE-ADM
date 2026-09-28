@@ -181,7 +181,44 @@ if (adminPanel) {
         response: []
       },
       {
-        name: '8.5 Delete Genre (Safe Unlink)',
+        name: '8.5 Batch Reorder Genre Display Priorities',
+        request: {
+          method: 'PATCH',
+          header: [
+            {
+              key: 'Content-Type',
+              value: 'application/json'
+            }
+          ],
+          body: {
+            mode: 'raw',
+            raw: JSON.stringify(
+              {
+                items: [
+                  { id: '6ab7a2782b9a6432b168e3e1', displayOrder: 1 },
+                  { id: '6ab7a2782b9a6432b168e3e2', displayOrder: 2 }
+                ]
+              },
+              null,
+              2
+            ),
+            options: {
+              raw: {
+                language: 'json'
+              }
+            }
+          },
+          url: {
+            raw: '{{baseUrl}}/genres/reorder',
+            host: ['{{baseUrl}}'],
+            path: ['genres', 'reorder']
+          },
+          description: 'Batch updates displayOrder priority ranks for multiple categories.'
+        },
+        response: []
+      },
+      {
+        name: '8.6 Delete Genre (Safe Unlink)',
         request: {
           method: 'DELETE',
           header: [],

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { resolveMediaUrl } from '../utils/formatters.js';
 
 const UserSchema = new mongoose.Schema(
   {
@@ -141,7 +142,7 @@ const UserSchema = new mongoose.Schema(
         ret.plan = doc.plan || (doc.isVip ? 'Monthly Pass' : 'Free Tier');
         ret.totalWatchTime = doc.totalWatchTime || '0.0 hrs';
         ret.promoCode = doc.promoCode || doc.voucherCode || null;
-        ret.avatarUrl = doc.avatarUrl || '';
+        ret.avatarUrl = resolveMediaUrl(doc.avatarUrl || '');
         
         if (doc.vipExpiresAt) {
           ret.vipExpiresAt = new Date(doc.vipExpiresAt).toLocaleDateString('en-GB', {

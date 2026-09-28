@@ -15,7 +15,8 @@ import {
   Bell,
   Clock,
   Shield,
-  Settings
+  Settings,
+  SlidersHorizontal
 } from 'lucide-react';
 
 export default function Sidebar({
@@ -43,6 +44,7 @@ export default function Sidebar({
         { id: 'upload', label: 'Upload Content', icon: Upload },
         { id: 'banners', label: 'Banners', icon: ImageIcon },
         { id: 'genres', label: 'Genres', icon: Layers },
+        { id: 'category_priority', label: 'Category Priority', icon: SlidersHorizontal },
       ]
     },
     {

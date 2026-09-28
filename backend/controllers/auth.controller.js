@@ -8,6 +8,7 @@ import { ApiResponse } from '../utils/apiResponse.js';
 import { AppError } from '../utils/appError.js';
 import { ERROR_CODES } from '../constants/errorCodes.js';
 import { isDev } from '../config/env.js';
+import { resolveMediaUrl } from '../utils/formatters.js';
 
 /**
  * Helper to resolve genre IDs from either ObjectIds or slugs/names
@@ -214,7 +215,7 @@ export class AuthController {
         email: user.email || null,
         isVip: user.isVip || false,
         vipExpiresAt: user.vipExpiresAt || null,
-        avatarUrl: user.avatarUrl || '',
+        avatarUrl: resolveMediaUrl(user.avatarUrl || '', req),
         status: user.status
       };
 
@@ -302,7 +303,7 @@ export class AuthController {
         interests: user.interests,
         isVip: user.isVip,
         vipExpiresAt: user.vipExpiresAt,
-        avatarUrl: user.avatarUrl,
+        avatarUrl: resolveMediaUrl(user.avatarUrl || '', req),
         status: user.status
       };
 
@@ -395,7 +396,7 @@ export class AuthController {
         lastName: user.lastName,
         fullName: user.fullName,
         email: user.email,
-        avatarUrl: user.avatarUrl,
+        avatarUrl: resolveMediaUrl(user.avatarUrl || '', req),
         interests: user.interests,
         isProfileCompleted: user.isProfileCompleted,
         isVip: user.isVip,
@@ -498,7 +499,7 @@ export class AuthController {
             email: user.email,
             isVip: user.isVip,
             vipExpiresAt: user.vipExpiresAt,
-            avatarUrl: user.avatarUrl,
+            avatarUrl: resolveMediaUrl(user.avatarUrl || '', req),
             interests: user.interests,
             preferredContentLanguages: user.preferredContentLanguages,
             settings: user.settings,
@@ -667,7 +668,7 @@ export class AuthController {
         isProfileCompleted: user.isProfileCompleted,
         isVip: user.isVip || false,
         vipExpiresAt: user.vipExpiresAt || null,
-        avatarUrl: user.avatarUrl || '',
+        avatarUrl: resolveMediaUrl(user.avatarUrl || '', req),
         status: user.status
       };
 

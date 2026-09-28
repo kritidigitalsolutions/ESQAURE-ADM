@@ -1764,86 +1764,251 @@
           ]
         },
         {
-          "name": "7. Home & Discovery Feed",
-          "description": "APIs powering the OTT Home Screen feed. Includes prioritized content by admin, continue watching row with playback progress, categories ordered by admin priority, recommended categories as genres, new releases, and dynamic admin-configured category sections. All endpoints support standard pagination.",
+          "name": "9. User Library & Saved Series (Watch Later)",
+          "description": "Endpoints for managing user-saved series (Watchlist), Watch Later playback triggers, resume state synchronization, and user library settings.",
           "item": [
             {
-              "name": "7.0a Get Home Content Banners (Hero Carousel)",
+              "name": "9.1 Get Saved Series (Watch Later)",
               "request": {
                 "method": "GET",
                 "header": [
                   {
                     "key": "Authorization",
                     "value": "Bearer {{authToken}}",
-                    "type": "text",
-                    "description": "Optional auth token to check user watchlist bookmark status"
+                    "type": "text"
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/home/banners?limit=5&genre=",
+                  "raw": "{{baseUrl}}/user/saved-series?page=1&limit=20&sortBy=recent",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "home",
-                    "banners"
+                    "user",
+                    "saved-series"
                   ],
                   "query": [
                     {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default 1)"
+                    },
+                    {
                       "key": "limit",
-                      "value": "5",
-                      "description": "Number of carousel banners (default 5, max 10)"
+                      "value": "20",
+                      "description": "Number of series per page (max 100)"
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "Filter saved series by title or synopsis keyword"
                     },
                     {
                       "key": "genre",
                       "value": "",
-                      "description": "Optional genre filter by slug or ID"
+                      "description": "Filter by genre name, slug, or ID"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "recent",
+                      "description": "Sort by recent | rating | title | episodes"
                     }
                   ]
                 },
-                "description": "Fetches high-impact Hero Carousel banners for the Home Screen. Returns widescreen 16:9 bannerUrl, 9:16 portrait posterUrl, teaser badges, genres, synopsis hook, and playback CTA (Watch Now + List)."
+                "description": "Fetches the authenticated user's saved series (Watchlist) with pagination. Each item includes full drama metadata along with real-time watchProgress (resumeEpisodeNumber, progressPercentage, actionLabel: \"Resume Ep X\" or \"Watch Now\") for seamless \"Watch Later\" functionality."
               },
               "response": []
             },
             {
-              "name": "7.0b Create Home Content Banner",
+              "name": "9.2 Toggle Save Series (+ / - Watch Later)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const r = pm.response.json();",
+                      "if (r.success && r.data) {",
+                      "    console.log(`[OK] Saved status for ${r.data.dramaTitle}: isSaved=${r.data.isSaved} (${r.data.action})`);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
               "request": {
                 "method": "POST",
                 "header": [
                   {
-                    "key": "Content-Type",
-                    "value": "application/json",
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
                     "type": "text"
                   }
                 ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"title\": \"Security Guard Ki CEO GF\",\n  \"subtitle\": \"Love, corporate intrigue, and dark secrets collide in this high-intensity serialized romance drama.\",\n  \"bannerUrl\": \"https://images.unsplash.com/photo-1518173946687-a4c8a383392e?auto=format&fit=crop&w=1280&q=80\",\n  \"posterUrl\": \"https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=720&q=80\",\n  \"trailerUrl\": \"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4\",\n  \"dramaId\": \"{{dramaId}}\",\n  \"badge\": \"FEATURED\",\n  \"linkType\": \"DRAMA\",\n  \"displayOrder\": 1,\n  \"isActive\": true\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
                 "url": {
-                  "raw": "{{baseUrl}}/home/banners",
+                  "raw": "{{baseUrl}}/user/saved-series/{{dramaId}}",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "home",
-                    "banners"
+                    "user",
+                    "saved-series",
+                    "{{dramaId}}"
                   ]
                 },
-                "description": "Create a new content banner for the home screen carousel."
+                "description": "Toggles drama in user's saved series watchlist (+ / -). If not saved, adds it (isSaved: true, action: \"ADDED\"). If already saved, removes it (isSaved: false, action: \"REMOVED\"). Supports both drama ObjectId and slug."
               },
               "response": []
             },
             {
-              "name": "7.0c Update Home Content Banner",
+              "name": "9.3 Check If Series Is Saved",
               "request": {
-                "method": "PATCH",
+                "method": "GET",
                 "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user/saved-series/check/{{dramaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "saved-series",
+                    "check",
+                    "{{dramaId}}"
+                  ]
+                },
+                "description": "Quickly checks whether a specific drama is saved in the user's watchlist. Returns { isSaved: boolean, addedAt: timestamp }."
+              },
+              "response": []
+            },
+            {
+              "name": "9.4 Remove Series from Watchlist",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user/saved-series/{{dramaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "saved-series",
+                    "{{dramaId}}"
+                  ]
+                },
+                "description": "Explicit REST removal endpoint. Removes a specific drama from the user's saved series."
+              },
+              "response": []
+            },
+            {
+              "name": "9.5 Clear All Saved Series",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user/saved-series",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "saved-series"
+                  ]
+                },
+                "description": "Permanently removes all saved series from the user's watchlist."
+              },
+              "response": []
+            },
+            {
+              "name": "9.6 User Library Profile Overview",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "profile"
+                  ]
+                },
+                "description": "Retrieves user profile info along with library metrics: savedSeriesCount, watchHistoryCount, and completedCount."
+              },
+              "response": []
+            },
+            {
+              "name": "9.7 User Watch History",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/user/watch-history?page=1&limit=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "watch-history"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Records per page"
+                    }
+                  ]
+                },
+                "description": "Chronological watch history listing with resume playback timestamps, duration, and completion flags."
+              },
+              "response": []
+            },
+            {
+              "name": "9.8 Update Playback & App Settings",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  },
                   {
                     "key": "Content-Type",
                     "value": "application/json",
@@ -1852,7 +2017,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"badge\": \"TOP 1\",\n  \"displayOrder\": 1,\n  \"isActive\": true\n}",
+                  "raw": "{\n  \"autoplayNext\": true,\n  \"videoQuality\": \"1080p\",\n  \"subtitlesLanguage\": \"Hindi\",\n  \"playbackSpeed\": \"1x\",\n  \"appLanguage\": \"English\",\n  \"preferredContentLanguages\": [\n    \"Hindi\",\n    \"English\"\n  ],\n  \"notifications\": {\n    \"newEpisodes\": true,\n    \"newReleases\": true,\n    \"recommendations\": true\n  }\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1860,54 +2025,25 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/home/banners/:id",
+                  "raw": "{{baseUrl}}/user/settings",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "home",
-                    "banners",
-                    ":id"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "Banner ObjectId"
-                    }
+                    "user",
+                    "settings"
                   ]
                 },
-                "description": "Update an existing home banner."
+                "description": "Updates playback preferences (autoplay, video quality 1080p/720p/Auto, subtitles) and notifications."
               },
               "response": []
-            },
-            {
-              "name": "7.0d Delete Home Content Banner",
-              "request": {
-                "method": "DELETE",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/home/banners/:id",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "banners",
-                    ":id"
-                  ],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "",
-                      "description": "Banner ObjectId"
-                    }
-                  ]
-                },
-                "description": "Delete a home banner."
-              },
-              "response": []
-            },
+            }
+          ]
+        },
+        {
+          "name": "7. Home & Discovery Feed",
+          "description": "APIs powering the OTT Home Screen feed. Includes prioritized content by admin, continue watching row with playback progress, categories ordered by admin priority, recommended categories as genres, new releases, and dynamic admin-configured category sections. All endpoints support standard pagination.",
+          "item": [
             {
               "name": "7.1 All Content by Admin Priority",
               "request": {
@@ -2241,283 +2377,6 @@
                   ]
                 },
                 "description": "Fetch detailed single genre metadata along with all linked drama series."
-              },
-              "response": []
-            }
-          ]
-        },
-        {
-          "name": "9. User Library & Saved Series (Watch Later)",
-          "description": "Endpoints for managing user-saved series (Watchlist), Watch Later playback triggers, resume state synchronization, and user library settings.",
-          "item": [
-            {
-              "name": "9.1 Get Saved Series (Watch Later)",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/user/saved-series?page=1&limit=20&sortBy=recent",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "user",
-                    "saved-series"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "1",
-                      "description": "Page number (default 1)"
-                    },
-                    {
-                      "key": "limit",
-                      "value": "20",
-                      "description": "Number of series per page (max 100)"
-                    },
-                    {
-                      "key": "search",
-                      "value": "",
-                      "description": "Filter saved series by title or synopsis keyword"
-                    },
-                    {
-                      "key": "genre",
-                      "value": "",
-                      "description": "Filter by genre name, slug, or ID"
-                    },
-                    {
-                      "key": "sortBy",
-                      "value": "recent",
-                      "description": "Sort by recent | rating | title | episodes"
-                    }
-                  ]
-                },
-                "description": "Fetches the authenticated user's saved series (Watchlist) with pagination. Each item includes full drama metadata along with real-time watchProgress (resumeEpisodeNumber, progressPercentage, actionLabel: \"Resume Ep X\" or \"Watch Now\") for seamless \"Watch Later\" functionality."
-              },
-              "response": []
-            },
-            {
-              "name": "9.2 Toggle Save Series (+ / - Watch Later)",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "const r = pm.response.json();",
-                      "if (r.success && r.data) {",
-                      "    console.log(`[OK] Saved status for ${r.data.dramaTitle}: isSaved=${r.data.isSaved} (${r.data.action})`);",
-                      "}"
-                    ]
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/user/saved-series/{{dramaId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "user",
-                    "saved-series",
-                    "{{dramaId}}"
-                  ]
-                },
-                "description": "Toggles drama in user's saved series watchlist (+ / -). If not saved, adds it (isSaved: true, action: \"ADDED\"). If already saved, removes it (isSaved: false, action: \"REMOVED\"). Supports both drama ObjectId and slug."
-              },
-              "response": []
-            },
-            {
-              "name": "9.3 Check If Series Is Saved",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/user/saved-series/check/{{dramaId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "user",
-                    "saved-series",
-                    "check",
-                    "{{dramaId}}"
-                  ]
-                },
-                "description": "Quickly checks whether a specific drama is saved in the user's watchlist. Returns { isSaved: boolean, addedAt: timestamp }."
-              },
-              "response": []
-            },
-            {
-              "name": "9.4 Remove Series from Watchlist",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/user/saved-series/{{dramaId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "user",
-                    "saved-series",
-                    "{{dramaId}}"
-                  ]
-                },
-                "description": "Explicit REST removal endpoint. Removes a specific drama from the user's saved series."
-              },
-              "response": []
-            },
-            {
-              "name": "9.5 Clear All Saved Series",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/user/saved-series",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "user",
-                    "saved-series"
-                  ]
-                },
-                "description": "Permanently removes all saved series from the user's watchlist."
-              },
-              "response": []
-            },
-            {
-              "name": "9.6 User Library Profile Overview",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/user/profile",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "user",
-                    "profile"
-                  ]
-                },
-                "description": "Retrieves user profile info along with library metrics: savedSeriesCount, watchHistoryCount, and completedCount."
-              },
-              "response": []
-            },
-            {
-              "name": "9.7 User Watch History",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/user/watch-history?page=1&limit=20",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "user",
-                    "watch-history"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "1",
-                      "description": "Page number"
-                    },
-                    {
-                      "key": "limit",
-                      "value": "20",
-                      "description": "Records per page"
-                    }
-                  ]
-                },
-                "description": "Chronological watch history listing with resume playback timestamps, duration, and completion flags."
-              },
-              "response": []
-            },
-            {
-              "name": "9.8 Update Playback & App Settings",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
-                    "type": "text"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"autoplayNext\": true,\n  \"videoQuality\": \"1080p\",\n  \"subtitlesLanguage\": \"Hindi\",\n  \"playbackSpeed\": \"1x\",\n  \"appLanguage\": \"English\",\n  \"preferredContentLanguages\": [\n    \"Hindi\",\n    \"English\"\n  ],\n  \"notifications\": {\n    \"newEpisodes\": true,\n    \"newReleases\": true,\n    \"recommendations\": true\n  }\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/user/settings",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "user",
-                    "settings"
-                  ]
-                },
-                "description": "Updates playback preferences (autoplay, video quality 1080p/720p/Auto, subtitles) and notifications."
               },
               "response": []
             }
@@ -3524,387 +3383,6 @@
           ]
         },
         {
-          "name": "7. Home Category Sections & Content Priority",
-          "description": "Admin panel management APIs for Home Page Category Sections and Content Priority ordering. Admin can create new custom sections (genre-based, custom curated, trending, new releases), set display priorities, toggle visibility, and assign drama priority scores.",
-          "item": [
-            {
-              "name": "7.1 Add New Category Section on Home Page",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"title\": \"Trending Romantic Stories\",\n  \"subtitle\": \"Top romance micro-dramas of the month\",\n  \"slug\": \"trending-romance\",\n  \"sectionType\": \"GENRE\",\n  \"genreId\": \"66e11ad9cf366676cc944b71\",\n  \"layout\": \"HORIZONTAL_CARD\",\n  \"displayOrder\": 1,\n  \"maxItems\": 10,\n  \"viewAllEnabled\": true,\n  \"isActive\": true\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/home/admin/sections",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "admin",
-                    "sections"
-                  ]
-                },
-                "description": "Allows admin to add a new category section on the mobile home page. Section types: GENRE (pulls dramas by genre), CUSTOM_CURATED (admin selects specific drama IDs), NEW_RELEASES, TRENDING, PRIORITY_CONTENT. Lower displayOrder indicates higher priority."
-              },
-              "response": []
-            },
-            {
-              "name": "7.2 List All Home Category Sections",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/home/admin/sections?page=1&limit=20&status=ALL",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "admin",
-                    "sections"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "1",
-                      "description": "Page number"
-                    },
-                    {
-                      "key": "limit",
-                      "value": "20",
-                      "description": "Items per page"
-                    },
-                    {
-                      "key": "search",
-                      "value": "",
-                      "description": "Search by section title or slug"
-                    },
-                    {
-                      "key": "status",
-                      "value": "ALL",
-                      "description": "Filter by status: ALL | ACTIVE | INACTIVE"
-                    }
-                  ]
-                },
-                "description": "Retrieves all configured home page category sections sorted by displayOrder (priority) for the admin table, with search and pagination."
-              },
-              "response": []
-            },
-            {
-              "name": "7.3 Get Single Home Section Details",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/home/admin/sections/{{sectionId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "admin",
-                    "sections",
-                    "{{sectionId}}"
-                  ]
-                },
-                "description": "Get full configuration and details of a single home category section."
-              },
-              "response": []
-            },
-            {
-              "name": "7.4 Update Home Category Section",
-              "request": {
-                "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"title\": \"Top Romantic Stories\",\n  \"subtitle\": \"Curated love stories for your evening\",\n  \"displayOrder\": 2,\n  \"maxItems\": 12,\n  \"layout\": \"HORIZONTAL_CARD\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/home/admin/sections/{{sectionId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "admin",
-                    "sections",
-                    "{{sectionId}}"
-                  ]
-                },
-                "description": "Update any section parameters: title, subtitle, slug, sectionType, genreId, dramaIds, layout, displayOrder, maxItems, isActive."
-              },
-              "response": []
-            },
-            {
-              "name": "7.5 Batch Reorder Section Display Priorities",
-              "request": {
-                "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"items\": [\n    {\n      \"id\": \"66e11ad9cf366676cc944b71\",\n      \"displayOrder\": 1\n    },\n    {\n      \"id\": \"66e11ad9cf366676cc944b72\",\n      \"displayOrder\": 2\n    },\n    {\n      \"id\": \"66e11ad9cf366676cc944b73\",\n      \"displayOrder\": 3\n    }\n  ]\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/home/admin/sections/reorder",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "admin",
-                    "sections",
-                    "reorder"
-                  ]
-                },
-                "description": "Allows drag-and-drop priority reordering of home sections in the admin CMS table."
-              },
-              "response": []
-            },
-            {
-              "name": "7.6 Toggle Section Active/Inactive Status",
-              "request": {
-                "method": "PATCH",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/home/admin/sections/{{sectionId}}/toggle",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "admin",
-                    "sections",
-                    "{{sectionId}}",
-                    "toggle"
-                  ]
-                },
-                "description": "Instantly toggles a home section between active (visible on home screen) and inactive (hidden)."
-              },
-              "response": []
-            },
-            {
-              "name": "7.7 Delete Home Category Section",
-              "request": {
-                "method": "DELETE",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/home/admin/sections/{{sectionId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "admin",
-                    "sections",
-                    "{{sectionId}}"
-                  ]
-                },
-                "description": "Permanently deletes a category section from the home page configuration."
-              },
-              "response": []
-            },
-            {
-              "name": "7.8 Set Individual Drama Priority Score",
-              "request": {
-                "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"priority\": 1\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/home/admin/dramas/{{dramaId}}/priority",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "admin",
-                    "dramas",
-                    "{{dramaId}}",
-                    "priority"
-                  ]
-                },
-                "description": "Allows admin to set priority score for any drama series (e.g. 1 for highest placement). Directly influences the \"All Content by Admin Priority\" feed."
-              },
-              "response": []
-            }
-          ]
-        },
-        {
-          "name": "8. Genres & Categories Management",
-          "description": "Admin APIs for full dynamic CRUD management of genres and categories, real-time drama count aggregation, custom color badges, icon selection, and active visibility toggle.",
-          "item": [
-            {
-              "name": "8.1 Get All Genres with Live Metrics (Admin)",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/genres/admin",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "genres",
-                    "admin"
-                  ]
-                },
-                "description": "Fetches all genres (both active and hidden) with aggregated dramaCount from Drama collection and high-level KPIs."
-              },
-              "response": []
-            },
-            {
-              "name": "8.2 Create New Genre Category",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Sci-Fi & Cyberpunk\",\n  \"slug\": \"scifi-cyberpunk\",\n  \"icon\": \"Sparkles\",\n  \"color\": \"#8B5CF6\",\n  \"displayOrder\": 9,\n  \"isActive\": true\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/genres",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "genres"
-                  ]
-                },
-                "description": "Creates a new genre with custom icon, accent color, and auto-generated slug."
-              },
-              "response": []
-            },
-            {
-              "name": "8.3 Update Existing Genre Category",
-              "request": {
-                "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Romantic Suspense\",\n  \"icon\": \"Heart\",\n  \"color\": \"#EC4899\",\n  \"isActive\": true,\n  \"displayOrder\": 1\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{baseUrl}}/genres/{{genreId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "genres",
-                    "{{genreId}}"
-                  ]
-                },
-                "description": "Updates genre name, slug, icon, color, or priority display order."
-              },
-              "response": []
-            },
-            {
-              "name": "8.4 Toggle Genre Active Status",
-              "request": {
-                "method": "PATCH",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/genres/{{genreId}}/toggle-active",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "genres",
-                    "{{genreId}}",
-                    "toggle-active"
-                  ]
-                },
-                "description": "Instantly switches genre between ACTIVE and HIDDEN in catalog."
-              },
-              "response": []
-            },
-            {
-              "name": "8.5 Delete Genre (Safe Unlink)",
-              "request": {
-                "method": "DELETE",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/genres/{{genreId}}",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "genres",
-                    "{{genreId}}"
-                  ]
-                },
-                "description": "Permanently deletes genre and safely unlinks its reference from all drama series."
-              },
-              "response": []
-            }
-          ]
-        },
-        {
           "name": "8. Content Library & Drama Management",
           "description": "Admin panel management APIs for Content Library (Dramas/Series). Includes fetching real dynamic drama catalog with stats, creating new series, updating metadata, deleting series, toggling active/inactive status, toggling paid/free access, setting priority ranks, and managing episodes.",
           "item": [
@@ -4267,6 +3745,472 @@
                   ]
                 },
                 "description": "Deletes a banner permanently from the database."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "7. Home Category Sections & Content Priority",
+          "description": "Admin panel management APIs for Home Page Category Sections and Content Priority ordering. Admin can create new custom sections (genre-based, custom curated, trending, new releases), set display priorities, toggle visibility, and assign drama priority scores.",
+          "item": [
+            {
+              "name": "7.1 Add New Category Section on Home Page",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Trending Romantic Stories\",\n  \"subtitle\": \"Top romance micro-dramas of the month\",\n  \"slug\": \"trending-romance\",\n  \"sectionType\": \"GENRE\",\n  \"genreId\": \"66e11ad9cf366676cc944b71\",\n  \"layout\": \"HORIZONTAL_CARD\",\n  \"displayOrder\": 1,\n  \"maxItems\": 10,\n  \"viewAllEnabled\": true,\n  \"isActive\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/home/admin/sections",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "admin",
+                    "sections"
+                  ]
+                },
+                "description": "Allows admin to add a new category section on the mobile home page. Section types: GENRE (pulls dramas by genre), CUSTOM_CURATED (admin selects specific drama IDs), NEW_RELEASES, TRENDING, PRIORITY_CONTENT. Lower displayOrder indicates higher priority."
+              },
+              "response": []
+            },
+            {
+              "name": "7.2 List All Home Category Sections",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/admin/sections?page=1&limit=20&status=ALL",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "admin",
+                    "sections"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Items per page"
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "Search by section title or slug"
+                    },
+                    {
+                      "key": "status",
+                      "value": "ALL",
+                      "description": "Filter by status: ALL | ACTIVE | INACTIVE"
+                    }
+                  ]
+                },
+                "description": "Retrieves all configured home page category sections sorted by displayOrder (priority) for the admin table, with search and pagination."
+              },
+              "response": []
+            },
+            {
+              "name": "7.3 Get Single Home Section Details",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/admin/sections/{{sectionId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "admin",
+                    "sections",
+                    "{{sectionId}}"
+                  ]
+                },
+                "description": "Get full configuration and details of a single home category section."
+              },
+              "response": []
+            },
+            {
+              "name": "7.4 Update Home Category Section",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Top Romantic Stories\",\n  \"subtitle\": \"Curated love stories for your evening\",\n  \"displayOrder\": 2,\n  \"maxItems\": 12,\n  \"layout\": \"HORIZONTAL_CARD\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/home/admin/sections/{{sectionId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "admin",
+                    "sections",
+                    "{{sectionId}}"
+                  ]
+                },
+                "description": "Update any section parameters: title, subtitle, slug, sectionType, genreId, dramaIds, layout, displayOrder, maxItems, isActive."
+              },
+              "response": []
+            },
+            {
+              "name": "7.5 Batch Reorder Section Display Priorities",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    {\n      \"id\": \"66e11ad9cf366676cc944b71\",\n      \"displayOrder\": 1\n    },\n    {\n      \"id\": \"66e11ad9cf366676cc944b72\",\n      \"displayOrder\": 2\n    },\n    {\n      \"id\": \"66e11ad9cf366676cc944b73\",\n      \"displayOrder\": 3\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/home/admin/sections/reorder",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "admin",
+                    "sections",
+                    "reorder"
+                  ]
+                },
+                "description": "Allows drag-and-drop priority reordering of home sections in the admin CMS table."
+              },
+              "response": []
+            },
+            {
+              "name": "7.6 Toggle Section Active/Inactive Status",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/admin/sections/{{sectionId}}/toggle",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "admin",
+                    "sections",
+                    "{{sectionId}}",
+                    "toggle"
+                  ]
+                },
+                "description": "Instantly toggles a home section between active (visible on home screen) and inactive (hidden)."
+              },
+              "response": []
+            },
+            {
+              "name": "7.7 Delete Home Category Section",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/admin/sections/{{sectionId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "admin",
+                    "sections",
+                    "{{sectionId}}"
+                  ]
+                },
+                "description": "Permanently deletes a category section from the home page configuration."
+              },
+              "response": []
+            },
+            {
+              "name": "7.8 Set Individual Drama Priority Score",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"priority\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/home/admin/dramas/{{dramaId}}/priority",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "admin",
+                    "dramas",
+                    "{{dramaId}}",
+                    "priority"
+                  ]
+                },
+                "description": "Allows admin to set priority score for any drama series (e.g. 1 for highest placement). Directly influences the \"All Content by Admin Priority\" feed."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "8. Genres & Categories Management",
+          "description": "Admin APIs for full dynamic CRUD management of genres and categories, real-time drama count aggregation, custom color badges, icon selection, and active visibility toggle.",
+          "item": [
+            {
+              "name": "8.1 Get All Genres with Live Metrics (Admin)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/genres/admin",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "genres",
+                    "admin"
+                  ]
+                },
+                "description": "Fetches all genres (both active and hidden) with aggregated dramaCount from Drama collection and high-level KPIs."
+              },
+              "response": []
+            },
+            {
+              "name": "8.2 Create New Genre Category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Sci-Fi & Cyberpunk\",\n  \"slug\": \"scifi-cyberpunk\",\n  \"icon\": \"Sparkles\",\n  \"color\": \"#8B5CF6\",\n  \"displayOrder\": 9,\n  \"isActive\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/genres",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "genres"
+                  ]
+                },
+                "description": "Creates a new genre with custom icon, accent color, and auto-generated slug."
+              },
+              "response": []
+            },
+            {
+              "name": "8.3 Update Existing Genre Category",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Romantic Suspense\",\n  \"icon\": \"Heart\",\n  \"color\": \"#EC4899\",\n  \"isActive\": true,\n  \"displayOrder\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/genres/{{genreId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "genres",
+                    "{{genreId}}"
+                  ]
+                },
+                "description": "Updates genre name, slug, icon, color, or priority display order."
+              },
+              "response": []
+            },
+            {
+              "name": "8.4 Toggle Genre Active Status",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/genres/{{genreId}}/toggle-active",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "genres",
+                    "{{genreId}}",
+                    "toggle-active"
+                  ]
+                },
+                "description": "Instantly switches genre between ACTIVE and HIDDEN in catalog."
+              },
+              "response": []
+            },
+            {
+              "name": "8.5 Batch Reorder Genre Display Priorities",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    {\n      \"id\": \"6ab7a2782b9a6432b168e3e1\",\n      \"displayOrder\": 1\n    },\n    {\n      \"id\": \"6ab7a2782b9a6432b168e3e2\",\n      \"displayOrder\": 2\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/genres/reorder",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "genres",
+                    "reorder"
+                  ]
+                },
+                "description": "Batch updates displayOrder priority ranks for multiple categories."
+              },
+              "response": []
+            },
+            {
+              "name": "8.6 Delete Genre (Safe Unlink)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/genres/{{genreId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "genres",
+                    "{{genreId}}"
+                  ]
+                },
+                "description": "Permanently deletes genre and safely unlinks its reference from all drama series."
+              },
+              "response": []
+            },
+            {
+              "name": "8.7 Toggle Genre Trending Status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/genres/{{genreId}}/toggle-trending",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "genres",
+                    "{{genreId}}",
+                    "toggle-trending"
+                  ]
+                },
+                "description": "Quick toggle whether this genre category is promoted as Trending on the mobile app home screen."
+              },
+              "response": []
+            },
+            {
+              "name": "8.8 Toggle Genre Popular Status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/genres/{{genreId}}/toggle-popular",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "genres",
+                    "{{genreId}}",
+                    "toggle-popular"
+                  ]
+                },
+                "description": "Quick toggle whether this genre category is included in the Popular Genres tray on mobile screens."
               },
               "response": []
             }

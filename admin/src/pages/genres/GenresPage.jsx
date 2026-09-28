@@ -66,7 +66,7 @@ const PRESET_COLORS = [
   '#F97316', // Orange
 ];
 
-export default function GenresPage() {
+export default function GenresPage({ onNavigate }) {
   const [genres, setGenres] = useState([]);
   const [serverStats, setServerStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -458,6 +458,17 @@ export default function GenresPage() {
               </button>
             )}
           </div>
+
+          {/* Category Priority CTA */}
+          <button
+            type="button"
+            onClick={() => onNavigate && onNavigate('category_priority')}
+            className="py-2.5 px-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#161B16] hover:dark:bg-white/[0.08] text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-white/10 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 cursor-pointer"
+            title="Manage Homepage Display Priority Ranks"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
+            <span>Category Priority</span>
+          </button>
 
           {/* Add Genre Primary Action Button */}
           <button

@@ -22,6 +22,7 @@ import PromosPage from './pages/promos/PromosPage';
 import LegalPage from './pages/legal/LegalPage';
 import AppNotificationsPage from './pages/notifications/AppNotificationsPage';
 import BannersPage from './pages/banners/BannersPage';
+import CategoryPriorityPage from './pages/genres/CategoryPriorityPage';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -125,6 +126,11 @@ export default function App() {
         return {
           title: "Genres",
           subtitle: "Manage categories and tags shown to catalog viewers."
+        };
+      case 'category_priority':
+        return {
+          title: "Homepage Feed & Section Priority",
+          subtitle: "Decide the exact rank priority (1, 2, 3...) for homepage sections, trending, popular genres, and category trays."
         };
       case 'admob':
         return {
@@ -260,6 +266,10 @@ export default function App() {
 
             {activeTab === 'genres' && (
               <GenresPage onNavigate={setActiveTab} />
+            )}
+
+            {activeTab === 'category_priority' && (
+              <CategoryPriorityPage onNavigate={setActiveTab} />
             )}
 
             {activeTab === 'users' && (

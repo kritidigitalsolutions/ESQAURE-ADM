@@ -81,11 +81,39 @@ export const genreService = {
   },
 
   /**
+   * Quick toggle trending status
+   */
+  async toggleTrending(id) {
+    return await request(`/${id}/toggle-trending`, {
+      method: 'PATCH'
+    });
+  },
+
+  /**
+   * Quick toggle popular genres status
+   */
+  async togglePopular(id) {
+    return await request(`/${id}/toggle-popular`, {
+      method: 'PATCH'
+    });
+  },
+
+  /**
    * Delete genre permanently (safely unlinks from dramas)
    */
   async deleteGenre(id) {
     return await request(`/${id}`, {
       method: 'DELETE'
+    });
+  },
+
+  /**
+   * Batch reorder genre display orders / priority ranks
+   */
+  async reorderGenres(items) {
+    return await request('/reorder', {
+      method: 'PATCH',
+      body: JSON.stringify({ items })
     });
   }
 };

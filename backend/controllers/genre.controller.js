@@ -53,6 +53,8 @@ export class GenreController {
           color: g.color || '#F59E0B',
           displayOrder: g.displayOrder || 0,
           isActive: Boolean(g.isActive),
+          isTrending: Boolean(g.isTrending),
+          isPopular: Boolean(g.isPopular),
           dramaCount: countMap[idStr] || 0,
           createdAt: g.createdAt,
           updatedAt: g.updatedAt
@@ -62,6 +64,8 @@ export class GenreController {
       const totalGenres = formatted.length;
       const activeGenres = formatted.filter((g) => g.isActive).length;
       const hiddenGenres = totalGenres - activeGenres;
+      const trendingGenres = formatted.filter((g) => g.isTrending).length;
+      const popularGenres = formatted.filter((g) => g.isPopular).length;
       const totalSeries = Object.values(countMap).reduce((a, b) => a + b, 0);
 
       return ApiResponse.success(res, 'Admin genres fetched successfully', {
@@ -70,6 +74,8 @@ export class GenreController {
           totalGenres,
           activeGenres,
           hiddenGenres,
+          trendingGenres,
+          popularGenres,
           totalSeries
         }
       });
@@ -79,12 +85,16 @@ export class GenreController {
   }
 
   /**
-   * 2. Public / Mobile App: Get Active Genres
-   * GET /api/v1/genres
+   * 2. Public / Mobile App: Get Active Genres (with optional trending / popular filters)
+   * GET /api/v1/genres?trending=true&popular=true
    */
   static async getActiveGenres(req, res, next) {
     try {
-      const genres = await Genre.find({ isActive: true })
+      const query = { isActive: true };
+      if (req?.query?.trending === 'true') query.isTrending = true;
+      if (req?.query?.popular === 'true') query.isPopular = true;
+
+      const genres = await Genre.find(query)
         .sort({ displayOrder: 1, name: 1 })
         .lean();
 
@@ -113,6 +123,9 @@ export class GenreController {
           imageUrl: g.imageUrl || '',
           color: g.color || '#F59E0B',
           displayOrder: g.displayOrder || 0,
+          isActive: true,
+          isTrending: Boolean(g.isTrending),
+          isPopular: Boolean(g.isPopular),
           dramaCount: countMap[idStr] || 0
         };
       });
@@ -176,7 +189,7 @@ export class GenreController {
    */
   static async createGenre(req, res, next) {
     try {
-      const { name, slug, icon = 'Heart', color = '#F59E0B', isActive = true, displayOrder } = req.body;
+      const { name, slug, icon = 'Heart', color = '#F59E0B', isActive = true, isTrending = false, isPopular = false, displayOrder } = req.body;
 
       if (!name || !name.trim()) {
         throw new AppError('Genre name is required', 400, 'VALIDATION_ERROR');
@@ -209,6 +222,8 @@ export class GenreController {
         icon: icon || 'Tags',
         color: color || '#F59E0B',
         isActive: Boolean(isActive),
+        isTrending: Boolean(isTrending),
+        isPopular: Boolean(isPopular),
         displayOrder: Number(order) || 0
       });
 
@@ -224,6 +239,8 @@ export class GenreController {
             icon: newGenre.icon,
             color: newGenre.color,
             isActive: newGenre.isActive,
+            isTrending: newGenre.isTrending,
+            isPopular: newGenre.isPopular,
             displayOrder: newGenre.displayOrder,
             dramaCount: 0
           }
@@ -242,7 +259,7 @@ export class GenreController {
   static async updateGenre(req, res, next) {
     try {
       const { id } = req.params;
-      const { name, slug, icon, color, isActive, displayOrder } = req.body;
+      const { name, slug, icon, color, isActive, isTrending, isPopular, displayOrder } = req.body;
 
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw new AppError('Invalid Genre ID', 400, 'INVALID_ID');
@@ -288,6 +305,8 @@ export class GenreController {
       if (icon !== undefined) genre.icon = icon;
       if (color !== undefined) genre.color = color;
       if (isActive !== undefined) genre.isActive = Boolean(isActive);
+      if (isTrending !== undefined) genre.isTrending = Boolean(isTrending);
+      if (isPopular !== undefined) genre.isPopular = Boolean(isPopular);
       if (displayOrder !== undefined) genre.displayOrder = Number(displayOrder);
 
       await genre.save();
@@ -303,6 +322,8 @@ export class GenreController {
           icon: genre.icon,
           color: genre.color,
           isActive: genre.isActive,
+          isTrending: Boolean(genre.isTrending),
+          isPopular: Boolean(genre.isPopular),
           displayOrder: genre.displayOrder,
           dramaCount
         }
@@ -346,9 +367,79 @@ export class GenreController {
             icon: genre.icon,
             color: genre.color,
             isActive: genre.isActive,
+            isTrending: Boolean(genre.isTrending),
+            isPopular: Boolean(genre.isPopular),
             displayOrder: genre.displayOrder,
             dramaCount
           }
+        }
+      );
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * 6.1 Admin: Toggle Trending Status
+   * PATCH /api/v1/genres/:id/toggle-trending
+   */
+  static async toggleTrending(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new AppError('Invalid Genre ID', 400, 'INVALID_ID');
+      }
+
+      const genre = await Genre.findById(id);
+      if (!genre) {
+        throw new AppError('Genre not found', 404, 'NOT_FOUND');
+      }
+
+      genre.isTrending = !genre.isTrending;
+      await genre.save();
+
+      return ApiResponse.success(
+        res,
+        `Genre is now ${genre.isTrending ? 'marked as Trending' : 'removed from Trending'}`,
+        {
+          id: genre._id.toString(),
+          name: genre.name,
+          isTrending: genre.isTrending
+        }
+      );
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * 6.2 Admin: Toggle Popular Status
+   * PATCH /api/v1/genres/:id/toggle-popular
+   */
+  static async togglePopular(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new AppError('Invalid Genre ID', 400, 'INVALID_ID');
+      }
+
+      const genre = await Genre.findById(id);
+      if (!genre) {
+        throw new AppError('Genre not found', 404, 'NOT_FOUND');
+      }
+
+      genre.isPopular = !genre.isPopular;
+      await genre.save();
+
+      return ApiResponse.success(
+        res,
+        `Genre is now ${genre.isPopular ? 'marked as Popular' : 'removed from Popular'}`,
+        {
+          id: genre._id.toString(),
+          name: genre.name,
+          isPopular: genre.isPopular
         }
       );
     } catch (error) {
@@ -384,6 +475,40 @@ export class GenreController {
       return ApiResponse.success(res, `Genre "${genre.name}" deleted successfully`, {
         deletedId: id
       });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * 8. Admin: Batch reorder genre display orders / priority ranks
+   * PATCH /api/v1/genres/reorder
+   */
+  static async reorderGenres(req, res, next) {
+    try {
+      const { items } = req.body; // [{ id: "...", displayOrder: 1, isTrending: true, isPopular: true }]
+      if (!Array.isArray(items)) {
+        throw new AppError('Items array is required for reordering.', 400, 'VALIDATION_ERROR');
+      }
+
+      const bulkOps = items.map((item) => {
+        const updateFields = {};
+        if (item.displayOrder !== undefined) updateFields.displayOrder = Number(item.displayOrder);
+        if (item.isTrending !== undefined) updateFields.isTrending = Boolean(item.isTrending);
+        if (item.isPopular !== undefined) updateFields.isPopular = Boolean(item.isPopular);
+        if (item.isActive !== undefined) updateFields.isActive = Boolean(item.isActive);
+
+        return {
+          updateOne: {
+            filter: { _id: item.id },
+            update: { $set: updateFields }
+          }
+        };
+      });
+
+      await Genre.bulkWrite(bulkOps);
+
+      return ApiResponse.success(res, 'Genre display priorities updated successfully');
     } catch (error) {
       return next(error);
     }

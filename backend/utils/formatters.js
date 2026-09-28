@@ -1,38 +1,12 @@
-import os from 'os';
-
 /**
  * Common data and text formatting helpers for E² Stories OTT
  */
 
-let cachedLocalIp = null;
-
 /**
- * Automatically get machine's active LAN IPv4 address (e.g. 192.168.1.25)
- * so mobile devices / physical phones on the network can access uploaded images/videos.
- */
-export const getLocalNetworkIp = () => {
-  if (cachedLocalIp) return cachedLocalIp;
-  try {
-    const interfaces = os.networkInterfaces();
-    for (const name of Object.keys(interfaces)) {
-      for (const iface of interfaces[name]) {
-        if (iface.family === 'IPv4' && !iface.internal) {
-          cachedLocalIp = iface.address;
-          return cachedLocalIp;
-        }
-      }
-    }
-  } catch (e) {
-    // fallback
-  }
-  return 'localhost';
-};
-
-/**
- * Resolve media URL dynamically to handle:
- * 1. Mobile devices calling from physical phones or emulators (replacing localhost:5001 with active server host)
- * 2. Relative upload paths like /uploads/images/...
- * 3. CDN / External URLs (kept as-is)
+ * Resolve media URL dynamically:
+ * 1. Prepend active request protocol & host to /uploads/ if Express req is present
+ * 2. Return relative path /uploads/... if req is null
+ * 3. Keep CDN / External URLs as-is
  */
 export const resolveMediaUrl = (url, req = null) => {
   if (!url || typeof url !== 'string') return '';
@@ -40,19 +14,27 @@ export const resolveMediaUrl = (url, req = null) => {
   if (!trimmed) return '';
 
   const request = req && typeof req === 'object' && req.get ? req : null;
-  const protocol = request ? (request.headers['x-forwarded-proto'] || request.protocol || 'http') : 'http';
-  const host = request ? request.get('host') : `${getLocalNetworkIp()}:5001`;
-  const currentBase = `${protocol}://${host}`;
 
-  // If URL contains localhost:5001 or 127.0.0.1:5001, dynamically rewrite to current reachable base
-  if (trimmed.includes('localhost:5001') || trimmed.includes('127.0.0.1:5001')) {
-    return trimmed.replace(/https?:\/\/(localhost|127\.0\.0\.1):5001/, currentBase);
+  // If URL contains /uploads/ anywhere
+  if (trimmed.includes('/uploads/')) {
+    const uploadPath = trimmed.substring(trimmed.indexOf('/uploads/'));
+    if (request) {
+      const protocol = request.headers['x-forwarded-proto'] || request.protocol || 'http';
+      const host = request.get('host');
+      return `${protocol}://${host}${uploadPath}`;
+    }
+    return uploadPath;
   }
 
-  // If URL is a relative path starting with /uploads or uploads
-  if (trimmed.startsWith('/uploads/') || trimmed.startsWith('uploads/')) {
-    const cleanPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
-    return `${currentBase}${cleanPath}`;
+  // If URL is relative without leading slash
+  if (trimmed.startsWith('uploads/')) {
+    const uploadPath = `/${trimmed}`;
+    if (request) {
+      const protocol = request.headers['x-forwarded-proto'] || request.protocol || 'http';
+      const host = request.get('host');
+      return `${protocol}://${host}${uploadPath}`;
+    }
+    return uploadPath;
   }
 
   return trimmed;

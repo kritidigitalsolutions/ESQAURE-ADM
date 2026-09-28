@@ -8,6 +8,7 @@ import { ApiResponse } from '../utils/apiResponse.js';
 import { AppError } from '../utils/appError.js';
 import { ERROR_CODES } from '../constants/errorCodes.js';
 import { syncAndCleanSubscriptionData } from '../utils/syncSubscriptionData.js';
+import { resolveMediaUrl } from '../utils/formatters.js';
 
 export class UserController {
   /**
@@ -100,7 +101,7 @@ export class UserController {
             status: u.status || 'ACTIVE',
             totalWatchTime: u.totalWatchTime || '0.0 hrs',
             promoCode: u.promoCode || u.voucherCode || null,
-            avatarUrl: u.avatarUrl || '',
+            avatarUrl: resolveMediaUrl(u.avatarUrl || '', req),
             joinedAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '2026',
             lastActive: 'Recently'
           };

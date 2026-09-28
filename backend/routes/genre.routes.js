@@ -40,6 +40,24 @@ router.patch('/:id', GenreController.updateGenre);
 router.patch('/:id/toggle-active', GenreController.toggleActive);
 
 /**
+ * PATCH /api/v1/genres/:id/toggle-trending
+ * Admin: Quick toggle trending status
+ */
+router.patch('/:id/toggle-trending', GenreController.toggleTrending);
+
+/**
+ * PATCH /api/v1/genres/:id/toggle-popular
+ * Admin: Quick toggle popular genres status
+ */
+router.patch('/:id/toggle-popular', GenreController.togglePopular);
+
+/**
+ * PATCH /api/v1/genres/reorder
+ * Admin: Batch reorder genre display orders / priority ranks
+ */
+router.patch('/reorder', GenreController.reorderGenres);
+
+/**
  * DELETE /api/v1/genres/:id
  * Admin: Delete genre permanently (safely unlinks from dramas)
  */

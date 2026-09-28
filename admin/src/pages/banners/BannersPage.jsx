@@ -91,8 +91,7 @@ export default function BannersPage({ onNavigate }) {
   // Video trailer preview modal
   const [previewVideo, setPreviewVideo] = useState(null);
 
-  // Active carousel simulator slide index
-  const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
+
 
   // Fetch live banners & dramas
   const fetchData = async () => {
@@ -376,141 +375,7 @@ export default function BannersPage({ onNavigate }) {
   return (
     <div className="space-y-6 font-urbanist selection:bg-[#FEF08A] selection:text-black pb-12">
 
-      {/* 2. Mobile App Hero Carousel Simulator Card (Live Preview) */}
-      {banners.filter((b) => b.isActive).length > 0 && (
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 shadow-nodus">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-            <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
-                <Tv className="w-4 h-4 stroke-[2.2]" />
-              </div>
-              <div>
-                <h3 className="font-extrabold text-slate-950 dark:text-white text-sm">
-                  Mobile App Hero Carousel Preview
-                </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Live interactive preview of how the top banner carousel displays on mobile phone screens
-                </p>
-              </div>
-            </div>
 
-            <div className="flex items-center space-x-2">
-              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                Slide {activeCarouselIndex + 1} of {banners.filter((b) => b.isActive).length}
-              </span>
-              <div className="flex items-center space-x-1">
-                {banners
-                  .filter((b) => b.isActive)
-                  .map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setActiveCarouselIndex(idx)}
-                      className={`h-2 rounded-full transition-all cursor-pointer ${
-                        activeCarouselIndex === idx
-                          ? 'w-6 bg-[#FEF08A]'
-                          : 'w-2 bg-slate-300 dark:bg-white/20 hover:bg-slate-400'
-                      }`}
-                      title={`Go to slide ${idx + 1}`}
-                    />
-                  ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Active Carousel Slide Card */}
-          {(() => {
-            const activeList = banners.filter((b) => b.isActive);
-            const current = activeList[activeCarouselIndex] || activeList[0];
-            if (!current) return null;
-
-            return (
-              <div className="relative rounded-2xl overflow-hidden aspect-[21/9] sm:aspect-[24/9] md:aspect-[28/9] bg-slate-950 border border-slate-200/60 dark:border-white/10 group shadow-md">
-                <img
-                  src={current.bannerUrl}
-                  alt={current.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-
-                {/* Dark Gradient Overlay for Cinematic Depth */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-4 sm:p-6 md:p-8">
-                  <div className="max-w-2xl space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#FEF08A] text-slate-950 shadow-xs">
-                        {current.badge || 'FEATURED'}
-                      </span>
-                      {current.linkType === 'DRAMA' && current.drama && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 backdrop-blur-xs text-white">
-                          Series • Ep {current.episodeNumber || 1}
-                        </span>
-                      )}
-                    </div>
-
-                    <h2 className="text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight drop-shadow-md">
-                      {current.title}
-                    </h2>
-
-                    {current.subtitle && (
-                      <p className="text-xs sm:text-sm text-slate-200 line-clamp-2 max-w-xl font-medium drop-shadow-sm">
-                        {current.subtitle}
-                      </p>
-                    )}
-
-                    <div className="flex items-center space-x-3 pt-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (current.trailerUrl) {
-                            setPreviewVideo({ title: current.title, url: current.trailerUrl });
-                          }
-                        }}
-                        className="px-4 py-2 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-black text-xs flex items-center space-x-1.5 shadow-md transition-all cursor-pointer"
-                      >
-                        <Play className="w-3.5 h-3.5 fill-current" />
-                        <span>{current.trailerUrl ? 'Watch Teaser' : 'Watch Now'}</span>
-                      </button>
-
-                      {current.trailerUrl && (
-                        <span className="text-[11px] text-emerald-400 font-bold flex items-center space-x-1 bg-black/60 px-2.5 py-1.5 rounded-xl border border-emerald-500/30">
-                          <CheckCircle2 className="w-3 h-3" />
-                          <span>Video Teaser Attached</span>
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Next / Prev slide overlay controls */}
-                {activeList.length > 1 && (
-                  <div className="absolute right-4 bottom-4 flex items-center space-x-1.5 z-10">
-                    <button
-                      onClick={() =>
-                        setActiveCarouselIndex((prev) =>
-                          prev === 0 ? activeList.length - 1 : prev - 1
-                        )
-                      }
-                      className="p-2 rounded-xl bg-black/60 hover:bg-black/80 text-white border border-white/20 backdrop-blur-xs cursor-pointer transition-all"
-                      title="Previous Slide"
-                    >
-                      <ChevronUp className="w-4 h-4 -rotate-90" />
-                    </button>
-                    <button
-                      onClick={() =>
-                        setActiveCarouselIndex((prev) =>
-                          prev === activeList.length - 1 ? 0 : prev + 1
-                        )
-                      }
-                      className="p-2 rounded-xl bg-black/60 hover:bg-black/80 text-white border border-white/20 backdrop-blur-xs cursor-pointer transition-all"
-                      title="Next Slide"
-                    >
-                      <ChevronDown className="w-4 h-4 -rotate-90" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-        </div>
-      )}
 
       {/* 3. Control & Filter Bar */}
       <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-3">

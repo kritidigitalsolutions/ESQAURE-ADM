@@ -68,7 +68,7 @@ export class HomeController {
             slug: drama.slug || '',
             tagline: b.subtitle || drama.synopsis?.slice(0, 120) || '',
             synopsis: b.subtitle || drama.synopsis || '',
-            bannerUrl: resolveMediaUrl(b.bannerUrl || drama.bannerUrl || drama.posterUrl, req),
+            bannerUrl: resolveMediaUrl(b.bannerUrl || drama.bannerUrl || '', req),
             posterUrl: resolveMediaUrl(b.posterUrl || drama.posterUrl || '', req),
             trailerUrl: resolveMediaUrl(b.trailerUrl || drama.trailerUrl || '', req),
             badge: b.badge || 'FEATURED',
@@ -150,8 +150,8 @@ export class HomeController {
           slug: d.slug,
           tagline: d.synopsis ? d.synopsis.slice(0, 120) + (d.synopsis.length > 120 ? '...' : '') : '',
           synopsis: d.synopsis || '',
-          bannerUrl: resolveMediaUrl(d.bannerUrl || d.posterUrl, req),
-          posterUrl: resolveMediaUrl(d.posterUrl, req),
+          bannerUrl: resolveMediaUrl(d.bannerUrl || '', req),
+          posterUrl: resolveMediaUrl(d.posterUrl || '', req),
           trailerUrl: resolveMediaUrl(d.trailerUrl || '', req),
           badge,
           genres: genreNames.length > 0 ? genreNames : ['Drama'],
@@ -636,6 +636,8 @@ export class HomeController {
             iconUrl: genre.iconUrl || '',
             imageUrl: genre.imageUrl || '',
             displayOrder: genre.displayOrder || 0,
+            isTrending: Boolean(genre.isTrending),
+            isPopular: Boolean(genre.isPopular),
             dramasCount: dramaCount,
             ...(includeDramas && { dramas })
           };
@@ -874,7 +876,18 @@ export class HomeController {
               isTrending: true
             })
               .populate('genres', 'name slug')
-              .sort({ trendingRank: 1, viewsCount: -1 })
+              .sort({ viewsCount: -1, rating: -1, priority: 1, createdAt: -1 })
+              .limit(maxItems);
+            dramas = rawDramas.map((d, idx) => ({
+              ...formatDramaCard(d, req),
+              trendingRank: idx + 1
+            }));
+          } else if (section.sectionType === 'POPULAR' || section.sectionType === 'POPULAR_GENRES') {
+            const rawDramas = await Drama.find({
+              status: 'PUBLISHED'
+            })
+              .populate('genres', 'name slug')
+              .sort({ viewsCount: -1, rating: -1, createdAt: -1 })
               .limit(maxItems);
             dramas = rawDramas.map((d) => formatDramaCard(d, req));
           } else if (section.sectionType === 'PRIORITY_CONTENT') {
@@ -949,7 +962,9 @@ export class HomeController {
         dramaSort = { releaseDate: -1, createdAt: -1 };
       } else if (section.sectionType === 'TRENDING') {
         dramaQuery.isTrending = true;
-        dramaSort = { trendingRank: 1, viewsCount: -1 };
+        dramaSort = { viewsCount: -1, rating: -1, priority: 1, createdAt: -1 };
+      } else if (section.sectionType === 'POPULAR' || section.sectionType === 'POPULAR_GENRES') {
+        dramaSort = { viewsCount: -1, rating: -1, createdAt: -1 };
       }
 
       const total = await Drama.countDocuments(dramaQuery);
@@ -961,6 +976,11 @@ export class HomeController {
         .skip(skip)
         .limit(limit);
 
+      const formattedDramas = dramas.map((d, idx) => ({
+        ...formatDramaCard(d, req),
+        ...(section.sectionType === 'TRENDING' ? { trendingRank: skip + idx + 1 } : {})
+      }));
+
       return ApiResponse.success(res, `Content for section "${section.title}" retrieved`, {
         section: {
           id: section._id.toString(),
@@ -970,7 +990,7 @@ export class HomeController {
           sectionType: section.sectionType,
           layout: section.layout
         },
-        dramas: dramas.map((d) => formatDramaCard(d, req)),
+        dramas: formattedDramas,
         pagination
       });
     } catch (error) {
@@ -1040,7 +1060,7 @@ export class HomeController {
       const topCategories = await Genre.find({ isActive: true })
         .sort({ displayOrder: 1, name: 1 })
         .limit(10)
-        .select('name slug icon iconUrl imageUrl displayOrder');
+        .select('name slug icon iconUrl imageUrl displayOrder isTrending isPopular');
 
       // 4. Admin Prioritized Content Tray
       const prioritizedDramas = await Drama.find({ status: 'PUBLISHED' })
@@ -1194,13 +1214,46 @@ export class HomeController {
       const pagination = getPaginationMeta(page, limit, total);
 
       const sections = await HomeSection.find(query)
-        .populate('genreId', 'name slug')
+        .populate('genreId', 'name slug icon color')
         .sort({ displayOrder: 1, createdAt: -1 })
         .skip(skip)
         .limit(limit);
 
+      const populated = await Promise.all(
+        sections.map(async (sec) => {
+          let dramaCount = 0;
+          if (sec.sectionType === 'GENRE' && sec.genreId) {
+            dramaCount = await Drama.countDocuments({ status: 'PUBLISHED', genres: sec.genreId._id });
+          } else if (sec.sectionType === 'TRENDING') {
+            dramaCount = await Drama.countDocuments({ status: 'PUBLISHED', isTrending: true });
+          } else if (sec.sectionType === 'POPULAR' || sec.sectionType === 'POPULAR_GENRES') {
+            dramaCount = await Drama.countDocuments({ status: 'PUBLISHED' });
+          } else if (sec.sectionType === 'NEW_RELEASES') {
+            dramaCount = await Drama.countDocuments({ status: 'PUBLISHED', isNewRelease: true });
+          } else if (sec.sectionType === 'CUSTOM_CURATED') {
+            dramaCount = sec.dramaIds?.length || 0;
+          }
+
+          return {
+            id: sec._id.toString(),
+            _id: sec._id.toString(),
+            title: sec.title,
+            slug: sec.slug,
+            subtitle: sec.subtitle || '',
+            sectionType: sec.sectionType,
+            genreId: sec.genreId,
+            displayOrder: sec.displayOrder || 0,
+            isActive: Boolean(sec.isActive),
+            maxItems: sec.maxItems || 10,
+            dramaCount,
+            createdAt: sec.createdAt,
+            updatedAt: sec.updatedAt
+          };
+        })
+      );
+
       return ApiResponse.success(res, 'Home category sections retrieved for admin', {
-        sections,
+        sections: populated,
         pagination
       });
     } catch (error) {
@@ -1216,7 +1269,7 @@ export class HomeController {
     try {
       const { id } = req.params;
       const section = await HomeSection.findById(id)
-        .populate('genreId', 'name slug')
+        .populate('genreId', 'name slug icon color')
         .populate('dramaIds', 'title slug posterUrl viewsCount');
 
       if (!section) {
@@ -1277,14 +1330,18 @@ export class HomeController {
    */
   static async reorderSections(req, res, next) {
     try {
-      const { items } = req.body; // [{ id: "...", displayOrder: 1 }]
+      const { items } = req.body; // [{ id: "...", displayOrder: 1, isActive: true }]
 
-      const bulkOps = items.map((item) => ({
-        updateOne: {
-          filter: { _id: item.id },
-          update: { $set: { displayOrder: Number(item.displayOrder) } }
-        }
-      }));
+      const bulkOps = items.map((item) => {
+        const updateFields = { displayOrder: Number(item.displayOrder) };
+        if (item.isActive !== undefined) updateFields.isActive = Boolean(item.isActive);
+        return {
+          updateOne: {
+            filter: { _id: item.id },
+            update: { $set: updateFields }
+          }
+        };
+      });
 
       await HomeSection.bulkWrite(bulkOps);
 

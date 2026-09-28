@@ -265,7 +265,7 @@ export const seedDefaultDramas = async () => {
     if (sectionCount === 0) {
       const defaultSections = [
         {
-          title: '🔥 Trending This Week',
+          title: 'Trending This Week',
           slug: 'trending-this-week',
           subtitle: 'The most-watched vertical micro-dramas',
           sectionType: 'TRENDING',
@@ -276,7 +276,7 @@ export const seedDefaultDramas = async () => {
           isActive: true
         },
         {
-          title: '✨ New Releases',
+          title: 'New Releases',
           slug: 'new-releases',
           subtitle: 'Fresh episodes added daily',
           sectionType: 'NEW_RELEASES',
@@ -287,7 +287,7 @@ export const seedDefaultDramas = async () => {
           isActive: true
         },
         {
-          title: '❤️ Romantic Escapes',
+          title: 'Romantic Escapes',
           slug: 'romantic-escapes',
           subtitle: 'Love, passion, and high society secrets',
           sectionType: 'GENRE',
@@ -299,7 +299,7 @@ export const seedDefaultDramas = async () => {
           isActive: true
         },
         {
-          title: '⚡ Thriller & Suspense',
+          title: 'Thriller & Suspense',
           slug: 'thriller-suspense',
           subtitle: 'Edge-of-your-seat gripping twists',
           sectionType: 'GENRE',

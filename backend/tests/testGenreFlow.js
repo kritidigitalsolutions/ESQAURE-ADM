@@ -87,9 +87,25 @@ const runTests = async () => {
     if (nextErr) throw nextErr;
     console.log('✅ Toggled Genre isActive:', res4.data?.data?.genre?.isActive);
 
+    // 4.1 Test Toggle Trending Status
+    console.log('\n--- 4.1 Testing GenreController.toggleTrending ---');
+    const reqTrending = { params: { id: createdTestGenreId } };
+    const resTrending = mockRes();
+    await GenreController.toggleTrending(reqTrending, resTrending, (err) => { nextErr = err; });
+    if (nextErr) throw nextErr;
+    console.log('✅ Toggled Genre isTrending:', resTrending.data?.data?.isTrending);
+
+    // 4.2 Test Toggle Popular Status
+    console.log('\n--- 4.2 Testing GenreController.togglePopular ---');
+    const reqPopular = { params: { id: createdTestGenreId } };
+    const resPopular = mockRes();
+    await GenreController.togglePopular(reqPopular, resPopular, (err) => { nextErr = err; });
+    if (nextErr) throw nextErr;
+    console.log('✅ Toggled Genre isPopular:', resPopular.data?.data?.isPopular);
+
     // 5. Test Public Get Active Genres
     console.log('\n--- 5. Testing GenreController.getActiveGenres ---');
-    const req5 = {};
+    const req5 = { query: {} };
     const res5 = mockRes();
     await GenreController.getActiveGenres(req5, res5, (err) => { nextErr = err; });
     if (nextErr) throw nextErr;

@@ -53,7 +53,7 @@ export const homeValidation = {
     subtitle: Joi.string().trim().allow('', null).default(''),
     slug: Joi.string().trim().lowercase().allow('', null),
     sectionType: Joi.string()
-      .valid('GENRE', 'CUSTOM_CURATED', 'NEW_RELEASES', 'TRENDING', 'PRIORITY_CONTENT')
+      .valid('GENRE', 'CUSTOM_CURATED', 'NEW_RELEASES', 'TRENDING', 'PRIORITY_CONTENT', 'POPULAR', 'POPULAR_GENRES')
       .default('GENRE'),
     genreId: Joi.string().trim().allow('', null),
     dramaIds: Joi.array().items(Joi.string().trim()).default([]),
@@ -72,7 +72,7 @@ export const homeValidation = {
     subtitle: Joi.string().trim().allow('', null),
     slug: Joi.string().trim().lowercase(),
     sectionType: Joi.string()
-      .valid('GENRE', 'CUSTOM_CURATED', 'NEW_RELEASES', 'TRENDING', 'PRIORITY_CONTENT'),
+      .valid('GENRE', 'CUSTOM_CURATED', 'NEW_RELEASES', 'TRENDING', 'PRIORITY_CONTENT', 'POPULAR', 'POPULAR_GENRES'),
     genreId: Joi.string().trim().allow('', null),
     dramaIds: Joi.array().items(Joi.string().trim()),
     layout: Joi.string()
@@ -89,7 +89,8 @@ export const homeValidation = {
       .items(
         Joi.object({
           id: Joi.string().required(),
-          displayOrder: Joi.number().integer().required()
+          displayOrder: Joi.number().integer().required(),
+          isActive: Joi.boolean().optional()
         })
       )
       .min(1)

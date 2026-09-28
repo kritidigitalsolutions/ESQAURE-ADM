@@ -39,6 +39,16 @@ const GenreSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
       index: true
+    },
+    isTrending: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
+    isPopular: {
+      type: Boolean,
+      default: false,
+      index: true
     }
   },
   {

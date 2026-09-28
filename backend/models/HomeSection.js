@@ -21,7 +21,7 @@ const HomeSectionSchema = new mongoose.Schema(
     },
     sectionType: {
       type: String,
-      enum: ['GENRE', 'CUSTOM_CURATED', 'NEW_RELEASES', 'TRENDING', 'PRIORITY_CONTENT'],
+      enum: ['GENRE', 'CUSTOM_CURATED', 'NEW_RELEASES', 'TRENDING', 'PRIORITY_CONTENT', 'POPULAR', 'POPULAR_GENRES'],
       default: 'GENRE',
       index: true
     },

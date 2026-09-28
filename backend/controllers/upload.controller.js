@@ -6,8 +6,8 @@ import { ERROR_CODES } from '../constants/errorCodes.js';
  */
 const formatFileResponse = (req, file) => {
   const subfolder = file.uploadSubfolder || 'documents';
-  const protocol = req.protocol;
-  const host = req.get('host');
+  const protocol = req ? (req.headers['x-forwarded-proto'] || req.protocol || 'http') : 'http';
+  const host = req ? req.get('host') : 'localhost:5001';
   const publicUrl = `${protocol}://${host}/uploads/${subfolder}/${file.filename}`;
 
   return {
@@ -17,7 +17,7 @@ const formatFileResponse = (req, file) => {
     size: file.size,
     folder: subfolder,
     url: publicUrl,
-    path: `uploads/${subfolder}/${file.filename}`
+    path: `/uploads/${subfolder}/${file.filename}`
   };
 };
 

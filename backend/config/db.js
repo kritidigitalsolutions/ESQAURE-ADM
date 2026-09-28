@@ -21,8 +21,8 @@ export const connectDB = async () => {
     console.log(`[Database] MongoDB Connected: ${conn.connection.host}/${conn.connection.name}`);
   } catch (error) {
     console.error(`[Database Error] MongoDB connection failed: ${error.message}`);
-    // Do not crash the entire process immediately if DB is temporarily down in dev
-    if (env.NODE_ENV === 'production') {
+    // Do not crash the process abruptly if running in serverless environment (e.g. Vercel)
+    if (env.NODE_ENV === 'production' && !process.env.VERCEL) {
       process.exit(1);
     }
   }
