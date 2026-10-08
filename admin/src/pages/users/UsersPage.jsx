@@ -662,7 +662,7 @@ export default function UsersPage({ onNavigate }) {
   };
 
   return (
-    <div className="space-y-6 font-urbanist">
+    <div className="space-y-3.5 font-urbanist">
 
       {/* Floating Action Toast Notification with Smooth Slide Transition */}
       {createPortal(
@@ -682,7 +682,7 @@ export default function UsersPage({ onNavigate }) {
       )}
 
       {/* 4 Core OTT User KPI Metric Cards (Dashboard Aesthetic) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Metric 1: Total Registered Base */}
         <KpiStatCard
           icon={Users}
@@ -732,7 +732,7 @@ export default function UsersPage({ onNavigate }) {
       </div>
 
       {/* Unified Controls Toolbar: Filter Pills (Left) & Search + Export (Right) */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 shadow-nodus">
+      <div className="bg-white dark:bg-[#121612] rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-nodus">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           
           {/* Segmented Sliding Toggle Track (Compact & Sleek) */}

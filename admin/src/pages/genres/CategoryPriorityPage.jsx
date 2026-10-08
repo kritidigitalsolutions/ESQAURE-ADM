@@ -249,13 +249,13 @@ export default function CategoryPriorityPage({ onNavigate }) {
   };
 
   return (
-    <div className="space-y-6 font-urbanist selection:bg-[#FEF08A] selection:text-black pb-14">
+    <div className="space-y-3.5 font-urbanist selection:bg-[#FEF08A] selection:text-black pb-8">
 
       {/* Floating Action Toast Notification */}
       {toast && (
-        <div className="fixed top-6 right-6 z-50 animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="fixed top-5 right-5 z-50 animate-in fade-in slide-in-from-top-4 duration-200">
           <div
-            className={`flex items-center space-x-3 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold ${
+            className={`flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl shadow-2xl border text-xs font-bold ${
               toast.type === 'error'
                 ? 'bg-rose-950/90 text-rose-200 border-rose-800 backdrop-blur-md'
                 : toast.type === 'info'
@@ -280,52 +280,52 @@ export default function CategoryPriorityPage({ onNavigate }) {
       )}
 
       {/* Top Header Card with Save Action */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden transition-all">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="flex items-start space-x-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
-              <SlidersHorizontal className="w-6 h-6 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+      <div className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs relative overflow-hidden transition-all">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-start space-x-3">
+            <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
+              <SlidersHorizontal className="w-4.5 h-4.5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+                <h1 className="text-base sm:text-lg font-extrabold text-slate-950 dark:text-white tracking-tight">
                   Homepage Section Priority Manager
                 </h1>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#FEF08A] text-slate-950 shadow-xs">
+                <span className="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase bg-[#FEF08A] text-slate-950 shadow-xs">
                   Home Feed Curation
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                 Decide the exact rank priority (1, 2, 3...) for sections and category trays on the mobile app homepage feed.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 shrink-0 self-start md:self-center">
+          <div className="flex items-center space-x-2 shrink-0 self-start md:self-center">
             {/* Refresh Button */}
             <button
               onClick={() => fetchData(true)}
               disabled={isRefreshing}
-              className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white border border-slate-200 dark:border-white/10 text-xs font-bold transition-all cursor-pointer"
+              className="p-2 rounded-lg bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white border border-slate-200 dark:border-white/10 text-xs font-bold transition-all cursor-pointer"
               title="Refresh Live Data"
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-amber-400' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-400' : ''}`} />
             </button>
 
             {/* Save Priority Order CTA */}
             <button
               onClick={handleSavePriorityOrder}
               disabled={isSaving || !isDirty}
-              className={`px-5 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm flex items-center space-x-2 transition-all cursor-pointer shadow-xs ${
+              className={`px-3.5 py-1.5 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all cursor-pointer shadow-xs ${
                 isDirty
                   ? 'bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 shadow-md ring-2 ring-amber-400/50 animate-pulse'
                   : 'bg-slate-200/80 dark:bg-white/[0.08] text-slate-400 dark:text-slate-500 cursor-not-allowed'
               }`}
             >
               {isSaving ? (
-                <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950" />
               ) : (
-                <Save className="w-4 h-4 stroke-[2.5]" />
+                <Save className="w-3.5 h-3.5 stroke-[2.5]" />
               )}
               <span>{isDirty ? 'Save Priority Order' : 'Priority Saved'}</span>
             </button>
@@ -334,10 +334,10 @@ export default function CategoryPriorityPage({ onNavigate }) {
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-nodus flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+      <div className="bg-white dark:bg-[#121612] rounded-xl p-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1">
           <div className="relative flex-1 max-w-sm">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={searchTerm}
@@ -415,17 +415,17 @@ export default function CategoryPriorityPage({ onNavigate }) {
           </p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
+        <div className="bg-white dark:bg-[#121612] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-urbanist">
-              <thead className="bg-slate-50/70 dark:bg-[#161B16]/80 border-b border-slate-200/80 dark:border-white/10 text-slate-400 dark:text-slate-500 font-bold uppercase text-[11px] tracking-wider">
+              <thead className="bg-slate-50/70 dark:bg-[#161B16]/80 border-b border-slate-200/80 dark:border-white/10 text-slate-400 dark:text-slate-500 font-bold uppercase text-[10px] tracking-wider">
                 <tr>
-                  <th className="py-3 px-4 text-center w-16">Rank</th>
-                  <th className="py-3 px-4">Section / Category</th>
-                  <th className="py-3 px-4 text-center w-36">Section Type</th>
-                  <th className="py-3 px-4 text-center w-28">Content</th>
-                  <th className="py-3 px-4 text-center w-28">Status</th>
-                  <th className="py-3 px-4 text-right w-28 pr-6">Priority</th>
+                  <th className="py-2.5 px-3.5 text-center w-14">Rank</th>
+                  <th className="py-2.5 px-3.5">Section / Category</th>
+                  <th className="py-2.5 px-3.5 text-center w-32">Section Type</th>
+                  <th className="py-2.5 px-3.5 text-center w-24">Content</th>
+                  <th className="py-2.5 px-3.5 text-center w-24">Status</th>
+                  <th className="py-2.5 px-3.5 text-right w-24 pr-4">Priority</th>
                 </tr>
               </thead>
 
@@ -442,7 +442,7 @@ export default function CategoryPriorityPage({ onNavigate }) {
                       className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition-colors group"
                     >
                       {/* Priority Rank (Clean number without #) */}
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-2.5 px-3.5 text-center">
                         <span
                           className={`inline-flex items-center justify-center text-xs ${
                             index === 0

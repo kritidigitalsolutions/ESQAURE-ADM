@@ -46,7 +46,9 @@ const SYSTEM_PAGES = [
   { id: 'page-subscriptions', tab: 'subscriptions', title: 'Subscription Plans', category: 'Navigation', icon: CreditCard, desc: '1 Month (₹99), 6 Months (₹499), 12 Months (₹899) & 7-Day Trial (₹2)' },
   { id: 'page-promos', tab: 'promos', title: 'Promos & Coupon Vouchers', category: 'Navigation', icon: Ticket, desc: 'Discount coupons, trial codes & referral campaigns' },
   { id: 'page-transactions', tab: 'transactions', title: 'Transactions & Payments', category: 'Navigation', icon: Receipt, desc: 'UPI, Razorpay & Card payment gateway logs' },
-  { id: 'page-admob', tab: 'admob', title: 'AdMob Ad Monetization', category: 'Navigation', icon: TrendingUp, desc: 'Rewarded video eCPM, ad units & daily impression revenue' },
+  { id: 'page-admob', tab: 'admob', title: 'Google AdMob Monetization', category: 'Navigation', icon: TrendingUp, desc: 'Rewarded video eCPM, ad units & daily impression revenue' },
+  { id: 'page-custom_ads', tab: 'custom_ads', title: 'Custom Ads & Direct Sponsors', category: 'Navigation', icon: Sparkles, desc: 'Direct sponsor campaigns, video pre-rolls, banners & promos' },
+  { id: 'page-ad_control', tab: 'ad_control', title: 'Ad Control & Synchronized Delivery', category: 'Navigation', icon: Sliders, desc: 'Synchronize whether to show Custom ads, AdMob, or both' },
   { id: 'page-notifications', tab: 'notifications', title: 'Push Notifications', category: 'Navigation', icon: Bell, desc: 'Targeted FCM push campaigns to viewer devices' },
   { id: 'page-app_notifications', tab: 'app_notifications', title: 'In-App System Notices', category: 'Navigation', icon: MessageSquare, desc: 'Maintenance alerts and community broadcasts' },
   { id: 'page-legal', tab: 'legal', title: 'Legal & Compliance', category: 'Navigation', icon: FileText, desc: 'Terms of service, privacy policy and statutory filings' },
@@ -265,7 +267,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleInputKeyDown}
           placeholder="Search dramas, users, logs..."
-          className="w-full pl-9 pr-8 py-2 text-xs font-medium bg-slate-100/90 dark:bg-[#161B16] focus:bg-white dark:focus:bg-[#1A201A] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-full border border-slate-200/90 dark:border-white/10 focus:border-[#FEF08A] dark:focus:border-[#FEF08A] focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/20 transition-all shadow-2xs"
+          className="w-full pl-9 pr-8 py-2 text-xs font-medium bg-slate-100/90 dark:bg-[#141A14] focus:bg-white dark:focus:bg-[#1A221A] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-400 rounded-full border border-slate-200/90 dark:border-white/10 focus:border-[#FEF08A] dark:focus:border-white/25 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/20 dark:focus:ring-0 transition-all shadow-2xs"
         />
 
         {/* Clear Button */}
@@ -285,11 +287,11 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
 
       {/* Interactive Dropdown Results Panel */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2.5 w-[calc(100vw-2rem)] max-w-[560px] sm:w-[480px] md:w-[560px] bg-white dark:bg-[#1C221C] border border-slate-200/90 dark:border-white/12 rounded-2xl shadow-2xl z-50 overflow-hidden font-urbanist animate-fadeIn">
+        <div className="absolute right-0 top-full mt-2.5 w-[calc(100vw-2rem)] max-w-[560px] sm:w-[480px] md:w-[560px] bg-white dark:bg-[#202720] border border-slate-200/90 dark:border-white/15 rounded-2xl shadow-2xl dark:shadow-[0_25px_60px_-12px_rgba(0,0,0,0.9),0_0_25px_rgba(0,0,0,0.7)] z-50 overflow-hidden font-urbanist animate-fadeIn backdrop-blur-xl">
           
           {/* Query Filter Chips Header (When query exists) */}
           {query.trim() && (
-            <div className="p-2.5 bg-slate-50/80 dark:bg-[#161B16] border-b border-slate-100 dark:border-white/10 flex items-center gap-1.5 overflow-x-auto text-[11px]">
+            <div className="p-2.5 bg-slate-50/80 dark:bg-[#181F18] border-b border-slate-100 dark:border-white/12 flex items-center gap-1.5 overflow-x-auto text-[11px]">
               {[
                 { id: 'ALL', label: 'All', count: searchResults.totalCount },
                 { id: 'dramas', label: 'Series', count: searchResults.dramas.length },
@@ -303,15 +305,15 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                   onClick={() => setActiveCategory(cat.id)}
                   className={`px-2.5 py-1 rounded-full font-bold flex items-center space-x-1.5 whitespace-nowrap transition-all ${
                     activeCategory === cat.id
-                      ? 'bg-slate-900 text-white dark:bg-[#FEF08A] dark:text-black shadow-xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'
+                      ? 'bg-slate-900 text-white dark:bg-[#FEF08A] dark:text-slate-950 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/[0.08]'
                   }`}
                 >
                   <span>{cat.label}</span>
                   <span className={`px-1.5 py-0.2 text-[9px] rounded-full font-extrabold ${
                     activeCategory === cat.id
-                      ? 'bg-white/20 dark:bg-black/15 text-white dark:text-black'
-                      : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                      ? 'bg-white/20 dark:bg-black/15 text-white dark:text-slate-950'
+                      : 'bg-slate-200 dark:bg-white/[0.08] text-slate-600 dark:text-slate-300'
                   }`}>
                     {cat.count}
                   </span>
@@ -321,7 +323,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
           )}
 
           {/* Results List */}
-          <div ref={listRef} className="max-h-[380px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 p-2">
+          <div ref={listRef} className="max-h-[380px] overflow-y-auto divide-y divide-slate-100 dark:divide-white/[0.06] p-2">
             
             {/* If Query has text and results exist */}
             {query.trim() && displayItems.length > 0 && (
@@ -337,25 +339,25 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       onMouseEnter={() => setSelectedIndex(index)}
                       className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-900 dark:text-white ring-1 ring-slate-200 dark:ring-slate-700'
-                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/70 text-slate-700 dark:text-slate-300'
+                          ? 'bg-slate-100 dark:bg-[#202720] text-slate-900 dark:text-white ring-1 ring-slate-200 dark:ring-white/15'
+                          : 'hover:bg-slate-50 dark:hover:bg-white/[0.04] text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-200/50 dark:border-amber-900/40">
-                          <Icon className="w-4 h-4" />
+                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/30 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] flex items-center justify-center shrink-0 border border-amber-300/50 dark:border-amber-400/25">
+                          <Icon className="w-4 h-4 stroke-[2.2]" />
                         </div>
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
                             {item.title}
                           </p>
-                          <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate">
+                          <p className="text-[11px] text-slate-400 dark:text-slate-400 truncate">
                             {item.desc}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2 shrink-0 ml-2">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200/60 dark:bg-white/[0.08] text-slate-600 dark:text-slate-300">
                           Page
                         </span>
                         <CornerDownLeft className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100" />
@@ -372,12 +374,12 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       onMouseEnter={() => setSelectedIndex(index)}
                       className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-900 dark:text-white ring-1 ring-slate-200 dark:ring-slate-700'
-                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/70 text-slate-700 dark:text-slate-300'
+                          ? 'bg-slate-100 dark:bg-[#202720] text-slate-900 dark:text-white ring-1 ring-slate-200 dark:ring-white/15'
+                          : 'hover:bg-slate-50 dark:hover:bg-white/[0.04] text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-9 h-12 rounded-lg bg-slate-900 overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 shadow-2xs">
+                        <div className="w-9 h-12 rounded-lg bg-slate-900 overflow-hidden shrink-0 border border-slate-200 dark:border-white/10 shadow-2xs">
                           <img src={item.poster} alt={item.title} className="w-full h-full object-cover" />
                         </div>
                         <div className="min-w-0">
@@ -385,7 +387,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                             <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
                               {item.title}
                             </p>
-                            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400 shrink-0">
+                            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/70 dark:bg-white/[0.08] text-slate-600 dark:text-slate-300 shrink-0">
                               {item.id}
                             </span>
                           </div>
@@ -401,10 +403,10 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       <div className="flex items-center space-x-2 shrink-0 ml-2">
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                           item.status === 'PUBLISHED'
-                            ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400'
+                            ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-300/40 dark:border-emerald-700/40'
                             : item.status === 'ENCODING'
-                            ? 'bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400'
-                            : 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400'
+                            ? 'bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400 border border-blue-300/40 dark:border-blue-700/40'
+                            : 'bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-300/40 dark:border-amber-700/40'
                         }`}>
                           {item.status}
                         </span>
@@ -422,13 +424,13 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       onMouseEnter={() => setSelectedIndex(index)}
                       className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-900 dark:text-white ring-1 ring-slate-200 dark:ring-slate-700'
-                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/70 text-slate-700 dark:text-slate-300'
+                          ? 'bg-slate-100 dark:bg-[#202720] text-slate-900 dark:text-white ring-1 ring-slate-200 dark:ring-white/15'
+                          : 'hover:bg-slate-50 dark:hover:bg-white/[0.04] text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0 border border-violet-200/60 dark:border-violet-800/40">
-                          {item.isVip ? <Crown className="w-4 h-4 text-amber-500" /> : <Users className="w-4 h-4" />}
+                        <div className="w-8 h-8 rounded-full bg-[#FEF08A]/30 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] flex items-center justify-center shrink-0 border border-amber-300/50 dark:border-amber-400/25">
+                          {item.isVip ? <Crown className="w-4 h-4 stroke-[2.2]" /> : <Users className="w-4 h-4 stroke-[2.2]" />}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center space-x-2">
@@ -445,8 +447,8 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       <div className="flex items-center space-x-2 shrink-0 ml-2">
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                           item.isVip
-                            ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-700/60'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                            ? 'bg-[#FEF08A]/20 dark:bg-[#FEF08A]/15 text-amber-800 dark:text-[#FEF08A] border border-amber-300/60 dark:border-amber-400/30'
+                            : 'bg-slate-100 dark:bg-white/[0.08] text-slate-600 dark:text-slate-300'
                         }`}>
                           {item.plan}
                         </span>
@@ -464,13 +466,13 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       onMouseEnter={() => setSelectedIndex(index)}
                       className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-900 dark:text-white ring-1 ring-slate-200 dark:ring-slate-700'
-                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/70 text-slate-700 dark:text-slate-300'
+                          ? 'bg-slate-100 dark:bg-[#202720] text-slate-900 dark:text-white ring-1 ring-slate-200 dark:ring-white/15'
+                          : 'hover:bg-slate-50 dark:hover:bg-white/[0.04] text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-800/40">
-                          <Receipt className="w-4 h-4" />
+                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/30 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] flex items-center justify-center shrink-0 border border-amber-300/50 dark:border-amber-400/25">
+                          <Receipt className="w-4 h-4 stroke-[2.2]" />
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center space-x-2">
@@ -508,13 +510,13 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       onMouseEnter={() => setSelectedIndex(index)}
                       className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-slate-100 dark:bg-slate-800/80 text-slate-900 dark:text-white ring-1 ring-slate-200 dark:ring-slate-700'
-                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/70 text-slate-700 dark:text-slate-300'
+                          ? 'bg-slate-100 dark:bg-[#202720] text-slate-900 dark:text-white ring-1 ring-slate-200 dark:ring-white/15'
+                          : 'hover:bg-slate-50 dark:hover:bg-white/[0.04] text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-200 dark:border-indigo-800/40">
-                          <Shield className="w-4 h-4" />
+                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/30 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] flex items-center justify-center shrink-0 border border-amber-300/50 dark:border-amber-400/25">
+                          <Shield className="w-4 h-4 stroke-[2.2]" />
                         </div>
                         <div className="min-w-0">
                           <p className="text-xs font-mono font-bold text-slate-900 dark:text-white truncate">
@@ -540,13 +542,13 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
             {/* If Query has text but NO results found */}
             {query.trim() && displayItems.length === 0 && (
               <div className="py-8 px-4 text-center">
-                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-400 flex items-center justify-center mx-auto mb-3">
                   <Search className="w-6 h-6" />
                 </div>
                 <h4 className="text-xs font-bold text-slate-900 dark:text-white">
                   No matching results for "{query}"
                 </h4>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 max-w-xs mx-auto">
+                <p className="text-[11px] text-slate-400 dark:text-slate-400 mt-1 max-w-xs mx-auto">
                   Try searching by drama title (e.g. "Security Guard"), user name, phone (+91), or payment ID.
                 </p>
                 <div className="mt-3 flex items-center justify-center gap-2">
@@ -555,7 +557,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       setQuery('');
                       setActiveCategory('ALL');
                     }}
-                    className="px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg transition-colors"
+                    className="px-3 py-1 bg-slate-100 dark:bg-white/[0.08] hover:bg-slate-200 dark:hover:bg-white/[0.14] text-slate-700 dark:text-slate-200 text-xs font-bold rounded-lg transition-colors cursor-pointer"
                   >
                     Clear Search
                   </button>
@@ -564,7 +566,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       setIsOpen(false);
                       onNavigate?.('dramas');
                     }}
-                    className="px-3 py-1 bg-[#FEF08A] hover:bg-[#FDE047] text-black text-xs font-bold rounded-lg transition-colors"
+                    className="px-3 py-1 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold rounded-lg transition-colors cursor-pointer shadow-xs"
                   >
                     View All Series
                   </button>
@@ -577,7 +579,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
               <div className="p-2 space-y-4">
                 {/* Quick Navigation Pages */}
                 <div>
-                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-300">
                     Quick Access Destinations
                   </div>
                   <div className="grid grid-cols-2 gap-1.5 mt-1">
@@ -596,17 +598,23 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                             setIsOpen(false);
                             onNavigate?.(item.tab);
                           }}
-                          className={`flex items-center space-x-2.5 p-2 rounded-xl text-left transition-all ${
+                          className={`group flex items-center space-x-2.5 p-2 rounded-xl text-left transition-all cursor-pointer ${
                             item.highlight
-                              ? 'bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-900 dark:text-amber-200 border border-amber-200/70 dark:border-amber-900/60'
-                              : 'bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-800'
+                              ? 'bg-amber-50/70 dark:bg-[#182018] hover:bg-amber-100/80 dark:hover:bg-[#1E271E] text-slate-900 dark:text-slate-100 border border-amber-300/80 dark:border-white/10 hover:border-amber-400 dark:hover:border-white/20 shadow-xs'
+                              : 'bg-slate-50 dark:bg-[#141A14] hover:bg-slate-100 dark:hover:bg-[#1A211A] text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
                           }`}
                         >
-                          <Icon className="w-4 h-4 text-amber-500 shrink-0" />
+                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${
+                            item.highlight
+                              ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
+                              : 'bg-[#FEF08A]/20 dark:bg-[#FEF08A]/15 text-amber-700 dark:text-[#FEF08A] border border-amber-300/40 dark:border-amber-400/25'
+                          }`}>
+                            <Icon className="w-3.5 h-3.5 stroke-[2.2]" />
+                          </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-xs font-bold truncate leading-tight">{item.title}</p>
+                            <p className="text-xs font-bold truncate leading-tight group-hover:text-amber-600 dark:group-hover:text-[#FEF08A] transition-colors">{item.title}</p>
                             {item.count && (
-                              <p className="text-[10px] text-slate-400 dark:text-slate-500">{item.count}</p>
+                              <p className="text-[10px] text-slate-400 dark:text-slate-400">{item.count}</p>
                             )}
                           </div>
                         </button>
@@ -617,12 +625,14 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
 
                 {/* Trending Micro-Dramas */}
                 <div>
-                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center justify-between">
+                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400/80 flex items-center justify-between">
                     <span>Trending Vertical Series</span>
-                    <span className="text-amber-500">Top Viewed</span>
+                    <span className="text-amber-600 dark:text-[#FEF08A] font-extrabold flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" /> Top Viewed
+                    </span>
                   </div>
                   <div className="space-y-1 mt-1">
-                    {mockDramas.slice(0, 3).map((drama) => (
+                    {mockDramas.slice(0, 3).map((drama, idx) => (
                       <div
                         key={drama.id}
                         onClick={() => {
@@ -630,25 +640,31 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                           onSelectDrama?.(drama.id);
                           onNavigate?.('dramas');
                         }}
-                        className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors group"
+                        className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.05] cursor-pointer transition-colors group border border-transparent dark:hover:border-white/10"
                       >
                         <div className="flex items-center space-x-3 min-w-0">
                           <img
                             src={drama.poster}
                             alt={drama.title}
-                            className="w-7 h-10 object-cover rounded-md border border-slate-200 dark:border-slate-700 shrink-0"
+                            className="w-7 h-10 object-cover rounded-md border border-slate-200 dark:border-white/10 shrink-0 shadow-xs"
                           />
                           <div className="min-w-0">
-                            <p className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-amber-500 transition-colors">
+                            <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-amber-600 dark:group-hover:text-[#FEF08A] transition-colors">
                               {drama.title}
                             </p>
-                            <p className="text-[10px] text-slate-400">
+                            <p className="text-[10px] text-slate-400 dark:text-slate-400">
                               {drama.genres.join(', ')} • {drama.views} views
                             </p>
                           </div>
                         </div>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
-                          Rank #{drama.trendingRank || 1}
+                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                          idx === 0
+                            ? 'bg-[#FEF08A]/15 text-amber-700 dark:text-[#FEF08A] border-amber-300/40 dark:border-[#FEF08A]/40'
+                            : idx === 1
+                            ? 'bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-white/10'
+                            : 'bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10'
+                        }`}>
+                          Rank #{drama.trendingRank || (idx + 1)}
                         </span>
                       </div>
                     ))}
@@ -661,7 +677,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
 
           {/* Search match counter if querying */}
           {query.trim() && (
-            <div className="px-3 py-1.5 bg-slate-50 dark:bg-[#161B16] border-t border-slate-100 dark:border-white/10 text-[10px] font-semibold text-slate-400 dark:text-slate-400 text-right">
+            <div className="px-3 py-1.5 bg-slate-50 dark:bg-[#141914] border-t border-slate-100 dark:border-white/10 text-[10px] font-semibold text-slate-400 dark:text-slate-400 text-right">
               {searchResults.totalCount} {searchResults.totalCount === 1 ? 'match' : 'matches'}
             </div>
           )}

@@ -125,6 +125,12 @@
       "value": "",
       "type": "string",
       "description": "MongoDB ObjectId of a Banner"
+    },
+    {
+      "key": "customAdId",
+      "value": "6ac77e265dd8236bc5e8c4f1",
+      "type": "string",
+      "description": "MongoDB ObjectId of a Custom Ad campaign for testing"
     }
   ],
   "item": [
@@ -2381,6 +2387,121 @@
               "response": []
             }
           ]
+        },
+        {
+          "name": "10. Ads & Monetization",
+          "description": "Mobile client endpoints for retrieving live Google AdMob configuration, querying dynamic mediation ad server (Custom Ad vs AdMob), and tracking custom ad impressions & clicks.",
+          "item": [
+            {
+              "name": "10.1 Get Mobile Ads Configuration",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/config?platform=android",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "config"
+                  ],
+                  "query": [
+                    {
+                      "key": "platform",
+                      "value": "android",
+                      "description": "android or ios"
+                    }
+                  ]
+                },
+                "description": "Fetch client-side ad configuration including App ID, enabled ad formats, active unit IDs (or Google test unit IDs if test mode is enabled), mediation strategy, and VIP bypass status."
+              },
+              "response": []
+            },
+            {
+              "name": "10.2 Dynamic Mediation Ad Serving",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/serve?placement=PLAYER_PREROLL&format=VIDEO_PREROLL&platform=android&isVip=false",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "serve"
+                  ],
+                  "query": [
+                    {
+                      "key": "placement",
+                      "value": "PLAYER_PREROLL",
+                      "description": "PLAYER_PREROLL, EPISODE_TRANSITION, HOME_BANNER, DRAWER_CARD, GLOBAL_POPUP"
+                    },
+                    {
+                      "key": "format",
+                      "value": "VIDEO_PREROLL",
+                      "description": "BANNER, INTERSTITIAL, VIDEO_PREROLL, NATIVE_CARD"
+                    },
+                    {
+                      "key": "platform",
+                      "value": "android",
+                      "description": "android or ios"
+                    },
+                    {
+                      "key": "isVip",
+                      "value": "false",
+                      "description": "true if user has active VIP subscription"
+                    }
+                  ]
+                },
+                "description": "Dynamic mediation server evaluating mediation waterfall (Custom Ad First, AdMob First, Traffic Split, etc.) and VIP subscriber protection."
+              },
+              "response": []
+            },
+            {
+              "name": "10.3 Track Custom Ad Impression",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/track/{{customAdId}}/impression",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "track",
+                    "{{customAdId}}",
+                    "impression"
+                  ]
+                },
+                "description": "Increments the impression counter when a custom ad is viewed."
+              },
+              "response": []
+            },
+            {
+              "name": "10.4 Track Custom Ad Click",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/track/{{customAdId}}/click",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "track",
+                    "{{customAdId}}",
+                    "click"
+                  ]
+                },
+                "description": "Increments the click counter when a custom ad CTA or poster is tapped."
+              },
+              "response": []
+            }
+          ]
         }
       ]
     },
@@ -4211,6 +4332,277 @@
                   ]
                 },
                 "description": "Quick toggle whether this genre category is included in the Popular Genres tray on mobile screens."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "9. Ads & AdMob Monetization Management",
+          "description": "Admin panel management APIs for Google AdMob configuration, format unit IDs, waterfall mediation rules, and full CRUD for custom direct sponsor ads.",
+          "item": [
+            {
+              "name": "9.1 Get AdMob & Mediation Settings",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "settings"
+                  ]
+                },
+                "description": "Returns full AdMob configuration, unit IDs, mediation strategy, and platform analytics summary."
+              },
+              "response": []
+            },
+            {
+              "name": "9.2 Update AdMob & Mediation Settings",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"admobEnabled\": true,\n  \"testMode\": false,\n  \"androidAppId\": \"ca-app-pub-9920192847192847~1234567890\",\n  \"iosAppId\": \"ca-app-pub-9920192847192847~0987654321\",\n  \"adUnits\": {\n    \"rewarded\": {\n      \"android\": \"ca-app-pub-9920192847192847/1122334455\",\n      \"ios\": \"ca-app-pub-9920192847192847/5544332211\",\n      \"enabled\": true,\n      \"rewardDescription\": \"Unlock Episode / 1 Free Pass\"\n    },\n    \"interstitial\": {\n      \"android\": \"ca-app-pub-9920192847192847/2233445566\",\n      \"ios\": \"ca-app-pub-9920192847192847/6655443322\",\n      \"enabled\": true,\n      \"intervalEpisodes\": 3\n    },\n    \"banner\": {\n      \"android\": \"ca-app-pub-9920192847192847/3344556677\",\n      \"ios\": \"ca-app-pub-9920192847192847/7766554433\",\n      \"enabled\": true\n    },\n    \"appOpen\": {\n      \"android\": \"ca-app-pub-9920192847192847/4455667788\",\n      \"ios\": \"ca-app-pub-9920192847192847/8877665544\",\n      \"enabled\": false\n    },\n    \"native\": {\n      \"android\": \"ca-app-pub-9920192847192847/5566778899\",\n      \"ios\": \"ca-app-pub-9920192847192847/9988776655\",\n      \"enabled\": true\n    }\n  },\n  \"mediationMode\": \"CUSTOM_FIRST\",\n  \"customAdSharePercent\": 50,\n  \"vipBypassAds\": true,\n  \"globalAdFrequencyCap\": 6\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ads/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "settings"
+                  ]
+                },
+                "description": "Update Google AdMob settings, unit IDs per format, mediation mode, and frequency caps."
+              },
+              "response": []
+            },
+            {
+              "name": "9.3 List Custom Ads (with Filters & Pagination)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom?page=1&limit=20&status=ALL&type=ALL",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "status",
+                      "value": "ALL",
+                      "description": "ALL, ACTIVE, PAUSED, EXPIRED"
+                    },
+                    {
+                      "key": "type",
+                      "value": "ALL",
+                      "description": "ALL, BANNER, INTERSTITIAL, VIDEO_PREROLL, NATIVE_CARD"
+                    },
+                    {
+                      "key": "placement",
+                      "value": "ALL",
+                      "description": "ALL, HOME_BANNER, PLAYER_PREROLL, EPISODE_TRANSITION, DRAWER_CARD, GLOBAL_POPUP"
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "search campaign title or advertiser"
+                    }
+                  ]
+                },
+                "description": "Fetch paginated custom ads with aggregate performance summary stats (impressions, clicks, CTR)."
+              },
+              "response": []
+            },
+            {
+              "name": "9.4 Create Custom Direct Sponsor Ad",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const r = pm.response.json();",
+                      "if (r.success && r.data && r.data.ad) {",
+                      "    pm.collectionVariables.set(\"customAdId\", r.data.ad._id || r.data.ad.id);",
+                      "    console.log(\"[OK] customAdId auto-saved:\", r.data.ad.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Red Bull Energy — Gives You Wings\",\n  \"advertiser\": \"Red Bull India\",\n  \"type\": \"VIDEO_PREROLL\",\n  \"placement\": \"PLAYER_PREROLL\",\n  \"mediaType\": \"VIDEO\",\n  \"mediaUrl\": \"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4\",\n  \"thumbnailUrl\": \"https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&q=80\",\n  \"videoDuration\": 15,\n  \"skipAfterSeconds\": 5,\n  \"ctaText\": \"Explore More\",\n  \"ctaAction\": \"EXTERNAL_URL\",\n  \"targetUrl\": \"https://www.redbull.com\",\n  \"status\": \"ACTIVE\",\n  \"priority\": 9,\n  \"startDate\": \"2026-10-08T11:28:53.410Z\",\n  \"endDate\": \"2026-11-07T11:28:53.410Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom"
+                  ]
+                },
+                "description": "Create a new custom ad campaign for direct brand sponsors or in-house platform promos."
+              },
+              "response": []
+            },
+            {
+              "name": "9.5 Get Custom Ad by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/{{customAdId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "{{customAdId}}"
+                  ]
+                },
+                "description": "Retrieve details for a single custom ad."
+              },
+              "response": []
+            },
+            {
+              "name": "9.6 Update Custom Ad",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Red Bull Energy — Updated Campaign\",\n  \"priority\": 10,\n  \"ctaText\": \"Claim Your Drink\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/{{customAdId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "{{customAdId}}"
+                  ]
+                },
+                "description": "Update fields, creative URLs, priority, or dates for an existing custom ad."
+              },
+              "response": []
+            },
+            {
+              "name": "9.7 Toggle Custom Ad Status",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/{{customAdId}}/toggle",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "{{customAdId}}",
+                    "toggle"
+                  ]
+                },
+                "description": "Quick toggle custom ad state between ACTIVE and PAUSED."
+              },
+              "response": []
+            },
+            {
+              "name": "9.8 Reset Custom Ad Analytics",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/{{customAdId}}/reset-stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "{{customAdId}}",
+                    "reset-stats"
+                  ]
+                },
+                "description": "Resets impression count and click count back to 0."
+              },
+              "response": []
+            },
+            {
+              "name": "9.9 Delete Custom Ad",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/{{customAdId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "{{customAdId}}"
+                  ]
+                },
+                "description": "Delete a custom ad permanently."
               },
               "response": []
             }

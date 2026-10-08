@@ -4,28 +4,46 @@ import React, { useEffect, useRef } from "react";
 /**
  * AnimatedGradientBackground
  *
- * Renders a customizable animated radial gradient background with a breathing effect.
+ * This component renders a customizable animated radial gradient background with a subtle breathing effect.
+ * It uses `framer-motion` for an entrance animation and raw CSS gradients for the dynamic background.
+ *
+ * @param {Object} props
+ * @param {number} [props.startingGap=125] - Initial size of the radial gradient, defining the starting width.
+ * @param {boolean} [props.Breathing=true] - Enables or disables the breathing animation effect.
+ * @param {boolean} [props.breathing] - Alternative alias for Breathing.
+ * @param {string[]} [props.gradientColors] - Array of colors to use in the radial gradient.
+ * @param {number[]} [props.gradientStops] - Array of percentage stops corresponding to each color in gradientColors.
+ * @param {number} [props.animationSpeed=0.02] - Speed of the breathing animation.
+ * @param {number} [props.breathingRange=5] - Maximum range for the breathing animation in percentage points.
+ * @param {React.CSSProperties} [props.containerStyle={}] - Additional inline styles for the gradient container.
+ * @param {string} [props.containerClassName=""] - Additional class names for the gradient container.
+ * @param {number} [props.topOffset=0] - Additional top offset for the gradient container.
+ * @returns {JSX.Element}
  */
 const AnimatedGradientBackground = ({
-  startingGap = 125,
+  startingGap = 112,
   Breathing = true,
+  breathing,
+  position = "50% 12%",
   gradientColors = [
-    "#0A0A0A",
-    "#4D1D09",
-    "#8A3D0B",
-    "#C27D16",
-    "#ECBD2A",
-    "#F4D465",
-    "#FDF5CF"
+    "#080B08",
+    "#161a12",
+    "#382e0e",
+    "#7d6518",
+    "#c4a62d",
+    "#FEF08A",
+    "#4d3c0c",
+    "#080B08",
   ],
-  gradientStops = [35, 50, 60, 70, 80, 90, 100],
+  gradientStops = [42, 55, 68, 77, 84, 90, 95, 100],
   animationSpeed = 0.02,
   breathingRange = 5,
   containerStyle = {},
   topOffset = 0,
-  position = "50% 20%",
   containerClassName = "",
 }) => {
+  const isBreathing = Breathing ?? breathing ?? true;
+
   // Validation: Ensure gradientStops and gradientColors lengths match
   if (gradientColors.length !== gradientStops.length) {
     throw new Error(
@@ -46,7 +64,7 @@ const AnimatedGradientBackground = ({
       if (width >= startingGap + breathingRange) directionWidth = -1;
       if (width <= startingGap - breathingRange) directionWidth = 1;
 
-      if (!Breathing) directionWidth = 0;
+      if (!isBreathing) directionWidth = 0;
       width += directionWidth * animationSpeed;
 
       const gradientStopsString = gradientStops
@@ -65,7 +83,16 @@ const AnimatedGradientBackground = ({
     animationFrame = requestAnimationFrame(animateGradient);
 
     return () => cancelAnimationFrame(animationFrame); // Cleanup animation
-  }, [startingGap, Breathing, gradientColors, gradientStops, animationSpeed, breathingRange, topOffset, position]);
+  }, [
+    startingGap,
+    isBreathing,
+    gradientColors,
+    gradientStops,
+    animationSpeed,
+    breathingRange,
+    topOffset,
+    position,
+  ]);
 
   return (
     <motion.div
@@ -82,7 +109,7 @@ const AnimatedGradientBackground = ({
           ease: [0.25, 0.1, 0.25, 1], // Cubic bezier easing
         },
       }}
-      className={`absolute inset-0 overflow-hidden ${containerClassName}`}
+      className={`absolute inset-0 overflow-hidden pointer-events-none select-none ${containerClassName}`}
     >
       <div
         ref={containerRef}

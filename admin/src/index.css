@@ -9,9 +9,6 @@
     font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
-  html {
-    scrollbar-gutter: stable;
-  }
 
   html,
   body {
@@ -142,7 +139,7 @@
 .sidebar-item-wave {
   position: relative;
   overflow: hidden;
-  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .sidebar-item-wave::before {
@@ -154,7 +151,7 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(254, 240, 138, 0.45) 50%,
+    rgba(254, 240, 138, 0.3) 50%,
     transparent 100%
   );
   transform: skewX(-20deg);
@@ -166,17 +163,13 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(254, 240, 138, 0.18) 50%,
+    rgba(254, 240, 138, 0.12) 50%,
     transparent 100%
   );
 }
 
 .sidebar-item-wave:hover::before {
   animation: subtleWave 0.65s ease-out;
-}
-
-.sidebar-item-wave:hover {
-  transform: translateX(3px);
 }
 
 /* Animated Login Background Effects */
@@ -319,5 +312,103 @@ html.view-transitioning *::after {
   50% {
     transform: scaleY(0.6);
   }
+}
+
+/* ==========================================================
+   Login Form Entrance Animations
+   ========================================================== */
+
+/* Card: fade up + scale in from below */
+@keyframes login-card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+/* Logo: fade down from above */
+@keyframes login-logo-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Staggered child elements: slide up + fade in */
+@keyframes login-item-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Error shake */
+@keyframes login-shake {
+  0%, 100% { transform: translateX(0); }
+  15%       { transform: translateX(-7px); }
+  30%       { transform: translateX(6px); }
+  45%       { transform: translateX(-5px); }
+  60%       { transform: translateX(4px); }
+  75%       { transform: translateX(-3px); }
+  90%       { transform: translateX(2px); }
+}
+
+/* Fade in (used for alerts) */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-login-logo {
+  animation: login-logo-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-login-card {
+  animation: login-card-enter 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+/* Stagger helpers */
+.animate-login-item-1 {
+  animation: login-item-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+}
+.animate-login-item-2 {
+  animation: login-item-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+}
+.animate-login-item-3 {
+  animation: login-item-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.42s both;
+}
+.animate-login-item-4 {
+  animation: login-item-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.49s both;
+}
+.animate-login-item-5 {
+  animation: login-item-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.56s both;
+}
+
+.animate-login-shake {
+  animation: login-shake 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease both;
+}
+
+/* Input focus glow */
+.login-input:focus {
+  box-shadow: 0 0 0 3px rgba(254, 240, 138, 0.12), 0 0 14px rgba(254, 240, 138, 0.07);
+  border-color: rgba(254, 240, 138, 0.35) !important;
 }
 

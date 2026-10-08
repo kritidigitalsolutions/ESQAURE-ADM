@@ -12,6 +12,7 @@ import homeRoutes         from './home.routes.js';
 import genreRoutes        from './genre.routes.js';
 import savedSeriesRoutes  from './savedSeries.routes.js';
 import promoRoutes        from './promo.routes.js';
+import adRoutes           from './ad.routes.js';
 
 const router = Router();
 
@@ -70,6 +71,9 @@ router.use('/genres', genreRoutes);
 
 /** Promos & Vouchers (Admin CRUD + mobile validate) */
 router.use('/promos', promoRoutes);
+
+/** Ads & Monetization (AdMob Config, Custom Ads CRUD, Mediation & Serving) */
+router.use('/ads', adRoutes);
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  SHARED ROUTES  (used by both Mobile App and Admin Panel)

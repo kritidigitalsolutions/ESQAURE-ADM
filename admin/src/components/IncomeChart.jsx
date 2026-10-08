@@ -173,24 +173,24 @@ export default function IncomeChart({ className = '' }) {
 
   return (
     <div
-      className={`w-full rounded-[28px] border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#121612] p-5 sm:px-7 sm:py-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover font-sans ${className}`}
+      className={`w-full rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#121612] p-4 sm:px-5 sm:py-4 shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover font-sans ${className}`}
     >
       {/* 1. TOP HEADER ROW: Pure clean layout, completely isolated from graph */}
-      <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-white/10">
+      <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
         {/* Left: Title & Subtle Icon */}
-        <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shadow-2xs shrink-0">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shadow-2xs shrink-0">
             <IndianRupee className="w-4 h-4 stroke-[2.5]" />
           </div>
           <div>
-            <h3 className="text-base font-extrabold tracking-tight text-slate-950 dark:text-white font-urbanist">
+            <h3 className="text-sm sm:text-base font-extrabold tracking-tight text-slate-950 dark:text-white font-urbanist">
               Platform Income
             </h3>
           </div>
         </div>
 
         {/* Right: Only the 3 clean period pills requested: Today | Monthly | Yearly */}
-        <div className="inline-flex items-center gap-1 rounded-xl bg-slate-100/90 dark:bg-[#161B16] p-1 border border-slate-200/70 dark:border-white/10 shadow-2xs">
+        <div className="inline-flex items-center gap-0.5 rounded-lg bg-slate-100/90 dark:bg-[#161B16] p-0.5 border border-slate-200/70 dark:border-white/10 shadow-2xs">
           {[
             { id: 'today', label: 'Today' },
             { id: 'monthly', label: 'Monthly' },
@@ -205,7 +205,7 @@ export default function IncomeChart({ className = '' }) {
                   setHoveredIdx(null);
                   setPeriod(btn.id);
                 }}
-                className={`rounded-lg px-3.5 py-1 text-xs font-extrabold transition-all cursor-pointer ${
+                className={`rounded-md px-2.5 py-1 text-[11px] font-extrabold transition-all cursor-pointer ${
                   isActive
                     ? 'bg-[#FEF08A] text-slate-950 shadow-2xs border border-amber-300/70'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/[0.06]'
@@ -219,25 +219,25 @@ export default function IncomeChart({ className = '' }) {
       </div>
 
       {/* 2. BODY ROW: Stat summary on left, Unobstructed wide graph on right */}
-      <div className="mt-3 flex flex-col md:flex-row items-start justify-between gap-6">
+      <div className="mt-2.5 flex flex-col md:flex-row items-start justify-between gap-4">
         {/* Left Column: Metric Headline & Subtitle */}
-        <div className="w-full md:w-[280px] lg:w-[320px] shrink-0 pt-0.5">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1 font-urbanist transition-all">
+        <div className="w-full md:w-[260px] lg:w-[280px] shrink-0 pt-0.5">
+          <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-0.5 font-urbanist transition-all">
             {displaySubtitle}
           </span>
-          <div className="flex items-center flex-wrap gap-2.5">
-            <span className="text-4xl sm:text-[42px] lg:text-[46px] font-black leading-none tracking-tight text-slate-950 dark:text-white font-urbanist transition-all">
+          <div className="flex items-center flex-wrap gap-2">
+            <span className="text-2xl sm:text-3xl font-black leading-none tracking-tight text-slate-950 dark:text-white font-urbanist transition-all">
               <AnimatedNumber value={displayAmount} duration={500} />
             </span>
 
             {/* Yellow Trend Pill Badge */}
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold bg-[#FEF08A] text-slate-950 border border-amber-300/80 shadow-2xs shrink-0">
-              <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-[#FEF08A] text-slate-950 border border-amber-300/80 shadow-2xs shrink-0">
+              <ArrowUp className="w-3 h-3 stroke-[2.5]" />
               <AnimatedNumber value={currentData.trend} duration={500} />
             </span>
           </div>
 
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1.5">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
             {currentData.subtext}
           </p>
         </div>
@@ -247,7 +247,7 @@ export default function IncomeChart({ className = '' }) {
           ref={containerRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          className="relative flex-1 w-full h-[120px] sm:h-[130px] rounded-2xl bg-gradient-to-l from-amber-50/40 dark:from-amber-900/10 via-amber-50/15 dark:via-amber-900/5 to-transparent border border-slate-100/90 dark:border-white/10 overflow-hidden cursor-crosshair select-none"
+          className="relative flex-1 w-full h-[100px] sm:h-[110px] rounded-xl bg-gradient-to-l from-amber-50/40 dark:from-amber-900/10 via-amber-50/15 dark:via-amber-900/5 to-transparent border border-slate-100/90 dark:border-white/10 overflow-hidden cursor-crosshair select-none"
         >
           {/* Subtle Dotted Pattern Overlay */}
           <div

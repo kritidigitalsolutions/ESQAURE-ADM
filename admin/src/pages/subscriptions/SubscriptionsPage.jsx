@@ -448,7 +448,7 @@ export default function SubscriptionsPage() {
 
 
   return (
-    <div className="space-y-6 font-urbanist w-full pb-16 selection:bg-[#FEF08A] selection:text-black">
+    <div className="space-y-3.5 font-urbanist w-full pb-16 selection:bg-[#FEF08A] selection:text-black">
 
       {/* Floating Action Toast Notification */}
       {toastMessage && (
@@ -463,7 +463,7 @@ export default function SubscriptionsPage() {
       {/* ======================================================== */}
       {/* 4 CORE MONETIZATION KPI OVERVIEW CARDS (100% Dynamic)     */}
       {/* ======================================================== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Metric 1: Monthly Subscription Revenue */}
         <KpiStatCard
           icon={CreditCard}
@@ -514,10 +514,10 @@ export default function SubscriptionsPage() {
       {/* ======================================================== */}
       {/* SECTION HEADER & PRIMARY ACTION BAR (Website Standard)   */}
       {/* ======================================================== */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center space-x-3.5">
-          <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
-            <CreditCard className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+      <div className="bg-white dark:bg-[#121612] rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-nodus flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center space-x-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
+            <CreditCard className="w-4 h-4 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
           </div>
           <div>
             <h3 className="font-extrabold text-slate-950 dark:text-white text-base sm:text-lg tracking-tight">

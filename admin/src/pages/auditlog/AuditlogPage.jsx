@@ -22,44 +22,44 @@ export default function AuditlogPage() {
   const histogramBars = [24, 38, 45, 60, 52, 78, 95, 82, 110, 125, 95, 140, 160, 130, 115, 145, 180, 150, 120, 95, 110, 135, 160, 175];
 
   return (
-    <div className="space-y-6 font-urbanist">
+    <div className="space-y-3.5 font-urbanist">
       
       {/* Nodus Audit Stats Header */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-sm">
-          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Authorized Admin Actions</span>
-          <div className="mt-2 flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-slate-950 dark:text-white font-urbanist">1,395</span>
-            <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/50">+14%</span>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/90 dark:border-white/10 shadow-xs">
+          <span className="text-[10.5px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Authorized Admin Actions</span>
+          <div className="mt-1.5 flex items-baseline justify-between">
+            <span className="text-2xl sm:text-[28px] font-black text-slate-950 dark:text-white font-urbanist">1,395</span>
+            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/50">+14%</span>
           </div>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Zero unverified mutation attempts</p>
+          <p className="text-[10.5px] text-slate-400 dark:text-slate-500 mt-0.5">Zero unverified mutation attempts</p>
         </div>
 
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-sm">
-          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Protected Media Resources</span>
-          <div className="mt-2 flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-slate-950 dark:text-white font-urbanist">1,258</span>
-            <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/50">+8%</span>
+        <div className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/90 dark:border-white/10 shadow-xs">
+          <span className="text-[10.5px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Protected Media Resources</span>
+          <div className="mt-1.5 flex items-baseline justify-between">
+            <span className="text-2xl sm:text-[28px] font-black text-slate-950 dark:text-white font-urbanist">1,258</span>
+            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/50">+8%</span>
           </div>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Episodes with strict DRM & JWT tokens</p>
+          <p className="text-[10.5px] text-slate-400 dark:text-slate-500 mt-0.5">Episodes with strict DRM & JWT tokens</p>
         </div>
 
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-sm">
-          <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Security & Transcode Alerts</span>
-          <div className="mt-2 flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-slate-950 dark:text-white font-urbanist">62</span>
-            <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/50">-22%</span>
+        <div className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/90 dark:border-white/10 shadow-xs">
+          <span className="text-[10.5px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Security & Transcode Alerts</span>
+          <div className="mt-1.5 flex items-baseline justify-between">
+            <span className="text-2xl sm:text-[28px] font-black text-slate-950 dark:text-white font-urbanist">62</span>
+            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/50">-22%</span>
           </div>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Automated CDN failover healthy</p>
+          <p className="text-[10.5px] text-slate-400 dark:text-slate-500 mt-0.5">Automated CDN failover healthy</p>
         </div>
       </div>
 
       {/* Nodus Activity Density Histogram */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+      <div className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/90 dark:border-white/10 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
           <div>
-            <h3 className="font-bold text-slate-950 dark:text-white text-base">Administrative Action Density</h3>
-            <p className="text-xs text-slate-400 dark:text-slate-400">Hourly mutation frequency across content and user models</p>
+            <h3 className="font-bold text-slate-950 dark:text-white text-sm">Administrative Action Density</h3>
+            <p className="text-[11px] text-slate-400 dark:text-slate-400">Hourly mutation frequency across content and user models</p>
           </div>
 
           {/* 1D, 1W, 1M, 1Y, MAX Range Pills */}
@@ -94,9 +94,9 @@ export default function AuditlogPage() {
       </div>
 
       {/* Filter & Audit Table */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#121612] rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden">
         
-        <div className="p-4 border-b border-slate-100 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50 dark:bg-[#161B16]">
+        <div className="p-3 sm:p-3.5 border-b border-slate-100 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-slate-50/50 dark:bg-[#161B16]">
           <div className="relative w-full sm:w-80">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
@@ -104,7 +104,7 @@ export default function AuditlogPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search audit actions, admins, entities..."
-              className="w-full pl-9 pr-8 py-2 text-xs font-semibold bg-white dark:bg-[#121612] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl focus:border-[#FEF08A] focus:outline-none"
+              className="w-full pl-9 pr-8 py-1.5 text-xs font-semibold bg-white dark:bg-[#121612] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-lg focus:border-[#FEF08A] focus:outline-none"
             />
             {searchTerm && (
               <button
@@ -117,29 +117,29 @@ export default function AuditlogPage() {
             )}
           </div>
 
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{filteredLogs.length} Records Logged</span>
+          <span className="text-[11.5px] font-bold text-slate-500 dark:text-slate-400">{filteredLogs.length} Records Logged</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 dark:bg-[#161B16] border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Action Event</th>
-                <th className="py-3 px-4">Administrator</th>
-                <th className="py-3 px-4">Target Resource</th>
-                <th className="py-3 px-4">Time</th>
-                <th className="py-3 px-4">Latency</th>
-                <th className="py-3 px-4 text-right">Payload Diff</th>
+                <th className="py-2.5 px-3.5">Status</th>
+                <th className="py-2.5 px-3.5">Action Event</th>
+                <th className="py-2.5 px-3.5">Administrator</th>
+                <th className="py-2.5 px-3.5">Target Resource</th>
+                <th className="py-2.5 px-3.5">Time</th>
+                <th className="py-2.5 px-3.5">Latency</th>
+                <th className="py-2.5 px-3.5 text-right">Payload Diff</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
               {filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="py-12 text-center">
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/[0.06] flex items-center justify-center text-slate-400">
-                        <Search className="w-5 h-5" />
+                  <td colSpan="7" className="py-10 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-1.5">
+                      <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-white/[0.06] flex items-center justify-center text-slate-400">
+                        <Search className="w-4.5 h-4.5" />
                       </div>
                       <p className="text-xs font-bold text-slate-800 dark:text-slate-200">No activity logs match your search</p>
                       <p className="text-[11px] text-slate-400 dark:text-slate-500">
@@ -147,7 +147,7 @@ export default function AuditlogPage() {
                       </p>
                       <button
                         onClick={() => setSearchTerm('')}
-                        className="mt-1 px-3 py-1 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-lg transition-colors cursor-pointer"
+                        className="mt-1 px-2.5 py-1 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-lg transition-colors cursor-pointer"
                       >
                         Reset Search
                       </button>
@@ -157,7 +157,7 @@ export default function AuditlogPage() {
               ) : (
                 filteredLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors">
-                  <td className="py-3 px-4">
+                  <td className="py-2.5 px-3.5">
                     <Badge
                       variant={log.status === 'SUCCESS' ? 'active' : 'inactive'}
                       size="xs"
@@ -165,10 +165,10 @@ export default function AuditlogPage() {
                       {log.status === 'SUCCESS' ? 'Success' : 'Failed'}
                     </Badge>
                   </td>
-                  <td className="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">
+                  <td className="py-2.5 px-3.5 font-mono font-bold text-slate-900 dark:text-white">
                     {log.action}
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-2.5 px-3.5">
                     <div className="flex items-center gap-1.5">
                       <span className="font-bold text-slate-700 dark:text-slate-300">
                         {log.admin}
@@ -178,16 +178,16 @@ export default function AuditlogPage() {
                       )}
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium truncate max-w-[200px]" title={log.targetId}>
+                  <td className="py-2.5 px-3.5 text-slate-600 dark:text-slate-400 font-medium truncate max-w-[200px]" title={log.targetId}>
                     {log.targetId}
                   </td>
-                  <td className="py-3 px-4 font-mono text-slate-500 dark:text-slate-400 text-[11px]">
+                  <td className="py-2.5 px-3.5 font-mono text-slate-500 dark:text-slate-400 text-[11px]">
                     {log.time}
                   </td>
-                  <td className="py-3 px-4 font-mono text-slate-400 dark:text-slate-400 text-[11px]">
+                  <td className="py-2.5 px-3.5 font-mono text-slate-400 dark:text-slate-400 text-[11px]">
                     {log.duration}
                   </td>
-                  <td className="py-3 px-4 text-right">
+                  <td className="py-2.5 px-3.5 text-right">
                     <button
                       onClick={() => setSelectedDiff(log)}
                       className="px-2.5 py-1 bg-slate-100 dark:bg-white/[0.06] hover:bg-[#FEF08A] hover:text-black dark:hover:bg-[#FEF08A] dark:hover:text-black text-slate-800 dark:text-slate-200 rounded-lg font-bold text-xs transition-colors border border-slate-200 dark:border-white/10 cursor-pointer"
@@ -207,21 +207,21 @@ export default function AuditlogPage() {
       {/* JSON Diff Inspector Modal */}
       {selectedDiff && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#202620] text-slate-950 dark:text-white rounded-2xl w-full max-w-lg p-6 shadow-2xl border border-slate-200 dark:border-white/15">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10 mb-4">
+          <div className="bg-white dark:bg-[#202620] text-slate-950 dark:text-white rounded-xl w-full max-w-lg p-4 sm:p-5 shadow-2xl border border-slate-200 dark:border-white/15">
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10 mb-3">
               <div>
                 <span className="text-xs font-mono font-bold text-amber-500 dark:text-[#FEF08A]">{selectedDiff.action}</span>
                 <h4 className="text-sm font-bold text-slate-950 dark:text-white mt-0.5">{selectedDiff.targetId}</h4>
               </div>
               <button onClick={() => setSelectedDiff(null)} className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg cursor-pointer">
-                <X className="w-5 h-5" />
+                <X className="w-4.5 h-4.5" />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs font-mono">
+            <div className="space-y-2.5 text-xs font-mono">
               <div>
                 <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 mb-1">MUTATION DIFF (BEFORE / AFTER):</p>
-                <div className="bg-slate-900 dark:bg-[#121612] p-3 rounded-xl border border-slate-800 dark:border-white/10 overflow-x-auto text-[11px]">
+                <div className="bg-slate-900 dark:bg-[#121612] p-2.5 rounded-lg border border-slate-800 dark:border-white/10 overflow-x-auto text-[11px]">
                   <pre className="text-emerald-400 leading-relaxed">
                     {JSON.stringify(selectedDiff.diff, null, 2)}
                   </pre>
@@ -229,10 +229,10 @@ export default function AuditlogPage() {
               </div>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-slate-100 dark:border-white/10 flex justify-end">
+            <div className="mt-4 pt-2.5 border-t border-slate-100 dark:border-white/10 flex justify-end">
               <button
                 onClick={() => setSelectedDiff(null)}
-                className="px-4 py-2 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-800 dark:text-white font-bold text-xs rounded-xl transition-colors cursor-pointer border border-transparent dark:border-white/10"
+                className="px-3 py-1.5 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-800 dark:text-white font-bold text-xs rounded-lg transition-colors cursor-pointer border border-transparent dark:border-white/10"
               >
                 Close Inspector
               </button>

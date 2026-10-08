@@ -162,59 +162,57 @@ export default function AppNotificationsPage() {
   }, [notices, searchTerm, selectedCategory, statusFilter]);
 
   return (
-    <div className="space-y-6 font-urbanist selection:bg-[#FEF08A] selection:text-black">
+    <div className="space-y-3.5 font-urbanist selection:bg-[#FEF08A] selection:text-black">
       
       {/* 1. Header Banner */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
-        <div className="flex items-center space-x-3.5">
-          <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
-            <Megaphone className="w-5 h-5 stroke-[2.2]" />
+      <div className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all">
+        <div className="flex items-center space-x-3">
+          <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
+            <Megaphone className="w-4.5 h-4.5 stroke-[2.2]" />
           </div>
           <div>
-            <h2 className="text-xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+            <h2 className="text-base sm:text-lg font-extrabold text-slate-950 dark:text-white tracking-tight">
               In-App Notifications
             </h2>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
               Broadcast system notices, updates, and offers directly into the user mobile inbox.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2.5 shrink-0">
+        <div className="flex items-center space-x-2 shrink-0">
           <button
             onClick={fetchNotices}
             disabled={isLoading}
-            className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/[0.1] transition-colors border border-slate-200/80 dark:border-white/10 cursor-pointer"
+            className="p-2 rounded-lg bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/[0.1] transition-colors border border-slate-200/80 dark:border-white/10 cursor-pointer"
             title="Refresh from server"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-amber-500' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-amber-500' : ''}`} />
           </button>
           
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all shadow-xs shrink-0 active:scale-98 cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all shadow-xs shrink-0 active:scale-98 cursor-pointer"
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>New Notice</span>
           </button>
         </div>
       </div>
 
-
-
       {feedback && (
         <div
-          className={`p-4 rounded-2xl border flex items-center justify-between gap-3 text-xs font-bold shadow-xs transition-all ${
+          className={`p-3 rounded-xl border flex items-center justify-between gap-2.5 text-xs font-bold shadow-xs transition-all ${
             feedback.type === 'success'
               ? 'bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-200'
               : 'bg-rose-50/90 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/80 text-rose-800 dark:text-rose-200'
           }`}
         >
-          <div className="flex items-center space-x-2.5">
+          <div className="flex items-center space-x-2">
             {feedback.type === 'success' ? (
-              <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
             ) : (
-              <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
             )}
             <span>{feedback.message}</span>
           </div>
@@ -228,7 +226,7 @@ export default function AppNotificationsPage() {
       )}
 
       {/* 3. Controls & Filter Bar */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 shadow-nodus flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#121612] rounded-xl p-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
         
         {/* Category Filter Chips */}
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -241,7 +239,7 @@ export default function AppNotificationsPage() {
             <button
               key={tab.id}
               onClick={() => setSelectedCategory(tab.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 selectedCategory === tab.id
                   ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
                   : 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/[0.1]'
@@ -253,22 +251,22 @@ export default function AppNotificationsPage() {
         </div>
 
         {/* Search & Status Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search announcements..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-900 dark:text-white bg-slate-50 dark:bg-[#161B16] focus:bg-white dark:focus:bg-[#121612] focus:outline-hidden focus:ring-1 focus:ring-[#FEF08A]"
+              className="pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-900 dark:text-white bg-slate-50 dark:bg-[#161B16] focus:bg-white dark:focus:bg-[#121612] focus:outline-hidden focus:ring-1 focus:ring-[#FEF08A]"
             />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-[#161B16] focus:outline-hidden"
+            className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-[#161B16] focus:outline-hidden"
           >
             <option value="ALL">All Status</option>
             <option value="ACTIVE">Active Only</option>
@@ -278,15 +276,15 @@ export default function AppNotificationsPage() {
       </div>
 
       {/* 4. Notices List / Cards */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {isLoading ? (
-          <div className="bg-white dark:bg-[#121612] rounded-2xl p-12 border border-slate-200/80 dark:border-white/10 text-center text-xs text-slate-400 flex items-center justify-center space-x-2">
+          <div className="bg-white dark:bg-[#121612] rounded-xl p-10 border border-slate-200/80 dark:border-white/10 text-center text-xs text-slate-400 flex items-center justify-center space-x-2">
             <RefreshCw className="w-4 h-4 animate-spin text-amber-500" />
             <span>Loading announcements from database...</span>
           </div>
         ) : filteredNotices.length === 0 ? (
-          <div className="bg-white dark:bg-[#121612] rounded-2xl p-12 border border-slate-200/80 dark:border-white/10 text-center text-xs text-slate-400 space-y-2">
-            <Megaphone className="w-8 h-8 mx-auto text-slate-300 dark:text-slate-600 stroke-[1.5]" />
+          <div className="bg-white dark:bg-[#121612] rounded-xl p-10 border border-slate-200/80 dark:border-white/10 text-center text-xs text-slate-400 space-y-2">
+            <Megaphone className="w-7 h-7 mx-auto text-slate-300 dark:text-slate-600 stroke-[1.5]" />
             <p className="font-bold text-slate-600 dark:text-slate-400">No in-app notices match your filters.</p>
             <p className="text-[11px] text-slate-400">Click "New Notice" to publish an in-app announcement to user inboxes.</p>
           </div>
@@ -296,47 +294,47 @@ export default function AppNotificationsPage() {
             return (
               <div
                 key={id}
-                className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 shadow-nodus flex items-start justify-between gap-4 hover:border-slate-300 dark:hover:border-white/20 transition-all"
+                className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex items-start justify-between gap-3 hover:border-slate-300 dark:hover:border-white/20 transition-all"
               >
-                <div className="flex items-start space-x-3.5 min-w-0">
+                <div className="flex items-start space-x-3 min-w-0">
                   {/* Uniform #FEF08A Icon Badge */}
-                  <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
+                  <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
                     {notice.category === 'SYSTEM' ? (
-                      <Info className="w-5 h-5 stroke-[2.2]" />
+                      <Info className="w-4 h-4 stroke-[2.2]" />
                     ) : notice.category === 'OFFER' ? (
-                      <Sparkles className="w-5 h-5 stroke-[2.2]" />
+                      <Sparkles className="w-4 h-4 stroke-[2.2]" />
                     ) : (
-                      <CheckCircle2 className="w-5 h-5 stroke-[2.2]" />
+                      <CheckCircle2 className="w-4 h-4 stroke-[2.2]" />
                     )}
                   </div>
 
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-                      <span className="font-extrabold text-sm text-slate-950 dark:text-white">
+                      <span className="font-bold text-xs sm:text-[13px] text-slate-950 dark:text-white">
                         {notice.title}
                       </span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/10">
+                      <span className="px-1.5 py-0.5 rounded text-[9.5px] font-extrabold bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/10">
                         {notice.category}
                       </span>
                       {notice.priority === 'High' && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                          HIGH PRIORITY
+                        <span className="px-1.5 py-0.5 rounded text-[9.5px] font-extrabold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                          HIGH
                         </span>
                       )}
                     </div>
 
-                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed break-words">
+                    <p className="text-[11.5px] text-slate-600 dark:text-slate-300 leading-relaxed break-words">
                       {notice.body}
                     </p>
 
-                    <div className="flex items-center space-x-3 text-[11px] text-slate-400 dark:text-slate-500 pt-1 font-medium flex-wrap gap-y-1">
+                    <div className="flex items-center space-x-2.5 text-[10.5px] text-slate-400 dark:text-slate-500 pt-0.5 font-medium flex-wrap gap-y-1">
                       <span>Target: <strong className="text-slate-700 dark:text-slate-200">{notice.target}</strong></span>
                       <span>•</span>
                       <span>{formatTimeAgo(notice.createdAt)}</span>
                       <span>•</span>
                       <button
                         onClick={() => handleToggle(id)}
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                        className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
                           notice.isActive
                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                             : 'bg-slate-200/80 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400'
@@ -350,10 +348,10 @@ export default function AppNotificationsPage() {
 
                 <button
                   onClick={() => handleDelete(id)}
-                  className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors shrink-0 cursor-pointer"
+                  className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors shrink-0 cursor-pointer"
                   title="Delete notice"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             );

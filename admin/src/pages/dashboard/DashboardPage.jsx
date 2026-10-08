@@ -26,7 +26,7 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
   }, []);
 
   return (
-    <div className="space-y-8 font-urbanist">
+    <div className="space-y-3.5 font-urbanist">
       {/* 4 Core OTT Stat Cards & Nodus Metric Row */}
       <MetricsOverview onOpenIngestModal={onOpenIngestModal} />
 
@@ -37,22 +37,22 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
       <IncomeChart onNavigate={onNavigate} />
 
       {/* Live OTT Performance Split: Top Trending Series & Live Subscriptions */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
         
         {/* Left: Top Trending Micro-Dramas */}
-        <div className="lg:col-span-7 bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus">
+        <div className="lg:col-span-7 bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-nodus">
           <div>
             {/* Enhanced Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10 gap-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
-                  <Flame className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10 gap-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
+                  <Flame className="w-4 h-4 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-950 dark:text-white text-base sm:text-[17px] font-urbanist tracking-tight leading-snug">
+                  <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base font-urbanist tracking-tight leading-snug">
                     Top Trending Micro-Dramas
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                     Ranked by paid conversions & completion rate
                   </p>
                 </div>
@@ -60,7 +60,7 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
               <button
                 type="button"
                 onClick={() => onNavigate('dramas')}
-                className="inline-flex items-center text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] border border-transparent dark:border-white/10 px-3 py-1.5 rounded-xl transition-all gap-1 group/btn shrink-0"
+                className="inline-flex items-center text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] border border-transparent dark:border-white/10 px-2.5 py-1 rounded-lg transition-all gap-1 group/btn shrink-0"
               >
                 <span>View Catalog</span>
                 <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform text-slate-500 dark:text-slate-400" />
@@ -76,7 +76,7 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
                   <div
                     key={drama.id}
                     onClick={() => onNavigate('dramas')}
-                    className="flex items-center space-x-3 py-3 px-2 -mx-2 rounded-xl hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors cursor-pointer group"
+                    className="flex items-center space-x-3 py-2.5 px-2 -mx-2 rounded-xl hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors cursor-pointer group"
                   >
                     {/* Typographic Rank Number */}
                     <span className={`font-urbanist font-black text-xs w-4 text-center shrink-0 ${
@@ -86,7 +86,7 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
                     </span>
 
                     {/* 9:16 Portrait Poster */}
-                    <div className="w-10 h-14 rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-slate-200/80 dark:border-white/10 shadow-2xs group-hover:scale-[1.02] transition-transform duration-200">
+                    <div className="w-9 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-slate-200/80 dark:border-white/10 shadow-2xs group-hover:scale-[1.02] transition-transform duration-200">
                       <img
                         src={drama.poster}
                         alt={drama.title}
@@ -113,19 +113,19 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
         </div>
 
         {/* Right: Recent Subscriptions Ledger */}
-        <div className="lg:col-span-5 bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus">
+        <div className="lg:col-span-5 bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-nodus">
           <div>
             {/* Enhanced Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10 gap-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
-                  <CreditCard className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10 gap-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
+                  <CreditCard className="w-4 h-4 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-950 dark:text-white text-base sm:text-[17px] font-urbanist tracking-tight leading-snug">
+                  <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base font-urbanist tracking-tight leading-snug">
                     Recent Subscriptions
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                     Live Razorpay webhook transactions
                   </p>
                 </div>

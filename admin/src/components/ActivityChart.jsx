@@ -175,7 +175,7 @@ export default function ActivityChart({ onNavigate }) {
       : `${peakVal.toLocaleString()} Subscribers`;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 font-sans">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 mb-3.5 font-sans">
       {/* Left Column: Progress Metric Card */}
       <div className="lg:col-span-8 flex">
         <ProgressMetricCard
@@ -198,21 +198,21 @@ export default function ActivityChart({ onNavigate }) {
           data={chartSeriesData}
           size="md"
           showStats={true}
-          className="h-full min-h-[380px]"
+          className="h-full min-h-[290px] sm:min-h-[300px]"
         />
       </div>
 
       {/* Right Column: Google AdMob Monetization Side Card */}
-      <div className="lg:col-span-4 bg-white dark:bg-[#121612] rounded-[28px] p-6 border border-slate-200/90 dark:border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover flex flex-col justify-between group">
+      <div className="lg:col-span-4 bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 dark:border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover flex flex-col justify-between group">
         <div>
           {/* Header */}
-          <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-white/10">
-            <div className="flex items-center space-x-2.5">
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shadow-xs shrink-0">
-                <Coins className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+          <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shadow-xs shrink-0">
+                <Coins className="w-4 h-4 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
               </div>
               <div>
-                <h3 className="font-extrabold text-slate-950 dark:text-white text-base font-urbanist tracking-tight">
+                <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base font-urbanist tracking-tight">
                   Google AdMob Monetization
                 </h3>
               </div>
@@ -220,59 +220,59 @@ export default function ActivityChart({ onNavigate }) {
           </div>
 
           {/* AdMob Monthly Revenue Box */}
-          <div className="mt-4 space-y-4">
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#161B16] border border-slate-100/90 dark:border-white/10">
+          <div className="mt-3 space-y-2.5">
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-100/90 dark:border-white/10">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider font-urbanist">
+                <span className="text-[10.5px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider font-urbanist">
                   Monthly Ad Revenue (March 2026)
                 </span>
-                <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-500/20">
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-500/20">
                   Live Sync
                 </span>
               </div>
-              <div className="mt-1.5">
-                <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight block">
+              <div className="mt-1">
+                <span className="text-2xl sm:text-[26px] font-black text-slate-950 dark:text-white font-urbanist tracking-tight block">
                   <AnimatedNumber value="₹4,85,200" />
                 </span>
               </div>
             </div>
 
             {/* Ad Format Share Breakdown (Stacked Pill Shape with Curved BG) */}
-            <div className="space-y-3">
-              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block font-urbanist">
+            <div className="space-y-2">
+              <span className="text-[10.5px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block font-urbanist">
                 AD FORMAT REVENUE SHARE
               </span>
 
               {/* Format 1: Rewarded Video */}
-              <div className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
-                <span className="font-semibold text-slate-600 dark:text-slate-400 text-[11px] font-urbanist">Rewarded Video (Ep Unlock)</span>
-                <div className="text-right flex items-baseline space-x-1.5">
-                  <span className="text-slate-950 dark:text-white font-black text-2xl sm:text-3xl font-urbanist tracking-tight">
+              <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
+                <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist">Rewarded Video (Ep Unlock)</span>
+                <div className="text-right flex items-baseline space-x-1">
+                  <span className="text-slate-950 dark:text-white font-black text-lg sm:text-xl font-urbanist tracking-tight">
                     <AnimatedNumber value="62.4%" />
                   </span>
-                  <span className="text-slate-400 dark:text-slate-500 font-bold text-xs">(₹3.02L)</span>
+                  <span className="text-slate-400 dark:text-slate-500 font-bold text-[11px]">(₹3.02L)</span>
                 </div>
               </div>
 
               {/* Format 2: Interstitial Ads */}
-              <div className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
-                <span className="font-semibold text-slate-600 dark:text-slate-400 text-[11px] font-urbanist">Interstitial (Nav & End)</span>
-                <div className="text-right flex items-baseline space-x-1.5">
-                  <span className="text-slate-950 dark:text-white font-black text-2xl sm:text-3xl font-urbanist tracking-tight">
+              <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
+                <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist">Interstitial (Nav & End)</span>
+                <div className="text-right flex items-baseline space-x-1">
+                  <span className="text-slate-950 dark:text-white font-black text-lg sm:text-xl font-urbanist tracking-tight">
                     <AnimatedNumber value="24.8%" />
                   </span>
-                  <span className="text-slate-400 dark:text-slate-500 font-bold text-xs">(₹1.20L)</span>
+                  <span className="text-slate-400 dark:text-slate-500 font-bold text-[11px]">(₹1.20L)</span>
                 </div>
               </div>
 
               {/* Format 3: Native & Banner */}
-              <div className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
-                <span className="font-semibold text-slate-600 dark:text-slate-400 text-[11px] font-urbanist">Native Feed & Banner</span>
-                <div className="text-right flex items-baseline space-x-1.5">
-                  <span className="text-slate-950 dark:text-white font-black text-2xl sm:text-3xl font-urbanist tracking-tight">
+              <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
+                <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist">Native Feed & Banner</span>
+                <div className="text-right flex items-baseline space-x-1">
+                  <span className="text-slate-950 dark:text-white font-black text-lg sm:text-xl font-urbanist tracking-tight">
                     <AnimatedNumber value="12.8%" />
                   </span>
-                  <span className="text-slate-400 dark:text-slate-500 font-bold text-xs">(₹62k)</span>
+                  <span className="text-slate-400 dark:text-slate-500 font-bold text-[11px]">(₹62k)</span>
                 </div>
               </div>
             </div>
@@ -280,7 +280,7 @@ export default function ActivityChart({ onNavigate }) {
         </div>
 
         {/* Footer Link */}
-        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end text-xs text-slate-500 dark:text-slate-400">
+        <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-end text-xs text-slate-500 dark:text-slate-400">
           <button
             type="button"
             onClick={() => onNavigate && onNavigate('admob')}

@@ -309,7 +309,7 @@ export default function GenresPage({ onNavigate }) {
   }, [genres, statusFilter, searchTerm, sortBy]);
 
   return (
-    <div className="space-y-6 font-urbanist pb-10">
+    <div className="space-y-3.5 font-urbanist pb-10">
 
       {/* Floating Action Toast Notification */}
       {toast && (
@@ -360,7 +360,7 @@ export default function GenresPage({ onNavigate }) {
       )}
 
       {/* 4 Standard KPI Overview Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiStatCard
           icon={Tags}
           title="Total Genres"
