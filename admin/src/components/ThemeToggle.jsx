@@ -68,40 +68,54 @@ export default function ThemeToggle({ variant = 'topbar', className = '' }) {
         onMouseLeave={() => setIsHovered(false)}
         title={isDark ? 'Switch to Light Mode (Alt+T)' : 'Switch to Dark Mode (Alt+T)'}
         aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-        className={`group relative inline-flex h-8 w-14 items-center rounded-full p-1 transition-all duration-300 cursor-pointer select-none border shadow-2xs hover:scale-102 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FEF08A] ${
+        className={`group relative inline-flex h-[26px] w-[48px] items-center rounded-full p-[2px] transition-all duration-300 cursor-pointer select-none border hover:scale-[1.03] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FEF08A]/80 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-900 ${
           isDark
-            ? 'bg-slate-900 border-slate-700/90 hover:border-slate-600'
-            : 'bg-slate-100 border-slate-200 hover:border-slate-300'
+            ? 'bg-[#0B0E0B] border-white/[0.08] hover:border-white/[0.16] shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.65)]'
+            : 'bg-slate-200/80 border-slate-300/80 hover:border-slate-400/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)]'
         } ${className}`}
       >
-        {/* Track ambient icons */}
-        <div className="w-full flex items-center justify-between px-1 pointer-events-none">
-          <Sun
-            className={`w-3.5 h-3.5 transition-all duration-300 ${
-              isDark ? 'text-slate-500 opacity-60 scale-75' : 'text-amber-500 opacity-0 scale-90'
-            }`}
-            strokeWidth={2}
-          />
-          <Moon
-            className={`w-3.5 h-3.5 transition-all duration-300 ${
-              isDark ? 'text-[#FEF08A] opacity-0 scale-90' : 'text-slate-400 opacity-60 scale-75'
-            }`}
-            strokeWidth={2}
-          />
+        {/* Track ambient icons (crisp and unobtrusive) */}
+        <div className="w-full flex items-center justify-between pointer-events-none px-0.5">
+          <div className="w-[20px] h-[20px] flex items-center justify-center">
+            <Sun
+              className={`w-3 h-3 transition-all duration-300 ${
+                isDark ? 'text-zinc-500/70 opacity-100 scale-85' : 'text-amber-500 opacity-0 scale-75'
+              }`}
+              strokeWidth={1.9}
+            />
+          </div>
+          <div className="w-[20px] h-[20px] flex items-center justify-center">
+            <Moon
+              className={`w-3 h-3 transition-all duration-300 ${
+                isDark ? 'text-[#FEF08A] opacity-0 scale-75' : 'text-slate-400/80 opacity-100 scale-85'
+              }`}
+              strokeWidth={1.9}
+            />
+          </div>
         </div>
 
-        {/* Sliding Thumb Knob */}
+        {/* Sliding Tactile Thumb Knob */}
         <span
-          className={`absolute top-1 left-1 flex h-6 w-6 items-center justify-center rounded-full shadow-sm transition-all duration-300 ease-out border ${
+          className={`absolute top-[2px] left-[2px] flex h-[20px] w-[20px] items-center justify-center rounded-full transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] border ${
             isDark
-              ? 'translate-x-6 bg-[#0D0D0D] border-slate-700/80 text-[#FEF08A]'
-              : 'translate-x-0 bg-white border-slate-200/90 text-amber-500'
+              ? 'translate-x-[22px] bg-gradient-to-b from-[#2E372E] to-[#1A211A] border-white/[0.14] text-[#FEF08A] shadow-[0_2px_5px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.18)]'
+              : 'translate-x-0 bg-gradient-to-b from-white to-slate-50 border-slate-200/90 text-amber-500 shadow-[0_1.5px_3px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,1)]'
           }`}
         >
           {isDark ? (
-            <Moon className="w-3.5 h-3.5 transition-transform duration-300" strokeWidth={2.2} />
+            <Moon
+              className="w-3 h-3 transition-transform duration-300 group-hover:-rotate-12 drop-shadow-[0_0_4px_rgba(254,240,138,0.4)]"
+              strokeWidth={2.2}
+              fill="currentColor"
+              fillOpacity={0.2}
+            />
           ) : (
-            <Sun className="w-3.5 h-3.5 transition-transform duration-300" strokeWidth={2.2} />
+            <Sun
+              className="w-3 h-3 transition-transform duration-300 group-hover:rotate-45 drop-shadow-[0_1px_1px_rgba(245,158,11,0.2)]"
+              strokeWidth={2.2}
+              fill="currentColor"
+              fillOpacity={0.2}
+            />
           )}
         </span>
       </button>

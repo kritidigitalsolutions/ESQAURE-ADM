@@ -494,31 +494,30 @@ export default function UploadContentPage({ onNavigate }) {
   ];
 
   return (
-    <div className="space-y-6 font-urbanist w-full pb-16 selection:bg-[#FEF08A] selection:text-black">
+    <div className="space-y-3.5 font-urbanist w-full pb-10 selection:bg-[#FEF08A] selection:text-black">
       
       {/* Top Header Card */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-white/10 shadow-nodus relative overflow-hidden transition-all">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="flex items-start space-x-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
-              <Upload className="w-6 h-6 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+      <div className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs relative overflow-hidden transition-all">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-start space-x-3">
+            <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
+              <Upload className="w-4.5 h-4.5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+              <h1 className="text-base sm:text-lg font-extrabold text-slate-950 dark:text-white tracking-tight">
                 Content Upload Studio
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                 Upload, encode, and publish high-engagement micro-drama series to the streaming app in a seamless sequence.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2.5 shrink-0 self-start md:self-center">
-
+          <div className="flex items-center space-x-2 shrink-0 self-start md:self-center">
             <button
               type="button"
               onClick={() => onNavigate && onNavigate('dramas')}
-              className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 border border-transparent dark:border-white/10 text-xs font-bold transition-all cursor-pointer"
+              className="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 border border-transparent dark:border-white/10 text-xs font-bold transition-all cursor-pointer"
             >
               Cancel
             </button>
@@ -526,10 +525,10 @@ export default function UploadContentPage({ onNavigate }) {
         </div>
 
         {/* Sequential Stepper Navigation Bar */}
-        <div className="mt-7 pt-5 border-t border-slate-100 dark:border-slate-800/80">
+        <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800/80">
           
           {/* Progress percentage bar */}
-          <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mb-4">
+          <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2.5">
             <div
               className="bg-[#FEF08A] h-full transition-all duration-500 ease-out"
               style={{ width: `${Math.min(100, Math.max(15, ((currentStep) / totalSteps) * 100))}%` }}
@@ -662,19 +661,19 @@ export default function UploadContentPage({ onNavigate }) {
       {/* STEP 1: SERIES FUNDAMENTALS & METADATA */}
       {/* ======================================================== */}
       {currentStep === 1 && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-6">
+        <div className="space-y-3.5 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#121612] rounded-xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
             
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 text-slate-950 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center font-extrabold shadow-xs">
-                  <Film className="w-5 h-5 stroke-[2.2]" />
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 text-slate-950 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center font-extrabold shadow-xs">
+                  <Film className="w-4.5 h-4.5 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-950 dark:text-white text-base sm:text-lg tracking-tight">
+                  <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base tracking-tight">
                     Step 1: Series Fundamentals & Storyline
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                     Enter the core identity, English title, storyline synopsis, and certifications.
                   </p>
                 </div>
@@ -860,20 +859,20 @@ export default function UploadContentPage({ onNavigate }) {
       {/* STEP 2: MEDIA STUDIO                                     */}
       {/* ======================================================== */}
       {currentStep === 2 && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-6">
+        <div className="space-y-3.5 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#121612] rounded-xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
 
             {/* Clean, Minimal Header matching Step 1 and Step 3 */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 text-slate-950 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center font-extrabold shadow-xs shrink-0">
-                  <Video className="w-5 h-5 stroke-[2.2]" />
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 text-slate-950 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center font-extrabold shadow-xs shrink-0">
+                  <Video className="w-4.5 h-4.5 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-950 dark:text-white text-base sm:text-lg tracking-tight">
+                  <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base tracking-tight">
                     Step 2: Media Studio
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                     Upload visual artwork, teaser trailer, and manage your vertical episode chapters.
                   </p>
                 </div>
@@ -1730,92 +1729,92 @@ export default function UploadContentPage({ onNavigate }) {
       {/* STEP 3: PAYWALL & LAUNCH */}
       {/* ======================================================== */}
       {currentStep === 3 && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-6">
+        <div className="space-y-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#121612] rounded-xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
             
             {/* Step 3 Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10 gap-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 text-slate-950 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center font-extrabold shadow-xs">
-                  <Lock className="w-5 h-5 stroke-[2.2]" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 dark:border-white/10 gap-2.5">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 text-slate-950 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center font-extrabold shadow-xs shrink-0">
+                  <Lock className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-950 dark:text-white text-base sm:text-lg tracking-tight">
+                  <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base tracking-tight">
                     Step 3: Paywall &amp; Launch
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                     Configure Free Preview vs Subscriber Paywall rules, set coin pricing, and publish series.
                   </p>
                 </div>
               </div>
 
-              <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                 Step 3 of 3
               </span>
             </div>
 
             {/* Quick Metrics Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
-                <span className="text-[11px] font-bold text-slate-400 block uppercase">Total Episodes</span>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-xl font-black text-slate-950 dark:text-white">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
+                <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Total Episodes</span>
+                <div className="flex items-center space-x-2 mt-0.5">
+                  <span className="text-lg sm:text-xl font-black text-slate-950 dark:text-white">
                     {totalEpisodes}
                   </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Episodes (From Media Studio)</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Episodes (From Media Studio)</span>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
-                <span className="text-[11px] font-bold text-slate-400 block uppercase">Free Preview Episodes</span>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">
+              <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
+                <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Free Preview Episodes</span>
+                <div className="flex items-center space-x-2 mt-0.5">
+                  <span className="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400">
                     {episodes.filter((ep) => ep.isFree).length}
                   </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Free (Click badge to toggle)</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Free (Click badge to toggle)</span>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
-                <span className="text-[11px] font-bold text-slate-400 block uppercase">Subscriber Paywall Locked</span>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-xl font-black text-amber-600 dark:text-[#FEF08A]">
+              <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
+                <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Subscriber Paywall Locked</span>
+                <div className="flex items-center space-x-2 mt-0.5">
+                  <span className="text-lg sm:text-xl font-black text-amber-600 dark:text-[#FEF08A]">
                     {episodes.filter((ep) => !ep.isFree).length}
                   </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Episodes (Requires Coins/Pass)</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Episodes (Requires Coins/Pass)</span>
                 </div>
               </div>
             </div>
 
             {/* Episode Paywall Access Table */}
-            <div className="border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-xs">
-              <div className="bg-slate-100/70 dark:bg-[#161B16] px-4 py-3 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
+            <div className="border border-slate-200/80 dark:border-white/10 rounded-xl overflow-hidden shadow-xs">
+              <div className="bg-slate-100/70 dark:bg-[#161B16] px-3.5 py-2.5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Episode ({episodes.length} total)</span>
                 <span>Paywall Status (Click badge to toggle Free / Subscriber)</span>
               </div>
 
               {episodes.length === 0 ? (
-                <div className="p-8 text-center bg-white dark:bg-[#121612]">
-                  <FileVideo className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
-                  <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No episodes found</p>
-                  <p className="text-xs text-slate-400 mt-1">Please go back to Step 2 (Media Studio) to add episode videos.</p>
+                <div className="p-6 text-center bg-white dark:bg-[#121612]">
+                  <FileVideo className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300">No episodes found</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Please go back to Step 2 (Media Studio) to add episode videos.</p>
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[380px] overflow-y-auto">
                   {episodes.map((ep) => (
                     <div
                       key={ep.id}
-                      className="px-4 py-3 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors bg-white dark:bg-[#121612]"
+                      className="px-3.5 py-2.5 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors bg-white dark:bg-[#121612]"
                     >
-                      <div className="flex items-center space-x-3 min-w-0 pr-3 flex-1">
-                        <span className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 font-black text-xs flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0">
+                      <div className="flex items-center space-x-2.5 min-w-0 pr-3 flex-1">
+                        <span className="w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-800 font-black text-[11px] flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0">
                           {ep.id}
                         </span>
                         <div className="min-w-0">
-                          <p className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 truncate">
+                          <p className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate">
                             {ep.title}
                           </p>
-                          <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-2">
+                          <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-2">
                             <span className="flex items-center gap-1 font-mono text-slate-500">
                               <Clock className="w-3 h-3" />
                               {ep.duration}
@@ -1841,7 +1840,7 @@ export default function UploadContentPage({ onNavigate }) {
                             );
                           }}
                           title="Click to toggle Free Preview or Subscriber Locked"
-                          className={`px-3 py-1.5 rounded-full text-[10px] font-extrabold tracking-wide flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95 ${
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold tracking-wide flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95 ${
                             ep.isFree
                               ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
                               : 'bg-[#FEF08A] text-slate-950 font-black border border-amber-300/80'
@@ -1874,19 +1873,19 @@ export default function UploadContentPage({ onNavigate }) {
       {/* ======================================================== */}
       {/* BOTTOM FIXED NAVIGATION BAR */}
       {/* ======================================================== */}
-      <div className="bg-white/95 dark:bg-[#141914]/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 shadow-nodus flex items-center justify-between gap-4 sticky bottom-4 z-40">
+      <div className="bg-white/95 dark:bg-[#141914]/95 backdrop-blur-md rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-md flex items-center justify-between gap-3 sticky bottom-3 z-40">
         
         <button
           type="button"
           onClick={handlePrevStep}
           disabled={currentStep === 1}
-          className={`inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`inline-flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
             currentStep === 1
               ? 'opacity-40 cursor-not-allowed text-slate-400'
               : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
           }`}
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5" />
           <span>Previous Step</span>
         </button>
 
@@ -1899,19 +1898,19 @@ export default function UploadContentPage({ onNavigate }) {
           <button
             type="button"
             onClick={handleNextStep}
-            className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-black transition-all shadow-xs hover:scale-[1.02] active:scale-[0.98]"
+            className="inline-flex items-center space-x-2 px-4.5 py-2 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-black transition-all shadow-xs hover:scale-[1.02] active:scale-[0.98]"
           >
             <span>Continue to {stepsConfig[currentStep].label}</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         ) : (
           <button
             type="button"
             onClick={handlePublish}
             disabled={isPublishing}
-            className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-black transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+            className="inline-flex items-center space-x-2 px-4.5 py-2 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-black transition-all shadow-xs hover:scale-[1.02] active:scale-[0.98]"
           >
-            <Sparkles className="w-4 h-4 text-slate-950" />
+            <Sparkles className="w-3.5 h-3.5 text-slate-950" />
             <span>Publish Series</span>
           </button>
         )}

@@ -14,6 +14,8 @@ import UsersPage from './pages/users/UsersPage';
 import SubscriptionsPage from './pages/subscriptions/SubscriptionsPage';
 import TransactionsPage from './pages/transactions/TransactionsPage';
 import AdmobPage from './pages/admob/AdmobPage';
+import CustomAdsPage from './pages/admob/CustomAdsPage';
+import AdControlPage from './pages/admob/AdControlPage';
 import NotificationsPage from './pages/notifications/NotificationsPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import UploadContentPage from './pages/upload/UploadContentPage';
@@ -70,29 +72,12 @@ export default function App() {
   const [selectedDramaId, setSelectedDramaId] = useState(null);
   const [isIngestModalOpen, setIsIngestModalOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem('sidebar_collapsed') === 'true';
-    } catch {
-      return false;
-    }
-  });
 
   const handleLogout = () => {
     try {
       localStorage.removeItem('admin_authenticated');
     } catch {}
     setIsAuthenticated(false);
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed(prev => {
-      const next = !prev;
-      try {
-        localStorage.setItem('sidebar_collapsed', String(next));
-      } catch {}
-      return next;
-    });
   };
 
   const getPageMeta = () => {
@@ -134,8 +119,18 @@ export default function App() {
         };
       case 'admob':
         return {
-          title: "AdMob",
-          subtitle: "Track monthly ad revenue, eCPM performance, fill rate, ad units, and impression stats."
+          title: "Google AdMob Monetization",
+          subtitle: "Manage Google AdMob App IDs, live ad units, performance metrics, and eCPM tracking."
+        };
+      case 'custom_ads':
+        return {
+          title: "Custom Ads & Direct Sponsors",
+          subtitle: "Publish and manage high-impact direct sponsor campaigns, video pre-rolls, banners, and in-house promos."
+        };
+      case 'ad_control':
+        return {
+          title: "Ad Control & Synchronized Delivery",
+          subtitle: "Central control room to synchronize whether to show Custom ads, AdMob, or both across all OTT placements."
         };
       case 'users':
         return {
@@ -207,8 +202,6 @@ export default function App() {
           setActiveTab(tab);
         }}
         onOpenIngestModal={() => setIsIngestModalOpen(true)}
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={toggleSidebar}
       />
 
       {/* Main Content Area (Fixed layout, clean top header docking) */}
@@ -219,8 +212,6 @@ export default function App() {
           onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
           title={meta.title}
           subtitle={meta.subtitle}
-          isSidebarCollapsed={isSidebarCollapsed}
-          onToggleSidebar={toggleSidebar}
           onLogout={handleLogout}
           onNavigate={(tab) => {
             setSelectedDramaId(null);
@@ -237,81 +228,91 @@ export default function App() {
         />
 
         {/* Dynamic Page Container */}
-        <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
-          <ErrorBoundary key={activeTab}>
-            {/* Active Page View */}
-            {activeTab === 'summary' && (
-              <DashboardPage
-                onOpenIngestModal={() => setActiveTab('upload')}
-                onNavigate={setActiveTab}
-              />
-            )}
+        <main className="flex-1 w-full overflow-y-auto overflow-x-hidden">
+          <div className="max-w-[1600px] w-full mx-auto px-3 sm:px-5 lg:px-6 py-4 min-h-full">
+            <ErrorBoundary key={activeTab}>
+              {/* Active Page View */}
+              {activeTab === 'summary' && (
+                <DashboardPage
+                  onOpenIngestModal={() => setActiveTab('upload')}
+                  onNavigate={setActiveTab}
+                />
+              )}
 
-            {(activeTab === 'dramas' || activeTab === 'episodes') && (
-              <DramasPage
-                onOpenIngestModal={() => setActiveTab('upload')}
-                onNavigate={setActiveTab}
-                selectedDramaId={selectedDramaId}
-                onClearSelectedDrama={() => setSelectedDramaId(null)}
-              />
-            )}
+              {(activeTab === 'dramas' || activeTab === 'episodes') && (
+                <DramasPage
+                  onOpenIngestModal={() => setActiveTab('upload')}
+                  onNavigate={setActiveTab}
+                  selectedDramaId={selectedDramaId}
+                  onClearSelectedDrama={() => setSelectedDramaId(null)}
+                />
+              )}
 
-            {activeTab === 'upload' && (
-              <UploadContentPage onNavigate={setActiveTab} />
-            )}
+              {activeTab === 'upload' && (
+                <UploadContentPage onNavigate={setActiveTab} />
+              )}
 
-            {activeTab === 'banners' && (
-              <BannersPage onNavigate={setActiveTab} />
-            )}
+              {activeTab === 'banners' && (
+                <BannersPage onNavigate={setActiveTab} />
+              )}
 
-            {activeTab === 'genres' && (
-              <GenresPage onNavigate={setActiveTab} />
-            )}
+              {activeTab === 'genres' && (
+                <GenresPage onNavigate={setActiveTab} />
+              )}
 
-            {activeTab === 'category_priority' && (
-              <CategoryPriorityPage onNavigate={setActiveTab} />
-            )}
+              {activeTab === 'category_priority' && (
+                <CategoryPriorityPage onNavigate={setActiveTab} />
+              )}
 
-            {activeTab === 'users' && (
-              <UsersPage onNavigate={setActiveTab} />
-            )}
+              {activeTab === 'users' && (
+                <UsersPage onNavigate={setActiveTab} />
+              )}
 
-            {activeTab === 'subscribers' && (
-              <SubscribersPage />
-            )}
+              {activeTab === 'subscribers' && (
+                <SubscribersPage />
+              )}
 
-            {activeTab === 'subscriptions' && (
-              <SubscriptionsPage />
-            )}
+              {activeTab === 'subscriptions' && (
+                <SubscriptionsPage />
+              )}
 
-            {activeTab === 'promos' && (
-              <PromosPage />
-            )}
+              {activeTab === 'promos' && (
+                <PromosPage />
+              )}
 
-            {activeTab === 'transactions' && (
-              <TransactionsPage />
-            )}
+              {activeTab === 'transactions' && (
+                <TransactionsPage />
+              )}
 
-            {activeTab === 'admob' && (
-              <AdmobPage />
-            )}
+              {activeTab === 'admob' && (
+                <AdmobPage onNavigate={setActiveTab} />
+              )}
 
-            {activeTab === 'notifications' && (
-              <NotificationsPage />
-            )}
+              {activeTab === 'custom_ads' && (
+                <CustomAdsPage onNavigate={setActiveTab} />
+              )}
 
-            {activeTab === 'app_notifications' && (
-              <AppNotificationsPage />
-            )}
+              {activeTab === 'ad_control' && (
+                <AdControlPage onNavigate={setActiveTab} />
+              )}
 
-            {activeTab === 'legal' && (
-              <LegalPage />
-            )}
+              {activeTab === 'notifications' && (
+                <NotificationsPage />
+              )}
 
-            {activeTab === 'settings' && (
-              <SettingsPage />
-            )}
-          </ErrorBoundary>
+              {activeTab === 'app_notifications' && (
+                <AppNotificationsPage />
+              )}
+
+              {activeTab === 'legal' && (
+                <LegalPage />
+              )}
+
+              {activeTab === 'settings' && (
+                <SettingsPage />
+              )}
+            </ErrorBoundary>
+          </div>
         </main>
 
         {/* Footer */}

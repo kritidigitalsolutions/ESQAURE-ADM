@@ -208,9 +208,9 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="space-y-6 font-urbanist pb-16 selection:bg-[#FEF08A] selection:text-black">
+    <div className="space-y-3.5 font-urbanist pb-16 selection:bg-[#FEF08A] selection:text-black">
       {/* Top Filter & Search Bar */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-[#121612] rounded-2xl p-3.5 sm:p-4 border border-slate-200/90 dark:border-white/10 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Search */}
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />

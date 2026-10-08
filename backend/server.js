@@ -4,6 +4,7 @@ import { connectDB, closeDB } from './config/db.js';
 import { seedDefaultGenres } from './config/seedGenres.js';
 import { seedDefaultLegalDocs } from './config/seedLegalDocs.js';
 import { removeDummyUsers } from './config/seedUsers.js';
+import { seedDefaultCustomAds } from './config/seedAds.js';
 import { initializeFirebase } from './config/firebase.js';
 
 const startServer = async () => {
@@ -12,6 +13,7 @@ const startServer = async () => {
   await seedDefaultGenres();
   await seedDefaultLegalDocs();
   await removeDummyUsers();
+  await seedDefaultCustomAds();
   initializeFirebase();
 
   // Listen for incoming traffic

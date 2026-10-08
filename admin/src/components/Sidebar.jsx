@@ -13,10 +13,11 @@ import {
   BadgePercent,
   SendHorizontal,
   Bell,
-  Clock,
   Shield,
   Settings,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Sparkles,
+  PanelLeft
 } from 'lucide-react';
 
 export default function Sidebar({
@@ -26,9 +27,41 @@ export default function Sidebar({
   isCollapsed: controlledCollapsed,
   onToggleCollapse: controlledToggle
 }) {
-  const [internalCollapsed, setInternalCollapsed] = React.useState(false);
+  const [internalCollapsed, setInternalCollapsed] = React.useState(() => {
+    try {
+      return localStorage.getItem('sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   const isCollapsed = controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
-  const toggleCollapse = controlledToggle || (() => setInternalCollapsed(prev => !prev));
+
+  const toggleCollapse = React.useCallback(() => {
+    if (controlledToggle) {
+      controlledToggle();
+    } else {
+      setInternalCollapsed(prev => {
+        const next = !prev;
+        try {
+          localStorage.setItem('sidebar_collapsed', String(next));
+        } catch {}
+        return next;
+      });
+    }
+  }, [controlledToggle]);
+
+  // Keyboard shortcut: Ctrl+B or Cmd+B to toggle sidebar cleanly
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        toggleCollapse();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleCollapse]);
 
   const navSections = [
     {
@@ -60,7 +93,9 @@ export default function Sidebar({
         { id: 'subscriptions', label: 'Subscription Plans', icon: CreditCard },
         { id: 'transactions', label: 'Transactions', icon: Receipt },
         { id: 'promos', label: 'Promos & Vouchers', icon: TicketPercent },
-        { id: 'admob', label: 'AdMob', icon: BadgePercent },
+        { id: 'admob', label: 'Google AdMob', icon: BadgePercent },
+        { id: 'custom_ads', label: 'Custom Ads', icon: Sparkles },
+        { id: 'ad_control', label: 'Ad Control & Sync', icon: SlidersHorizontal },
       ]
     },
     {
@@ -82,47 +117,79 @@ export default function Sidebar({
   return (
     <aside
       className={`${
-        isCollapsed ? 'w-[76px]' : 'w-64'
-      } bg-white dark:bg-[#141914] text-slate-900 dark:text-slate-100 flex flex-col h-screen sticky top-0 shrink-0 border-r border-slate-200/90 dark:border-white/10 shadow-[1px_0_12px_-4px_rgba(15,23,42,0.04)] dark:shadow-[1px_0_12px_-4px_rgba(0,0,0,0.5)] z-40 font-urbanist selection:bg-[#FEF08A] selection:text-black transition-[width] duration-300 ease-in-out`}
+        isCollapsed ? 'w-[64px]' : 'w-56'
+      } bg-white dark:bg-[#141914] text-slate-900 dark:text-slate-100 flex flex-col h-screen sticky top-0 shrink-0 border-r border-slate-200/80 dark:border-white/10 shadow-[1px_0_12px_-4px_rgba(15,23,42,0.04)] dark:shadow-[1px_0_16px_-4px_rgba(0,0,0,0.5)] z-40 font-urbanist selection:bg-[#FEF08A] selection:text-black transition-[width] duration-250 ease-[cubic-bezier(0.2,0,0,1)] will-change-[width]`}
     >
-      
-      {/* 1. Header & Brand Identity */}
-      <div className={`p-4 border-b border-slate-100 dark:border-white/10 flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} bg-white dark:bg-[#141914] shrink-0`}>
-        <div
-          className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} cursor-pointer group min-w-0 w-full`}
-          onClick={() => setActiveTab('summary')}
-          title="E² Stories Admin Panel"
-        >
-          <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-slate-900 to-slate-950 p-1.5 shadow-sm border border-slate-800/80 flex items-center justify-center shrink-0 group-hover:scale-105 group-hover:shadow-md transition-all duration-200">
-            <img
-              src="/logo-transparent.png"
-              alt="Admin Panel Logo"
-              className="w-full h-full object-contain filter drop-shadow-sm"
-            />
-            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-[#141914] rounded-full"></span>
-          </div>
-          {!isCollapsed && (
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center space-x-1.5">
-                <span className="font-extrabold tracking-tight text-black dark:text-white text-[18.5px] font-urbanist leading-none truncate">
+      {/* 1. Clean, Unified Header */}
+      <div className={`h-14 px-3 border-b border-slate-100 dark:border-white/10 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} bg-white dark:bg-[#141914] shrink-0 overflow-hidden`}>
+        {isCollapsed ? (
+          /* Collapsed View: Single intuitive trigger icon button with logo and expand indicator */
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            title="Expand sidebar (Ctrl+B)"
+            aria-label="Expand sidebar"
+            className="relative w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] active:scale-95 transition-all duration-150 group cursor-pointer"
+          >
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-slate-900 to-slate-950 p-1 shadow-xs border border-slate-800/80 flex items-center justify-center transition-all duration-200 group-hover:scale-90 group-hover:opacity-10">
+              <img
+                src="/logo-transparent.png"
+                alt="Logo"
+                className="w-full h-full object-contain filter drop-shadow-xs"
+              />
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200">
+              <PanelLeft className="w-4 h-4 stroke-[2] text-slate-900 dark:text-white" />
+            </div>
+          </button>
+        ) : (
+          /* Expanded View: Brand Identity + Minimal Single Toggle Button */
+          <>
+            <div
+              className="flex items-center space-x-2.5 min-w-0 cursor-pointer group"
+              onClick={() => setActiveTab('summary')}
+              title="E² Stories Admin Panel"
+            >
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-900 to-slate-950 p-1 shadow-xs border border-slate-800/80 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200">
+                <img
+                  src="/logo-transparent.png"
+                  alt="Admin Panel Logo"
+                  className="w-full h-full object-contain filter drop-shadow-xs"
+                />
+              </div>
+              <div className="min-w-0 flex flex-col justify-center">
+                <span className="font-bold text-[14.5px] text-slate-900 dark:text-white leading-tight truncate">
                   E² Stories
                 </span>
+                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 leading-none mt-0.5">
+                  Admin Panel
+                </span>
               </div>
-              <p className="text-[12.5px] font-semibold text-slate-600 dark:text-slate-400 truncate mt-0.5">Admin Panel</p>
             </div>
-          )}
-        </div>
+
+            <button
+              type="button"
+              onClick={toggleCollapse}
+              title="Collapse sidebar (Ctrl+B)"
+              aria-label="Collapse sidebar"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] active:scale-95 transition-all duration-150 cursor-pointer shrink-0"
+            >
+              <PanelLeft className="w-4 h-4 stroke-[1.8]" />
+            </button>
+          </>
+        )}
       </div>
 
-      {/* 2. Navigation Links Area */}
-      <nav className={`flex-1 ${isCollapsed ? 'p-2 space-y-2.5' : 'p-3 space-y-2'} overflow-y-auto overflow-x-hidden custom-scrollbar`}>
+      {/* 2. Navigation Area */}
+      <nav className={`flex-1 py-2.5 px-2.5 space-y-1 ${isCollapsed ? 'no-scrollbar' : 'custom-scrollbar'} overflow-y-auto overflow-x-hidden`}>
         {navSections.map((section, sIdx) => (
-          <div key={sIdx} className={isCollapsed ? 'space-y-1' : 'space-y-0.5'}>
+          <div key={sIdx} className="space-y-0.5">
+            {/* Section Header or Divider */}
             {isCollapsed ? (
-              sIdx > 0 && <div className="my-2 mx-auto w-6 border-t border-slate-200/80 dark:border-white/10" title={section.title} />
+              sIdx > 0 && <div className="h-[1px] w-5 mx-auto bg-slate-200/70 dark:bg-white/10 my-1.5" title={section.title} />
             ) : (
-              <div className={`px-3 ${sIdx === 0 ? 'pb-1' : 'pt-2 pb-1'} flex items-center justify-between`}>
-                <span className="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">
+              <div className="px-2 pt-2 pb-1">
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block truncate">
                   {section.title}
                 </span>
               </div>
@@ -135,47 +202,46 @@ export default function Sidebar({
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`relative flex items-center transition-all duration-150 group sidebar-item-wave ${
+                  className={`relative flex items-center transition-all duration-150 group sidebar-item-wave cursor-pointer ${
                     isCollapsed
-                      ? `w-10 h-10 mx-auto justify-center rounded-xl ${
-                          isActive
-                            ? 'bg-[#FEF08A] text-black shadow-xs ring-1 ring-amber-300/80 font-bold'
-                            : 'text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-white/[0.06]'
+                      ? 'w-9 h-9 mx-auto justify-center rounded-xl'
+                      : 'w-full h-9 px-2.5 rounded-xl text-[12.5px]'
+                  } ${
+                    isActive
+                      ? `bg-[#FEF08A] text-slate-950 font-bold border border-amber-300/80 shadow-xs ${
+                          isCollapsed ? 'ring-2 ring-[#FEF08A]/80 ring-offset-2 ring-offset-white dark:ring-offset-[#141914]' : ''
                         }`
-                      : `w-full justify-between px-3 py-2 rounded-xl text-[13.5px] ${
-                          isActive
-                            ? 'bg-[#FEF08A] text-black shadow-xs border border-amber-300/60 font-bold'
-                            : 'text-slate-800 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-white/[0.06] font-semibold'
-                        }`
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/[0.06] font-medium'
                   }`}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  {/* Left Active Accent Indicator Bar */}
+                  {/* Left Active Accent Pill when expanded */}
                   {!isCollapsed && isActive && (
-                    <span className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-black rounded-r-full" />
+                    <span className="absolute left-1 top-2 bottom-2 w-1 bg-slate-950 rounded-full" />
                   )}
 
-                  <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2.5 min-w-0'}`}>
+                  {/* Icon */}
+                  <div className="flex items-center justify-center shrink-0">
                     <Icon
-                      className={`w-[18px] h-[18px] shrink-0 transition-all duration-150 group-hover:scale-105 ${
+                      className={`w-4 h-4 transition-colors duration-150 ${
                         isActive
-                          ? 'text-black stroke-[2.2]'
-                          : 'text-slate-600 dark:text-slate-400 group-hover:text-black dark:group-hover:text-white stroke-[1.8]'
+                          ? 'text-slate-950 stroke-[2.3]'
+                          : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-950 dark:group-hover:text-white stroke-[1.8]'
                       }`}
                     />
-
-                    {!isCollapsed && (
-                      <span className="truncate tracking-tight font-semibold">
-                        {item.label}
-                      </span>
-                    )}
                   </div>
 
-                  {/* Collapsed Tooltip */}
-                  {isCollapsed && (
-                    <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-950 dark:bg-slate-100 text-white dark:text-slate-900 text-[12px] font-semibold rounded-lg shadow-xl border border-slate-800 dark:border-slate-200 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap">
+                  {/* Label */}
+                  {!isCollapsed && (
+                    <span className="truncate tracking-tight ml-2.5 text-left leading-none font-semibold">
                       {item.label}
-                      <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-slate-950 dark:border-r-slate-100" />
+                    </span>
+                  )}
+
+                  {/* Clean Floating Tooltip in Collapsed Mode */}
+                  {isCollapsed && (
+                    <div className="absolute left-[calc(100%+8px)] top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900/95 dark:bg-[#1A201A]/95 text-white text-[11px] font-semibold rounded-lg shadow-xl border border-slate-700/60 dark:border-white/10 opacity-0 -translate-x-1 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150 z-50 whitespace-nowrap backdrop-blur-xs">
+                      {item.label}
                     </div>
                   )}
                 </button>
@@ -184,7 +250,6 @@ export default function Sidebar({
           </div>
         ))}
       </nav>
-
     </aside>
   );
 }

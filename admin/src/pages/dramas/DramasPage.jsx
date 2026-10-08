@@ -229,10 +229,10 @@ export default function DramasPage({
   }, [dramas, searchTerm, selectedGenre, selectedStatus, sortBy]);
 
   return (
-    <div className="space-y-6 font-urbanist selection:bg-[#FEF08A] selection:text-black">
+    <div className="space-y-3.5 font-urbanist selection:bg-[#FEF08A] selection:text-black">
       
       {/* 4 Core Content Library KPI Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Metric 1: Total Series */}
         <KpiStatCard
           icon={Film}
@@ -281,7 +281,7 @@ export default function DramasPage({
       </div>
 
       {/* Clean, Smart & Perfectly Aligned Toolbar */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-4">
+      <div className="bg-white dark:bg-[#121612] rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-3">
         
         {/* Row 1: Search & Status (Left) + View Switcher & Upload (Right) */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">

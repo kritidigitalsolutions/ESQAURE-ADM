@@ -140,36 +140,36 @@ export default function MetricsOverview({ onOpenIngestModal }) {
   const current = metricData[activeTab];
 
   return (
-    <div className="space-y-4 mb-8 font-sans">
+    <div className="space-y-3 mb-3.5 font-sans">
       
       {/* 2 Core Stat Cards: 1) User Base & 2) Paid Subscriptions (Subscribers) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         
         {/* Card 1: User Base */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 min-h-[170px] border border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-xl dark:hover:border-amber-400/40 hover:-translate-y-1 relative overflow-hidden group transition-all duration-300 flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 min-h-[130px] border border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-xl dark:hover:border-amber-400/40 hover:-translate-y-0.5 relative overflow-hidden group transition-all duration-300 flex flex-col justify-between">
           <div>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-11 h-11 rounded-xl bg-[#FEF08A] dark:bg-[#FEF08A]/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-110 transition-transform shadow-xs shrink-0">
-                  <Users className="w-5.5 h-5.5 stroke-[2.2]" />
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs shrink-0">
+                  <Users className="w-4.5 h-4.5 stroke-[2.2]" />
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block font-urbanist">
+                  <span className="text-[11px] font-bold text-slate-950 dark:text-white uppercase tracking-wider block font-urbanist">
                     {userMetrics[userTab].label}
                   </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
+                  <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium block">
                     {userMetrics[userTab].sublabel}
                   </span>
                 </div>
               </div>
 
               {/* Switcher Buttons */}
-              <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-1 rounded-xl w-full sm:w-[290px] border border-slate-200/70 dark:border-white/10 shadow-xs">
+              <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-0.5 rounded-lg w-full sm:w-[260px] border border-slate-200/70 dark:border-white/10 shadow-xs">
                 {/* Sliding Active Indicator Pill */}
                 <span
-                  className="absolute top-1 bottom-1 left-1 rounded-lg bg-[#FEF08A] shadow-xs transition-transform duration-300 ease-out pointer-events-none border border-amber-300/60"
+                  className="absolute top-0.5 bottom-0.5 left-0.5 rounded-md bg-[#FEF08A] shadow-xs transition-transform duration-300 ease-out pointer-events-none border border-amber-300/60"
                   style={{
-                    width: 'calc((100% - 8px) / 3)',
+                    width: 'calc((100% - 4px) / 3)',
                     transform: `translateX(${
                       userTab === 'total' ? '0%' : userTab === 'active' ? '100%' : '200%'
                     })`,
@@ -181,7 +181,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   <button
                     type="button"
                     onClick={() => setUserTab('total')}
-                    className={`py-1.5 text-xs font-bold rounded-lg text-center flex items-center justify-center transition-colors duration-200 select-none ${
+                    className={`py-1 text-[11px] font-bold rounded-md text-center flex items-center justify-center transition-colors duration-200 select-none ${
                       userTab === 'total'
                         ? 'text-slate-950 font-extrabold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -192,7 +192,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   <button
                     type="button"
                     onClick={() => setUserTab('active')}
-                    className={`py-1.5 text-xs font-bold rounded-lg text-center flex items-center justify-center transition-colors duration-200 select-none ${
+                    className={`py-1 text-[11px] font-bold rounded-md text-center flex items-center justify-center transition-colors duration-200 select-none ${
                       userTab === 'active'
                         ? 'text-slate-950 font-extrabold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -203,7 +203,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   <button
                     type="button"
                     onClick={() => setUserTab('new')}
-                    className={`py-1.5 text-xs font-bold rounded-lg text-center flex items-center justify-center transition-colors duration-200 select-none ${
+                    className={`py-1 text-[11px] font-bold rounded-md text-center flex items-center justify-center transition-colors duration-200 select-none ${
                       userTab === 'new'
                         ? 'text-slate-950 font-extrabold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -215,49 +215,49 @@ export default function MetricsOverview({ onOpenIngestModal }) {
               </div>
             </div>
             
-            <div className="mt-6 sm:mt-7 flex items-baseline justify-between">
-              <div className="flex items-baseline space-x-2">
-                <span className="text-4xl sm:text-5xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
+            <div className="mt-4 sm:mt-4.5 flex items-baseline justify-between">
+              <div className="flex items-baseline space-x-1.5">
+                <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
                   <AnimatedNumber value={userMetrics[userTab].value} />
                 </span>
                 {userMetrics[userTab].unit && (
-                  <span className="text-base font-bold text-slate-400 dark:text-slate-500">
+                  <span className="text-sm font-bold text-slate-400 dark:text-slate-500">
                     {userMetrics[userTab].unit}
                   </span>
                 )}
               </div>
-              <span className="inline-flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-full bg-emerald-500 text-white shadow-xs">
-                <ArrowUpRight className="w-3.5 h-3.5" /> <AnimatedNumber value={userMetrics[userTab].badge} />
+              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-xs">
+                <ArrowUpRight className="w-3 h-3" /> <AnimatedNumber value={userMetrics[userTab].badge} />
               </span>
             </div>
           </div>
         </div>
 
         {/* Card 2: Paid Subscriptions */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 sm:p-7 min-h-[170px] border border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-xl dark:hover:border-amber-400/40 hover:-translate-y-1 relative overflow-hidden group transition-all duration-300 flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 min-h-[130px] border border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-xl dark:hover:border-amber-400/40 hover:-translate-y-0.5 relative overflow-hidden group transition-all duration-300 flex flex-col justify-between">
           <div>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-11 h-11 rounded-xl bg-[#FEF08A] dark:bg-[#FEF08A]/20 border border-amber-300 dark:border-amber-500/40 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-110 transition-transform shadow-xs shrink-0">
-                  <ShieldCheck className="w-5.5 h-5.5 stroke-[2.2]" />
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs shrink-0">
+                  <ShieldCheck className="w-4.5 h-4.5 stroke-[2.2]" />
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-wider block font-urbanist">
+                  <span className="text-[11px] font-bold text-slate-950 dark:text-white uppercase tracking-wider block font-urbanist">
                     {subscriptionMetrics[subTab].label}
                   </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
+                  <span className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium block">
                     {subscriptionMetrics[subTab].sublabel}
                   </span>
                 </div>
               </div>
 
               {/* Switcher Buttons */}
-              <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-1 rounded-xl w-full sm:w-[290px] border border-slate-200/70 dark:border-white/10 shadow-xs">
+              <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-0.5 rounded-lg w-full sm:w-[260px] border border-slate-200/70 dark:border-white/10 shadow-xs">
                 {/* Sliding Active Indicator Pill */}
                 <span
-                  className="absolute top-1 bottom-1 left-1 rounded-lg bg-[#FEF08A] shadow-xs transition-transform duration-300 ease-out pointer-events-none border border-amber-300/60"
+                  className="absolute top-0.5 bottom-0.5 left-0.5 rounded-md bg-[#FEF08A] shadow-xs transition-transform duration-300 ease-out pointer-events-none border border-amber-300/60"
                   style={{
-                    width: 'calc((100% - 8px) / 3)',
+                    width: 'calc((100% - 4px) / 3)',
                     transform: `translateX(${
                       subTab === 'active' ? '0%' : subTab === 'new' ? '100%' : '200%'
                     })`,
@@ -269,7 +269,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   <button
                     type="button"
                     onClick={() => setSubTab('active')}
-                    className={`py-1.5 text-xs font-bold rounded-lg text-center flex items-center justify-center transition-colors duration-200 select-none ${
+                    className={`py-1 text-[11px] font-bold rounded-md text-center flex items-center justify-center transition-colors duration-200 select-none ${
                       subTab === 'active'
                         ? 'text-slate-950 font-extrabold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -280,7 +280,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   <button
                     type="button"
                     onClick={() => setSubTab('new')}
-                    className={`py-1.5 text-xs font-bold rounded-lg text-center flex items-center justify-center transition-colors duration-200 select-none ${
+                    className={`py-1 text-[11px] font-bold rounded-md text-center flex items-center justify-center transition-colors duration-200 select-none ${
                       subTab === 'new'
                         ? 'text-slate-950 font-extrabold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -291,7 +291,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   <button
                     type="button"
                     onClick={() => setSubTab('renewals')}
-                    className={`py-1.5 text-xs font-bold rounded-lg text-center flex items-center justify-center transition-colors duration-200 select-none ${
+                    className={`py-1 text-[11px] font-bold rounded-md text-center flex items-center justify-center transition-colors duration-200 select-none ${
                       subTab === 'renewals'
                         ? 'text-slate-950 font-extrabold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -303,19 +303,19 @@ export default function MetricsOverview({ onOpenIngestModal }) {
               </div>
             </div>
 
-            <div className="mt-6 sm:mt-7 flex items-baseline justify-between">
-              <div className="flex items-baseline space-x-2">
-                <span className="text-4xl sm:text-5xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
+            <div className="mt-4 sm:mt-4.5 flex items-baseline justify-between">
+              <div className="flex items-baseline space-x-1.5">
+                <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
                   <AnimatedNumber value={subscriptionMetrics[subTab].value} />
                 </span>
                 {subscriptionMetrics[subTab].unit && (
-                  <span className="text-base font-bold text-slate-500 dark:text-slate-500">
+                  <span className="text-sm font-bold text-slate-500 dark:text-slate-500">
                     {subscriptionMetrics[subTab].unit}
                   </span>
                 )}
               </div>
-              <span className="inline-flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-full bg-emerald-500 text-white shadow-xs">
-                <ArrowUpRight className="w-3.5 h-3.5" /> <AnimatedNumber value={subscriptionMetrics[subTab].badge} />
+              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-xs">
+                <ArrowUpRight className="w-3 h-3" /> <AnimatedNumber value={subscriptionMetrics[subTab].badge} />
               </span>
             </div>
           </div>
@@ -324,40 +324,40 @@ export default function MetricsOverview({ onOpenIngestModal }) {
       </div>
 
       {/* Hero Income / Revenue Banner */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           
           {/* Left: Two Split Metrics + Top Driver */}
           <div className="flex flex-col justify-between shrink-0">
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-5">
               {/* Stat 1 */}
               <div>
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">
+                <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">
                   {current.stat1Label}
                 </span>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-2xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
+                <div className="flex items-center space-x-2 mt-0.5">
+                  <span className="text-lg sm:text-xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
                     <AnimatedNumber value={current.stat1Value} />
                   </span>
-                  <span className="inline-flex items-center text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                  <span className="inline-flex items-center text-[10.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                     <AnimatedNumber value={current.stat1Badge} />
                   </span>
                 </div>
               </div>
 
               {/* Vertical divider */}
-              <div className="h-9 w-px bg-slate-200 dark:bg-white/10" />
+              <div className="h-7 w-px bg-slate-200 dark:bg-white/10" />
 
               {/* Stat 2 */}
               <div>
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">
+                <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">
                   {current.stat2Label}
                 </span>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-2xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
+                <div className="flex items-center space-x-2 mt-0.5">
+                  <span className="text-lg sm:text-xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
                     <AnimatedNumber value={current.stat2Value} />
                   </span>
-                  <span className="inline-flex items-center text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                  <span className="inline-flex items-center text-[10.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                     <AnimatedNumber value={current.stat2Badge} />
                   </span>
                 </div>
@@ -365,9 +365,9 @@ export default function MetricsOverview({ onOpenIngestModal }) {
             </div>
 
             {/* Bottom subtitle */}
-            <div className="mt-3 flex items-center space-x-2">
+            <div className="mt-2.5 flex items-center space-x-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-              <p className="text-xs font-medium text-slate-400 dark:text-slate-400">
+              <p className="text-[11px] font-medium text-slate-400 dark:text-slate-400">
                 Top Revenue Driver:{' '}
                 <span className="font-semibold text-slate-700 dark:text-slate-200">
                   1 Month Pass (₹99) &amp; 12M Pass (₹899)
@@ -377,22 +377,22 @@ export default function MetricsOverview({ onOpenIngestModal }) {
           </div>
 
           {/* Center: Hero Stat Box */}
-          <div className="flex flex-col items-start lg:items-center justify-center lg:border-x lg:border-slate-100 dark:lg:border-white/10 lg:px-8 py-2">
-            <span className="text-4xl sm:text-5xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
+          <div className="flex flex-col items-start lg:items-center justify-center lg:border-x lg:border-slate-100 dark:lg:border-white/10 lg:px-6 py-1">
+            <span className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
               <AnimatedNumber value={current.centerValue} />
             </span>
-            <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mt-1">
+            <span className="text-[10.5px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mt-0.5">
               {current.centerLabel}
             </span>
           </div>
 
           {/* Right: Switcher Tabs */}
-          <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-1.5 rounded-full flex items-center border border-slate-200/70 dark:border-white/10 shadow-xs self-start lg:self-center shrink-0 w-full sm:w-[320px]">
+          <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-1 rounded-full flex items-center border border-slate-200/70 dark:border-white/10 shadow-xs self-start lg:self-center shrink-0 w-full sm:w-[275px]">
             {/* Sliding Pill */}
             <span
-              className="absolute top-1.5 bottom-1.5 left-1.5 rounded-full bg-[#FEF08A] shadow-md transition-transform duration-300 ease-out pointer-events-none border border-amber-300/60"
+              className="absolute top-1 bottom-1 left-1 rounded-full bg-[#FEF08A] shadow-md transition-transform duration-300 ease-out pointer-events-none border border-amber-300/60"
               style={{
-                width: 'calc((100% - 12px) / 3)',
+                width: 'calc((100% - 8px) / 3)',
                 transform: `translateX(${
                   activeTab === 'revenue' ? '0%' : activeTab === 'subscribers' ? '100%' : '200%'
                 })`,
@@ -403,33 +403,33 @@ export default function MetricsOverview({ onOpenIngestModal }) {
               <button
                 type="button"
                 onClick={() => setActiveTab('revenue')}
-                className={`py-2 text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors duration-200 cursor-pointer ${
+                className={`py-1 text-[11px] font-bold rounded-full flex items-center justify-center space-x-1 transition-colors duration-200 cursor-pointer ${
                   activeTab === 'revenue' ? 'text-slate-950 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
                 }`}
               >
-                <IndianRupee className="w-3.5 h-3.5" />
+                <IndianRupee className="w-3 h-3" />
                 <span>Revenue</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('subscribers')}
-                className={`py-2 text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors duration-200 cursor-pointer ${
+                className={`py-1 text-[11px] font-bold rounded-full flex items-center justify-center space-x-1 transition-colors duration-200 cursor-pointer ${
                   activeTab === 'subscribers' ? 'text-slate-950 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
                 }`}
               >
-                <Crown className="w-3.5 h-3.5" />
+                <Crown className="w-3 h-3" />
                 <span>Subscribers</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('plans')}
-                className={`py-2 text-xs font-bold rounded-full flex items-center justify-center space-x-1.5 transition-colors duration-200 cursor-pointer ${
+                className={`py-1 text-[11px] font-bold rounded-full flex items-center justify-center space-x-1 transition-colors duration-200 cursor-pointer ${
                   activeTab === 'plans' ? 'text-slate-950 font-extrabold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
                 }`}
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
+                <LayoutGrid className="w-3 h-3" />
                 <span>Plans</span>
               </button>
             </div>

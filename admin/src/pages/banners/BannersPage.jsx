@@ -373,28 +373,26 @@ export default function BannersPage({ onNavigate }) {
   };
 
   return (
-    <div className="space-y-6 font-urbanist selection:bg-[#FEF08A] selection:text-black pb-12">
-
-
+    <div className="space-y-3.5 font-urbanist selection:bg-[#FEF08A] selection:text-black pb-6">
 
       {/* 3. Control & Filter Bar */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-3">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-[#121612] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-2.5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
           
           {/* Search Box */}
           <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search banners by title, badge, drama..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl text-xs bg-slate-100 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#FEF08A] focus:outline-none transition-all font-medium"
+              className="w-full pl-9 pr-8 py-1.5 rounded-lg text-xs bg-slate-100 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#FEF08A] focus:outline-none transition-all font-medium"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -402,12 +400,12 @@ export default function BannersPage({ onNavigate }) {
           </div>
 
           {/* Action Buttons: View Switcher + Upload New Banner */}
-          <div className="flex items-center space-x-2.5 shrink-0 self-end md:self-auto">
+          <div className="flex items-center space-x-2 shrink-0 self-end md:self-auto">
             {/* View Switcher: Cards vs Table */}
-            <div className="bg-slate-100 dark:bg-[#161B16] p-1 rounded-xl flex items-center border border-slate-200/70 dark:border-white/10">
+            <div className="bg-slate-100 dark:bg-[#161B16] p-0.5 rounded-lg flex items-center border border-slate-200/70 dark:border-white/10">
               <button
                 onClick={() => setViewMode('cards')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
                   viewMode === 'cards'
                     ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -417,7 +415,7 @@ export default function BannersPage({ onNavigate }) {
               </button>
               <button
                 onClick={() => setViewMode('table')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
                   viewMode === 'table'
                     ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
                     : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -431,29 +429,29 @@ export default function BannersPage({ onNavigate }) {
             <button
               onClick={fetchData}
               disabled={isLoading}
-              className="p-2 rounded-xl bg-slate-100 dark:bg-[#161B16] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200/70 dark:border-white/10 transition-all cursor-pointer"
+              className="p-1.5 rounded-lg bg-slate-100 dark:bg-[#161B16] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200/70 dark:border-white/10 transition-all cursor-pointer"
               title="Refresh Banners"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
 
             {/* Upload / Create Banner CTA */}
             <button
               onClick={handleOpenCreate}
-              className="px-5 py-2 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-extrabold text-xs sm:text-sm rounded-xl flex items-center justify-center space-x-2 shadow-xs hover:shadow transition-all shrink-0 cursor-pointer"
+              className="px-3.5 py-1.5 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-lg flex items-center justify-center space-x-1.5 shadow-xs transition-all shrink-0 cursor-pointer"
             >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Upload Banner</span>
             </button>
           </div>
         </div>
 
         {/* Secondary Filter Dropdowns & Stats */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2.5 border-t border-slate-100 dark:border-white/5">
-          <div className="flex items-center flex-wrap gap-2.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-slate-100 dark:border-white/5">
+          <div className="flex items-center flex-wrap gap-2">
             {/* Status Filter */}
-            <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#161B16] px-3 py-1.5 rounded-xl border border-slate-200/70 dark:border-white/10 text-xs">
-              <span className="text-slate-400 font-medium">Status:</span>
+            <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#161B16] px-2.5 py-1 rounded-lg border border-slate-200/70 dark:border-white/10 text-xs">
+              <span className="text-slate-400 font-medium text-[11px]">Status:</span>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
@@ -466,8 +464,8 @@ export default function BannersPage({ onNavigate }) {
             </div>
 
             {/* Link Type Filter */}
-            <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#161B16] px-3 py-1.5 rounded-xl border border-slate-200/70 dark:border-white/10 text-xs">
-              <Link2 className="w-3.5 h-3.5 text-slate-400" />
+            <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#161B16] px-2.5 py-1 rounded-lg border border-slate-200/70 dark:border-white/10 text-xs">
+              <Link2 className="w-3 h-3 text-slate-400" />
               <select
                 value={filterLinkType}
                 onChange={(e) => setFilterLinkType(e.target.value)}
@@ -531,11 +529,11 @@ export default function BannersPage({ onNavigate }) {
         /* ========================================================
            CARDS VIEW: 16:9 WIDESCREEN HERO BANNER TILES
            ======================================================== */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {filteredBanners.map((banner, index) => (
             <div
               key={banner.id}
-              className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden flex flex-col group transition-all duration-300 hover:border-amber-300/40 dark:hover:border-amber-400/20"
+              className="bg-white dark:bg-[#121612] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden flex flex-col group transition-all duration-300 hover:border-amber-300/40 dark:hover:border-amber-400/20"
             >
               {/* 16:9 Banner Image Container */}
               <div className="relative aspect-[16/9] bg-slate-950 overflow-hidden">
@@ -547,7 +545,7 @@ export default function BannersPage({ onNavigate }) {
 
                 {/* Priority Shifter & Order Badge Top-Left */}
                 <div className="absolute top-2.5 left-2.5 z-10 flex items-center space-x-1">
-                  <span className="inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-xs bg-black/80 backdrop-blur-xs text-white border border-white/20">
+                  <span className="inline-flex items-center text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-xs bg-black/80 backdrop-blur-xs text-white border border-white/20">
                     #{banner.displayOrder || index + 1}
                   </span>
                   <div className="flex items-center bg-black/80 backdrop-blur-xs rounded-full p-0.5 border border-white/20">
@@ -593,63 +591,63 @@ export default function BannersPage({ onNavigate }) {
                     className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                     title="Preview Trailer Video"
                   >
-                    <div className="w-12 h-12 rounded-full bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-                      <Play className="w-5 h-5 fill-current ml-0.5" />
+                    <div className="w-10 h-10 rounded-full bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                      <Play className="w-4 h-4 fill-current ml-0.5" />
                     </div>
                   </button>
                 )}
               </div>
 
               {/* Banner Details Body */}
-              <div className="p-4 flex-1 flex flex-col justify-between space-y-3 bg-white dark:bg-[#121612]">
+              <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between space-y-2 bg-white dark:bg-[#121612]">
                 <div>
-                  <h4 className="font-bold text-slate-950 dark:text-white text-sm truncate">
+                  <h4 className="font-bold text-slate-950 dark:text-white text-xs sm:text-[13px] truncate">
                     {banner.title}
                   </h4>
                   {banner.subtitle && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 font-medium">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 font-medium">
                       {banner.subtitle}
                     </p>
                   )}
                 </div>
 
                 {/* Target Link Info */}
-                <div className="pt-2 border-t border-slate-100 dark:border-white/5 space-y-2 text-xs">
+                <div className="pt-2 border-t border-slate-100 dark:border-white/5 space-y-1.5 text-xs">
                   {banner.linkType === 'DRAMA' ? (
                     <div className="flex items-center space-x-2 text-slate-600 dark:text-slate-300">
                       <Clapperboard className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                      <span className="truncate font-semibold">
+                      <span className="truncate font-semibold text-[11px]">
                         {banner.drama ? banner.drama.title : 'Linked Drama'} (Ep {banner.episodeNumber || 1})
                       </span>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2 text-blue-600 dark:text-blue-400 truncate">
                       <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-                      <span className="truncate font-mono text-[11px]">
+                      <span className="truncate font-mono text-[10.5px]">
                         {banner.externalUrl || 'External Link'}
                       </span>
                     </div>
                   )}
 
                   {/* Actions Footer */}
-                  <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center justify-between pt-1.5">
                     <button
                       type="button"
                       onClick={() => handleToggleActive(banner.id)}
-                      className={`text-xs font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                      className={`text-[10.5px] font-bold px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
                         banner.isActive
                           ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400'
                           : 'text-slate-500 bg-slate-100 dark:bg-[#1A201A] dark:text-slate-400'
                       }`}
                     >
-                      {banner.isActive ? '● Live in Carousel' : '○ Hidden'}
+                      {banner.isActive ? '● Live' : '○ Hidden'}
                     </button>
 
-                    <div className="flex items-center space-x-1.5">
+                    <div className="flex items-center space-x-1">
                       <button
                         type="button"
                         onClick={() => handleOpenEdit(banner)}
-                        className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
+                        className="p-1 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
                         title="Edit Banner"
                       >
                         <Pencil className="w-3.5 h-3.5" />
@@ -657,7 +655,7 @@ export default function BannersPage({ onNavigate }) {
                       <button
                         type="button"
                         onClick={() => handleDeleteBanner(banner.id)}
-                        className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                        className="p-1 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
                         title="Delete Banner"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -675,10 +673,10 @@ export default function BannersPage({ onNavigate }) {
         /* ========================================================
            TABLE VIEW: CLEAN & MINIMAL STUDIO CATALOG TABLE
            ======================================================== */
-        <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
+        <div className="bg-white dark:bg-[#121612] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-slate-50/80 dark:bg-[#161B16] border-b border-slate-200/80 dark:border-white/10 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
+              <thead className="bg-slate-50/80 dark:bg-[#161B16] border-b border-slate-200/80 dark:border-white/10 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
                   <th className="py-3 px-4 w-20 text-center">Order</th>
                   <th className="py-3 px-4 w-32">Preview</th>

@@ -282,54 +282,54 @@ export default function NotificationsPage() {
   }, [campaigns, historySearchTerm, historyFilter]);
 
   return (
-    <div className="space-y-6 font-urbanist selection:bg-[#FEF08A] selection:text-black">
+    <div className="space-y-3.5 font-urbanist selection:bg-[#FEF08A] selection:text-black">
       
       {/* 1. Header Banner */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
-        <div className="flex items-center space-x-3.5">
-          <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
-            <Send className="w-5 h-5 stroke-[2.2]" />
+      <div className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all">
+        <div className="flex items-center space-x-3">
+          <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
+            <Send className="w-4.5 h-4.5 stroke-[2.2]" />
           </div>
           <div>
-            <h2 className="text-xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+            <h2 className="text-base sm:text-lg font-extrabold text-slate-950 dark:text-white tracking-tight">
               Push Notifications
             </h2>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
               Broadcast instant push alerts to registered mobile devices via Firebase Cloud Messaging (FCM).
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2.5 shrink-0">
+        <div className="flex items-center space-x-2 shrink-0">
           <button
             onClick={fetchCampaigns}
             disabled={isLoading}
-            className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/[0.1] transition-colors border border-slate-200/80 dark:border-white/10 cursor-pointer"
+            className="p-2 rounded-lg bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/[0.1] transition-colors border border-slate-200/80 dark:border-white/10 cursor-pointer"
             title="Refresh statistics and history from server"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-amber-500' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-amber-500' : ''}`} />
           </button>
           
-          <div className="px-3.5 py-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold flex items-center space-x-2 shadow-xs">
-            <Radio className="w-3.5 h-3.5 animate-pulse text-emerald-500" />
-            <span>FCM Engine: Connected</span>
+          <div className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold flex items-center space-x-1.5 shadow-xs">
+            <Radio className="w-3 h-3 animate-pulse text-emerald-500" />
+            <span>FCM: Connected</span>
           </div>
         </div>
       </div>
 
       {feedback && (
         <div
-          className={`p-4 rounded-2xl border flex items-center justify-between gap-3 text-xs font-bold shadow-xs transition-all ${
+          className={`p-3 rounded-xl border flex items-center justify-between gap-2.5 text-xs font-bold shadow-xs transition-all ${
             feedback.type === 'success'
               ? 'bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-200'
               : 'bg-rose-50/90 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/80 text-rose-800 dark:text-rose-200'
           }`}
         >
-          <div className="flex items-center space-x-2.5">
+          <div className="flex items-center space-x-2">
             {feedback.type === 'success' ? (
-              <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
             ) : (
-              <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
             )}
             <span>{feedback.message}</span>
           </div>
@@ -342,21 +342,21 @@ export default function NotificationsPage() {
         </div>
       )}
 
-      {/* 2. Main Studio: Organized 2-Column Clean Minimal Architecture (No Device Mockup) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* 2. Main Studio: Organized 2-Column Clean Minimal Architecture */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
         
         {/* Left Column: Broadcast Composer (lg:col-span-7) */}
-        <div className="lg:col-span-7 bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus transition-all">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10 mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/50 border border-amber-200/70 dark:border-amber-600/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-2xs">
-                <Send className="w-4 h-4 stroke-[2.2]" />
+        <div className="lg:col-span-7 bg-white dark:bg-[#121612] rounded-xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-xs transition-all">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10 mb-3">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/50 border border-amber-200/70 dark:border-amber-600/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-2xs">
+                <Send className="w-3.5 h-3.5 stroke-[2.2]" />
               </div>
               <div>
-                <h3 className="font-extrabold text-base text-slate-950 dark:text-white tracking-tight">
+                <h3 className="font-extrabold text-sm text-slate-950 dark:text-white tracking-tight">
                   Compose Push Broadcast
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                   Send high-priority notification to targeted OTT viewers.
                 </p>
               </div>
@@ -723,80 +723,80 @@ export default function NotificationsPage() {
         </div>
 
         {/* Right Column: Clean Minimal Real-Time Preview & Delivery Infrastructure (lg:col-span-5) */}
-        <div className="lg:col-span-5 bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus flex flex-col justify-between space-y-6 transition-all">
+        <div className="lg:col-span-5 bg-white dark:bg-[#121612] rounded-xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between space-y-3.5 transition-all">
           
           <div>
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/10 mb-5">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
-                  <Bell className="w-4 h-4 stroke-[2.2]" />
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10 mb-3.5">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
+                  <Bell className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base text-slate-950 dark:text-white tracking-tight">
+                  <h3 className="font-extrabold text-sm text-slate-950 dark:text-white tracking-tight">
                     Live Message Preview
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                     Real-time rendering of the mobile notification card.
                   </p>
                 </div>
               </div>
 
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10">
+              <span className="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10">
                 Card Preview
               </span>
             </div>
 
             {/* Clean Modern Notification Card (Elevated Level 2 Surface, No Device Mockup) */}
-            <div className="p-4 bg-slate-50 dark:bg-[#161B16] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-sm relative overflow-hidden transition-all">
+            <div className="p-3.5 bg-slate-50 dark:bg-[#161B16] rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs relative overflow-hidden transition-all">
               
               {/* Top Meta Line: App Icon, Brand Name, Timestamp, Bell */}
-              <div className="flex items-center justify-between pb-2.5 border-b border-slate-200/60 dark:border-white/5">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-white/5">
                 <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 rounded-lg bg-[#FEF08A] text-slate-950 font-black text-[11px] flex items-center justify-center shadow-2xs">
+                  <div className="w-5 h-5 rounded-md bg-[#FEF08A] text-slate-950 font-black text-[10px] flex items-center justify-center shadow-2xs">
                     E²
                   </div>
-                  <span className="text-xs font-black text-slate-900 dark:text-white tracking-tight">
+                  <span className="text-[11.5px] font-black text-slate-900 dark:text-white tracking-tight">
                     E² STORIES
                   </span>
                   <span className="text-slate-300 dark:text-white/20">·</span>
-                  <span className="text-[11px] text-slate-400 font-medium">Just now</span>
+                  <span className="text-[10.5px] text-slate-400 font-medium">Just now</span>
                 </div>
-                <Bell className="w-3.5 h-3.5 text-slate-400" />
+                <Bell className="w-3 h-3 text-slate-400" />
               </div>
 
               {/* Recipient tag if Specific User is chosen */}
               {targetAudience === 'Specific User' && (
                 selectedUser ? (
-                  <div className="mt-2.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-[11px] font-bold flex items-center space-x-1.5">
-                    <UserCheck className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+                  <div className="mt-2 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-[10.5px] font-bold flex items-center space-x-1.5">
+                    <UserCheck className="w-3 h-3 shrink-0 text-amber-500" />
                     <span className="truncate">Direct recipient: {selectedUser.name || selectedUser.phone}</span>
                   </div>
                 ) : (
-                  <div className="mt-2.5 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-dashed border-amber-300/60 dark:border-amber-700/40 text-amber-700 dark:text-amber-300 text-[11px] font-medium flex items-center space-x-1.5">
-                    <User className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+                  <div className="mt-2 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/20 border border-dashed border-amber-300/60 dark:border-amber-700/40 text-amber-700 dark:text-amber-300 text-[10.5px] font-medium flex items-center space-x-1.5">
+                    <User className="w-3 h-3 shrink-0 text-amber-500" />
                     <span>Awaiting user selection from directory...</span>
                   </div>
                 )
               )}
 
               {/* Dynamic Notification Content */}
-              <div className="pt-3 space-y-1.5">
-                <h4 className="text-sm font-extrabold text-slate-950 dark:text-white leading-snug">
+              <div className="pt-2.5 space-y-1">
+                <h4 className="text-xs sm:text-[13px] font-extrabold text-slate-950 dark:text-white leading-snug">
                   {title.trim() || 'Your notification title will appear here...'}
                 </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed break-words">
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed break-words">
                   {message.trim() || 'Notification body copy will be previewed here in real-time as you compose your push alert message.'}
                 </p>
               </div>
 
               {/* Deep-link badge if selected */}
               {selectedDramaDetails && (
-                <div className="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-white/5 flex items-center justify-between text-[11px]">
-                  <div className="flex items-center space-x-1.5 text-amber-600 dark:text-amber-400 font-bold truncate">
-                    <Film className="w-3.5 h-3.5 shrink-0" />
+                <div className="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-white/5 flex items-center justify-between text-[10.5px]">
+                  <div className="flex items-center space-x-1 text-amber-600 dark:text-amber-400 font-bold truncate">
+                    <Film className="w-3 h-3 shrink-0" />
                     <span className="truncate">Opens: {selectedDramaDetails.title}</span>
                   </div>
-                  <span className="text-[10px] text-slate-400 font-medium shrink-0">
+                  <span className="text-[9.5px] text-slate-400 font-medium shrink-0">
                     Auto Deep-Link
                   </span>
                 </div>
@@ -805,27 +805,27 @@ export default function NotificationsPage() {
           </div>
 
           {/* FCM Delivery Architecture Specification Box */}
-          <div className="p-4 bg-slate-50/70 dark:bg-[#141914] rounded-2xl border border-slate-200/80 dark:border-white/10 space-y-2.5 text-xs">
-            <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
+          <div className="p-3 bg-slate-50/70 dark:bg-[#141914] rounded-xl border border-slate-200/80 dark:border-white/10 space-y-2 text-xs">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-0.5">
               FCM Engine Diagnostics
             </span>
             
-            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
+            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300 text-[11px]">
               <span className="font-medium">Protocol</span>
               <span className="font-bold text-slate-900 dark:text-white">FCM v1 REST API</span>
             </div>
 
-            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
+            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300 text-[11px]">
               <span className="font-medium">Priority Class</span>
               <span className="font-bold text-emerald-600 dark:text-emerald-400">High (Direct Wake-Lock)</span>
             </div>
 
-            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
+            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300 text-[11px]">
               <span className="font-medium">Sound & Vibration</span>
               <span className="font-bold text-slate-900 dark:text-white">Default OTT Channel</span>
             </div>
 
-            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300">
+            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300 text-[11px]">
               <span className="font-medium">Target Scope</span>
               <span className="font-bold text-slate-900 dark:text-white">
                 {targetAudience === 'Specific User'
@@ -842,23 +842,23 @@ export default function NotificationsPage() {
       </div>
 
       {/* 3. Past Broadcast History Table */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden transition-all">
+      <div className="bg-white dark:bg-[#121612] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden transition-all">
         
         {/* Table Controls Header */}
-        <div className="p-5 border-b border-slate-100 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-white/[0.02]">
-          <div className="flex items-center space-x-3">
-            <h3 className="font-extrabold text-slate-950 dark:text-white text-base tracking-tight">
+        <div className="p-3 sm:p-3.5 border-b border-slate-100 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-slate-50/50 dark:bg-white/[0.02]">
+          <div className="flex items-center space-x-2.5">
+            <h3 className="font-extrabold text-slate-950 dark:text-white text-xs sm:text-sm tracking-tight">
               Past Broadcast History
             </h3>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-200/80 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300">
+            <span className="px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-slate-200/80 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300">
               {campaigns.length} total
             </span>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             {/* Search Input */}
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search history..."
@@ -898,13 +898,13 @@ export default function NotificationsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] text-[11px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  <th className="py-3.5 px-5">Campaign & Message</th>
-                  <th className="py-3.5 px-4">Audience Target</th>
-                  <th className="py-3.5 px-4">Deep Link</th>
-                  <th className="py-3.5 px-4 text-right">Recipients</th>
-                  <th className="py-3.5 px-4">Timestamp</th>
-                  <th className="py-3.5 px-5 text-right">Status</th>
+                <tr className="border-b border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  <th className="py-2.5 px-3.5">Campaign & Message</th>
+                  <th className="py-2.5 px-3">Audience Target</th>
+                  <th className="py-2.5 px-3">Deep Link</th>
+                  <th className="py-2.5 px-3 text-right">Recipients</th>
+                  <th className="py-2.5 px-3">Timestamp</th>
+                  <th className="py-2.5 px-3.5 text-right">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
@@ -916,17 +916,17 @@ export default function NotificationsPage() {
                       className="hover:bg-slate-50/80 dark:hover:bg-white/[0.03] transition-colors"
                     >
                       {/* Campaign & Message */}
-                      <td className="py-3.5 px-5 min-w-[220px] max-w-[340px]">
+                      <td className="py-2.5 px-3.5 min-w-[220px] max-w-[340px]">
                         <p className="font-extrabold text-slate-950 dark:text-white truncate">
                           {n.title}
                         </p>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                        <p className="text-[10.5px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
                           {n.message}
                         </p>
                       </td>
 
                       {/* Audience */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
+                      <td className="py-2.5 px-3 whitespace-nowrap">
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                             n.targetAudience && n.targetAudience.startsWith('User:')

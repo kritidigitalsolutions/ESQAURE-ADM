@@ -229,18 +229,18 @@ export default function LegalPage() {
   const activeDef = DOC_DEFS.find(d => d.id === activeId) || DOC_DEFS[0];
 
   return (
-    <div className="space-y-5 font-urbanist">
+    <div className="space-y-3.5 font-urbanist">
 
       {/* ── Page header ── */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl px-6 py-5 border border-slate-200/90 dark:border-white/10 shadow-sm transition-colors">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0">
-              <Scale className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+      <div className="bg-white dark:bg-[#121612] rounded-xl px-4 py-3 sm:py-3.5 border border-slate-200/90 dark:border-white/10 shadow-xs transition-colors">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0">
+              <Scale className="w-4.5 h-4.5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
             </div>
             <div>
-              <h2 className="text-xl font-extrabold text-slate-950 dark:text-white">Legal &amp; Policy Hub</h2>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+              <h2 className="text-base font-extrabold text-slate-950 dark:text-white">Legal &amp; Policy Hub</h2>
+              <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
                 Edit and publish official documents served to your mobile app.
               </p>
             </div>
@@ -248,16 +248,16 @@ export default function LegalPage() {
           <button
             onClick={loadData}
             disabled={loading}
-            className="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-700 dark:hover:text-white transition-all"
+            className="p-2 rounded-lg border border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-700 dark:hover:text-white transition-all cursor-pointer"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#FEF08A]' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#FEF08A]' : ''}`} />
           </button>
         </div>
       </div>
 
       {/* ── Toast ── */}
       {toast && (
-        <div className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-bold border ${
+        <div className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border ${
           toast.type === 'success'
             ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40'
             : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/40'
@@ -268,11 +268,11 @@ export default function LegalPage() {
       )}
 
       {/* ── Two-column layout ── */}
-      <div className="flex gap-5 items-start">
+      <div className="flex gap-3.5 items-start">
 
         {/* Sidebar */}
-        <aside className="w-52 shrink-0 bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-sm p-2 space-y-0.5 transition-colors">
-          <p className="text-[10px] font-extrabold text-slate-400 dark:text-white/25 uppercase tracking-[0.14em] px-2.5 pt-1.5 pb-2">
+        <aside className="w-48 shrink-0 bg-white dark:bg-[#121612] rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs p-1.5 space-y-0.5 transition-colors">
+          <p className="text-[10px] font-extrabold text-slate-400 dark:text-white/25 uppercase tracking-[0.14em] px-2 pt-1 pb-1.5">
             Documents
           </p>
           {DOC_DEFS.map(def => (
@@ -284,10 +284,10 @@ export default function LegalPage() {
               onClick={() => setActiveId(def.id)}
             />
           ))}
-          <div className="pt-3 pb-1 px-1">
-            <div className="rounded-xl p-3 bg-amber-50 dark:bg-[#FEF08A]/[0.04] border border-amber-100 dark:border-[#FEF08A]/[0.12]">
-              <p className="text-[10px] font-extrabold text-amber-700 dark:text-[#FEF08A]/60 uppercase tracking-wider mb-1">IT Rules 2021</p>
-              <p className="text-[11px] text-amber-800/60 dark:text-white/30 font-medium leading-[1.55]">
+          <div className="pt-2 pb-1 px-0.5">
+            <div className="rounded-lg p-2.5 bg-amber-50 dark:bg-[#FEF08A]/[0.04] border border-amber-100 dark:border-[#FEF08A]/[0.12]">
+              <p className="text-[9.5px] font-extrabold text-amber-700 dark:text-[#FEF08A]/60 uppercase tracking-wider mb-0.5">IT Rules 2021</p>
+              <p className="text-[10.5px] text-amber-800/60 dark:text-white/30 font-medium leading-[1.45]">
                 Rule 11 mandates a published Grievance Officer for all OTT platforms.
               </p>
             </div>
@@ -296,8 +296,8 @@ export default function LegalPage() {
 
         {/* Editor panel */}
         <div
-          className="flex-1 min-w-0 bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-sm overflow-hidden transition-colors flex flex-col"
-          style={{ minHeight: '560px' }}
+          className="flex-1 min-w-0 bg-white dark:bg-[#121612] rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden transition-colors flex flex-col"
+          style={{ minHeight: '520px' }}
         >
           {loading ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 py-24">

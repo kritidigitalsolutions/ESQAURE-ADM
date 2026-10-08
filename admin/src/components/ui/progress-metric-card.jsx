@@ -50,8 +50,8 @@ export default function ProgressMetricCard({
 }) {
   const isCompact = size === 'sm';
   const gridId = `grid-${useId().replace(/:/g, '')}`;
-  const minHeightClass = isCompact ? 'min-h-[200px] sm:min-h-[220px]' : 'min-h-[340px] sm:min-h-[380px]';
-  const shell = `relative flex ${minHeightClass} w-full flex-col overflow-hidden rounded-[28px] border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#121612] shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover ${className}`;
+  const minHeightClass = isCompact ? 'min-h-[190px] sm:min-h-[210px]' : 'min-h-[290px] sm:min-h-[310px]';
+  const shell = `relative flex ${minHeightClass} w-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#121612] shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover ${className}`;
 
   const periods = periodOptions ?? DEFAULT_PERIODS;
   const [selectedLabel, setSelectedLabel] = useState(period);
@@ -192,7 +192,7 @@ export default function ProgressMetricCard({
         </div>
 
         {/* Embedded Interactive MetricChart SVG */}
-        <div className={`absolute inset-0 ${isCompact ? 'pt-10 pb-6 pr-4' : 'pt-20 pb-12 pr-4'} pointer-events-auto`}>
+        <div className={`absolute inset-0 ${isCompact ? 'pt-8 pb-4 pr-3' : 'pt-14 pb-8 pr-3'} pointer-events-auto`}>
           <MetricChart
             series={chartSeries}
             view={view}
@@ -206,22 +206,22 @@ export default function ProgressMetricCard({
       </div>
 
       {/* Main Card Content Layout */}
-      <div className={`relative z-10 flex flex-1 flex-col ${isCompact ? 'p-4 sm:p-5' : 'p-5 sm:p-7'} pointer-events-none`}>
+      <div className={`relative z-10 flex flex-1 flex-col ${isCompact ? 'p-3.5 sm:p-4' : 'p-4 sm:p-5'} pointer-events-none`}>
         {/* Top Header Row: Title + Toggle Switchers */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pointer-events-none">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pointer-events-none">
           <div className="pointer-events-auto w-fit">
-            <div className="flex items-center gap-3">
-              <h3 className="text-base sm:text-lg font-extrabold tracking-tight text-slate-950 dark:text-white font-urbanist">{title}</h3>
+            <div className="flex items-center gap-2.5">
+              <h3 className="text-sm sm:text-base font-extrabold tracking-tight text-slate-950 dark:text-white font-urbanist">{title}</h3>
               <ViewToggle value={view} onChange={setView} />
             </div>
             {subtitle && (
-              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-0.5">{subtitle}</p>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">{subtitle}</p>
             )}
           </div>
 
           {/* Unified Signature Dashboard Pill Tabs (Users vs Subscribers) */}
           {tabs.length > 0 && (
-            <div className="pointer-events-auto inline-flex items-center gap-0.5 rounded-xl bg-slate-100/90 dark:bg-[#161B16] p-1 border border-slate-200/70 dark:border-white/10 shadow-2xs self-start sm:self-auto">
+            <div className="pointer-events-auto inline-flex items-center gap-0.5 rounded-lg bg-slate-100/90 dark:bg-[#161B16] p-0.5 border border-slate-200/70 dark:border-white/10 shadow-2xs self-start sm:self-auto">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
@@ -232,7 +232,7 @@ export default function ProgressMetricCard({
                       setHoveredIdx(null);
                       onTabChange?.(tab.id);
                     }}
-                    className={`rounded-lg px-3.5 py-1.5 text-xs font-extrabold transition-all cursor-pointer ${
+                    className={`rounded-md px-2.5 py-1 text-[11px] font-extrabold transition-all cursor-pointer ${
                       isActive
                         ? 'bg-[#FEF08A] text-slate-950 shadow-2xs border border-amber-300/70'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800'
@@ -248,11 +248,11 @@ export default function ProgressMetricCard({
 
         {/* Multi-series legend */}
         {isMulti && (
-          <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 w-fit pointer-events-auto">
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 w-fit pointer-events-auto">
             {chartSeries.map((s) => (
               <span
                 key={s.name}
-                className="flex items-center gap-1.5 text-xs font-semibold text-slate-500"
+                className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500"
               >
                 <span className="h-2 w-2 rounded-full" style={{ background: s.color }} />
                 {s.name}
@@ -262,25 +262,25 @@ export default function ProgressMetricCard({
         )}
 
         {/* Polished Metric Headline & Peak/Focused Badge */}
-        <div className={`${isCompact ? 'mt-2 sm:mt-3' : 'mt-5 sm:mt-6'} w-fit pointer-events-none`}>
-          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-1 font-urbanist transition-all">
+        <div className={`${isCompact ? 'mt-2' : 'mt-2.5 sm:mt-3'} w-fit pointer-events-none`}>
+          <span className="text-[10px] sm:text-[10.5px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-0.5 font-urbanist transition-all">
             {activeSublabel}
           </span>
-          <div className="flex items-baseline flex-wrap gap-2 sm:gap-3">
-            <span className={`${isCompact ? 'text-2xl sm:text-3xl lg:text-4xl' : 'text-3xl sm:text-4xl lg:text-5xl'} font-black leading-none tracking-tight text-slate-950 dark:text-white font-urbanist transition-all select-text pointer-events-auto`}>
-              <AnimatedNumber value={activeTotalDisplay} duration={500} /> {unit && !activeTotalDisplay.includes(unit) ? <span className="text-xl sm:text-2xl font-bold text-slate-600 dark:text-slate-400">{unit}</span> : ''}
+          <div className="flex items-baseline flex-wrap gap-2">
+            <span className={`${isCompact ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'} font-black leading-none tracking-tight text-slate-950 dark:text-white font-urbanist transition-all select-text pointer-events-auto`}>
+              <AnimatedNumber value={activeTotalDisplay} duration={500} /> {unit && !activeTotalDisplay.includes(unit) ? <span className="text-lg sm:text-xl font-bold text-slate-600 dark:text-slate-400">{unit}</span> : ''}
             </span>
 
             {/* Signature OTT Dashboard Yellow / Emerald Trend Badge */}
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold bg-[#FEF08A] text-slate-950 border border-amber-300/80 shadow-2xs pointer-events-auto">
-              <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-[#FEF08A] text-slate-950 border border-amber-300/80 shadow-2xs pointer-events-auto">
+              <ArrowUp className="w-3 h-3 stroke-[2.5]" />
               <AnimatedNumber value={displayPercent} duration={500} />
             </span>
           </div>
         </div>
 
         {/* Period Selector: Shifted to Left Bottom Above Dates */}
-        <div className={`${isCompact ? 'mt-3 pt-1' : 'mt-auto pt-4 sm:pt-6'} w-fit pointer-events-none`}>
+        <div className={`${isCompact ? 'mt-2 pt-0.5' : 'mt-auto pt-2.5 sm:pt-3'} w-fit pointer-events-none`}>
           <PeriodSelect
             value={selectedLabel}
             options={periods}
@@ -291,7 +291,7 @@ export default function ProgressMetricCard({
 
       {/* Footer Area: Timeline Date Labels */}
       <div
-        className={`relative z-10 flex items-center justify-between gap-3 border-t border-slate-100 dark:border-white/10 bg-white/95 dark:bg-[#141914]/95 backdrop-blur-xs ${isCompact ? 'px-4 sm:px-5 py-2.5' : 'px-5 sm:px-7 py-3.5'}`}
+        className={`relative z-10 flex items-center justify-between gap-2.5 border-t border-slate-100 dark:border-white/10 bg-white/95 dark:bg-[#141914]/95 backdrop-blur-xs ${isCompact ? 'px-3 sm:px-4 py-1.5' : 'px-4 sm:px-5 py-2'}`}
       >
         {/* Dynamic Date Labels Under Graph */}
         <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 overflow-x-auto w-full py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

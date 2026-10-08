@@ -116,17 +116,17 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6 font-urbanist max-w-4xl">
+    <div className="space-y-3.5 font-urbanist max-w-4xl">
       
       {/* Page Header */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
-        <div className="flex items-center space-x-3.5">
-          <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
-            <ShieldCheck className="w-5 h-5 stroke-[2.2]" />
+      <div className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/90 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors">
+        <div className="flex items-center space-x-3">
+          <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
+            <ShieldCheck className="w-4 h-4 stroke-[2.2]" />
           </div>
           <div>
-            <h2 className="text-lg font-extrabold text-slate-950 dark:text-white">Admin Settings</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <h2 className="text-base sm:text-lg font-extrabold text-slate-950 dark:text-white">Admin Settings</h2>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
               Manage your administrator name, login email address, and security password.
             </p>
           </div>
@@ -134,43 +134,43 @@ export default function SettingsPage() {
       </div>
 
       {/* 1. Admin Profile Controls (Name & Login Email Update) */}
-      <form onSubmit={handleProfileSave} className="bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-nodus space-y-5 transition-colors">
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
-              <User className="w-4 h-4 stroke-[2.2]" />
+      <form onSubmit={handleProfileSave} className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/90 dark:border-white/10 shadow-xs space-y-3.5 transition-colors">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-7.5 h-7.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
+              <User className="w-3.5 h-3.5 stroke-[2.2]" />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">Profile Details</h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">Update admin display name and login email address</p>
+              <h3 className="font-extrabold text-xs sm:text-sm text-slate-950 dark:text-white">Profile Details</h3>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">Update admin display name and login email address</p>
             </div>
           </div>
         </div>
 
         {/* Feedback Messages */}
         {profileErrorMsg && (
-          <div className="flex items-center space-x-2.5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 text-xs font-semibold animate-fadeIn">
-            <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+          <div className="flex items-center space-x-2 p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 text-xs font-semibold animate-fadeIn">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-500" />
             <span>{profileErrorMsg}</span>
           </div>
         )}
 
         {profileSuccessMsg && (
-          <div className="flex items-center space-x-2.5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold animate-fadeIn">
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
+          <div className="flex items-center space-x-2 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold animate-fadeIn">
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
             <span>{profileSuccessMsg}</span>
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           {/* Admin Name */}
-          <div className="space-y-1.5">
-            <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">
+          <div className="space-y-1">
+            <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
               Admin Name
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <User className="w-4 h-4" />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <User className="w-3.5 h-3.5" />
               </div>
               <input
                 type="text"
@@ -182,19 +182,19 @@ export default function SettingsPage() {
                   if (profileErrorMsg) setProfileErrorMsg('');
                 }}
                 placeholder="Administrator"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/60 transition-colors"
+                className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-lg font-medium text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/60 transition-colors"
               />
             </div>
           </div>
 
           {/* Login Email */}
-          <div className="space-y-1.5">
-            <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">
+          <div className="space-y-1">
+            <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
               Login Email Address
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <Mail className="w-4 h-4" />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <Mail className="w-3.5 h-3.5" />
               </div>
               <input
                 type="email"
@@ -206,27 +206,27 @@ export default function SettingsPage() {
                   if (profileErrorMsg) setProfileErrorMsg('');
                 }}
                 placeholder="admin@e2stories.com"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/60 transition-colors"
+                className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-lg font-medium text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/60 transition-colors"
               />
             </div>
           </div>
         </div>
 
         {/* Save Profile Button */}
-        <div className="flex items-center justify-end pt-2">
+        <div className="flex items-center justify-end pt-1">
           <button
             type="submit"
             disabled={isProfileSaving}
-            className="py-2.5 px-6 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-extrabold text-xs rounded-xl flex items-center space-x-2 transition-all shadow-xs active:scale-98 cursor-pointer disabled:opacity-60"
+            className="py-1.5 px-4.5 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-extrabold text-xs rounded-lg flex items-center space-x-1.5 transition-all shadow-xs active:scale-98 cursor-pointer disabled:opacity-60"
           >
             {isProfileSaving ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950" />
                 <span>Saving Profile...</span>
               </>
             ) : (
               <>
-                <Save className="w-4 h-4 text-slate-950" />
+                <Save className="w-3.5 h-3.5 text-slate-950" />
                 <span>Save Profile Details</span>
               </>
             )}
@@ -235,43 +235,43 @@ export default function SettingsPage() {
       </form>
 
       {/* 2. Password Update Controls */}
-      <form onSubmit={handlePasswordSave} className="bg-white dark:bg-[#121612] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-nodus space-y-5 transition-colors">
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
-              <KeyRound className="w-4 h-4 stroke-[2.2]" />
+      <form onSubmit={handlePasswordSave} className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/90 dark:border-white/10 shadow-xs space-y-3.5 transition-colors">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-7.5 h-7.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
+              <KeyRound className="w-3.5 h-3.5 stroke-[2.2]" />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">Security & Password</h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">Update your account login password</p>
+              <h3 className="font-extrabold text-xs sm:text-sm text-slate-950 dark:text-white">Security &amp; Password</h3>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">Update your account login password</p>
             </div>
           </div>
         </div>
 
         {/* Feedback Messages */}
         {passwordErrorMsg && (
-          <div className="flex items-center space-x-2.5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 text-xs font-semibold animate-fadeIn">
-            <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+          <div className="flex items-center space-x-2 p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 text-xs font-semibold animate-fadeIn">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-500" />
             <span>{passwordErrorMsg}</span>
           </div>
         )}
 
         {passwordSuccessMsg && (
-          <div className="flex items-center space-x-2.5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold animate-fadeIn">
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
+          <div className="flex items-center space-x-2 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold animate-fadeIn">
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
             <span>{passwordSuccessMsg}</span>
           </div>
         )}
 
-        <div className="space-y-4 text-xs">
+        <div className="space-y-3 text-xs">
           {/* Current Password */}
-          <div className="space-y-1.5">
-            <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">
+          <div className="space-y-1">
+            <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
               Current Password
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <Lock className="w-4 h-4" />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <Lock className="w-3.5 h-3.5" />
               </div>
               <input
                 type={showCurrentPassword ? 'text' : 'password'}
@@ -283,28 +283,28 @@ export default function SettingsPage() {
                   if (passwordErrorMsg) setPasswordErrorMsg('');
                 }}
                 placeholder="••••••••••••"
-                className="w-full pl-10 pr-11 py-2.5 bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/60 transition-colors"
+                className="w-full pl-9 pr-10 py-1.5 bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-lg font-medium text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/60 transition-colors"
               />
               <button
                 type="button"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 focus:outline-none cursor-pointer"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200 focus:outline-none cursor-pointer"
                 title={showCurrentPassword ? "Hide password" : "Show password"}
               >
-                {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showCurrentPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* New Password */}
-            <div className="space-y-1.5">
-              <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">
+            <div className="space-y-1">
+              <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
                 New Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="w-4 h-4" />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Lock className="w-3.5 h-3.5" />
                 </div>
                 <input
                   type={showNewPassword ? 'text' : 'password'}
@@ -316,27 +316,27 @@ export default function SettingsPage() {
                     if (passwordErrorMsg) setPasswordErrorMsg('');
                   }}
                   placeholder="••••••••••••"
-                  className="w-full pl-10 pr-11 py-2.5 bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/60 transition-colors"
+                  className="w-full pl-9 pr-10 py-1.5 bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-lg font-medium text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/60 transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 focus:outline-none cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200 focus:outline-none cursor-pointer"
                   title={showNewPassword ? "Hide password" : "Show password"}
                 >
-                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showNewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
               </div>
             </div>
 
             {/* Confirm New Password */}
-            <div className="space-y-1.5">
-              <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">
+            <div className="space-y-1">
+              <label className="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px]">
                 Confirm New Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="w-4 h-4" />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Lock className="w-3.5 h-3.5" />
                 </div>
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
@@ -348,15 +348,15 @@ export default function SettingsPage() {
                     if (passwordErrorMsg) setPasswordErrorMsg('');
                   }}
                   placeholder="••••••••••••"
-                  className="w-full pl-10 pr-11 py-2.5 bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/60 transition-colors"
+                  className="w-full pl-9 pr-10 py-1.5 bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-lg font-medium text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/60 transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 focus:outline-none cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200 focus:outline-none cursor-pointer"
                   title={showConfirmPassword ? "Hide password" : "Show password"}
                 >
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
               </div>
             </div>
@@ -364,20 +364,20 @@ export default function SettingsPage() {
         </div>
 
         {/* Update Password Button */}
-        <div className="flex items-center justify-end pt-2">
+        <div className="flex items-center justify-end pt-1">
           <button
             type="submit"
             disabled={isPasswordSaving}
-            className="py-2.5 px-6 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-extrabold text-xs rounded-xl flex items-center space-x-2 transition-all shadow-xs active:scale-98 cursor-pointer disabled:opacity-60"
+            className="py-1.5 px-4.5 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-extrabold text-xs rounded-lg flex items-center space-x-1.5 transition-all shadow-xs active:scale-98 cursor-pointer disabled:opacity-60"
           >
             {isPasswordSaving ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950" />
                 <span>Updating Password...</span>
               </>
             ) : (
               <>
-                <Lock className="w-4 h-4 text-slate-950" />
+                <Lock className="w-3.5 h-3.5 text-slate-950" />
                 <span>Update Password</span>
               </>
             )}
