@@ -3,7 +3,7 @@
 
 ---
 
-## 1. High-Level System Architecture
+## 1 Highevel System Architecture
 
 ```mermaid
 graph TD
