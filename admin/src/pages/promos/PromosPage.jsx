@@ -4,6 +4,7 @@ import {
   RefreshCw, Loader2, AlertCircle, ToggleLeft, ToggleRight, Pencil
 } from 'lucide-react';
 import promoService from '../../services/promoService';
+import PageLoader from '../../components/common/PageLoader';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const formatDiscount = (type, value) => {
@@ -354,10 +355,7 @@ export default function PromosPage() {
       {/* Table */}
       <div className="bg-white dark:bg-[#121612] rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden transition-colors">
         {loading ? (
-          <div className="flex items-center justify-center py-16 space-x-2 text-slate-400">
-            <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
-            <span className="text-xs font-semibold">Loading promos…</span>
-          </div>
+          <PageLoader size="sm" text="Loading..." minHeight="min-h-[260px]" />
         ) : promos.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 space-y-2 text-slate-400">
             <Ticket className="w-8 h-8 opacity-30" />

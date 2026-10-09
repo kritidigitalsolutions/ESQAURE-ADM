@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ToggleSwitch from '../../../components/common/ToggleSwitch';
 import {
   Copy,
   Check,
@@ -371,19 +372,11 @@ export default function AdmobConfigTab({ settings, googleTestUnits, onSaveSettin
                     <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                       {isEnabled ? 'Active' : 'Disabled'}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => handleUnitChange(fmt.key, 'enabled', !isEnabled)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        isEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-white/20'
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                          isEnabled ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
+                    <ToggleSwitch
+                      enabled={isEnabled}
+                      onChange={() => handleUnitChange(fmt.key, 'enabled', !isEnabled)}
+                      title={isEnabled ? 'Active' : 'Disabled'}
+                    />
                   </div>
                 </div>
 

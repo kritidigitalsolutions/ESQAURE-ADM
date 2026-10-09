@@ -25,8 +25,12 @@ import LegalPage from './pages/legal/LegalPage';
 import AppNotificationsPage from './pages/notifications/AppNotificationsPage';
 import BannersPage from './pages/banners/BannersPage';
 import CategoryPriorityPage from './pages/genres/CategoryPriorityPage';
+import PageLoader from './components/common/PageLoader';
+import { subscribeToAuthChanges, logoutAdmin } from './services/firebase';
 
 export default function App() {
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [adminUser, setAdminUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
       return localStorage.getItem('admin_authenticated') === 'true';
@@ -34,6 +38,34 @@ export default function App() {
       return false;
     }
   });
+
+  // Listen to Firebase Authentication state changes
+  useEffect(() => {
+    const unsubscribe = subscribeToAuthChanges((firebaseUser) => {
+      if (firebaseUser) {
+        setAdminUser(firebaseUser);
+        setIsAuthenticated(true);
+        try {
+          localStorage.setItem('admin_authenticated', 'true');
+          localStorage.setItem('admin_user_email', firebaseUser.email || '');
+          if (firebaseUser.displayName) {
+            localStorage.setItem('admin_user_name', firebaseUser.displayName);
+          }
+        } catch (e) {
+          console.error('Error syncing auth state', e);
+        }
+      } else {
+        setAdminUser(null);
+        setIsAuthenticated(false);
+        try {
+          localStorage.removeItem('admin_authenticated');
+        } catch (e) {}
+      }
+      setIsAuthChecking(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const getInitialTab = () => {
     try {
@@ -73,11 +105,18 @@ export default function App() {
   const [isIngestModalOpen, setIsIngestModalOpen] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutAdmin();
+    } catch (err) {
+      console.error('Error logging out from Firebase:', err);
+    }
     try {
       localStorage.removeItem('admin_authenticated');
+      localStorage.removeItem('admin_user_email');
     } catch {}
     setIsAuthenticated(false);
+    setAdminUser(null);
   };
 
   const getPageMeta = () => {
@@ -164,8 +203,8 @@ export default function App() {
         };
       case 'app_notifications':
         return {
-          title: "In-App Notices",
-          subtitle: "Broadcast system notices, maintenance announcements, and promotional offers to user inboxes."
+          title: "Notifications",
+          subtitle: "Broadcast system notifications, maintenance announcements, and promotional offers to user inboxes."
         };
       case 'legal':
         return {
@@ -186,6 +225,15 @@ export default function App() {
   };
 
   const meta = getPageMeta();
+
+  if (isAuthChecking) {
+    return (
+      <PageLoader
+        fullScreen
+        text="Loading..."
+      />
+    );
+  }
 
   if (!isAuthenticated) {
     return <LoginPage onLoginSuccess={() => setIsAuthenticated(true)} />;
@@ -315,10 +363,6 @@ export default function App() {
           </div>
         </main>
 
-        {/* Footer */}
-        <footer className="bg-white dark:bg-[#121612] border-t border-slate-200 dark:border-white/10 py-3.5 text-center text-xs text-slate-400 dark:text-slate-500 font-medium shrink-0">
-          <p>© 2026 E² Stories (Entertainment Squared) — Vertical Micro-Drama OTT Platform Dashboard</p>
-        </footer>
 
 
       </div>

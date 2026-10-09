@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { notificationService } from '../../services/notificationService';
+import PageLoader from '../../components/common/PageLoader';
 import {
   Plus,
   Sparkles,
@@ -195,7 +196,7 @@ export default function AppNotificationsPage() {
             className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all shadow-xs shrink-0 active:scale-98 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>New Notice</span>
+            <span>New Notification</span>
           </button>
         </div>
       </div>
@@ -231,7 +232,7 @@ export default function AppNotificationsPage() {
         {/* Category Filter Chips */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {[
-            { id: 'ALL', label: 'All Notices' },
+            { id: 'ALL', label: 'All Notifications' },
             { id: 'SYSTEM', label: 'System' },
             { id: 'OFFER', label: 'Offers' },
             { id: 'BILLING', label: 'Billing' },
@@ -256,7 +257,7 @@ export default function AppNotificationsPage() {
             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search announcements..."
+              placeholder="Search notifications..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-900 dark:text-white bg-slate-50 dark:bg-[#161B16] focus:bg-white dark:focus:bg-[#121612] focus:outline-hidden focus:ring-1 focus:ring-[#FEF08A]"
@@ -278,15 +279,14 @@ export default function AppNotificationsPage() {
       {/* 4. Notices List / Cards */}
       <div className="space-y-2.5">
         {isLoading ? (
-          <div className="bg-white dark:bg-[#121612] rounded-xl p-10 border border-slate-200/80 dark:border-white/10 text-center text-xs text-slate-400 flex items-center justify-center space-x-2">
-            <RefreshCw className="w-4 h-4 animate-spin text-amber-500" />
-            <span>Loading announcements from database...</span>
+          <div className="bg-white dark:bg-[#121612] rounded-xl border border-slate-200/80 dark:border-white/10 overflow-hidden">
+            <PageLoader size="sm" text="Loading..." minHeight="min-h-[220px]" />
           </div>
         ) : filteredNotices.length === 0 ? (
           <div className="bg-white dark:bg-[#121612] rounded-xl p-10 border border-slate-200/80 dark:border-white/10 text-center text-xs text-slate-400 space-y-2">
             <Megaphone className="w-7 h-7 mx-auto text-slate-300 dark:text-slate-600 stroke-[1.5]" />
-            <p className="font-bold text-slate-600 dark:text-slate-400">No in-app notices match your filters.</p>
-            <p className="text-[11px] text-slate-400">Click "New Notice" to publish an in-app announcement to user inboxes.</p>
+            <p className="font-bold text-slate-600 dark:text-slate-400">No notifications match your filters.</p>
+            <p className="text-[11px] text-slate-400">Click "New Notification" to publish an in-app announcement to user inboxes.</p>
           </div>
         ) : (
           filteredNotices.map((notice) => {
@@ -369,7 +369,7 @@ export default function AppNotificationsPage() {
                   <Megaphone className="w-4 h-4" />
                 </div>
                 <h3 className="text-base font-extrabold text-slate-950 dark:text-white">
-                  Publish In-App Notice
+                  Publish Notification
                 </h3>
               </div>
               <button
@@ -383,7 +383,7 @@ export default function AppNotificationsPage() {
             <form onSubmit={handleCreateNotice} className="space-y-4 text-xs">
               <div>
                 <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
-                  Notice Title *
+                  Notification Title *
                 </label>
                 <input
                   type="text"
@@ -443,7 +443,7 @@ export default function AppNotificationsPage() {
 
               <div>
                 <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
-                  Notice Body Copy *
+                  Notification Body Copy *
                 </label>
                 <textarea
                   required
@@ -468,7 +468,7 @@ export default function AppNotificationsPage() {
                   disabled={isSubmitting || !title.trim() || !body.trim()}
                   className="px-5 py-2 bg-[#FEF08A] hover:bg-[#FDE047] disabled:opacity-50 text-slate-950 font-bold rounded-xl shadow-xs transition-all cursor-pointer"
                 >
-                  {isSubmitting ? 'Publishing...' : 'Publish Notice'}
+                  {isSubmitting ? 'Publishing...' : 'Publish Notification'}
                 </button>
               </div>
             </form>

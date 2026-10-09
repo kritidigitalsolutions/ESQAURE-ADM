@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { genreService } from '../../services/genreService';
 import KpiStatCard from '../../components/common/KpiStatCard';
+import PageLoader from '../../components/common/PageLoader';
 import {
   Tags,
   Plus,
@@ -534,30 +535,10 @@ export default function GenresPage({ onNavigate }) {
         </div>
       </div>
 
-      {/* Loading Skeleton */}
+      {/* Loading State */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div
-              key={i}
-              className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 animate-pulse space-y-4"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-white/[0.06]" />
-                  <div className="space-y-1.5">
-                    <div className="w-20 h-4 bg-slate-200 dark:bg-white/[0.06] rounded" />
-                    <div className="w-14 h-3 bg-slate-200 dark:bg-white/[0.06] rounded" />
-                  </div>
-                </div>
-                <div className="w-16 h-6 bg-slate-200 dark:bg-white/[0.06] rounded-full" />
-              </div>
-              <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex justify-between">
-                <div className="w-16 h-3 bg-slate-200 dark:bg-white/[0.06] rounded" />
-                <div className="w-12 h-3 bg-slate-200 dark:bg-white/[0.06] rounded" />
-              </div>
-            </div>
-          ))}
+        <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
+          <PageLoader text="Loading..." minHeight="min-h-[340px]" />
         </div>
       ) : filteredGenres.length === 0 ? (
         /* Empty State */

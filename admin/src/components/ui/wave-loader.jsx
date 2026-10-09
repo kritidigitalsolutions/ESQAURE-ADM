@@ -1,2 +1,2 @@
-export * from "./Wave";
-export { default } from "./Wave";
+export * from "./wave";
+export { default } from "./wave";

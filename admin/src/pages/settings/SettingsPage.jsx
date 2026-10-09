@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Lock, Eye, EyeOff, CheckCircle2, AlertCircle, Save, KeyRound, ShieldCheck, Loader2 } from 'lucide-react';
+import { updateAdminPassword, updateAdminProfile, getFirebaseErrorMessage } from '../../services/firebase';
 
 export default function SettingsPage() {
   // Admin Profile State
@@ -35,7 +36,7 @@ export default function SettingsPage() {
   }, []);
 
   // Handle Admin Profile Update (Name & Login Email)
-  const handleProfileSave = (e) => {
+  const handleProfileSave = async (e) => {
     e.preventDefault();
     setProfileErrorMsg('');
     setProfileSuccessMsg('');
@@ -58,28 +59,31 @@ export default function SettingsPage() {
 
     setIsProfileSaving(true);
 
-    setTimeout(() => {
-      try {
-        const cleanName = adminName.trim();
-        const cleanEmail = adminEmail.trim();
-        localStorage.setItem('admin_user_name', cleanName);
-        localStorage.setItem('admin_user_email', cleanEmail);
-        
-        // Notify other components (e.g. Topbar) of profile update
-        window.dispatchEvent(new Event('admin_profile_updated'));
-        
-        setProfileSuccessMsg('Admin profile updated successfully.');
-      } catch (err) {
-        console.error('Failed to update admin profile', err);
-        setProfileErrorMsg('Failed to update profile. Please try again.');
-      } finally {
-        setIsProfileSaving(false);
-      }
-    }, 400);
+    try {
+      const cleanName = adminName.trim();
+      const cleanEmail = adminEmail.trim();
+
+      // Update Firebase Auth profile
+      await updateAdminProfile(cleanName);
+
+      localStorage.setItem('admin_user_name', cleanName);
+      localStorage.setItem('admin_user_email', cleanEmail);
+      
+      // Notify other components (e.g. Topbar) of profile update
+      window.dispatchEvent(new Event('admin_profile_updated'));
+      
+      setProfileSuccessMsg('Admin profile updated successfully.');
+    } catch (err) {
+      console.error('Failed to update admin profile', err);
+      const friendlyErr = getFirebaseErrorMessage(err);
+      setProfileErrorMsg(friendlyErr || 'Failed to update profile. Please try again.');
+    } finally {
+      setIsProfileSaving(false);
+    }
   };
 
-  // Handle Password Update
-  const handlePasswordSave = (e) => {
+  // Handle Firebase Password Update
+  const handlePasswordSave = async (e) => {
     e.preventDefault();
     setPasswordErrorMsg('');
     setPasswordSuccessMsg('');
@@ -106,13 +110,19 @@ export default function SettingsPage() {
 
     setIsPasswordSaving(true);
 
-    setTimeout(() => {
-      setIsPasswordSaving(false);
-      setPasswordSuccessMsg('Admin password updated successfully.');
+    try {
+      await updateAdminPassword(newPassword, currentPassword);
+      setPasswordSuccessMsg('Admin password updated successfully in Firebase.');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    }, 500);
+    } catch (err) {
+      console.error('Failed to update admin password in Firebase:', err);
+      const friendlyErr = getFirebaseErrorMessage(err);
+      setPasswordErrorMsg(friendlyErr);
+    } finally {
+      setIsPasswordSaving(false);
+    }
   };
 
   return (

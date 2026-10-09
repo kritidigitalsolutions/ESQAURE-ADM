@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { subscriptionService } from '../../services/subscriptionService';
 import Badge from '../../components/common/Badge';
+import PageLoader from '../../components/common/PageLoader';
 import { Receipt, Search, X, Download, FileText, CheckCircle2, XCircle, RefreshCw, AlertCircle } from 'lucide-react';
 
 export default function TransactionsPage() {
@@ -300,17 +301,11 @@ export default function TransactionsPage() {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
               {isLoading && transactions.length === 0 ? (
-                Array.from({ length: 4 }).map((_, idx) => (
-                  <tr key={idx} className="animate-pulse">
-                    <td className="py-4 px-4"><div className="h-4 w-28 bg-slate-200 dark:bg-white/10 rounded" /></td>
-                    <td className="py-4 px-4"><div className="h-4 w-24 bg-slate-200 dark:bg-white/10 rounded" /></td>
-                    <td className="py-4 px-4"><div className="h-4 w-20 bg-slate-200 dark:bg-white/10 rounded" /></td>
-                    <td className="py-4 px-4"><div className="h-4 w-24 bg-slate-200 dark:bg-white/10 rounded" /></td>
-                    <td className="py-4 px-4"><div className="h-4 w-16 bg-slate-200 dark:bg-white/10 rounded" /></td>
-                    <td className="py-4 px-4"><div className="h-5 w-16 bg-slate-200 dark:bg-white/10 rounded-full" /></td>
-                    <td className="py-4 px-4 text-right"><div className="h-4 w-24 bg-slate-200 dark:bg-white/10 rounded ml-auto" /></td>
-                  </tr>
-                ))
+                <tr>
+                  <td colSpan="7" className="py-12">
+                    <PageLoader size="sm" text="Loading..." minHeight="min-h-[220px]" />
+                  </td>
+                </tr>
               ) : filteredTxns.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="py-12 text-center">

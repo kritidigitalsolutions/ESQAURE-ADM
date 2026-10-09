@@ -374,6 +374,57 @@
                 "description": "Log out the current session. After logout, call **3.10 Unregister Device Token** to stop push notifications on this device."
               },
               "response": []
+            },
+            {
+              "name": "1.6 Firebase Login & ID Token Verification",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const r = pm.response.json();",
+                      "if (r.success && r.data) {",
+                      "    if (r.data.token) {",
+                      "        pm.collectionVariables.set('adminToken', r.data.token);",
+                      "        pm.collectionVariables.set('authToken', r.data.token);",
+                      "        console.log('[OK] adminToken saved:', r.data.token);",
+                      "    }",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"idToken\": \"{{firebaseIdToken}}\",\n  \"email\": \"admin@e2stories.com\",\n  \"displayName\": \"Administrator\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/firebase-login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "firebase-login"
+                  ]
+                },
+                "description": "Verify Firebase Authentication ID token (or email/admin profile) and return platform session JWT for Admin Panel access.\n\n**Payload:**\n- `idToken`: Firebase JWT token obtained from client SDK\n- `email`: Admin email address\n- `displayName`: Administrator name"
+              },
+              "response": []
             }
           ]
         },
@@ -2510,6 +2561,62 @@
       "description": "All APIs used by the E² Stories Admin Panel. Covers user management (search, subscription, suspend, delete) and sending notifications to users.",
       "item": [
         {
+          "name": "1. Admin Authentication",
+          "item": [
+            {
+              "name": "Firebase Admin Login & Token Verification",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const r = pm.response.json();",
+                      "if (r.success && r.data) {",
+                      "    if (r.data.token) {",
+                      "        pm.collectionVariables.set('adminToken', r.data.token);",
+                      "        pm.collectionVariables.set('authToken', r.data.token);",
+                      "        console.log('[OK] adminToken saved:', r.data.token);",
+                      "    }",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"idToken\": \"{{firebaseIdToken}}\",\n  \"email\": \"admin@e2stories.com\",\n  \"displayName\": \"Administrator\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/firebase-login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "firebase-login"
+                  ]
+                },
+                "description": "Verify Firebase Authentication ID token (or email/admin profile) and return platform session JWT for Admin Panel access.\n\n**Payload:**\n- `idToken`: Firebase JWT token obtained from client SDK\n- `email`: Admin email address\n- `displayName`: Administrator name"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
           "name": "4. User Management",
           "description": "View, search, filter, edit, suspend, grant subscription, and delete users.",
           "item": [
@@ -4372,7 +4479,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"admobEnabled\": true,\n  \"testMode\": false,\n  \"androidAppId\": \"ca-app-pub-9920192847192847~1234567890\",\n  \"iosAppId\": \"ca-app-pub-9920192847192847~0987654321\",\n  \"adUnits\": {\n    \"rewarded\": {\n      \"android\": \"ca-app-pub-9920192847192847/1122334455\",\n      \"ios\": \"ca-app-pub-9920192847192847/5544332211\",\n      \"enabled\": true,\n      \"rewardDescription\": \"Unlock Episode / 1 Free Pass\"\n    },\n    \"interstitial\": {\n      \"android\": \"ca-app-pub-9920192847192847/2233445566\",\n      \"ios\": \"ca-app-pub-9920192847192847/6655443322\",\n      \"enabled\": true,\n      \"intervalEpisodes\": 3\n    },\n    \"banner\": {\n      \"android\": \"ca-app-pub-9920192847192847/3344556677\",\n      \"ios\": \"ca-app-pub-9920192847192847/7766554433\",\n      \"enabled\": true\n    },\n    \"appOpen\": {\n      \"android\": \"ca-app-pub-9920192847192847/4455667788\",\n      \"ios\": \"ca-app-pub-9920192847192847/8877665544\",\n      \"enabled\": false\n    },\n    \"native\": {\n      \"android\": \"ca-app-pub-9920192847192847/5566778899\",\n      \"ios\": \"ca-app-pub-9920192847192847/9988776655\",\n      \"enabled\": true\n    }\n  },\n  \"mediationMode\": \"CUSTOM_FIRST\",\n  \"customAdSharePercent\": 50,\n  \"vipBypassAds\": true,\n  \"globalAdFrequencyCap\": 6\n}",
+                  "raw": "{\n  \"admobEnabled\": true,\n  \"testMode\": false,\n  \"publisherAccountId\": \"pub-6490055741105644\",\n  \"appPackageName\": \"com.flix9ott.app\",\n  \"oauthClientId\": \"389814863433-dits4313tlppgv84l.apps.googleusercontent.com\",\n  \"oauthClientSecret\": \"GOCSPX-SampleSecretKey983719\",\n  \"oauthRefreshToken\": \"1//04SampleRefreshToken_AdMobSync\",\n  \"androidAppId\": \"ca-app-pub-6490055741105644~9920192847\",\n  \"iosAppId\": \"ca-app-pub-xxx/yyy\",\n  \"adUnits\": {\n    \"appOpen\": {\n      \"android\": \"ca-app-pub-6490055741105644/4455667788\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true\n    },\n    \"banner\": {\n      \"android\": \"ca-app-pub-6490055741105644/3344556677\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true\n    },\n    \"interstitial\": {\n      \"android\": \"ca-app-pub-6490055741105644/2233445566\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true,\n      \"intervalEpisodes\": 3\n    },\n    \"rewarded\": {\n      \"android\": \"ca-app-pub-6490055741105644/1122334455\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true,\n      \"rewardDescription\": \"Unlock Episode / 1 Free Pass\"\n    },\n    \"rewardedInterstitial\": {\n      \"android\": \"ca-app-pub-6490055741105644/5566778899\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true\n    }\n  },\n  \"mediationMode\": \"CUSTOM_FIRST\",\n  \"customAdSharePercent\": 50,\n  \"vipBypassAds\": true,\n  \"globalAdFrequencyCap\": 6\n}",
                   "options": {
                     "raw": {
                       "language": "json"

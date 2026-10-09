@@ -6,6 +6,7 @@ import {
   Eye, SplitSquareHorizontal, Pencil, Clock
 } from 'lucide-react';
 import { legalService } from '../../services/legalService';
+import PageLoader from '../../components/common/PageLoader';
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
 const fmt = (d) =>
@@ -229,17 +230,17 @@ export default function LegalPage() {
   const activeDef = DOC_DEFS.find(d => d.id === activeId) || DOC_DEFS[0];
 
   return (
-    <div className="space-y-3.5 font-urbanist">
+    <div className="h-[calc(100vh-92px)] flex flex-col gap-2.5 font-urbanist overflow-hidden">
 
       {/* ── Page header ── */}
-      <div className="bg-white dark:bg-[#121612] rounded-xl px-4 py-3 sm:py-3.5 border border-slate-200/90 dark:border-white/10 shadow-xs transition-colors">
+      <div className="bg-white dark:bg-[#121612] rounded-xl px-4 py-2.5 border border-slate-200/90 dark:border-white/10 shadow-xs transition-colors shrink-0">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0">
-              <Scale className="w-4.5 h-4.5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+            <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0">
+              <Scale className="w-4 h-4 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
             </div>
             <div>
-              <h2 className="text-base font-extrabold text-slate-950 dark:text-white">Legal &amp; Policy Hub</h2>
+              <h2 className="text-sm sm:text-base font-extrabold text-slate-950 dark:text-white leading-tight">Legal &amp; Policy Hub</h2>
               <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
                 Edit and publish official documents served to your mobile app.
               </p>
@@ -248,7 +249,7 @@ export default function LegalPage() {
           <button
             onClick={loadData}
             disabled={loading}
-            className="p-2 rounded-lg border border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-700 dark:hover:text-white transition-all cursor-pointer"
+            className="p-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-white/[0.05] hover:text-slate-700 dark:hover:text-white transition-all cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#FEF08A]' : ''}`} />
           </button>
@@ -257,7 +258,7 @@ export default function LegalPage() {
 
       {/* ── Toast ── */}
       {toast && (
-        <div className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border ${
+        <div className={`shrink-0 flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold border ${
           toast.type === 'success'
             ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40'
             : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/40'
@@ -268,49 +269,37 @@ export default function LegalPage() {
       )}
 
       {/* ── Two-column layout ── */}
-      <div className="flex gap-3.5 items-start">
+      <div className="flex gap-3 items-stretch flex-1 min-h-0 overflow-hidden">
 
         {/* Sidebar */}
-        <aside className="w-48 shrink-0 bg-white dark:bg-[#121612] rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs p-1.5 space-y-0.5 transition-colors">
-          <p className="text-[10px] font-extrabold text-slate-400 dark:text-white/25 uppercase tracking-[0.14em] px-2 pt-1 pb-1.5">
-            Documents
-          </p>
-          {DOC_DEFS.map(def => (
-            <DocCard
-              key={def.id}
-              def={def}
-              data={docData[def.id]}
-              active={activeId === def.id}
-              onClick={() => setActiveId(def.id)}
-            />
-          ))}
-          <div className="pt-2 pb-1 px-0.5">
-            <div className="rounded-lg p-2.5 bg-amber-50 dark:bg-[#FEF08A]/[0.04] border border-amber-100 dark:border-[#FEF08A]/[0.12]">
-              <p className="text-[9.5px] font-extrabold text-amber-700 dark:text-[#FEF08A]/60 uppercase tracking-wider mb-0.5">IT Rules 2021</p>
-              <p className="text-[10.5px] text-amber-800/60 dark:text-white/30 font-medium leading-[1.45]">
-                Rule 11 mandates a published Grievance Officer for all OTT platforms.
-              </p>
-            </div>
+        <aside className="w-48 shrink-0 bg-white dark:bg-[#121612] rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs p-1.5 flex flex-col transition-colors overflow-hidden h-full">
+          <div className="space-y-0.5 overflow-y-auto min-h-0 flex-1">
+            <p className="text-[10px] font-extrabold text-slate-400 dark:text-white/25 uppercase tracking-[0.14em] px-2 pt-1 pb-1.5">
+              Documents
+            </p>
+            {DOC_DEFS.map(def => (
+              <DocCard
+                key={def.id}
+                def={def}
+                data={docData[def.id]}
+                active={activeId === def.id}
+                onClick={() => setActiveId(def.id)}
+              />
+            ))}
           </div>
         </aside>
 
         {/* Editor panel */}
-        <div
-          className="flex-1 min-w-0 bg-white dark:bg-[#121612] rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden transition-colors flex flex-col"
-          style={{ minHeight: '520px' }}
-        >
+        <div className="flex-1 min-w-0 bg-white dark:bg-[#121612] rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden transition-colors flex flex-col h-full min-h-0">
           {loading ? (
-            <div className="flex-1 flex flex-col items-center justify-center gap-3 py-24">
-              <div className="w-10 h-10 rounded-2xl bg-[#FEF08A]/20 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center">
-                <Loader2 className="w-5 h-5 animate-spin text-amber-500 dark:text-[#FEF08A]" />
-              </div>
-              <p className="text-sm font-semibold text-slate-400 dark:text-slate-500">Loading from database…</p>
+            <div className="flex-1 flex items-center justify-center p-6">
+              <PageLoader size="sm" text="Loading..." minHeight="min-h-[200px]" />
             </div>
           ) : (
-            <div className="flex flex-col flex-1 min-h-0">
+            <div className="flex flex-col flex-1 min-h-0 h-full overflow-hidden">
 
               {/* Doc topbar */}
-              <div className="flex items-center justify-between gap-4 px-5 py-3.5 border-b border-slate-100 dark:border-white/[0.07] bg-slate-50/80 dark:bg-[#161B16]/60 shrink-0">
+              <div className="flex items-center justify-between gap-4 px-5 py-3 border-b border-slate-100 dark:border-white/[0.07] bg-slate-50/80 dark:bg-[#161B16]/60 shrink-0">
                 <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
                   <h3 className="text-[15px] font-extrabold text-slate-950 dark:text-white leading-none">{activeDef.title}</h3>
                   {active.version && (
@@ -328,32 +317,30 @@ export default function LegalPage() {
                 <button
                   onClick={loadData}
                   disabled={loading}
-                  className="p-2 rounded-lg border border-slate-200 dark:border-white/[0.1] text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.05] transition-all"
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-white/[0.1] text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/[0.05] transition-all"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
                 </button>
               </div>
 
-              {/* Last revision */}
-              {active.lastUpdated && (
-                <div className="flex items-center gap-1.5 px-5 pt-2.5 text-[11px] text-slate-400 dark:text-white/25 font-semibold shrink-0">
-                  <Clock className="w-3 h-3 opacity-70" />
-                  Last revision: {fmt(active.lastUpdated)}
+              {/* Last revision & View toggle bar (Consolidated to save vertical space) */}
+              <div className="flex items-center justify-between gap-3 px-5 py-2 border-b border-slate-100 dark:border-white/[0.07] bg-slate-50/60 dark:bg-black/10 shrink-0">
+                <div className="flex items-center gap-3">
+                  <ViewToggle mode={viewMode} onChange={setViewMode} />
+                  {active.lastUpdated && (
+                    <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-white/25 font-semibold">
+                      <Clock className="w-3 h-3 opacity-70" />
+                      <span>Last revision: {fmt(active.lastUpdated)}</span>
+                    </div>
+                  )}
                 </div>
-              )}
-
-
-
-              {/* View toggle bar */}
-              <div className="flex items-center gap-3 px-5 py-2.5 mt-3 border-b border-slate-100 dark:border-white/[0.07] bg-slate-50/60 dark:bg-black/10 shrink-0">
-                <ViewToggle mode={viewMode} onChange={setViewMode} />
-                <span className="ml-auto text-[11px] font-mono text-slate-300 dark:text-white/20">
+                <span className="text-[11px] font-mono text-slate-300 dark:text-white/20">
                   {(active.content || '').length.toLocaleString()} chars
                 </span>
               </div>
 
               {/* Formatting toolbar */}
-              <div className="flex items-center gap-0.5 px-4 py-2 border-b border-slate-100 dark:border-white/[0.06] bg-slate-50/40 dark:bg-black/10 shrink-0">
+              <div className="flex items-center gap-0.5 px-4 py-1.5 border-b border-slate-100 dark:border-white/[0.06] bg-slate-50/40 dark:bg-black/10 shrink-0">
                 <ToolBtn action={() => document.execCommand('undo')} title="Undo"><Undo2 className="w-3.5 h-3.5" /></ToolBtn>
                 <ToolBtn action={() => document.execCommand('redo')} title="Redo"><Redo2 className="w-3.5 h-3.5" /></ToolBtn>
                 <div className="w-px h-4 mx-1.5 bg-slate-200 dark:bg-white/[0.08]" />
@@ -373,19 +360,19 @@ export default function LegalPage() {
                 <ToolBtn action={() => handleInsert('[', '](https://)')} title="Insert link"><Link className="w-3.5 h-3.5" /></ToolBtn>
               </div>
 
-              {/* Editor + Preview panes */}
-              <div className="flex flex-1 overflow-hidden min-h-0">
+              {/* Editor + Preview panes (Fills available height, internal scrolling only) */}
+              <div className="flex flex-1 overflow-hidden min-h-0 h-full">
                 {(viewMode === 'write' || viewMode === 'split') && (
-                  <div className="flex-1 relative overflow-hidden">
+                  <div className="flex-1 relative overflow-hidden flex flex-col h-full">
                     <textarea
                       ref={textRef}
                       value={active.content}
                       onChange={e => setDocData(prev => ({ ...prev, [activeId]: { ...prev[activeId], content: e.target.value } }))}
                       spellCheck={false}
                       placeholder={`# ${activeDef.title}\n\nStart writing your document…\n\nSupports **bold**, _italic_, # Heading 1, ## Heading 2, - bullet list`}
-                      className="w-full h-full resize-none focus:outline-none bg-white dark:bg-transparent"
+                      className="w-full flex-1 resize-none focus:outline-none bg-white dark:bg-transparent overflow-y-auto"
                       style={{
-                        padding: '18px 22px',
+                        padding: '16px 20px',
                         fontFamily: '"JetBrains Mono","Fira Code","Cascadia Code",ui-monospace,monospace',
                         fontSize: '12.5px',
                         lineHeight: '1.85',
@@ -400,35 +387,37 @@ export default function LegalPage() {
                 )}
                 {(viewMode === 'preview' || viewMode === 'split') && (
                   <div
-                    className="flex-1 overflow-y-auto bg-slate-50 dark:bg-black/20 text-slate-800 dark:text-slate-300"
-                    style={{ padding: '18px 22px' }}
+                    className="flex-1 overflow-y-auto bg-slate-50 dark:bg-black/20 text-slate-800 dark:text-slate-300 h-full"
+                    style={{ padding: '16px 20px' }}
                     dangerouslySetInnerHTML={{ __html: renderMd(active.content) }}
                   />
                 )}
               </div>
 
               {/* Bottom action bar */}
-              <div className="flex items-center justify-end gap-2.5 px-5 py-3 border-t border-slate-100 dark:border-white/[0.07] bg-slate-50/60 dark:bg-[#161B16]/40 shrink-0">
+              <div className="flex items-center justify-end gap-2.5 px-5 py-3 border-t border-slate-100 dark:border-white/[0.07] bg-slate-50/70 dark:bg-[#161B16]/60 shrink-0">
                 <button
+                  type="button"
                   onClick={handleDiscard}
                   disabled={saving}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white text-[12px] font-bold hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-all disabled:opacity-40"
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-all cursor-pointer disabled:opacity-40"
                 >
-                  <RotateCcw className="w-3 h-3" /> Discard Edits
+                  Discard Edits
                 </button>
                 <button
+                  type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.07] text-[12px] font-bold transition-all disabled:opacity-40"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-[#161B16] hover:bg-slate-50 dark:hover:bg-white/[0.08] border border-slate-200/90 dark:border-white/10 shadow-xs transition-all cursor-pointer disabled:opacity-40"
                 >
-                  <Save className="w-3.5 h-3.5" /> Save Draft
+                  Save Draft
                 </button>
                 <button
+                  type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-[12px] font-extrabold active:scale-[0.97] transition-all disabled:opacity-50 shadow-sm"
+                  className="px-5 py-2 rounded-xl text-xs font-black text-slate-950 bg-[#FEF08A] hover:bg-[#FDE047] active:scale-[0.98] shadow-xs transition-all cursor-pointer disabled:opacity-50"
                 >
-                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                   {saving ? 'Publishing…' : 'Publish Changes'}
                 </button>
               </div>

@@ -1,100 +1,91 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import adService from '../../services/adService';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
 import {
-  SlidersHorizontal,
-  Crown,
-  Clock,
   Sparkles,
   Save,
   Loader2,
   CheckCircle2,
-  ShieldCheck,
   Zap,
-  Layers,
-  ArrowRight,
   Film,
+  Layers,
   Smartphone,
   RefreshCw,
-  Check,
-  ToggleLeft,
-  ToggleRight,
   Coins,
-  ShieldAlert
+  Crown,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+  SlidersHorizontal,
+  Check,
+  ShieldCheck,
+  Activity,
+  Radio
 } from 'lucide-react';
 
-const MEDIATION_STRATEGIES = [
+// 3 Core Delivery Strategies
+const MAIN_STRATEGIES = [
   {
     id: 'CUSTOM_FIRST',
-    title: 'Both — Custom Ads First (Fallback to AdMob)',
-    badge: 'Recommended for Max Revenue',
-    desc: 'Always attempts to serve direct sponsor & in-house campaigns first (100% margin). If no active custom ad matches the placement, automatically falls back to Google AdMob.',
-    icon: Sparkles
-  },
-  {
-    id: 'ADMOB_FIRST',
-    title: 'Both — Google AdMob First (Custom Backfill)',
-    badge: 'Standard Network',
-    desc: 'Requests Google AdMob ad units first to prioritize fill rate. Custom ads only serve as secondary backfill if AdMob fails or has low eCPM.',
-    icon: Zap
-  },
-  {
-    id: 'PERCENTAGE_SPLIT',
-    title: 'Both — Dynamic Traffic Split (Custom vs AdMob)',
-    badge: 'A/B Monetization',
-    desc: 'Distribute ad impression requests by percentage (e.g. 50% Custom Direct Ads, 50% Google AdMob).',
-    icon: SlidersHorizontal
+    backendMode: 'CUSTOM_FIRST',
+    title: 'Smart Auto',
+    subtitle: 'Custom ads 1st → AdMob fallback',
+    desc: 'Direct custom ads first. Automatically fills with Google AdMob if none active.',
+    icon: Sparkles,
+    badge: 'Max Revenue'
   },
   {
     id: 'CUSTOM_ONLY',
-    title: 'Custom Direct Sponsors Only',
-    badge: 'Zero External SDK Traffic',
-    desc: 'Only serve direct sponsor campaigns and in-house OTT promos. Completely bypasses Google AdMob network.',
-    icon: Layers
+    backendMode: 'CUSTOM_ONLY',
+    title: 'Custom Ads',
+    subtitle: 'Direct campaigns & OTT promos',
+    desc: 'Only displays direct custom ad campaigns. Google AdMob is completely turned off.',
+    icon: Layers,
+    badge: '100% Margin'
   },
   {
     id: 'ADMOB_ONLY',
-    title: 'Google AdMob Only',
-    badge: 'Automated Programmatic',
-    desc: 'Only serve Google AdMob ads. In-house custom ads will be ignored.',
-    icon: Coins
+    backendMode: 'ADMOB_ONLY',
+    title: 'Google AdMob',
+    subtitle: 'Fully automated network',
+    desc: 'Serves Google AdMob programmatic ads exclusively. Custom ad campaigns are bypassed.',
+    icon: Coins,
+    badge: 'Automated'
   }
 ];
 
-const PLACEMENT_CONFIGS = [
+// 5 Mobile Placement Locations
+const PLACEMENT_LIST = [
   {
     key: 'playerPreroll',
-    placementEnum: 'PLAYER_PREROLL',
-    title: 'Video Player Pre-Roll Ads',
-    desc: 'Plays 10-15s ad before drama episode stream begins.',
+    title: 'Video Pre-Roll Ads',
+    desc: 'Plays before episode video stream begins',
     icon: Film
   },
   {
     key: 'episodeTransition',
-    placementEnum: 'EPISODE_TRANSITION',
-    title: 'Episode Transition & End Interstitials',
-    desc: 'Full-screen interstitial cards or video between episode switches.',
+    title: 'Between Episodes Interstitial',
+    desc: 'Full-screen card when transitioning episodes',
     icon: Zap,
     hasInterval: true
   },
   {
     key: 'homeBanner',
-    placementEnum: 'HOME_BANNER',
-    title: 'Home Page Hero & Feed Banners',
-    desc: 'Landscape display banners embedded in catalog trays.',
+    title: 'Home Feed Banners',
+    desc: 'Display banners embedded inside catalog trays',
     icon: Layers
   },
   {
     key: 'drawerCard',
-    placementEnum: 'DRAWER_CARD',
-    title: 'Episodes Drawer & Catalog Cards',
-    desc: 'Sponsored cards placed inside the vertical episodes drawer.',
+    title: 'Episode Drawer Cards',
+    desc: 'Sponsored card in vertical episode selector',
     icon: Smartphone
   },
   {
     key: 'appOpen',
-    placementEnum: 'GLOBAL_POPUP',
-    title: 'App Open / Cold Start Splash Ads',
-    desc: 'Full screen splash card displayed when the mobile app opens.',
+    title: 'App Open Splash Ads',
+    desc: 'Full-screen splash shown on cold app launch',
     icon: Sparkles
   }
 ];
@@ -102,7 +93,9 @@ const PLACEMENT_CONFIGS = [
 export default function AdControlPage({ onNavigate }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [initialFormJson, setInitialFormJson] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const [form, setForm] = useState({
     globalAdsEnabled: true,
@@ -125,32 +118,123 @@ export default function AdControlPage({ onNavigate }) {
     }
   });
 
+  const toastTimerRef = useRef(null);
+  const showToast = (message, type = 'success') => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast({ message, type });
+    toastTimerRef.current = setTimeout(() => setToast(null), 3000);
+  };
+
+  const isDirty = useMemo(() => {
+    if (!initialFormJson) return false;
+    return JSON.stringify(form) !== initialFormJson;
+  }, [form, initialFormJson]);
+
   const loadData = useCallback(async (showIndicator = false) => {
     if (showIndicator) setIsRefreshing(true);
     try {
       const res = await adService.getSettings();
       if (res?.success && res.data?.settings) {
-        setForm(prev => ({
-          ...prev,
-          ...res.data.settings,
+        const s = res.data.settings;
+        const normalized = {
+          globalAdsEnabled: s.globalAdsEnabled !== undefined ? s.globalAdsEnabled : true,
+          customAdsEnabled: s.customAdsEnabled !== undefined ? s.customAdsEnabled : true,
+          admobEnabled: s.admobEnabled !== undefined ? s.admobEnabled : true,
+          testMode: s.testMode !== undefined ? s.testMode : false,
+          mediationMode: s.mediationMode || 'CUSTOM_FIRST',
+          customAdSharePercent: s.customAdSharePercent ?? 50,
+          vipBypassAds: s.vipBypassAds !== undefined ? s.vipBypassAds : true,
+          globalAdFrequencyCap: s.globalAdFrequencyCap ?? 6,
+          adUnits: {
+            ...(s.adUnits || {}),
+            interstitial: {
+              ...(s.adUnits?.interstitial || {}),
+              intervalEpisodes: s.adUnits?.interstitial?.intervalEpisodes ?? 3
+            }
+          },
           placementControls: {
-            ...prev.placementControls,
-            ...(res.data.settings.placementControls || {})
+            playerPreroll: s.placementControls?.playerPreroll || { mode: 'BOTH_CUSTOM_FIRST', enabled: true },
+            episodeTransition: s.placementControls?.episodeTransition || { mode: 'BOTH_CUSTOM_FIRST', enabled: true },
+            homeBanner: s.placementControls?.homeBanner || { mode: 'BOTH_CUSTOM_FIRST', enabled: true },
+            drawerCard: s.placementControls?.drawerCard || { mode: 'BOTH_CUSTOM_FIRST', enabled: true },
+            appOpen: s.placementControls?.appOpen || { mode: 'DISABLED', enabled: false }
           }
-        }));
+        };
+        setForm(normalized);
+        setInitialFormJson(JSON.stringify(normalized));
+        if (showIndicator) showToast('Settings refreshed from server');
       }
     } catch (err) {
-      console.warn('Failed to load ad control settings:', err);
+      console.warn('Failed to load ad settings:', err);
+      if (showIndicator) showToast('Failed to load settings', 'error');
     } finally {
       if (showIndicator) {
-        setTimeout(() => setIsRefreshing(false), 500);
+        setTimeout(() => setIsRefreshing(false), 300);
       }
     }
   }, []);
 
   useEffect(() => {
     loadData();
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
   }, [loadData]);
+
+  const handleSave = async (e) => {
+    if (e?.preventDefault) e.preventDefault();
+    setIsSaving(true);
+    try {
+      await adService.updateSettings(form);
+      setInitialFormJson(JSON.stringify(form));
+      showToast('Settings saved & synced across mobile apps!');
+    } catch (err) {
+      showToast(err?.response?.data?.message || err.message || 'Failed to save settings', 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleStrategyChange = (stratId) => {
+    setForm(prev => {
+      let customAdsEnabled = true;
+      let admobEnabled = true;
+      if (stratId === 'CUSTOM_ONLY') admobEnabled = false;
+      if (stratId === 'ADMOB_ONLY') customAdsEnabled = false;
+
+      return {
+        ...prev,
+        mediationMode: stratId,
+        customAdsEnabled,
+        admobEnabled
+      };
+    });
+  };
+
+  const handlePlacementToggle = (key) => {
+    setForm(prev => {
+      const current = prev.placementControls?.[key] || { mode: 'BOTH_CUSTOM_FIRST', enabled: true };
+      const nextEnabled = !current.enabled;
+
+      let defaultMode = 'BOTH_CUSTOM_FIRST';
+      if (prev.mediationMode === 'CUSTOM_ONLY') defaultMode = 'CUSTOM_ONLY';
+      if (prev.mediationMode === 'ADMOB_ONLY') defaultMode = 'ADMOB_ONLY';
+
+      return {
+        ...prev,
+        placementControls: {
+          ...prev.placementControls,
+          [key]: {
+            ...current,
+            enabled: nextEnabled,
+            mode: nextEnabled
+              ? (current.mode === 'DISABLED' ? defaultMode : current.mode)
+              : 'DISABLED'
+          }
+        }
+      };
+    });
+  };
 
   const handlePlacementModeChange = (key, mode) => {
     setForm(prev => ({
@@ -166,318 +250,264 @@ export default function AdControlPage({ onNavigate }) {
     }));
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setIsSaving(true);
-    setSaveSuccess(false);
-    try {
-      await adService.updateSettings(form);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (err) {
-      alert(err.message || 'Failed to update ad control settings');
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const activePlacementsCount = useMemo(() => {
+    return PLACEMENT_LIST.filter(p => {
+      const ctrl = form.placementControls?.[p.key];
+      return ctrl?.enabled && ctrl?.mode !== 'DISABLED';
+    }).length;
+  }, [form.placementControls]);
 
   return (
-    <div className="space-y-4 font-urbanist animate-fade-in pb-12">
-      
-      {/* Sleek Action & Status Strip */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-3 sm:p-3.5 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors">
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <div className="flex items-center space-x-2 px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-bold text-slate-700 dark:text-slate-300">
-              Synchronized Mediation:
-            </span>
-            <span className="font-extrabold text-emerald-700 dark:text-emerald-400">
-              Active with Mobile Apps
-            </span>
-          </div>
+    <div className="w-full space-y-6 font-urbanist animate-fade-in pb-10 selection:bg-[#FEF08A] selection:text-black">
 
-          <div className="px-2.5 py-1 rounded-xl text-xs font-bold bg-[#FEF08A]/30 text-amber-950 dark:text-[#FEF08A] border border-amber-300/40 dark:border-amber-700/40">
-            {form.mediationMode.replace(/_/g, ' ')}
-          </div>
-
-          <span className="text-[11px] text-slate-400 hidden md:inline-block">
-            VIP Pass Bypass: {form.vipBypassAds ? 'Enabled' : 'Off'}
-          </span>
+      {/* ─────────────────────────────────────────────────────────────
+          1. CLEAN TOP HEADER
+         ───────────────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight">
+            Ad Delivery & Controls
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+            Configure mobile ad mediation priorities, placement switches, and audience fatigue limits.
+          </p>
         </div>
 
-        <div className="flex items-center space-x-2 shrink-0">
+        {/* Quick Actions */}
+        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
           <button
             type="button"
             onClick={() => loadData(true)}
             disabled={isRefreshing}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-[#161B16] hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200/70 dark:border-white/10 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-[#161B16] hover:bg-slate-100 dark:hover:bg-white/[0.08] border border-slate-200/90 dark:border-white/10 shadow-xs transition-all cursor-pointer disabled:opacity-50"
+            title="Reload settings from server"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Sync Settings</span>
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 dark:text-slate-400 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>Sync</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving || !isDirty}
+            className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
+              isDirty
+                ? 'bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-black ring-2 ring-[#FEF08A]/40'
+                : 'bg-slate-100 dark:bg-white/[0.04] text-slate-400 dark:text-slate-600 border border-slate-200/70 dark:border-white/5 cursor-not-allowed'
+            }`}
+          >
+            {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+            <span>{isSaving ? 'Saving...' : isDirty ? 'Save Changes' : 'Saved'}</span>
           </button>
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-4">
-
-        {/* 1. Master Engine Toggles Card */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus">
-          <div className="mb-3.5 pb-3 border-b border-slate-100 dark:border-white/10">
-            <h3 className="text-base font-black text-slate-950 dark:text-white">
-              Master Ad Engine Switches
-            </h3>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
-              Turn individual ad networks or the entire ad infrastructure on or off network-wide.
-            </p>
+      {/* ─────────────────────────────────────────────────────────────
+          2. MASTER KILL-SWITCH (Single quiet hero card)
+         ───────────────────────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-xs flex items-center justify-between gap-4 transition-colors">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
+            <Radio className="w-5 h-5 stroke-[2.2]" />
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            
-            {/* Global Master Switch */}
-            <div className={`p-3.5 rounded-xl border transition-all ${
-              form.globalAdsEnabled
-                ? 'bg-slate-50 dark:bg-[#161B16] border-slate-200/70 dark:border-white/10'
-                : 'bg-rose-50/60 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50'
-            }`}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-extrabold text-slate-900 dark:text-white">
-                  All Ads Master Switch
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setForm(p => ({ ...p, globalAdsEnabled: !p.globalAdsEnabled }))}
-                  className="cursor-pointer"
-                >
-                  {form.globalAdsEnabled ? (
-                    <ToggleRight className="w-7 h-7 text-emerald-500" />
-                  ) : (
-                    <ToggleLeft className="w-7 h-7 text-rose-400" />
-                  )}
-                </button>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                {form.globalAdsEnabled ? 'Ad delivery is active across platform' : 'All ads completely turned OFF'}
-              </p>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm sm:text-base font-black text-slate-950 dark:text-white">
+                Global App Ads
+              </h2>
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold border ${
+                form.globalAdsEnabled
+                  ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                  : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${form.globalAdsEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                {form.globalAdsEnabled ? 'Active' : 'Muted'}
+              </span>
             </div>
-
-            {/* Custom Ads Network Switch */}
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/70 dark:border-white/10">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Custom Ads Network</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setForm(p => ({ ...p, customAdsEnabled: !p.customAdsEnabled }))}
-                  className="cursor-pointer"
-                >
-                  {form.customAdsEnabled ? (
-                    <ToggleRight className="w-7 h-7 text-emerald-500" />
-                  ) : (
-                    <ToggleLeft className="w-7 h-7 text-slate-400" />
-                  )}
-                </button>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                {form.customAdsEnabled ? 'Direct sponsor ads enabled' : 'Custom ads disabled'}
-              </p>
-            </div>
-
-            {/* Google AdMob Network Switch */}
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/70 dark:border-white/10">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1">
-                  <Coins className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Google AdMob</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setForm(p => ({ ...p, admobEnabled: !p.admobEnabled }))}
-                  className="cursor-pointer"
-                >
-                  {form.admobEnabled ? (
-                    <ToggleRight className="w-7 h-7 text-emerald-500" />
-                  ) : (
-                    <ToggleLeft className="w-7 h-7 text-slate-400" />
-                  )}
-                </button>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                {form.admobEnabled ? 'Serving programmatic AdMob ads' : 'AdMob network disabled'}
-              </p>
-            </div>
-
-            {/* Developer Test Mode */}
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/70 dark:border-white/10">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1">
-                  <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Sandbox Test Mode</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setForm(p => ({ ...p, testMode: !p.testMode }))}
-                  className="cursor-pointer"
-                >
-                  {form.testMode ? (
-                    <ToggleRight className="w-7 h-7 text-amber-500" />
-                  ) : (
-                    <ToggleLeft className="w-7 h-7 text-slate-400" />
-                  )}
-                </button>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                {form.testMode ? 'Using Google test unit IDs' : 'Live production ads active'}
-              </p>
-            </div>
-
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 truncate sm:whitespace-normal">
+              Master switch for all video pre-rolls, interstitials, sponsor banners and app open splash ads.
+            </p>
           </div>
         </div>
 
-        {/* 2. Central Mediation & Delivery Strategy */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus">
-          <div className="mb-3.5 pb-3 border-b border-slate-100 dark:border-white/10">
-            <h3 className="text-base font-black text-slate-950 dark:text-white">
-              Primary Mediation & Delivery Mode
+        <div className="shrink-0 pl-2">
+          <ToggleSwitch
+            enabled={form.globalAdsEnabled}
+            onChange={() => setForm(p => ({ ...p, globalAdsEnabled: !p.globalAdsEnabled }))}
+            title="Master switch for all ads"
+          />
+        </div>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          3. DELIVERY STRATEGY (Clean, Modern Segmented Cards)
+         ───────────────────────────────────────────────────────────── */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-0.5">
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-urbanist">
+              Mediation Strategy
             </h3>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
-              Select how the mobile app chooses between Custom Ads and Google AdMob.
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 hidden sm:block">
+              Choose how sponsor campaigns and programmatic ads are prioritized across the app.
             </p>
           </div>
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">
+            Active: <strong className="text-slate-900 dark:text-white font-bold">{MAIN_STRATEGIES.find(s => s.id === form.mediationMode)?.title || 'Smart Auto'}</strong>
+          </span>
+        </div>
 
-          <div className="space-y-3">
-            {MEDIATION_STRATEGIES.map((strat) => {
-              const Icon = strat.icon;
-              const isSelected = form.mediationMode === strat.id;
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {MAIN_STRATEGIES.map((strat) => {
+            const isSelected = form.mediationMode === strat.id;
+            const Icon = strat.icon;
 
-              return (
-                <div
-                  key={strat.id}
-                  onClick={() => setForm(p => ({ ...p, mediationMode: strat.id }))}
-                  className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-[#FEF08A]/15 dark:bg-[#FEF08A]/10 border-amber-300 dark:border-amber-400 ring-1 ring-amber-300 shadow-xs'
-                      : 'bg-slate-50/70 dark:bg-[#161B16] border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start space-x-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                        isSelected
-                          ? 'bg-[#FEF08A] text-slate-950'
-                          : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400'
-                      }`}>
-                        <Icon className="w-4 h-4 stroke-[2.2]" />
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs sm:text-sm font-black text-slate-950 dark:text-white">
-                            {strat.title}
-                          </span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 dark:bg-[#FEF08A]/20 text-amber-900 dark:text-[#FEF08A] border border-amber-200 dark:border-amber-700/40">
-                            {strat.badge}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                          {strat.desc}
-                        </p>
-                      </div>
+            return (
+              <div
+                key={strat.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => handleStrategyChange(strat.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleStrategyChange(strat.id);
+                  }
+                }}
+                className={`p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#FEF08A] ${
+                  isSelected
+                    ? 'bg-amber-50/40 dark:bg-[#161B16] border-amber-300 dark:border-[#FEF08A]/60 ring-2 ring-[#FEF08A]/30 shadow-xs'
+                    : 'bg-white dark:bg-[#121612] border-slate-200/90 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50/50 dark:hover:bg-white/[0.02]'
+                }`}
+              >
+                <div>
+                  {/* Header Row: Icon + Badge + Clean Radio Check */}
+                  <div className="flex items-center justify-between gap-2 mb-2.5">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                      isSelected
+                        ? 'bg-[#FEF08A] text-slate-950 shadow-xs ring-1 ring-amber-300/70 dark:ring-transparent'
+                        : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-white/10 group-hover:scale-105'
+                    }`}>
+                      <Icon className="w-4 h-4 stroke-[2.2]" />
                     </div>
 
-                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-1 ${
-                      isSelected
-                        ? 'border-amber-500 bg-amber-500'
-                        : 'border-slate-300 dark:border-white/20'
-                    }`}>
-                      {isSelected && <div className="w-2 h-2 rounded-full bg-slate-950" />}
+                    <div className="flex items-center gap-1.5">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold tracking-tight ${
+                        isSelected
+                          ? 'bg-[#FEF08A]/50 dark:bg-[#FEF08A]/20 text-slate-950 dark:text-[#FEF08A] border border-amber-300/60 dark:border-[#FEF08A]/30'
+                          : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/5'
+                      }`}>
+                        {strat.badge}
+                      </span>
+
+                      <div className={`w-4.5 h-4.5 rounded-full flex items-center justify-center transition-all ${
+                        isSelected
+                          ? 'bg-[#FEF08A] text-slate-950 ring-2 ring-amber-300/50 dark:ring-[#FEF08A]/30 shadow-xs'
+                          : 'border-2 border-slate-300 dark:border-white/20 group-hover:border-slate-400 dark:group-hover:border-white/30'
+                      }`}>
+                        {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Percentage Split Slider */}
-                  {strat.id === 'PERCENTAGE_SPLIT' && isSelected && (
-                    <div className="mt-3.5 pt-3 border-t border-amber-300/40 dark:border-white/10 space-y-2">
-                      <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
-                        <span>Direct Custom Ads: <strong className="text-amber-600 dark:text-[#FEF08A]">{form.customAdSharePercent}%</strong></span>
-                        <span>Google AdMob: <strong className="text-emerald-600 dark:text-emerald-400">{100 - form.customAdSharePercent}%</strong></span>
-                      </div>
-                      <input
-                        type="range"
-                        min="5"
-                        max="95"
-                        step="5"
-                        value={form.customAdSharePercent}
-                        onChange={(e) => setForm(p => ({ ...p, customAdSharePercent: Number(e.target.value) }))}
-                        className="w-full accent-[#FEF08A] cursor-pointer"
-                      />
-                    </div>
-                  )}
+                  {/* Title & Subtitle */}
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-black text-slate-950 dark:text-white tracking-tight">
+                      {strat.title}
+                    </h4>
+                    <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 mt-0.5">
+                      {strat.subtitle}
+                    </p>
+                  </div>
+
+                  {/* Clean Description */}
+                  <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-medium">
+                    {strat.desc}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
+      </div>
 
-        {/* 3. Granular Placement-by-Placement Synchronized Control Matrix */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus">
-          <div className="mb-3.5 pb-3 border-b border-slate-100 dark:border-white/10">
-            <h3 className="text-base font-black text-slate-950 dark:text-white">
-              Placement-by-Placement Synchronization
+      {/* ─────────────────────────────────────────────────────────────
+          4. PLACEMENT LOCATIONS & AUDIENCE SAFEGUARDS (Balanced 2 Columns)
+         ───────────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+        {/* ── LEFT COLUMN (7 Cols): PLACEMENT SLOTS (Single Unified Card) ── */}
+        <div className="lg:col-span-7 space-y-2.5">
+          <div className="flex items-center justify-between px-0.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-urbanist">
+              Placement Locations
             </h3>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
-              Specify what type of ad to serve in each unique mobile app slot (Both with fallback, Custom Only, AdMob Only, or Disabled).
-            </p>
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+              <strong className="text-slate-800 dark:text-slate-200">{activePlacementsCount} of {PLACEMENT_LIST.length}</strong> slots enabled
+            </span>
           </div>
 
-          <div className="space-y-3">
-            {PLACEMENT_CONFIGS.map((slot) => {
+          <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-xs divide-y divide-slate-100 dark:divide-white/5 overflow-hidden">
+            {PLACEMENT_LIST.map((slot) => {
               const Icon = slot.icon;
               const ctrl = form.placementControls?.[slot.key] || { mode: 'BOTH_CUSTOM_FIRST', enabled: true };
-              const currentMode = ctrl.mode;
+              const isEnabled = ctrl.enabled && ctrl.mode !== 'DISABLED';
 
               return (
                 <div
                   key={slot.key}
-                  className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-3"
+                  className={`p-3.5 sm:p-4 flex items-center justify-between gap-3 transition-colors ${
+                    isEnabled ? 'hover:bg-slate-50/60 dark:hover:bg-white/[0.02]' : 'opacity-60 bg-slate-50/20 dark:bg-white/[0.01]'
+                  }`}
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
-                      <Icon className="w-4 h-4 stroke-[2.2]" />
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0">
+                      <Icon className="w-4 h-4 stroke-[2]" />
                     </div>
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white">
-                        {slot.title}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <div className="min-w-0">
+                      <div className="flex items-center flex-wrap gap-2">
+                        <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                          {slot.title}
+                        </span>
+                        {slot.hasInterval && isEnabled && (
+                          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-[#161B16] text-[10px] font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10">
+                            <span>Every</span>
+                            <input
+                              type="number"
+                              min="1"
+                              max="10"
+                              value={form.adUnits?.interstitial?.intervalEpisodes ?? 3}
+                              onChange={(e) => {
+                                const val = Math.max(1, parseInt(e.target.value) || 1);
+                                setForm(p => ({
+                                  ...p,
+                                  adUnits: {
+                                    ...p.adUnits,
+                                    interstitial: {
+                                      ...(p.adUnits?.interstitial || {}),
+                                      intervalEpisodes: val
+                                    }
+                                  }
+                                }));
+                              }}
+                              className="w-6 text-center font-black rounded bg-white dark:bg-[#121612] text-slate-950 dark:text-white text-xs border border-slate-300 dark:border-white/20"
+                            />
+                            <span>eps</span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-slate-400 truncate mt-0.5 font-medium">
                         {slot.desc}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 shrink-0">
-                    {/* Mode Buttons */}
-                    {[
-                      { id: 'BOTH_CUSTOM_FIRST', label: 'Both (Custom 1st)' },
-                      { id: 'CUSTOM_ONLY', label: 'Custom Only' },
-                      { id: 'ADMOB_ONLY', label: 'AdMob Only' },
-                      { id: 'DISABLED', label: 'Disabled' },
-                    ].map((btn) => (
-                      <button
-                        key={btn.id}
-                        type="button"
-                        onClick={() => handlePlacementModeChange(slot.key, btn.id)}
-                        className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                          currentMode === btn.id
-                            ? btn.id === 'DISABLED'
-                              ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 font-black border border-rose-200 dark:border-rose-800/60'
-                              : 'bg-[#FEF08A] text-slate-950 font-black shadow-xs'
-                            : 'bg-white dark:bg-[#202620] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:text-slate-950 dark:hover:text-white'
-                        }`}
-                      >
-                        {btn.label}
-                      </button>
-                    ))}
+                  <div className="shrink-0 pl-2">
+                    <ToggleSwitch
+                      enabled={isEnabled}
+                      onChange={() => handlePlacementToggle(slot.key)}
+                      title={isEnabled ? 'Mute placement' : 'Enable placement'}
+                    />
                   </div>
                 </div>
               );
@@ -485,108 +515,164 @@ export default function AdControlPage({ onNavigate }) {
           </div>
         </div>
 
-        {/* 4. VIP Subscriber Protection & Frequency Capping */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          
-          {/* VIP Shield */}
-          <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col justify-between">
-            <div>
-              <div className="flex items-center space-x-2.5 mb-2">
-                <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
-                  <Crown className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <h4 className="text-sm font-black text-slate-950 dark:text-white">
-                  VIP Subscriber Ad-Free Shield
-                </h4>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-                Automatically bypass all advertisements (both AdMob and custom sponsors) for users with an active paid OTT subscription plan.
-              </p>
-            </div>
+        {/* ── RIGHT COLUMN (5 Cols): AUDIENCE SAFEGUARDS & OVERRIDES ── */}
+        <div className="lg:col-span-5 space-y-4">
 
-            <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                {form.vipBypassAds ? 'Shield Active (VIPs See 0 Ads)' : 'Disabled (Ads Shown to VIPs)'}
-              </span>
-              <button
-                type="button"
-                onClick={() => setForm(p => ({ ...p, vipBypassAds: !p.vipBypassAds }))}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                  form.vipBypassAds ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-white/20'
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    form.vipBypassAds ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
+          {/* Card: Audience Protections */}
+          <div className="space-y-2.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 font-urbanist px-0.5">
+              Audience Protections
+            </h3>
+
+            <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-xs divide-y divide-slate-100 dark:divide-white/5 overflow-hidden">
+              {/* VIP Pass */}
+              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3">
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0">
+                    <Crown className="w-4 h-4 stroke-[2]" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block truncate">
+                      VIP Ad-Free Pass
+                    </span>
+                    <span className="text-[11px] text-slate-400 block truncate font-medium">
+                      Subscribers never see any ads
+                    </span>
+                  </div>
+                </div>
+
+                <div className="shrink-0 pl-2">
+                  <ToggleSwitch
+                    enabled={form.vipBypassAds}
+                    onChange={() => setForm(p => ({ ...p, vipBypassAds: !p.vipBypassAds }))}
+                    title="Toggle VIP Ad-Free Pass"
+                  />
+                </div>
+              </div>
+
+              {/* Hourly Cap */}
+              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3">
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0">
+                    <Clock className="w-4 h-4 stroke-[2]" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white block truncate">
+                      Hourly Ad Limit
+                    </span>
+                    <span className="text-[11px] text-slate-400 block truncate font-medium">
+                      Cap per free user / hr
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0">
+                  {[3, 6, 10].map(cap => (
+                    <button
+                      key={cap}
+                      type="button"
+                      onClick={() => setForm(p => ({ ...p, globalAdFrequencyCap: cap }))}
+                      className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
+                        form.globalAdFrequencyCap === cap
+                          ? 'bg-[#FEF08A] text-slate-950 font-black shadow-xs'
+                          : 'bg-slate-100 dark:bg-[#161B16] text-slate-500 hover:text-slate-900 dark:hover:text-white border border-slate-200/70 dark:border-white/10'
+                      }`}
+                    >
+                      {cap}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Hourly Frequency Capping */}
-          <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col justify-between">
-            <div>
-              <div className="flex items-center space-x-2.5 mb-2">
-                <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
-                  <Clock className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <h4 className="text-sm font-black text-slate-950 dark:text-white">
-                  Global Hourly Frequency Cap
-                </h4>
+          {/* Collapsible: Developer Sandbox & Overrides */}
+          <div className="border border-slate-200/90 dark:border-white/10 rounded-2xl overflow-hidden bg-white dark:bg-[#121612] shadow-xs">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full p-3.5 hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" />
+                <span>Developer Sandbox & Overrides</span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-                Maximum interstitial and video pre-roll impressions permitted per free user per hour to preserve audience retention and prevent app fatigue.
-              </p>
-            </div>
+              {showAdvanced ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            </button>
 
-            <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Max Ads Per Hour:
-              </span>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="number"
-                  min="1"
-                  max="30"
-                  value={form.globalAdFrequencyCap}
-                  onChange={(e) => setForm(p => ({ ...p, globalAdFrequencyCap: Number(e.target.value) }))}
-                  className="w-16 px-2 py-1 text-xs text-center font-black rounded-lg bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
-                />
-                <span className="text-xs text-slate-400 font-bold">Ads / Hour</span>
+            {showAdvanced && (
+              <div className="p-3.5 border-t border-slate-100 dark:border-white/5 space-y-3 text-xs animate-fade-in bg-slate-50/30 dark:bg-black/10">
+                {/* Sandbox Test Mode */}
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
+                  <div>
+                    <span className="font-bold text-slate-900 dark:text-white block text-xs">
+                      Sandbox Test Mode
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      Use Google test unit IDs safely
+                    </span>
+                  </div>
+                  <ToggleSwitch
+                    enabled={form.testMode}
+                    onChange={() => setForm(p => ({ ...p, testMode: !p.testMode }))}
+                    title="Sandbox Test Mode"
+                  />
+                </div>
+
+                {/* Per-Placement Source Override */}
+                <div className="space-y-1.5 pt-1">
+                  <span className="font-bold text-slate-700 dark:text-slate-300 block text-[11px]">
+                    Per-Placement Source Override
+                  </span>
+                  {PLACEMENT_LIST.map((slot) => {
+                    const ctrl = form.placementControls?.[slot.key] || { mode: 'BOTH_CUSTOM_FIRST', enabled: true };
+                    return (
+                      <div key={slot.key} className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-[#161B16] text-[11px] border border-slate-200/60 dark:border-white/5">
+                        <span className="text-slate-700 dark:text-slate-300 font-medium truncate max-w-[140px]">
+                          {slot.title}
+                        </span>
+                        <select
+                          value={ctrl.mode}
+                          onChange={(e) => handlePlacementModeChange(slot.key, e.target.value)}
+                          className="text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-[#121612] border border-slate-200 dark:border-white/10 px-2 py-0.5 text-slate-900 dark:text-white cursor-pointer"
+                        >
+                          <option value="BOTH_CUSTOM_FIRST">Both (Custom 1st)</option>
+                          <option value="CUSTOM_ONLY">Custom Only</option>
+                          <option value="ADMOB_ONLY">AdMob Only</option>
+                          <option value="DISABLED">Disabled</option>
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
         </div>
 
-        {/* Save Bar */}
-        <div className="sticky bottom-3 p-3.5 rounded-2xl bg-white/95 dark:bg-[#161B16]/95 backdrop-blur-md border border-slate-200 dark:border-white/15 shadow-xl flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            {saveSuccess && (
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 animate-fade-in">
-                <CheckCircle2 className="w-4 h-4" /> Ad Control rules successfully synchronized and saved!
-              </span>
-            )}
-            {!saveSuccess && (
-              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                Changes take effect dynamically on all live mobile app sessions.
-              </span>
-            )}
-          </div>
+      </div>
 
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="px-5 py-2.5 rounded-xl text-xs font-black bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-          >
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            <span>{isSaving ? 'Saving...' : 'Save Ad Control Settings'}</span>
-          </button>
+
+      {/* ─────────────────────────────────────────────────────────────
+          6. CLEAN TOAST
+         ───────────────────────────────────────────────────────────── */}
+      {toast && (
+        <div className={`fixed bottom-4 left-4 z-50 flex items-center gap-2 px-3.5 py-2 rounded-xl shadow-2xl text-xs font-bold transition-all border animate-fade-in ${
+          toast.type === 'error'
+            ? 'bg-rose-900 text-white border-rose-700'
+            : toast.type === 'info'
+            ? 'bg-slate-900 text-white border-slate-700'
+            : 'bg-emerald-900 text-emerald-100 border-emerald-700'
+        }`}>
+          {toast.type === 'error' ? (
+            <AlertCircle className="w-4 h-4 text-rose-300" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          )}
+          <span>{toast.message}</span>
         </div>
-
-      </form>
-
+      )}
     </div>
   );
 }

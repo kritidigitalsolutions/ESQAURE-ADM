@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ToggleSwitch from '../../../components/common/ToggleSwitch';
 import {
   SlidersHorizontal,
   Crown,
@@ -187,19 +188,11 @@ export default function MediationTab({ settings, onSaveSettings }) {
             <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
               {form.vipBypassAds ? 'Shield Active (VIPs See 0 Ads)' : 'Disabled (Ads Shown to VIPs)'}
             </span>
-            <button
-              type="button"
-              onClick={() => setForm(p => ({ ...p, vipBypassAds: !p.vipBypassAds }))}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                form.vipBypassAds ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-white/20'
-              }`}
-            >
-              <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  form.vipBypassAds ? 'translate-x-5' : 'translate-x-0'
-                }`}
-              />
-            </button>
+            <ToggleSwitch
+              enabled={form.vipBypassAds}
+              onChange={() => setForm(p => ({ ...p, vipBypassAds: !p.vipBypassAds }))}
+              title="VIP Ad-Free Shield"
+            />
           </div>
         </div>
 

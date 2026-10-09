@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Upload, Film, Image as ImageIcon, Sparkles, Check, Crown, Flame } from 'lucide-react';
+import ToggleSwitch from './common/ToggleSwitch';
 
 export default function DramaIngestModal({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -127,11 +128,10 @@ export default function DramaIngestModal({ isOpen, onClose }) {
                 <Crown className="w-4 h-4 text-amber-500" />
                 <span className="font-bold text-slate-800 dark:text-slate-200">Feature on Home Banner</span>
               </div>
-              <input
-                type="checkbox"
+              <ToggleSwitch
                 checked={isFeatured}
-                onChange={(e) => setIsFeatured(e.target.checked)}
-                className="w-4 h-4 accent-amber-400 rounded cursor-pointer"
+                onChange={setIsFeatured}
+                ariaLabel="Feature on Home Banner"
               />
             </div>
 
@@ -140,11 +140,10 @@ export default function DramaIngestModal({ isOpen, onClose }) {
                 <Flame className="w-4 h-4 text-amber-500" />
                 <span className="font-bold text-slate-800 dark:text-slate-200">Show in Trending Top List</span>
               </div>
-              <input
-                type="checkbox"
+              <ToggleSwitch
                 checked={isTrending}
-                onChange={(e) => setIsTrending(e.target.checked)}
-                className="w-4 h-4 accent-amber-400 rounded cursor-pointer"
+                onChange={setIsTrending}
+                ariaLabel="Show in Trending Top List"
               />
             </div>
           </div>

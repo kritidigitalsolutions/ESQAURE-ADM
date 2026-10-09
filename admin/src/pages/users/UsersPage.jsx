@@ -6,6 +6,8 @@ import { userService } from '../../services/userService';
 import AnimatedNumber from '../../components/common/AnimatedNumber';
 import Badge from '../../components/common/Badge';
 import KpiStatCard from '../../components/common/KpiStatCard';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
+import PageLoader from '../../components/common/PageLoader';
 import {
   Users,
   Search,
@@ -538,10 +540,10 @@ export default function UsersPage({ onNavigate }) {
         filterType === 'SUBSCRIBED'
           ? 'Subscribed'
           : filterType === 'FREE'
-          ? 'Free Tier'
-          : filterType === 'SUSPENDED'
-          ? 'Suspended'
-          : 'All Users';
+            ? 'Free Tier'
+            : filterType === 'SUSPENDED'
+              ? 'Suspended'
+              : 'All Users';
       const searchInfo = searchTerm ? ` | Search: "${searchTerm}"` : '';
       doc.text(
         `Generated: ${todayStr} | Filter: ${activeFilterLabel}${searchInfo} | Total Records: ${filteredUsers.length}`,
@@ -668,11 +670,10 @@ export default function UsersPage({ onNavigate }) {
       {createPortal(
         <div className="fixed bottom-6 right-6 z-[1200] pointer-events-none overflow-hidden p-2">
           <div
-            className={`pointer-events-auto bg-slate-950 dark:bg-white text-white dark:text-slate-950 px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-bold border border-slate-800 dark:border-slate-200 transition-all duration-300 ease-out transform ${
-              toast.show
+            className={`pointer-events-auto bg-slate-950 dark:bg-white text-white dark:text-slate-950 px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-bold border border-slate-800 dark:border-slate-200 transition-all duration-300 ease-out transform ${toast.show
                 ? 'translate-x-0 opacity-100'
                 : 'translate-x-[120%] opacity-0 pointer-events-none'
-            }`}
+              }`}
           >
             <CheckCircle2 className="w-4 h-4 text-emerald-400 dark:text-emerald-600 shrink-0" />
             <span>{toast.text}</span>
@@ -734,7 +735,7 @@ export default function UsersPage({ onNavigate }) {
       {/* Unified Controls Toolbar: Filter Pills (Left) & Search + Export (Right) */}
       <div className="bg-white dark:bg-[#121612] rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-nodus">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          
+
           {/* Segmented Sliding Toggle Track (Compact & Sleek) */}
           <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-1 rounded-xl border border-slate-200/70 dark:border-white/10 shadow-2xs w-full sm:w-[420px]">
             {/* Smooth Sliding Active Indicator Pill */}
@@ -742,15 +743,14 @@ export default function UsersPage({ onNavigate }) {
               className="absolute top-1 bottom-1 left-1 rounded-lg bg-[#FEF08A] shadow-xs transition-transform duration-300 ease-out pointer-events-none border border-amber-300/70"
               style={{
                 width: 'calc((100% - 8px) / 4)',
-                transform: `translateX(${
-                  filterType === 'ALL'
+                transform: `translateX(${filterType === 'ALL'
                     ? '0%'
                     : filterType === 'SUBSCRIBED'
-                    ? '100%'
-                    : filterType === 'FREE'
-                    ? '200%'
-                    : '300%'
-                })`,
+                      ? '100%'
+                      : filterType === 'FREE'
+                        ? '200%'
+                        : '300%'
+                  })`,
               }}
             />
 
@@ -768,11 +768,10 @@ export default function UsersPage({ onNavigate }) {
                     key={tab.id}
                     type="button"
                     onClick={() => setFilterType(tab.id)}
-                    className={`py-1.5 text-xs font-bold text-center flex items-center justify-center transition-colors duration-200 select-none cursor-pointer ${
-                      isSelected
+                    className={`py-1.5 text-xs font-bold text-center flex items-center justify-center transition-colors duration-200 select-none cursor-pointer ${isSelected
                         ? 'text-slate-950 font-black'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
-                    }`}
+                      }`}
                   >
                     {tab.label}
                   </button>
@@ -861,40 +860,12 @@ export default function UsersPage({ onNavigate }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/80 dark:divide-white/5 font-medium">
-              {isLoading ? (
-                Array.from({ length: 5 }).map((_, idx) => (
-                  <tr key={`user-skel-${idx}`} className="animate-pulse">
-                    <td className="py-3 px-3 text-center">
-                      <div className="w-4 h-3 bg-slate-200 dark:bg-slate-800 rounded mx-auto" />
-                    </td>
-                    <td className="py-3 px-3.5">
-                      <div className="flex items-center space-x-2.5">
-                        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0" />
-                        <div className="space-y-1">
-                          <div className="w-24 h-3.5 bg-slate-200 dark:bg-slate-800 rounded" />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-3.5">
-                      <div className="w-48 h-3 bg-slate-200 dark:bg-slate-800 rounded" />
-                    </td>
-                    <td className="py-3 px-3.5">
-                      <div className="w-24 h-5 bg-slate-200 dark:bg-slate-800 rounded-full" />
-                    </td>
-                    <td className="py-3 px-3.5">
-                      <div className="w-20 h-3 bg-slate-200 dark:bg-slate-800 rounded" />
-                    </td>
-                    <td className="py-3 px-3.5">
-                      <div className="w-16 h-5 bg-slate-200 dark:bg-slate-800 rounded-lg" />
-                    </td>
-                    <td className="py-3 px-3.5">
-                      <div className="w-14 h-5 bg-slate-200 dark:bg-slate-800 rounded-full" />
-                    </td>
-                    <td className="py-3 px-3.5 text-right">
-                      <div className="w-20 h-7 bg-slate-100 dark:bg-slate-800 rounded-lg ml-auto" />
-                    </td>
-                  </tr>
-                ))
+              {isLoading && filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="py-12">
+                    <PageLoader size="sm" text="Loading..." minHeight="min-h-[220px]" />
+                  </td>
+                </tr>
               ) : apiError && filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="py-12 text-center">
@@ -1078,11 +1049,10 @@ export default function UsersPage({ onNavigate }) {
                             type="button"
                             title={isActive ? 'Suspend User' : 'Unblock User'}
                             onClick={() => handleToggleUserStatus(user.id)}
-                            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all active:scale-95 cursor-pointer ${
-                              isActive
+                            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all active:scale-95 cursor-pointer ${isActive
                                 ? 'bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-900/20 text-slate-400 hover:text-orange-500'
                                 : 'bg-orange-100 dark:bg-orange-900/20 text-orange-500 hover:bg-orange-200'
-                            }`}
+                              }`}
                           >
                             <Ban className="w-3.5 h-3.5" />
                           </button>
@@ -1116,7 +1086,7 @@ export default function UsersPage({ onNavigate }) {
 
           {/* Right-Side Slide-Over Panel */}
           <div className="relative w-full max-w-md h-full bg-white dark:bg-[#1E241E] shadow-2xl border-l border-slate-200/80 dark:border-white/12 flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out font-urbanist overflow-hidden">
-            
+
             {/* Top Bar Header */}
             <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-white/90 dark:bg-[#161B16]/95 backdrop-blur-md shrink-0">
               <div className="flex items-center space-x-3">
@@ -1180,16 +1150,14 @@ export default function UsersPage({ onNavigate }) {
                     </div>
                   </div>
                   <span
-                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold shrink-0 ${
-                      overrideUser.status === 'ACTIVE'
+                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold shrink-0 ${overrideUser.status === 'ACTIVE'
                         ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40'
                         : 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/40'
-                    }`}
+                      }`}
                   >
                     <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        overrideUser.status === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
-                      }`}
+                      className={`w-1.5 h-1.5 rounded-full ${overrideUser.status === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
+                        }`}
                     />
                     {overrideUser.status}
                   </span>
@@ -1342,9 +1310,8 @@ export default function UsersPage({ onNavigate }) {
                           {currentPlanItem.price}
                         </span>
                         <ChevronDown
-                          className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-                            isPlanDropdownOpen ? 'rotate-180 text-slate-900 dark:text-white' : ''
-                          }`}
+                          className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isPlanDropdownOpen ? 'rotate-180 text-slate-900 dark:text-white' : ''
+                            }`}
                         />
                       </div>
                     </button>
@@ -1359,11 +1326,10 @@ export default function UsersPage({ onNavigate }) {
                               key={plan.id}
                               type="button"
                               onClick={() => handleSelectPlan(plan)}
-                              className={`w-full px-3.5 py-2.5 flex items-center justify-between cursor-pointer text-left transition-colors ${
-                                isSelected
+                              className={`w-full px-3.5 py-2.5 flex items-center justify-between cursor-pointer text-left transition-colors ${isSelected
                                   ? 'bg-[#FEF08A]/35 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] font-bold'
                                   : 'hover:bg-slate-100/70 dark:hover:bg-white/[0.04] text-slate-700 dark:text-slate-300'
-                              }`}
+                                }`}
                             >
                               <span className={`text-xs ${isSelected ? 'font-black text-slate-950 dark:text-white' : 'font-medium'}`}>
                                 {plan.name}
@@ -1397,19 +1363,11 @@ export default function UsersPage({ onNavigate }) {
                     </span>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleToggleUserStatus(overrideUser.id)}
-                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${
-                      overrideUser.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200 ${
-                        overrideUser.status === 'ACTIVE' ? 'translate-x-4' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
+                  <ToggleSwitch
+                    enabled={overrideUser.status === 'ACTIVE'}
+                    onChange={() => handleToggleUserStatus(overrideUser.id)}
+                    title="Account status toggle"
+                  />
                 </div>
               </div>
 
@@ -1450,7 +1408,7 @@ export default function UsersPage({ onNavigate }) {
 
           {/* Right-Side Slide-Over Panel */}
           <div className="relative w-full max-w-md h-full bg-white dark:bg-[#1E241E] shadow-2xl border-l border-slate-200/80 dark:border-white/12 flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out font-urbanist overflow-hidden">
-            
+
             {/* Top Bar Header */}
             <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-white/90 dark:bg-[#161B16]/95 backdrop-blur-md shrink-0">
               <div className="flex items-center space-x-3">
@@ -1669,11 +1627,10 @@ export default function UsersPage({ onNavigate }) {
               <button
                 type="button"
                 onClick={() => handleToggleUserStatus(viewUser.id)}
-                className={`py-2 px-3 text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer flex items-center space-x-1.5 ${
-                  viewUser.status === 'ACTIVE'
+                className={`py-2 px-3 text-xs font-bold rounded-xl transition-all active:scale-95 cursor-pointer flex items-center space-x-1.5 ${viewUser.status === 'ACTIVE'
                     ? 'text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30'
                     : 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'
-                }`}
+                  }`}
               >
                 <Ban className="w-3.5 h-3.5" />
                 <span>{viewUser.status === 'ACTIVE' ? 'Suspend User' : 'Unblock User'}</span>
@@ -1715,9 +1672,9 @@ export default function UsersPage({ onNavigate }) {
 
           {/* Custom Confirmation Card */}
           <div className="relative w-full max-w-md bg-white dark:bg-[#202620] rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] border border-slate-200/90 dark:border-white/15 z-10 animate-in fade-in zoom-in-95 duration-200 font-urbanist overflow-hidden">
-            
+
             <div className="p-6 sm:p-7 space-y-5">
-              
+
               {/* Header: Icon Badge + Title + Close Button */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3.5">
