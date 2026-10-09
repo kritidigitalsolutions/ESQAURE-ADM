@@ -45,11 +45,11 @@ export default function Topbar({
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen().catch(() => {});
+        document.documentElement.requestFullscreen().catch(() => { });
       }
     } else {
       if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
+        document.exitFullscreen().catch(() => { });
       }
     }
   };
@@ -75,7 +75,7 @@ export default function Topbar({
       try {
         setAdminName(localStorage.getItem('admin_user_name') || 'Administrator');
         setAdminEmail(localStorage.getItem('admin_user_email') || 'admin@e2stories.com');
-      } catch {}
+      } catch { }
     };
 
     window.addEventListener('storage', handleProfileUpdate);

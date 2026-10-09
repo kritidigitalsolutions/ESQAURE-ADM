@@ -3,6 +3,8 @@ import { bannerService } from '../../services/bannerService';
 import { dramaService } from '../../services/dramaService';
 import { uploadService } from '../../services/uploadService';
 import Badge from '../../components/common/Badge';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
+import PageLoader from '../../components/common/PageLoader';
 import {
   Image as ImageIcon,
   Plus,
@@ -499,9 +501,8 @@ export default function BannersPage({ onNavigate }) {
 
       {/* 4. Main Banners Content */}
       {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-slate-500 space-y-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[#FEF08A]" />
-          <p className="text-xs font-bold">Loading hero banners catalog...</p>
+        <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
+          <PageLoader text="Loading..." minHeight="min-h-[360px]" />
         </div>
       ) : filteredBanners.length === 0 ? (
         <div className="bg-white dark:bg-[#121612] rounded-2xl p-12 text-center border border-slate-200/80 dark:border-white/10 shadow-nodus">
@@ -1187,15 +1188,11 @@ export default function BannersPage({ onNavigate }) {
                   </span>
                 </div>
 
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formIsActive}
-                    onChange={(e) => setFormIsActive(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-[#202620] peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FEF08A]"></div>
-                </label>
+                <ToggleSwitch
+                  checked={formIsActive}
+                  onChange={setFormIsActive}
+                  ariaLabel="Active banner status"
+                />
               </div>
 
               {/* Modal Footer Buttons */}

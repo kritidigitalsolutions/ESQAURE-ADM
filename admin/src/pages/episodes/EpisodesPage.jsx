@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { mockDramas, mockEpisodes } from '../../data/mockOttData';
 import { Video, Plus, Play, Lock, Unlock, UploadCloud, Subtitles, CheckCircle2, ChevronRight, X, Clock, Eye, Search } from 'lucide-react';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
 
 export default function EpisodesPage({ initialDramaId }) {
   const [dramas] = useState(() => {
@@ -366,15 +367,11 @@ export default function EpisodesPage({ initialDramaId }) {
                   <span className="font-bold text-slate-900 dark:text-white block text-xs">Freemium Paywall Access</span>
                   <span className="text-[10.5px] text-slate-500 dark:text-slate-400">Uncheck to lock episode behind subscription</span>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={newEpIsFree}
-                    onChange={(e) => setNewEpIsFree(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-9 h-5 bg-slate-300 dark:bg-[#202620] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#FEF08A]"></div>
-                </label>
+                <ToggleSwitch
+                  checked={newEpIsFree}
+                  onChange={setNewEpIsFree}
+                  ariaLabel="Freemium Paywall Access"
+                />
               </div>
 
               <div className="pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-end space-x-2">

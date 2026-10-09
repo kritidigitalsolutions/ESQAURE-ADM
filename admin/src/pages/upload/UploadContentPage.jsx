@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useId } from 'react';
 import { dramaService } from '../../services/dramaService';
+import PulsatingDots from '../../components/common/PulsatingDots';
 import {
   Upload,
   Video,
@@ -39,6 +40,7 @@ import {
 } from 'lucide-react';
 import { uploadService } from '../../services/uploadService';
 import { genreService } from '../../services/genreService';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
 
 // Reusable Dashboard-styled Slide Switch component
 function SlideSwitch({ checked, onChange, label, sublabel, icon: Icon, badge }) {
@@ -75,16 +77,12 @@ function SlideSwitch({ checked, onChange, label, sublabel, icon: Icon, badge }) 
         </div>
       </div>
 
-      <label htmlFor={switchId} className="relative inline-flex items-center cursor-pointer shrink-0">
-        <input
-          type="checkbox"
-          id={switchId}
-          checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
-          className="sr-only peer"
-        />
-        <div className="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FEF08A] peer-checked:after:bg-slate-950 peer-checked:after:border-slate-950 transition-colors"></div>
-      </label>
+      <ToggleSwitch
+        id={switchId}
+        checked={checked}
+        onChange={onChange}
+        ariaLabel={label}
+      />
     </div>
   );
 }
@@ -789,8 +787,8 @@ export default function UploadContentPage({ onNavigate }) {
               <div className="flex flex-wrap gap-2">
                 {isGenresLoading ? (
                   <div className="flex items-center space-x-2 text-xs text-slate-400 py-2">
-                    <RotateCcw className="w-3.5 h-3.5 animate-spin text-[#FEF08A]" />
-                    <span>Loading live catalog genres from database...</span>
+                    <PulsatingDots size="sm" />
+                    <span className="font-semibold text-slate-500 dark:text-slate-400">Loading catalog genres...</span>
                   </div>
                 ) : availableGenres.length === 0 ? (
                   <span className="text-xs text-slate-400 italic">No genres found in database.</span>

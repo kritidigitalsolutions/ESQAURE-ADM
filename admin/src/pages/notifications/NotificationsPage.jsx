@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { notificationService } from '../../services/notificationService';
 import { userService } from '../../services/userService';
 import { mockDramas } from '../../data/mockOttData';
+import PageLoader from '../../components/common/PageLoader';
+import PulsatingDots from '../../components/common/PulsatingDots';
 import {
   Send,
   Bell,
@@ -572,8 +574,8 @@ export default function NotificationsPage() {
                       <div className="absolute left-0 right-0 mt-1.5 max-h-56 overflow-y-auto bg-white dark:bg-[#1E241E] border border-slate-200 dark:border-white/15 rounded-xl shadow-xl z-30 divide-y divide-slate-100 dark:divide-white/5">
                         {isUsersLoading ? (
                           <div className="p-4 text-center text-xs text-slate-400 flex items-center justify-center space-x-2">
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-500" />
-                            <span>Loading user directory...</span>
+                            <PulsatingDots size="sm" />
+                            <span className="font-semibold text-slate-500 dark:text-slate-400">Loading user directory...</span>
                           </div>
                         ) : filteredUsersList.length === 0 ? (
                           <div className="p-4 text-center text-xs text-slate-400">
@@ -884,10 +886,7 @@ export default function NotificationsPage() {
         </div>
 
         {isLoading ? (
-          <div className="p-12 text-center text-xs text-slate-400 flex items-center justify-center space-x-2">
-            <RefreshCw className="w-4 h-4 animate-spin text-amber-500" />
-            <span>Loading broadcast records from database...</span>
-          </div>
+          <PageLoader size="sm" text="Loading..." minHeight="min-h-[220px]" />
         ) : filteredCampaigns.length === 0 ? (
           <div className="p-12 text-center text-xs text-slate-400 space-y-2">
             <Bell className="w-8 h-8 mx-auto text-slate-300 dark:text-slate-600 stroke-[1.5]" />

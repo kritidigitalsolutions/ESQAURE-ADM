@@ -232,11 +232,10 @@ export default function ProgressMetricCard({
                       setHoveredIdx(null);
                       onTabChange?.(tab.id);
                     }}
-                    className={`rounded-md px-2.5 py-1 text-[11px] font-extrabold transition-all cursor-pointer ${
-                      isActive
+                    className={`rounded-md px-2.5 py-1 text-[11px] font-extrabold transition-all cursor-pointer ${isActive
                         ? 'bg-[#FEF08A] text-slate-950 shadow-2xs border border-amber-300/70'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800'
-                    }`}
+                      }`}
                   >
                     {tab.label}
                   </button>
@@ -291,26 +290,28 @@ export default function ProgressMetricCard({
 
       {/* Footer Area: Timeline Date Labels */}
       <div
-        className={`relative z-10 flex items-center justify-between gap-2.5 border-t border-slate-100 dark:border-white/10 bg-white/95 dark:bg-[#141914]/95 backdrop-blur-xs ${isCompact ? 'px-3 sm:px-4 py-1.5' : 'px-4 sm:px-5 py-2'}`}
+        className={`relative z-10 flex items-center justify-between border-t border-slate-100 dark:border-white/10 bg-white/95 dark:bg-[#141914]/95 backdrop-blur-xs ${isCompact ? 'px-2 sm:px-3 py-1' : 'px-2.5 sm:px-3.5 py-1.5'}`}
       >
-        {/* Dynamic Date Labels Under Graph */}
-        <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 overflow-x-auto w-full py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* Dynamic Compact Auto-Fitting Date Labels Under Graph */}
+        <div className="flex items-center justify-between w-full gap-0.5 sm:gap-1 overflow-x-auto sm:overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {primary?.data?.map((pt, idx) => {
             const isSelected = hoveredIdx === idx;
             return (
               <button
                 key={idx}
                 type="button"
+                title={pt.date}
                 onMouseEnter={() => setHoveredIdx(idx)}
                 onMouseLeave={() => setHoveredIdx(null)}
                 onClick={() => setHoveredIdx(idx)}
-                className={`px-2 sm:px-2.5 py-1 rounded-lg transition-all whitespace-nowrap cursor-pointer ${
-                  isSelected
-                    ? 'bg-[#FEF08A] text-slate-950 font-extrabold shadow-2xs scale-105'
+                className={`flex-1 min-w-0 py-1 px-0.5 sm:px-1 rounded-md transition-all text-center cursor-pointer ${isSelected
+                    ? 'bg-[#FEF08A] text-slate-950 font-extrabold shadow-2xs ring-1 ring-amber-400/50'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06]'
-                }`}
+                  }`}
               >
-                {pt.date}
+                <span className="block truncate text-[9.5px] sm:text-[10px] md:text-[11px] font-semibold leading-tight tracking-tight">
+                  {pt.date}
+                </span>
               </button>
             );
           })}

@@ -4,6 +4,8 @@ import { subscriptionService } from '../../services/subscriptionService';
 import Badge from '../../components/common/Badge';
 import AnimatedNumber from '../../components/common/AnimatedNumber';
 import KpiStatCard from '../../components/common/KpiStatCard';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
+import PageLoader from '../../components/common/PageLoader';
 import {
   Crown,
   Check,
@@ -554,25 +556,8 @@ export default function SubscriptionsPage() {
       {/* SUBSCRIPTION PLAN CARDS GRID (100% Dynamic from MongoDB)  */}
       {/* ======================================================== */}
       {isLoading && plans.length === 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 animate-pulse">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-96 rounded-2xl bg-slate-100 dark:bg-[#121612] border border-slate-200/80 dark:border-white/10 p-6 flex flex-col justify-between"
-            >
-              <div className="space-y-4">
-                <div className="w-20 h-6 rounded-lg bg-slate-200 dark:bg-white/10" />
-                <div className="w-3/4 h-8 rounded-lg bg-slate-200 dark:bg-white/10" />
-                <div className="w-1/2 h-10 rounded-lg bg-slate-200 dark:bg-white/10" />
-                <div className="space-y-2 pt-4">
-                  <div className="w-full h-4 rounded bg-slate-200 dark:bg-white/10" />
-                  <div className="w-5/6 h-4 rounded bg-slate-200 dark:bg-white/10" />
-                  <div className="w-4/6 h-4 rounded bg-slate-200 dark:bg-white/10" />
-                </div>
-              </div>
-              <div className="w-full h-10 rounded-xl bg-slate-200 dark:bg-white/10 mt-6" />
-            </div>
-          ))}
+        <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
+          <PageLoader text="Loading..." minHeight="min-h-[340px]" />
         </div>
       ) : plans.length === 0 ? (
         <div className="bg-white dark:bg-[#121612] rounded-2xl p-10 border border-slate-200/80 dark:border-white/10 text-center space-y-3 shadow-nodus">
@@ -1158,20 +1143,11 @@ export default function SubscriptionsPage() {
                       </div>
 
                       {/* Smooth Slide Switch */}
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, trialEligible: !formData.trialEligible })}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          formData.trialEligible ? 'bg-[#FEF08A]' : 'bg-slate-300 dark:bg-slate-700'
-                        }`}
+                      <ToggleSwitch
+                        enabled={formData.trialEligible}
+                        onChange={() => setFormData({ ...formData, trialEligible: !formData.trialEligible })}
                         title="Toggle 7-day trial eligibility"
-                      >
-                        <span
-                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-slate-950 shadow-md ring-0 transition duration-200 ease-in-out ${
-                            formData.trialEligible ? 'translate-x-5' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
+                      />
                     </div>
                   </div>
 
@@ -1494,13 +1470,11 @@ export default function SubscriptionsPage() {
                   </div>
 
                   {/* Modern Animated Toggle Switch */}
-                  <div className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-200 ease-in-out shrink-0 ${
-                    trialFormData.enabled ? 'bg-[#FEF08A]' : 'bg-slate-300 dark:bg-slate-700'
-                  }`}>
-                    <div className={`w-5 h-5 rounded-full bg-slate-950 dark:bg-slate-900 shadow-md transform transition-transform duration-200 ease-in-out ${
-                      trialFormData.enabled ? 'translate-x-5' : 'translate-x-0'
-                    }`} />
-                  </div>
+                  <ToggleSwitch
+                    enabled={trialFormData.enabled}
+                    onChange={(val) => setTrialFormData((prev) => ({ ...prev, enabled: val }))}
+                    title="Toggle campaign status"
+                  />
                 </div>
               </div>
 

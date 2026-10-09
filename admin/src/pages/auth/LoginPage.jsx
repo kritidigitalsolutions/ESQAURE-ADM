@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import AnimatedGradientBackground from '../../components/ui/AnimatedGradientBackground';
 import InteractiveHoverButton from '../../components/ui/InteractiveHoverButton';
+import { loginWithEmail, sendResetPasswordEmail, getFirebaseErrorMessage } from '../../services/firebase';
 
 export default function LoginPage({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -12,65 +13,83 @@ export default function LoginPage({ onLoginSuccess }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Handle Login Submission
-  const handleLoginSubmit = (e) => {
+  // Handle Firebase Email/Password Login
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
     
-    if (!email.trim() || !password) {
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !password) {
       setErrorMessage('Please enter both email address and password.');
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(cleanEmail)) {
       setErrorMessage('Please enter a valid email address.');
       return;
     }
 
     setIsLoading(true);
 
-    // Simulate authenticating admin credentials
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const user = await loginWithEmail(cleanEmail, password);
+
+      // Persist user session info for fast UI hydration
       try {
         localStorage.setItem('admin_authenticated', 'true');
-        localStorage.setItem('admin_user_email', email);
+        localStorage.setItem('admin_user_email', user.email || cleanEmail);
+        if (user.displayName) {
+          localStorage.setItem('admin_user_name', user.displayName);
+        }
       } catch (err) {
         console.error('Error storing session', err);
       }
+
       if (onLoginSuccess) {
-        onLoginSuccess({ email });
+        onLoginSuccess(user);
       }
-    }, 750);
+    } catch (err) {
+      console.error('Firebase authentication failed:', err);
+      const friendlyError = getFirebaseErrorMessage(err);
+      setErrorMessage(friendlyError);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Handle Forgot Password Request
-  const handleForgotPasswordSubmit = (e) => {
+  // Handle Firebase Password Reset Request
+  const handleForgotPasswordSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
 
-    if (!email.trim()) {
+    const cleanEmail = email.trim();
+    if (!cleanEmail) {
       setErrorMessage('Please enter your admin email address.');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(cleanEmail)) {
       setErrorMessage('Please enter a valid email address.');
       return;
     }
 
     setIsLoading(true);
 
-    // Simulate sending password reset email
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await sendResetPasswordEmail(cleanEmail);
       setViewMode('reset_sent');
-      setSuccessMessage(`Password reset link has been sent to ${email}`);
-    }, 800);
+      setSuccessMessage(`A password reset link has been sent to ${cleanEmail}`);
+    } catch (err) {
+      console.error('Firebase password reset failed:', err);
+      const friendlyError = getFirebaseErrorMessage(err);
+      setErrorMessage(friendlyError);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -111,9 +130,21 @@ export default function LoginPage({ onLoginSuccess }) {
 
               {/* Error Alert */}
               {errorMessage && (
-                <div className="flex items-center space-x-2 p-2.5 rounded-lg bg-red-950/60 border border-red-800/40 text-red-200 text-xs font-medium mb-3.5 animate-fadeIn animate-login-shake">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-400" />
-                  <span>{errorMessage}</span>
+                <div className="flex flex-col space-y-1.5 p-3 rounded-xl bg-red-950/60 border border-red-800/40 text-red-200 text-xs font-medium mb-3.5 animate-fadeIn animate-login-shake">
+                  <div className="flex items-start space-x-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+                    <span className="leading-relaxed">{errorMessage}</span>
+                  </div>
+                  {errorMessage.includes('console.firebase.google.com') && (
+                    <a
+                      href="https://console.firebase.google.com/project/e2-stories/authentication"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center space-x-1 text-[11px] font-bold text-[#FEF08A] hover:underline pl-6"
+                    >
+                      <span>Open Firebase Authentication Console →</span>
+                    </a>
+                  )}
                 </div>
               )}
 
@@ -205,9 +236,21 @@ export default function LoginPage({ onLoginSuccess }) {
 
               {/* Error Alert */}
               {errorMessage && (
-                <div className="flex items-center space-x-2 p-2.5 rounded-lg bg-red-950/60 border border-red-800/40 text-red-200 text-xs font-medium animate-fadeIn">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-400" />
-                  <span>{errorMessage}</span>
+                <div className="flex flex-col space-y-1.5 p-3 rounded-xl bg-red-950/60 border border-red-800/40 text-red-200 text-xs font-medium animate-fadeIn">
+                  <div className="flex items-start space-x-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+                    <span className="leading-relaxed">{errorMessage}</span>
+                  </div>
+                  {errorMessage.includes('console.firebase.google.com') && (
+                    <a
+                      href="https://console.firebase.google.com/project/e2-stories/authentication"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center space-x-1 text-[11px] font-bold text-[#FEF08A] hover:underline pl-6"
+                    >
+                      <span>Open Firebase Authentication Console →</span>
+                    </a>
+                  )}
                 </div>
               )}
 

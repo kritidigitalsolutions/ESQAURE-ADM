@@ -32,6 +32,26 @@ const AdSettingSchema = new mongoose.Schema(
       type: String,
       default: 'ca-app-pub-9920192847192847~0987654321'
     },
+    publisherAccountId: {
+      type: String,
+      default: 'pub-6490055741105644'
+    },
+    appPackageName: {
+      type: String,
+      default: 'com.flix9ott.app'
+    },
+    oauthClientId: {
+      type: String,
+      default: '389814863433-dits4313tlppgv84l'
+    },
+    oauthClientSecret: {
+      type: String,
+      default: 'GOCSPX-SampleSecretKey983719'
+    },
+    oauthRefreshToken: {
+      type: String,
+      default: '1//04SampleRefreshToken_AdMobSync'
+    },
     // AdMob Ad Units per format
     adUnits: {
       rewarded: {
@@ -59,6 +79,11 @@ const AdSettingSchema = new mongoose.Schema(
       native: {
         android: { type: String, default: 'ca-app-pub-9920192847192847/5566778899' },
         ios: { type: String, default: 'ca-app-pub-9920192847192847/9988776655' },
+        enabled: { type: Boolean, default: true }
+      },
+      rewardedInterstitial: {
+        android: { type: String, default: 'ca-app-pub-6490055741105644/4411056644' },
+        ios: { type: String, default: 'ca-app-pub-xxx/yyy' },
         enabled: { type: Boolean, default: true }
       }
     },

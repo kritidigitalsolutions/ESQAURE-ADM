@@ -205,11 +205,10 @@ export default function IncomeChart({ className = '' }) {
                   setHoveredIdx(null);
                   setPeriod(btn.id);
                 }}
-                className={`rounded-md px-2.5 py-1 text-[11px] font-extrabold transition-all cursor-pointer ${
-                  isActive
+                className={`rounded-md px-2.5 py-1 text-[11px] font-extrabold transition-all cursor-pointer ${isActive
                     ? 'bg-[#FEF08A] text-slate-950 shadow-2xs border border-amber-300/70'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/[0.06]'
-                }`}
+                  }`}
               >
                 {btn.label}
               </button>

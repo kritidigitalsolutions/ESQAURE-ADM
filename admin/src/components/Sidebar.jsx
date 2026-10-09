@@ -45,7 +45,7 @@ export default function Sidebar({
         const next = !prev;
         try {
           localStorage.setItem('sidebar_collapsed', String(next));
-        } catch {}
+        } catch { }
         return next;
       });
     }
@@ -102,7 +102,7 @@ export default function Sidebar({
       title: 'ENGAGEMENT',
       items: [
         { id: 'notifications', label: 'Push Notifications', icon: SendHorizontal },
-        { id: 'app_notifications', label: 'In-App Notices', icon: Bell },
+        { id: 'app_notifications', label: 'Notifications', icon: Bell },
       ]
     },
     {
@@ -116,9 +116,8 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`${
-        isCollapsed ? 'w-[64px]' : 'w-56'
-      } bg-white dark:bg-[#141914] text-slate-900 dark:text-slate-100 flex flex-col h-screen sticky top-0 shrink-0 border-r border-slate-200/80 dark:border-white/10 shadow-[1px_0_12px_-4px_rgba(15,23,42,0.04)] dark:shadow-[1px_0_16px_-4px_rgba(0,0,0,0.5)] z-40 font-urbanist selection:bg-[#FEF08A] selection:text-black transition-[width] duration-250 ease-[cubic-bezier(0.2,0,0,1)] will-change-[width]`}
+      className={`${isCollapsed ? 'w-[64px]' : 'w-56'
+        } bg-white dark:bg-[#141914] text-slate-900 dark:text-slate-100 flex flex-col h-screen sticky top-0 shrink-0 border-r border-slate-200/80 dark:border-white/10 shadow-[1px_0_12px_-4px_rgba(15,23,42,0.04)] dark:shadow-[1px_0_16px_-4px_rgba(0,0,0,0.5)] z-40 font-urbanist selection:bg-[#FEF08A] selection:text-black transition-[width] duration-250 ease-[cubic-bezier(0.2,0,0,1)] will-change-[width]`}
     >
       {/* 1. Clean, Unified Header */}
       <div className={`h-14 px-3 border-b border-slate-100 dark:border-white/10 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} bg-white dark:bg-[#141914] shrink-0 overflow-hidden`}>
@@ -202,32 +201,23 @@ export default function Sidebar({
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`relative flex items-center transition-all duration-150 group sidebar-item-wave cursor-pointer ${
-                    isCollapsed
+                  className={`relative flex items-center transition-all duration-150 group sidebar-item-wave cursor-pointer ${isCollapsed
                       ? 'w-9 h-9 mx-auto justify-center rounded-xl'
                       : 'w-full h-9 px-2.5 rounded-xl text-[12.5px]'
-                  } ${
-                    isActive
-                      ? `bg-[#FEF08A] text-slate-950 font-bold border border-amber-300/80 shadow-xs ${
-                          isCollapsed ? 'ring-2 ring-[#FEF08A]/80 ring-offset-2 ring-offset-white dark:ring-offset-[#141914]' : ''
-                        }`
+                    } ${isActive
+                      ? `bg-[#FEF08A] text-slate-950 font-bold border border-amber-300/80 shadow-xs ${isCollapsed ? 'ring-2 ring-[#FEF08A]/80 ring-offset-2 ring-offset-white dark:ring-offset-[#141914]' : ''
+                      }`
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/[0.06] font-medium'
-                  }`}
+                    }`}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  {/* Left Active Accent Pill when expanded */}
-                  {!isCollapsed && isActive && (
-                    <span className="absolute left-1 top-2 bottom-2 w-1 bg-slate-950 rounded-full" />
-                  )}
-
                   {/* Icon */}
                   <div className="flex items-center justify-center shrink-0">
                     <Icon
-                      className={`w-4 h-4 transition-colors duration-150 ${
-                        isActive
+                      className={`w-4 h-4 transition-colors duration-150 ${isActive
                           ? 'text-slate-950 stroke-[2.3]'
                           : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-950 dark:group-hover:text-white stroke-[1.8]'
-                      }`}
+                        }`}
                     />
                   </div>
 

@@ -4,6 +4,7 @@ import AnimatedNumber from '../../components/common/AnimatedNumber';
 import Badge from '../../components/common/Badge';
 import KpiStatCard from '../../components/common/KpiStatCard';
 import ManageContentModal from '../../components/ManageContentModal';
+import PageLoader from '../../components/common/PageLoader';
 import {
   Search,
   X,
@@ -230,7 +231,7 @@ export default function DramasPage({
 
   return (
     <div className="space-y-3.5 font-urbanist selection:bg-[#FEF08A] selection:text-black">
-      
+
       {/* 4 Core Content Library KPI Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Metric 1: Total Series */}
@@ -282,10 +283,10 @@ export default function DramasPage({
 
       {/* Clean, Smart & Perfectly Aligned Toolbar */}
       <div className="bg-white dark:bg-[#121612] rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-3">
-        
+
         {/* Row 1: Search & Status (Left) + View Switcher & Upload (Right) */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          
+
           {/* Left: Search Bar & Status Tabs */}
           <div className="flex items-center flex-wrap gap-2.5 flex-1 min-w-0">
             {/* Search input */}
@@ -320,11 +321,10 @@ export default function DramasPage({
                 <button
                   key={tab.id}
                   onClick={() => setSelectedStatus(tab.id)}
-                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                    selectedStatus === tab.id
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${selectedStatus === tab.id
                       ? 'bg-[#FEF08A] text-slate-950 shadow-xs font-black'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/[0.05]'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -338,22 +338,20 @@ export default function DramasPage({
             <div className="bg-slate-100 dark:bg-[#161B16] p-1 rounded-xl flex items-center border border-slate-200/70 dark:border-white/10">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  viewMode === 'grid'
+                className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'grid'
                     ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
                     : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-white/[0.05]'
-                }`}
+                  }`}
                 title="Grid View"
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  viewMode === 'table'
+                className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'table'
                     ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
                     : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-white/[0.05]'
-                }`}
+                  }`}
                 title="Table View"
               >
                 <List className="w-4 h-4" />
@@ -445,8 +443,12 @@ export default function DramasPage({
 
       </div>
 
-      {/* Empty State */}
-      {filteredDramas.length === 0 ? (
+      {/* Main Content: Loading State, Empty State, Grid, or Table */}
+      {isLoading ? (
+        <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
+          <PageLoader text="Loading..." minHeight="min-h-[380px]" />
+        </div>
+      ) : filteredDramas.length === 0 ? (
         <div className="bg-white dark:bg-[#121612] rounded-2xl p-12 text-center border border-slate-200/80 dark:border-white/10 shadow-nodus">
           <div className="w-12 h-12 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 flex items-center justify-center text-amber-600 dark:text-amber-400 mx-auto mb-3">
             <Search className="w-6 h-6 stroke-[2.2]" />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { homeService } from '../../services/homeService';
+import PageLoader from '../../components/common/PageLoader';
 import {
   SlidersHorizontal,
   ChevronUp,
@@ -398,9 +399,8 @@ export default function CategoryPriorityPage({ onNavigate }) {
 
       {/* Main Priority Reorder Table */}
       {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-slate-500 space-y-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[#FEF08A]" />
-          <p className="text-xs font-bold">Loading homepage section priority feed...</p>
+        <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
+          <PageLoader text="Loading..." minHeight="min-h-[360px]" />
         </div>
       ) : filteredSections.length === 0 ? (
         <div className="bg-white dark:bg-[#121612] rounded-2xl p-12 text-center border border-slate-200/80 dark:border-white/10 shadow-nodus">

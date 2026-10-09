@@ -4,6 +4,7 @@ import { Crown, Search, X, CheckCircle2, CreditCard, ArrowUpRight, RefreshCw, Za
 import AnimatedNumber from '../../components/common/AnimatedNumber';
 import Badge from '../../components/common/Badge';
 import KpiStatCard from '../../components/common/KpiStatCard';
+import PageLoader from '../../components/common/PageLoader';
 
 export default function SubscribersPage() {
   const [subscribers, setSubscribers] = useState([]);
@@ -233,16 +234,11 @@ export default function SubscribersPage() {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-semibold text-slate-900 dark:text-slate-100">
               {isLoading && subscribers.length === 0 ? (
-                Array.from({ length: 4 }).map((_, idx) => (
-                  <tr key={idx} className="animate-pulse">
-                    <td className="py-4 px-5"><div className="h-4 w-32 bg-slate-200 dark:bg-white/10 rounded" /></td>
-                    <td className="py-4 px-4"><div className="h-4 w-24 bg-slate-200 dark:bg-white/10 rounded" /></td>
-                    <td className="py-4 px-4"><div className="h-4 w-20 bg-slate-200 dark:bg-white/10 rounded" /></td>
-                    <td className="py-4 px-4"><div className="h-4 w-24 bg-slate-200 dark:bg-white/10 rounded" /></td>
-                    <td className="py-4 px-4"><div className="h-4 w-20 bg-slate-200 dark:bg-white/10 rounded" /></td>
-                    <td className="py-4 px-5"><div className="h-5 w-16 bg-slate-200 dark:bg-white/10 rounded-full" /></td>
-                  </tr>
-                ))
+                <tr>
+                  <td colSpan="6" className="py-12">
+                    <PageLoader size="sm" text="Loading..." minHeight="min-h-[220px]" />
+                  </td>
+                </tr>
               ) : filteredSubscribers.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="py-12 text-center">

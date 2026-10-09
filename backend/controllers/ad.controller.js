@@ -87,6 +87,11 @@ export const updateAdSettings = async (req, res, next) => {
       testMode,
       androidAppId,
       iosAppId,
+      publisherAccountId,
+      appPackageName,
+      oauthClientId,
+      oauthClientSecret,
+      oauthRefreshToken,
       adUnits,
       mediationMode,
       customAdSharePercent,
@@ -102,6 +107,11 @@ export const updateAdSettings = async (req, res, next) => {
     if (testMode !== undefined) updateFields.testMode = Boolean(testMode);
     if (androidAppId !== undefined) updateFields.androidAppId = String(androidAppId).trim();
     if (iosAppId !== undefined) updateFields.iosAppId = String(iosAppId).trim();
+    if (publisherAccountId !== undefined) updateFields.publisherAccountId = String(publisherAccountId).trim();
+    if (appPackageName !== undefined) updateFields.appPackageName = String(appPackageName).trim();
+    if (oauthClientId !== undefined) updateFields.oauthClientId = String(oauthClientId).trim();
+    if (oauthClientSecret !== undefined) updateFields.oauthClientSecret = String(oauthClientSecret).trim();
+    if (oauthRefreshToken !== undefined) updateFields.oauthRefreshToken = String(oauthRefreshToken).trim();
     if (adUnits !== undefined) updateFields.adUnits = adUnits;
     if (mediationMode !== undefined) updateFields.mediationMode = mediationMode;
     if (customAdSharePercent !== undefined) updateFields.customAdSharePercent = Number(customAdSharePercent);
