@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useId } from 'react';
 import { dramaService } from '../../services/dramaService';
 import PulsatingDots from '../../components/common/PulsatingDots';
+import ModalPortal from '../../components/common/ModalPortal';
 import {
   Upload,
   Video,
@@ -36,7 +37,8 @@ import {
   Link,
   Edit3,
   Globe,
-  Search
+  Search,
+  Loader2
 } from 'lucide-react';
 import { uploadService } from '../../services/uploadService';
 import { genreService } from '../../services/genreService';
@@ -47,30 +49,30 @@ function SlideSwitch({ checked, onChange, label, sublabel, icon: Icon, badge }) 
   const switchId = useId();
 
   return (
-    <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/70 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all group">
-      <div className="flex items-start space-x-3.5 pr-4 min-w-0">
+    <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/70 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 transition-all group">
+      <div className="flex items-start space-x-2.5 pr-3 min-w-0">
         {Icon && (
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
             checked
-              ? 'bg-[#FEF08A]/20 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] border border-amber-300/60 dark:border-amber-700/40'
-              : 'bg-slate-200/70 dark:bg-[#121612] text-slate-400 dark:text-slate-500 border border-transparent dark:border-white/5'
+              ? 'bg-[#FEF08A]/40 dark:bg-[#FEF08A]/20 text-slate-950 dark:text-amber-300 border border-amber-300/60 dark:border-amber-400/30'
+              : 'bg-slate-200/70 dark:bg-[#121216] text-slate-400 dark:text-slate-500 border border-transparent dark:border-white/5'
           }`}>
             <Icon className="w-4 h-4 stroke-[2.2]" />
           </div>
         )}
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <label htmlFor={switchId} className="font-bold text-xs sm:text-sm text-slate-900 dark:text-slate-100 cursor-pointer select-none">
+          <div className="flex items-center gap-1.5">
+            <label htmlFor={switchId} className="font-bold text-xs text-slate-900 dark:text-slate-100 cursor-pointer select-none">
               {label}
             </label>
             {badge && (
-              <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/60">
+              <span className="text-[9.5px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-950 dark:text-amber-300 border border-amber-300/60">
                 {badge}
               </span>
             )}
           </div>
           {sublabel && (
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed font-medium">
+            <p className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed font-medium">
               {sublabel}
             </p>
           )}
@@ -178,13 +180,48 @@ export default function UploadContentPage({ onNavigate }) {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [publishError, setPublishError] = useState(null);
 
-  // Age rating badge options
+  // Age rating options with distinct certification color accents
   const ageRatings = [
-    { value: 'U (All Ages)', label: 'U', desc: 'Universal — All Ages', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' },
-    { value: 'U/A 7+', label: '7+', desc: 'Mild fantasy / comedy', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' },
-    { value: 'U/A 13+', label: '13+', desc: 'Teen Romance / Thriller', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' },
-    { value: 'U/A 16+', label: '16+', desc: 'Mature Themes / Intense', color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300' },
-    { value: 'A 18+', label: '18+', desc: 'Adults Only Content', color: 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300' },
+    {
+      value: 'U (All Ages)',
+      label: 'U',
+      desc: 'Universal — All Ages',
+      badgeActive: 'bg-emerald-500 text-white',
+      badgeInactive: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30',
+      activeBorder: 'border-emerald-500/80 bg-emerald-500/10 dark:bg-emerald-500/15 ring-1 ring-emerald-500/50'
+    },
+    {
+      value: 'U/A 7+',
+      label: '7+',
+      desc: 'Mild fantasy / comedy',
+      badgeActive: 'bg-sky-500 text-white',
+      badgeInactive: 'bg-sky-500/15 text-sky-700 dark:text-sky-400 border border-sky-500/30',
+      activeBorder: 'border-sky-500/80 bg-sky-500/10 dark:bg-sky-500/15 ring-1 ring-sky-500/50'
+    },
+    {
+      value: 'U/A 13+',
+      label: '13+',
+      desc: 'Teen Romance / Thriller',
+      badgeActive: 'bg-amber-400 text-slate-950',
+      badgeInactive: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30',
+      activeBorder: 'border-amber-400/80 bg-amber-400/10 dark:bg-amber-400/15 ring-1 ring-amber-400/50'
+    },
+    {
+      value: 'U/A 16+',
+      label: '16+',
+      desc: 'Mature Themes / Intense',
+      badgeActive: 'bg-orange-500 text-white',
+      badgeInactive: 'bg-orange-500/15 text-orange-700 dark:text-orange-400 border border-orange-500/30',
+      activeBorder: 'border-orange-500/80 bg-orange-500/10 dark:bg-orange-500/15 ring-1 ring-orange-500/50'
+    },
+    {
+      value: 'A 18+',
+      label: '18+',
+      desc: 'Adults Only Content',
+      badgeActive: 'bg-rose-500 text-white',
+      badgeInactive: 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30',
+      activeBorder: 'border-rose-500/80 bg-rose-500/10 dark:bg-rose-500/15 ring-1 ring-rose-500/50'
+    },
   ];
 
   const toggleGenre = (genreName) => {
@@ -489,33 +526,36 @@ export default function UploadContentPage({ onNavigate }) {
     { num: 1, label: 'Series Info', icon: Film, subtitle: 'Metadata & Story' },
     { num: 2, label: 'Media Studio', icon: Video, subtitle: 'Artwork & Episode Files' },
     { num: 3, label: 'Paywall & Launch', icon: Lock, subtitle: 'Monetization & Publish' },
-  ];
-
-  return (
-    <div className="space-y-3.5 font-urbanist w-full pb-10 selection:bg-[#FEF08A] selection:text-black">
+  ];  return (
+    <div className="space-y-3 font-urbanist w-full pb-8 selection:bg-[#FEF08A] selection:text-black">
       
-      {/* Top Header Card */}
-      <div className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs relative overflow-hidden transition-all">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-start space-x-3">
-            <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
-              <Upload className="w-4.5 h-4.5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+      {/* Top Header & Stepper Card */}
+      <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs relative overflow-hidden transition-all">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center shrink-0 shadow-xs">
+              <Upload className="w-4 h-4 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
             </div>
             <div>
-              <h1 className="text-base sm:text-lg font-extrabold text-slate-950 dark:text-white tracking-tight">
-                Content Upload Studio
-              </h1>
+              <div className="flex items-center space-x-2">
+                <h1 className="text-sm sm:text-base font-black text-slate-950 dark:text-white tracking-tight">
+                  Content Upload Studio
+                </h1>
+                <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+                  Step {currentStep} of {totalSteps}
+                </span>
+              </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                Upload, encode, and publish high-engagement micro-drama series to the streaming app in a seamless sequence.
+                Upload, encode, and publish micro-dramas to the catalog.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 shrink-0 self-start md:self-center">
+          <div className="flex items-center space-x-2 shrink-0 self-start sm:self-center">
             <button
               type="button"
               onClick={() => onNavigate && onNavigate('dramas')}
-              className="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 border border-transparent dark:border-white/10 text-xs font-bold transition-all cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-600 dark:text-slate-300 border border-transparent dark:border-white/10 text-xs font-bold transition-all cursor-pointer active:scale-95"
             >
               Cancel
             </button>
@@ -523,18 +563,17 @@ export default function UploadContentPage({ onNavigate }) {
         </div>
 
         {/* Sequential Stepper Navigation Bar */}
-        <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800/80">
-          
-          {/* Progress percentage bar */}
-          <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2.5">
+        <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/10">
+          {/* Progress percentage bar in vibrant green */}
+          <div className="w-full bg-slate-100 dark:bg-[#18181E] h-1.5 rounded-full overflow-hidden mb-2.5">
             <div
-              className="bg-[#FEF08A] h-full transition-all duration-500 ease-out"
-              style={{ width: `${Math.min(100, Math.max(15, ((currentStep) / totalSteps) * 100))}%` }}
+              className="bg-emerald-500 h-full transition-all duration-300 ease-out shadow-xs"
+              style={{ width: `${((currentStep) / totalSteps) * 100}%` }}
             />
           </div>
 
           {/* Stepper buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {stepsConfig.map((s) => {
               const IconComp = s.icon;
               const isCurrent = currentStep === s.num;
@@ -545,30 +584,30 @@ export default function UploadContentPage({ onNavigate }) {
                   key={s.num}
                   type="button"
                   onClick={() => setCurrentStep(s.num)}
-                  className={`flex flex-col sm:flex-row items-center sm:items-start p-2 sm:p-2.5 rounded-xl text-left transition-all relative ${
+                  className={`flex items-center p-1.5 sm:p-2 rounded-lg text-left transition-all cursor-pointer ${
                     isCurrent
-                      ? 'bg-[#FEF08A]/30 dark:bg-[#FEF08A]/15 border border-amber-300/80 dark:border-amber-500/40 shadow-xs'
+                      ? 'bg-[#FEF08A]/30 dark:bg-[#FEF08A]/15 border border-amber-300/80 dark:border-amber-500/40 shadow-2xs'
                       : isCompleted
-                      ? 'bg-slate-50 dark:bg-[#161B16] border border-transparent hover:border-slate-200 dark:hover:border-white/10 text-slate-700 dark:text-slate-300'
-                      : 'border border-transparent opacity-60 hover:opacity-100'
+                      ? 'bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 text-emerald-950 dark:text-emerald-300'
+                      : 'border border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 opacity-70'
                   }`}
                 >
-                  <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0 mb-1 sm:mb-0 sm:mr-2.5 font-black text-xs transition-colors ${
+                  <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 mr-2 text-[11px] font-bold transition-colors ${
                     isCurrent
-                      ? 'bg-[#FEF08A] text-slate-950 shadow-2xs font-extrabold'
+                      ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs'
                       : isCompleted
-                      ? 'bg-emerald-500 text-white font-bold'
-                      : 'bg-slate-200/80 dark:bg-[#121612] text-slate-500 dark:text-slate-400'
+                      ? 'bg-emerald-500 text-white font-bold shadow-2xs'
+                      : 'bg-slate-200/80 dark:bg-[#121216] text-slate-500 dark:text-slate-400'
                   }`}>
-                    {isCompleted ? <Check className="w-4 h-4 stroke-[3]" /> : <IconComp className="w-4 h-4" />}
+                    {isCompleted ? <Check className="w-3.5 h-3.5 stroke-[2.5]" /> : <IconComp className="w-3.5 h-3.5" />}
                   </div>
-                  <div className="min-w-0 text-center sm:text-left hidden sm:block">
-                    <p className={`text-xs font-extrabold truncate ${
-                      isCurrent ? 'text-slate-950 dark:text-white' : 'text-slate-600 dark:text-slate-400'
+                  <div className="min-w-0">
+                    <p className={`text-xs font-bold truncate ${
+                      isCurrent ? 'text-slate-950 dark:text-white' : isCompleted ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-600 dark:text-slate-400'
                     }`}>
                       {s.label}
                     </p>
-                    <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                    <p className="text-[10px] text-slate-400 truncate hidden sm:block">
                       {s.subtitle}
                     </p>
                   </div>
@@ -581,14 +620,14 @@ export default function UploadContentPage({ onNavigate }) {
 
       {/* Success Notification Banner */}
       {uploadSuccess && (
-        <div className="p-5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300/80 dark:border-emerald-700/60 rounded-2xl flex items-center space-x-3.5 text-emerald-950 dark:text-emerald-200 animate-in fade-in zoom-in-95 duration-200 shadow-sm">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-            <CheckCircle2 className="w-6 h-6 stroke-[2.5]" />
+        <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300/80 dark:border-emerald-700/60 rounded-xl flex items-center space-x-3 text-emerald-950 dark:text-emerald-200 shadow-2xs animate-in fade-in duration-200">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <CheckCircle2 className="w-4.5 h-4.5 stroke-[2.5]" />
           </div>
           <div>
-            <p className="font-extrabold text-sm sm:text-base">Series Published Successfully to Live Catalog!</p>
-            <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
-              Encoding CDN endpoints configured. Forwarding you to the Content Library...
+            <p className="font-extrabold text-xs sm:text-sm">Series Published Successfully to Live Catalog!</p>
+            <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
+              Encoding CDN configured. Forwarding you to the Content Library...
             </p>
           </div>
         </div>
@@ -596,156 +635,127 @@ export default function UploadContentPage({ onNavigate }) {
 
       {/* Publishing Modal Overlay */}
       {isPublishing && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#202620] rounded-3xl p-8 max-w-md w-full border border-slate-200 dark:border-white/15 shadow-2xl space-y-6 text-center animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 rounded-2xl bg-[#FEF08A]/30 border border-amber-300/80 flex items-center justify-center mx-auto shadow-xs">
-              <RotateCcw className="w-8 h-8 text-slate-950 dark:text-[#FEF08A] animate-spin" />
+        <ModalPortal>
+          <div className="fixed inset-0 z-[99999] bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#24242E] rounded-2xl p-6 max-w-sm w-full border border-slate-200 dark:border-white/15 shadow-2xl space-y-4 text-center animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 text-slate-950 dark:text-amber-300 flex items-center justify-center mx-auto shadow-xs">
+              <RotateCcw className="w-6 h-6 text-slate-950 dark:text-[#FEF08A] animate-spin" />
             </div>
             
             <div>
-              <h3 className="text-lg font-extrabold text-slate-950 dark:text-white">Publishing Drama to CDN</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Optimizing 9:16 vertical bitrate stream and applying Widevine DRM keys...
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-950 dark:text-white">Publishing Drama to CDN</h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Optimizing 9:16 vertical bitrate stream and applying DRM keys...
               </p>
             </div>
 
-            <div className="space-y-3 text-left">
-              <div className="flex items-center space-x-3 text-xs font-bold">
-                {publishingStage >= 1 ? (
-                  <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                ) : (
-                  <div className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 shrink-0" />
-                )}
-                <span className={publishingStage >= 1 ? 'text-slate-950 dark:text-white' : 'text-slate-400'}>
-                  Validating 1080x1920 portrait aspect ratio
-                </span>
-              </div>
-              <div className="flex items-center space-x-3 text-xs font-bold">
-                {publishingStage >= 2 ? (
-                  <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                ) : (
-                  <div className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 shrink-0" />
-                )}
-                <span className={publishingStage >= 2 ? 'text-slate-950 dark:text-white' : 'text-slate-400'}>
-                  Transcoding H.264 multi-bitrate chunks (480p / 720p / 1080p)
-                </span>
-              </div>
-              <div className="flex items-center space-x-3 text-xs font-bold">
-                {publishingStage >= 3 ? (
-                  <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                ) : (
-                  <div className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 shrink-0" />
-                )}
-                <span className={publishingStage >= 3 ? 'text-slate-950 dark:text-white' : 'text-slate-400'}>
-                  Configuring Razorpay Subscriber paywall lock for episodes {freeEpisodes + 1}+
-                </span>
-              </div>
-              <div className="flex items-center space-x-3 text-xs font-bold">
-                {publishingStage >= 4 ? (
-                  <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                ) : (
-                  <div className="w-4 h-4 rounded-full border border-slate-300 dark:border-slate-700 shrink-0" />
-                )}
-                <span className={publishingStage >= 4 ? 'text-slate-950 dark:text-white' : 'text-slate-400'}>
-                  Broadcasting instant cache invalidation to Edge CDN
-                </span>
-              </div>
+            <div className="space-y-2 text-left">
+              {[
+                { stage: 1, label: 'Validating portrait aspect ratio' },
+                { stage: 2, label: 'Transcoding multi-bitrate chunks' },
+                { stage: 3, label: `Configuring Subscriber paywall for episodes ${freeEpisodes + 1}+` },
+                { stage: 4, label: 'Broadcasting instant cache to Edge CDN' },
+              ].map((item) => (
+                <div key={item.stage} className="flex items-center space-x-2 text-[11px] font-bold">
+                  {publishingStage >= item.stage ? (
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  ) : (
+                    <div className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-700 shrink-0" />
+                  )}
+                  <span className={publishingStage >= item.stage ? 'text-slate-950 dark:text-white' : 'text-slate-400'}>
+                    {item.label}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      )}
+      </ModalPortal>
+    )}
 
       {/* ======================================================== */}
       {/* STEP 1: SERIES FUNDAMENTALS & METADATA */}
       {/* ======================================================== */}
       {currentStep === 1 && (
-        <div className="space-y-3.5 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121612] rounded-xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
+        <div className="space-y-3 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#121216] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3.5">
             
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 text-slate-950 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center font-extrabold shadow-xs">
-                  <Film className="w-4.5 h-4.5 stroke-[2.2]" />
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
+              <div className="flex items-center space-x-2">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center font-extrabold shadow-xs">
+                  <Film className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base tracking-tight">
+                  <h3 className="font-extrabold text-slate-950 dark:text-white text-xs sm:text-sm tracking-tight">
                     Step 1: Series Fundamentals & Storyline
                   </h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                  <p className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium">
                     Enter the core identity, English title, storyline synopsis, and certifications.
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                 Step 1 of 3
               </span>
             </div>
 
-            {/* Title Input */}
-            <div>
-              <label className="block text-xs font-bold text-slate-900 dark:text-slate-200 mb-1.5">
-                Series Title <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. The Billionaire's Secret Nanny"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-4 py-2.5 text-xs sm:text-sm font-semibold bg-slate-50/70 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:bg-white dark:focus:bg-[#121612] focus:border-[#FEF08A] dark:focus:border-[#FEF08A] focus:outline-none text-slate-950 dark:text-white transition-colors"
-              />
-              <p className="text-[11px] text-slate-400 mt-1">Displayed as the primary headline on user search &amp; catalog.</p>
-            </div>
-
-            {/* Catalog Display Priority */}
-            <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-900 dark:text-slate-200">
-                  Catalog Display Priority
+            {/* Title & Priority Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <div className="sm:col-span-3">
+                <label className="block text-xs font-bold text-slate-900 dark:text-slate-200 mb-1">
+                  Series Title <span className="text-amber-500">*</span>
                 </label>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                  Sets the rank in the mobile app feed. Priority 1 places this series at the top; existing content shifts down automatically.
-                </p>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. The Billionaire's Secret Nanny"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-3 py-2 text-xs font-semibold bg-slate-50/70 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg focus:bg-white dark:focus:bg-[#121216] focus:border-[#FEF08A] focus:outline-none text-slate-950 dark:text-white transition-colors"
+                />
               </div>
-              <div className="flex items-center space-x-2 shrink-0">
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Rank:</span>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-900 dark:text-slate-200 mb-1">
+                  Priority Rank
+                </label>
                 <input
                   type="number"
                   min={1}
                   max={99}
                   value={priority}
                   onChange={(e) => setPriority(Math.max(1, Number(e.target.value)))}
-                  className="w-20 px-3 py-1.5 text-xs sm:text-sm font-bold text-center bg-white dark:bg-[#121612] border border-slate-200 dark:border-white/10 rounded-xl text-slate-950 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                  className="w-full px-3 py-2 text-xs font-bold text-center bg-slate-50/70 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-950 dark:text-white focus:outline-none focus:border-[#FEF08A]"
                 />
               </div>
             </div>
 
             {/* Synopsis & Hook */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center justify-between mb-1">
                 <label className="block text-xs font-bold text-slate-900 dark:text-slate-200">
-                  Synopsis & Micro-Drama Hook <span className="text-rose-500">*</span>
+                  Synopsis & Hook <span className="text-amber-500">*</span>
                 </label>
-                <span className="text-[11px] font-semibold text-slate-400">
-                  {synopsis.length} / 500 characters
+                <span className="text-[10px] font-semibold text-slate-400">
+                  {synopsis.length} / 500 chars
                 </span>
               </div>
               <textarea
-                rows={3}
+                rows={2.5}
                 maxLength={500}
                 placeholder="Write a high-tension synopsis designed for 2-minute vertical video binge-watchers..."
                 value={synopsis}
                 onChange={(e) => setSynopsis(e.target.value)}
-                className="w-full px-4 py-2.5 text-xs sm:text-sm font-medium bg-slate-50/70 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:bg-white dark:focus:bg-[#121612] focus:border-[#FEF08A] dark:focus:border-[#FEF08A] focus:outline-none text-slate-950 dark:text-white transition-colors leading-relaxed"
+                className="w-full px-3 py-2 text-xs font-medium bg-slate-50/70 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg focus:bg-white dark:focus:bg-[#121216] focus:border-[#FEF08A] focus:outline-none text-slate-950 dark:text-white transition-colors leading-relaxed"
               />
             </div>
 
-            {/* Age Certification Badges */}
+            {/* Age Certification (Theme-aligned, no rainbow) */}
             <div>
-              <label className="block text-xs font-bold text-slate-900 dark:text-slate-200 mb-2">
-                Content Age Certification & Rating
+              <label className="block text-xs font-bold text-slate-900 dark:text-slate-200 mb-1.5">
+                Age Certification & Rating
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                 {ageRatings.map((rating) => {
                   const isSelected = ageRating === rating.value;
                   return (
@@ -753,19 +763,21 @@ export default function UploadContentPage({ onNavigate }) {
                       type="button"
                       key={rating.value}
                       onClick={() => setAgeRating(rating.value)}
-                      className={`p-3 rounded-xl text-left border transition-all flex flex-col justify-between ${
+                      className={`p-2 rounded-lg text-left border transition-all flex flex-col justify-between cursor-pointer ${
                         isSelected
-                          ? 'border-[#FEF08A] bg-[#FEF08A]/10 dark:bg-[#FEF08A]/10 ring-1 ring-[#FEF08A] shadow-2xs'
-                          : 'border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-[#161B16] hover:border-slate-300 dark:hover:border-white/20'
+                          ? `${rating.activeBorder} shadow-2xs`
+                          : 'border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-[#18181E] text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/20'
                       }`}
                     >
-                      <span className={`px-2 py-0.5 rounded text-[11px] font-black w-fit mb-1.5 ${rating.color}`}>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-black w-fit mb-1 shadow-2xs ${
+                        isSelected ? rating.badgeActive : rating.badgeInactive
+                      }`}>
                         {rating.label}
                       </span>
-                      <span className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate block">
+                      <span className="font-bold text-xs truncate block text-slate-900 dark:text-white">
                         {rating.value}
                       </span>
-                      <span className="text-[10px] text-slate-400 truncate mt-0.5 block">
+                      <span className="text-[9.5px] text-slate-400 truncate mt-0.5 block">
                         {rating.desc}
                       </span>
                     </button>
@@ -776,19 +788,19 @@ export default function UploadContentPage({ onNavigate }) {
 
             {/* Genres Multi-Select */}
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-xs font-bold text-slate-900 dark:text-slate-200">
-                  Select Associated Genres (Select up to 4)
+                  Associated Genres
                 </label>
-                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                <span className="text-[10.5px] font-bold text-amber-600 dark:text-amber-400">
                   {selectedGenres.length} Selected
                 </span>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {isGenresLoading ? (
-                  <div className="flex items-center space-x-2 text-xs text-slate-400 py-2">
+                  <div className="flex items-center space-x-2 text-xs text-slate-400 py-1">
                     <PulsatingDots size="sm" />
-                    <span className="font-semibold text-slate-500 dark:text-slate-400">Loading catalog genres...</span>
+                    <span className="font-semibold text-slate-500 dark:text-slate-400">Loading genres...</span>
                   </div>
                 ) : availableGenres.length === 0 ? (
                   <span className="text-xs text-slate-400 italic">No genres found in database.</span>
@@ -801,13 +813,13 @@ export default function UploadContentPage({ onNavigate }) {
                         type="button"
                         key={genreKey}
                         onClick={() => toggleGenre(genre.name)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 ${
+                        className={`px-3 py-1 rounded-full text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
                           isSelected
-                            ? 'bg-[#FEF08A] text-slate-950 font-extrabold shadow-2xs border border-amber-300'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-transparent'
+                            ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs border border-amber-300'
+                            : 'bg-slate-100 dark:bg-[#18181E] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200/60 dark:border-white/10'
                         }`}
                       >
-                        {isSelected && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
+                        {isSelected && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
                         <span>{genre.name}</span>
                       </button>
                     );
@@ -817,15 +829,15 @@ export default function UploadContentPage({ onNavigate }) {
             </div>
 
             {/* Metadata Secondary Options */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <div>
-                <label className="block text-xs font-bold text-slate-900 dark:text-slate-200 mb-1.5">
+                <label className="block text-xs font-bold text-slate-900 dark:text-slate-200 mb-1">
                   Audio Track / Primary Language
                 </label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs font-semibold bg-slate-50/70 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:bg-white dark:focus:bg-[#121612] focus:border-[#FEF08A] text-slate-900 dark:text-white focus:outline-none"
+                  className="w-full px-3 py-2 text-xs font-semibold bg-slate-50/70 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg focus:bg-white dark:focus:bg-[#121216] focus:border-[#FEF08A] text-slate-900 dark:text-white focus:outline-none cursor-pointer"
                 >
                   <option value="Hindi">Hindi (Original)</option>
                   <option value="Hindi (Dubbed)">Hindi (Dubbed)</option>
@@ -836,7 +848,7 @@ export default function UploadContentPage({ onNavigate }) {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-900 dark:text-slate-200 mb-1.5">
+                <label className="block text-xs font-bold text-slate-900 dark:text-slate-200 mb-1">
                   Lead Director / Creator Studio
                 </label>
                 <input
@@ -844,7 +856,7 @@ export default function UploadContentPage({ onNavigate }) {
                   placeholder="e.g. E² In-House Originals"
                   value={director}
                   onChange={(e) => setDirector(e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs font-semibold bg-slate-50/70 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:bg-white dark:focus:bg-[#121612] focus:border-[#FEF08A] text-slate-900 dark:text-white focus:outline-none"
+                  className="w-full px-3 py-2 text-xs font-semibold bg-slate-50/70 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg focus:bg-white dark:focus:bg-[#121216] focus:border-[#FEF08A] text-slate-900 dark:text-white focus:outline-none"
                 />
               </div>
             </div>
@@ -857,56 +869,52 @@ export default function UploadContentPage({ onNavigate }) {
       {/* STEP 2: MEDIA STUDIO                                     */}
       {/* ======================================================== */}
       {currentStep === 2 && (
-        <div className="space-y-3.5 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121612] rounded-xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
+        <div className="space-y-3 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#121216] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3.5">
 
-            {/* Clean, Minimal Header matching Step 1 and Step 3 */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 text-slate-950 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center font-extrabold shadow-xs shrink-0">
-                  <Video className="w-4.5 h-4.5 stroke-[2.2]" />
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
+              <div className="flex items-center space-x-2">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center font-extrabold shadow-xs shrink-0">
+                  <Video className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base tracking-tight">
+                  <h3 className="font-extrabold text-slate-950 dark:text-white text-xs sm:text-sm tracking-tight">
                     Step 2: Media Studio
                   </h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                  <p className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium">
                     Upload visual artwork, teaser trailer, and manage your vertical episode chapters.
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 border border-transparent dark:border-white/10">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 border border-transparent dark:border-white/10">
                 Step 2 of 3
               </span>
             </div>
 
-            {/* Section A: Visual Artwork & Teaser Trailer (Clean, 3-Card Grid with Uniform Heights) */}
+            {/* Section A: Visual Artwork & Teaser Trailer (Compact 3-Card Grid) */}
             <div>
-              <div className="flex items-center space-x-2 mb-3">
-                <ImageIcon className="w-4 h-4 text-amber-500" />
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Visual Media &amp; Teaser Trailer
+              <div className="flex items-center space-x-1.5 mb-2.5">
+                <ImageIcon className="w-3.5 h-3.5 text-amber-500" />
+                <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  Visual Media & Teaser Trailer
                 </h4>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 
                 {/* 1. 9:16 Vertical Poster */}
-                <div className="rounded-2xl border border-slate-200/80 dark:border-white/10 p-5 bg-white dark:bg-[#161B16] flex flex-col justify-between shadow-2xs">
+                <div className="rounded-xl border border-slate-200/80 dark:border-white/10 p-3 bg-white dark:bg-[#18181E] flex flex-col justify-between shadow-2xs">
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-1.5">
-                        <ImageIcon className="w-4 h-4 text-amber-500" />
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">Vertical Poster (9:16)</span>
-                      </div>
-                      <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-[#161B16] text-[10px] font-bold border border-transparent dark:border-white/10">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">Vertical Poster (9:16)</span>
+                      <div className="flex items-center p-0.5 rounded-md bg-slate-100 dark:bg-[#121216] text-[10px] font-bold border border-transparent dark:border-white/10">
                         <button
                           type="button"
                           onClick={() => setPosterMode('file')}
-                          className={`px-2 py-0.5 rounded transition-all ${
+                          className={`px-1.5 py-0.5 rounded transition-all cursor-pointer ${
                             posterMode === 'file'
-                              ? 'bg-white dark:bg-[#121612] text-slate-950 dark:text-white shadow-2xs font-extrabold'
-                              : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                              ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs'
+                              : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
                           File
@@ -914,10 +922,10 @@ export default function UploadContentPage({ onNavigate }) {
                         <button
                           type="button"
                           onClick={() => setPosterMode('url')}
-                          className={`px-2 py-0.5 rounded transition-all ${
+                          className={`px-1.5 py-0.5 rounded transition-all cursor-pointer ${
                             posterMode === 'url'
-                              ? 'bg-white dark:bg-[#121612] text-slate-950 dark:text-white shadow-2xs font-extrabold'
-                              : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                              ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs'
+                              : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
                           URL
@@ -925,31 +933,30 @@ export default function UploadContentPage({ onNavigate }) {
                       </div>
                     </div>
 
-                    <div className="h-64 rounded-xl border border-dashed border-slate-200 dark:border-white/10 overflow-hidden bg-slate-50/50 dark:bg-[#161B16]/30 flex items-center justify-center p-3 relative">
+                    <div className="h-40 rounded-lg border border-dashed border-slate-200 dark:border-white/10 overflow-hidden bg-slate-50/50 dark:bg-[#121216] flex items-center justify-center p-2 relative">
                       {posterUrl ? (
-                        <div className="relative h-full aspect-[9/16] rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 group shadow-sm">
+                        <div className="relative h-full aspect-[9/16] rounded-md overflow-hidden border border-slate-200 dark:border-white/10 group shadow-2xs">
                           <img src={posterUrl} alt="Poster" className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button
                               type="button"
                               onClick={() => setPosterUrl('')}
-                              className="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-colors shadow-sm flex items-center space-x-1"
+                              className="px-2 py-1 rounded-md bg-rose-600 text-white text-[11px] font-bold hover:bg-rose-700 transition-colors shadow-xs flex items-center space-x-1 cursor-pointer"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-3 h-3" />
                               <span>Remove</span>
                             </button>
                           </div>
                         </div>
                       ) : posterMode === 'url' ? (
-                        <div className="w-full px-3 text-center space-y-2">
-                          <Link className="w-5 h-5 text-amber-500 mx-auto" />
-                          <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Image Web URL</p>
+                        <div className="w-full px-2 text-center space-y-1.5">
+                          <Link className="w-4 h-4 text-amber-500 mx-auto" />
                           <input
                             type="url"
                             placeholder="https://.../poster.jpg"
                             value={posterUrlInput}
                             onChange={(e) => setPosterUrlInput(e.target.value)}
-                            className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] font-mono"
+                            className="w-full px-2 py-1 text-xs bg-white dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-md text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] font-mono"
                           />
                           <button
                             type="button"
@@ -960,13 +967,13 @@ export default function UploadContentPage({ onNavigate }) {
                               }
                             }}
                             disabled={!posterUrlInput.trim()}
-                            className="w-full py-1.5 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all disabled:opacity-40"
+                            className="w-full py-1 rounded-md bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all disabled:opacity-40 cursor-pointer"
                           >
                             Apply Poster
                           </button>
                         </div>
                       ) : (
-                        <label className="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-amber-50/20 dark:hover:bg-amber-950/20 rounded-lg transition-colors p-2">
+                        <label className="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-amber-50/20 dark:hover:bg-amber-950/20 rounded-md transition-colors p-1">
                           <input
                             type="file"
                             accept="image/*"
@@ -979,19 +986,16 @@ export default function UploadContentPage({ onNavigate }) {
                           />
                           {isPosterUploading ? (
                             <div className="flex flex-col items-center">
-                              <RotateCcw className="w-5 h-5 text-amber-500 animate-spin mb-1.5" />
-                              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Uploading to Server...</span>
+                              <RotateCcw className="w-4 h-4 text-amber-500 animate-spin mb-1" />
+                              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Uploading...</span>
                             </div>
                           ) : (
                             <>
-                              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-amber-500 flex items-center justify-center mb-2">
-                                <ImageIcon className="w-4 h-4" />
+                              <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-amber-500 flex items-center justify-center mb-1">
+                                <ImageIcon className="w-3.5 h-3.5" />
                               </div>
                               <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Poster</p>
-                              <p className="text-[11px] text-slate-400 mt-0.5">1080 × 1920 (PNG/JPG)</p>
-                              <span className="mt-2.5 text-[10px] font-bold px-2.5 py-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-                                Browse File
-                              </span>
+                              <p className="text-[10px] text-slate-400">1080 × 1920 (9:16)</p>
                             </>
                           )}
                         </label>
@@ -999,28 +1003,25 @@ export default function UploadContentPage({ onNavigate }) {
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-                    <span>Mobile app cover</span>
-                    <span className="font-semibold text-amber-600 dark:text-amber-400">Required</span>
+                  <div className="pt-2 mt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10.5px] text-slate-400">
+                    <span>Mobile Cover</span>
+                    <span className="font-bold text-amber-600 dark:text-amber-400">Required</span>
                   </div>
                 </div>
 
                 {/* 2. 9:16 Vertical Trailer */}
-                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 bg-white dark:bg-[#151515] flex flex-col justify-between shadow-2xs">
+                <div className="rounded-xl border border-slate-200/80 dark:border-white/10 p-3 bg-white dark:bg-[#18181E] flex flex-col justify-between shadow-2xs">
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-1.5">
-                        <Video className="w-4 h-4 text-amber-500" />
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">Teaser Trailer (9:16)</span>
-                      </div>
-                      <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-[#161B16] text-[10px] font-bold border border-transparent dark:border-white/10">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">Teaser Trailer (9:16)</span>
+                      <div className="flex items-center p-0.5 rounded-md bg-slate-100 dark:bg-[#121216] text-[10px] font-bold border border-transparent dark:border-white/10">
                         <button
                           type="button"
                           onClick={() => setTrailerMode('file')}
-                          className={`px-2 py-0.5 rounded transition-all ${
+                          className={`px-1.5 py-0.5 rounded transition-all cursor-pointer ${
                             trailerMode === 'file'
-                              ? 'bg-white dark:bg-[#121612] text-slate-950 dark:text-white shadow-2xs font-extrabold'
-                              : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                              ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs'
+                              : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
                           File
@@ -1028,10 +1029,10 @@ export default function UploadContentPage({ onNavigate }) {
                         <button
                           type="button"
                           onClick={() => setTrailerMode('url')}
-                          className={`px-2 py-0.5 rounded transition-all ${
+                          className={`px-1.5 py-0.5 rounded transition-all cursor-pointer ${
                             trailerMode === 'url'
-                              ? 'bg-white dark:bg-[#121612] text-slate-950 dark:text-white shadow-2xs font-extrabold'
-                              : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                              ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs'
+                              : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
                           URL
@@ -1039,9 +1040,9 @@ export default function UploadContentPage({ onNavigate }) {
                       </div>
                     </div>
 
-                    <div className="h-64 rounded-xl border border-dashed border-slate-200 dark:border-white/10 overflow-hidden bg-slate-50/50 dark:bg-[#161B16]/30 flex items-center justify-center p-3 relative">
+                    <div className="h-40 rounded-lg border border-dashed border-slate-200 dark:border-white/10 overflow-hidden bg-slate-50/50 dark:bg-[#121216] flex items-center justify-center p-2 relative">
                       {trailerFileName || trailerUrl ? (
-                        <div className="w-full h-full rounded-lg bg-slate-900 text-white p-3 flex flex-col items-center justify-center text-center relative border border-slate-700">
+                        <div className="w-full h-full rounded-md bg-slate-900 text-white p-2 flex flex-col items-center justify-center text-center relative border border-slate-700">
                           <div
                             onClick={() => {
                               if (trailerUrl) {
@@ -1051,16 +1052,15 @@ export default function UploadContentPage({ onNavigate }) {
                                 });
                               }
                             }}
-                            className={`w-10 h-10 rounded-full ${trailerUrl ? 'bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 cursor-pointer hover:scale-105' : 'bg-slate-700 text-slate-400 cursor-not-allowed'} flex items-center justify-center mb-2 transition-transform`}
+                            className={`w-8 h-8 rounded-full ${trailerUrl ? 'bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 cursor-pointer hover:scale-105' : 'bg-slate-700 text-slate-400 cursor-not-allowed'} flex items-center justify-center mb-1 transition-transform`}
                             title={trailerUrl ? "Play trailer preview" : "No trailer uploaded"}
                           >
-                            <Play className="w-4 h-4 fill-current ml-0.5" />
+                            <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
                           </div>
-                          <p className="text-xs font-bold text-white truncate max-w-[150px]">
+                          <p className="text-xs font-bold text-white truncate max-w-[130px]">
                             {trailerFileName || 'Trailer Video Stream'}
                           </p>
-                          <span className="text-[10px] text-emerald-400 font-semibold mt-1">✓ Transcode Ready (1080p)</span>
-                          <div className="mt-3 flex items-center gap-1.5">
+                          <div className="mt-2 flex items-center gap-1">
                             {trailerUrl && (
                               <button
                                 type="button"
@@ -1070,7 +1070,7 @@ export default function UploadContentPage({ onNavigate }) {
                                     url: trailerUrl,
                                   })
                                 }
-                                className="px-2.5 py-1 text-[11px] rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold transition-colors cursor-pointer"
+                                className="px-2 py-0.5 text-[10px] rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold transition-colors cursor-pointer"
                               >
                                 Preview
                               </button>
@@ -1081,22 +1081,21 @@ export default function UploadContentPage({ onNavigate }) {
                                 setTrailerFileName('');
                                 setTrailerUrl('');
                               }}
-                              className="px-2 py-1 text-[11px] rounded-lg bg-rose-900/60 hover:bg-rose-900 text-rose-200 font-bold transition-colors"
+                              className="px-2 py-0.5 text-[10px] rounded-md bg-rose-900/60 hover:bg-rose-900 text-rose-200 font-bold transition-colors cursor-pointer"
                             >
                               Remove
                             </button>
                           </div>
                         </div>
                       ) : trailerMode === 'url' ? (
-                        <div className="w-full px-3 text-center space-y-2">
-                          <Video className="w-5 h-5 text-amber-500 mx-auto" />
-                          <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Video Stream URL</p>
+                        <div className="w-full px-2 text-center space-y-1.5">
+                          <Video className="w-4 h-4 text-amber-500 mx-auto" />
                           <input
                             type="url"
                             placeholder="https://.../trailer.mp4"
                             value={trailerUrlInput}
                             onChange={(e) => setTrailerUrlInput(e.target.value)}
-                            className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] font-mono"
+                            className="w-full px-2 py-1 text-xs bg-white dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-md text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] font-mono"
                           />
                           <button
                             type="button"
@@ -1108,13 +1107,13 @@ export default function UploadContentPage({ onNavigate }) {
                               }
                             }}
                             disabled={!trailerUrlInput.trim()}
-                            className="w-full py-1.5 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all disabled:opacity-40"
+                            className="w-full py-1 rounded-md bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all disabled:opacity-40 cursor-pointer"
                           >
                             Apply Trailer
                           </button>
                         </div>
                       ) : (
-                        <label className="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-amber-50/20 dark:hover:bg-amber-950/20 rounded-lg transition-colors p-2">
+                        <label className="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-amber-50/20 dark:hover:bg-amber-950/20 rounded-md transition-colors p-1">
                           <input
                             type="file"
                             accept="video/*,.mp4,.mov,.m4v"
@@ -1127,19 +1126,16 @@ export default function UploadContentPage({ onNavigate }) {
                           />
                           {isTrailerUploading ? (
                             <div className="flex flex-col items-center">
-                              <RotateCcw className="w-5 h-5 text-amber-500 animate-spin mb-1.5" />
-                              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Uploading Video...</span>
+                              <RotateCcw className="w-4 h-4 text-amber-500 animate-spin mb-1" />
+                              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Uploading...</span>
                             </div>
                           ) : (
                             <>
-                              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-amber-500 flex items-center justify-center mb-2">
-                                <Video className="w-4 h-4" />
+                              <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-amber-500 flex items-center justify-center mb-1">
+                                <Video className="w-3.5 h-3.5" />
                               </div>
                               <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Teaser</p>
-                              <p className="text-[11px] text-slate-400 mt-0.5">Vertical 9:16 (MP4/MOV)</p>
-                              <span className="mt-2.5 text-[10px] font-bold px-2.5 py-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-                                Browse Video
-                              </span>
+                              <p className="text-[10px] text-slate-400">Vertical 9:16 (MP4)</p>
                             </>
                           )}
                         </label>
@@ -1147,28 +1143,25 @@ export default function UploadContentPage({ onNavigate }) {
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-                    <span>Reel teaser auto-play</span>
-                    <span className="font-medium">Optional</span>
+                  <div className="pt-2 mt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10.5px] text-slate-400">
+                    <span>Reel Teaser</span>
+                    <span>Optional</span>
                   </div>
                 </div>
 
                 {/* 3. 16:9 Hero Banner */}
-                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 bg-white dark:bg-[#151515] flex flex-col justify-between shadow-2xs">
+                <div className="rounded-xl border border-slate-200/80 dark:border-white/10 p-3 bg-white dark:bg-[#18181E] flex flex-col justify-between shadow-2xs">
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-1.5">
-                        <Film className="w-4 h-4 text-amber-500" />
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">Hero Billboard (16:9)</span>
-                      </div>
-                      <div className="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-[#161B16] text-[10px] font-bold border border-transparent dark:border-white/10">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">Hero Billboard (16:9)</span>
+                      <div className="flex items-center p-0.5 rounded-md bg-slate-100 dark:bg-[#121216] text-[10px] font-bold border border-transparent dark:border-white/10">
                         <button
                           type="button"
                           onClick={() => setBannerMode('file')}
-                          className={`px-2 py-0.5 rounded transition-all ${
+                          className={`px-1.5 py-0.5 rounded transition-all cursor-pointer ${
                             bannerMode === 'file'
-                              ? 'bg-white dark:bg-[#121612] text-slate-950 dark:text-white shadow-2xs font-extrabold'
-                              : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                              ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs'
+                              : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
                           File
@@ -1176,10 +1169,10 @@ export default function UploadContentPage({ onNavigate }) {
                         <button
                           type="button"
                           onClick={() => setBannerMode('url')}
-                          className={`px-2 py-0.5 rounded transition-all ${
+                          className={`px-1.5 py-0.5 rounded transition-all cursor-pointer ${
                             bannerMode === 'url'
-                              ? 'bg-white dark:bg-[#121612] text-slate-950 dark:text-white shadow-2xs font-extrabold'
-                              : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                              ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs'
+                              : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
                           URL
@@ -1187,31 +1180,30 @@ export default function UploadContentPage({ onNavigate }) {
                       </div>
                     </div>
 
-                    <div className="h-64 rounded-xl border border-dashed border-slate-200 dark:border-white/10 overflow-hidden bg-slate-50/50 dark:bg-[#161B16]/30 flex items-center justify-center p-3 relative">
+                    <div className="h-40 rounded-lg border border-dashed border-slate-200 dark:border-white/10 overflow-hidden bg-slate-50/50 dark:bg-[#121216] flex items-center justify-center p-2 relative">
                       {bannerUrl ? (
-                        <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group shadow-sm">
+                        <div className="relative w-full aspect-[16/9] rounded-md overflow-hidden border border-slate-200 dark:border-white/10 group shadow-2xs">
                           <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button
                               type="button"
                               onClick={() => setBannerUrl('')}
-                              className="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-colors shadow-sm flex items-center space-x-1"
+                              className="px-2 py-1 rounded-md bg-rose-600 text-white text-[11px] font-bold hover:bg-rose-700 transition-colors shadow-xs flex items-center space-x-1 cursor-pointer"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-3 h-3" />
                               <span>Remove</span>
                             </button>
                           </div>
                         </div>
                       ) : bannerMode === 'url' ? (
-                        <div className="w-full px-3 text-center space-y-2">
-                          <Link className="w-5 h-5 text-amber-500 mx-auto" />
-                          <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Banner Web URL</p>
+                        <div className="w-full px-2 text-center space-y-1.5">
+                          <Link className="w-4 h-4 text-amber-500 mx-auto" />
                           <input
                             type="url"
                             placeholder="https://.../banner.jpg"
                             value={bannerUrlInput}
                             onChange={(e) => setBannerUrlInput(e.target.value)}
-                            className="w-full px-2.5 py-1.5 text-xs bg-white dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] font-mono"
+                            className="w-full px-2 py-1 text-xs bg-white dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-md text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] font-mono"
                           />
                           <button
                             type="button"
@@ -1222,13 +1214,13 @@ export default function UploadContentPage({ onNavigate }) {
                               }
                             }}
                             disabled={!bannerUrlInput.trim()}
-                            className="w-full py-1.5 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all disabled:opacity-40"
+                            className="w-full py-1 rounded-md bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all disabled:opacity-40 cursor-pointer"
                           >
                             Apply Banner
                           </button>
                         </div>
                       ) : (
-                        <label className="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-amber-50/20 dark:hover:bg-amber-950/20 rounded-lg transition-colors p-2">
+                        <label className="w-full h-full flex flex-col items-center justify-center text-center cursor-pointer hover:bg-amber-50/20 dark:hover:bg-amber-950/20 rounded-md transition-colors p-1">
                           <input
                             type="file"
                             accept="image/*"
@@ -1241,19 +1233,16 @@ export default function UploadContentPage({ onNavigate }) {
                           />
                           {isBannerUploading ? (
                             <div className="flex flex-col items-center">
-                              <RotateCcw className="w-5 h-5 text-amber-500 animate-spin mb-1.5" />
-                              <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Uploading to Server...</span>
+                              <RotateCcw className="w-4 h-4 text-amber-500 animate-spin mb-1" />
+                              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Uploading...</span>
                             </div>
                           ) : (
                             <>
-                              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-amber-500 flex items-center justify-center mb-2">
-                                <Film className="w-4 h-4" />
+                              <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-amber-500 flex items-center justify-center mb-1">
+                                <Film className="w-3.5 h-3.5" />
                               </div>
                               <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Upload Banner</p>
-                              <p className="text-[11px] text-slate-400 mt-0.5">1920 × 1080 (16:9 Widescreen)</p>
-                              <span className="mt-2.5 text-[10px] font-bold px-2.5 py-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
-                                Browse Image
-                              </span>
+                              <p className="text-[10px] text-slate-400">1920 × 1080 (16:9)</p>
                             </>
                           )}
                         </label>
@@ -1261,9 +1250,9 @@ export default function UploadContentPage({ onNavigate }) {
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-                    <span>Featured top slider</span>
-                    <span className="font-medium">Optional</span>
+                  <div className="pt-2 mt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10.5px] text-slate-400">
+                    <span>Featured Slider</span>
+                    <span>Optional</span>
                   </div>
                 </div>
 
@@ -1271,233 +1260,29 @@ export default function UploadContentPage({ onNavigate }) {
             </div>
 
             {/* Section B: Episode Video Files & Ingestion */}
-            <div className="pt-6 border-t border-slate-100 dark:border-white/10 space-y-4">
+            <div className="pt-3 border-t border-slate-100 dark:border-white/10 space-y-3">
               
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Film className="w-4 h-4 text-amber-500" />
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    Episodes &amp; Video Content ({episodes.length})
+                <div className="flex items-center space-x-1.5">
+                  <Film className="w-3.5 h-3.5 text-amber-500" />
+                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Episodes & Video Content ({episodes.length})
                   </h4>
                 </div>
               </div>
 
               {/* Single Episode Ingestion Builder */}
-              <div className="rounded-2xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 p-4 sm:p-5 space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200/70 dark:border-white/10 pb-2.5">
-                    <div className="flex items-center space-x-2">
-                      <span className="w-5 h-5 rounded-md bg-[#FEF08A] text-slate-950 font-black text-xs flex items-center justify-center">
-                        {episodes.length + 1}
-                      </span>
-                      <span className="text-xs font-bold text-slate-900 dark:text-white">
-                        Add Episode {episodes.length + 1}
-                      </span>
-                    </div>
-                    {(newEpTitle || newEpVideoUrl) && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setNewEpTitle('');
-                          setNewEpVideoUrl('');
-                          setNewEpFileName('');
-                          setNewEpFileSize('');
-                        }}
-                        className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
-                        title="Clear fields"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
+              <div className="rounded-xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 p-3 sm:p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between border-b border-slate-200/70 dark:border-white/10 pb-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-5 h-5 rounded-md bg-[#FEF08A] text-slate-950 font-black text-xs flex items-center justify-center">
+                      {episodes.length + 1}
+                    </span>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                      Add Episode {episodes.length + 1}
+                    </span>
                   </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                        Episode Title
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Episode 1: The Incognito Meeting"
-                        value={newEpTitle}
-                        onChange={(e) => setNewEpTitle(e.target.value)}
-                        className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-400 text-slate-900 dark:text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                        Duration
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="2:15"
-                        value={newEpDuration}
-                        onChange={(e) => setNewEpDuration(e.target.value)}
-                        className="w-full px-3 py-2 text-xs font-semibold bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-400 text-slate-950 dark:text-white"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div>
-                        <label className="text-xs font-bold text-slate-900 dark:text-white">
-                          Episode Media Source
-                        </label>
-                        <p className="text-[11px] text-slate-400">
-                          Choose local video file upload or enter a direct video stream URL
-                        </p>
-                      </div>
-
-                      <div className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/70 text-xs font-bold shadow-2xs shrink-0 self-start sm:self-auto">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setNewEpSourceType('file');
-                            if (newEpVideoUrl?.startsWith('http')) setNewEpVideoUrl('');
-                          }}
-                          className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
-                            newEpSourceType === 'file'
-                              ? 'bg-[#FEF08A] text-slate-950 shadow-xs font-extrabold'
-                              : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                          }`}
-                        >
-                          <Upload className="w-3.5 h-3.5" />
-                          <span>Media Upload</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setNewEpSourceType('url');
-                          }}
-                          className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-1.5 ${
-                            newEpSourceType === 'url'
-                              ? 'bg-[#FEF08A] text-slate-950 shadow-xs font-extrabold'
-                              : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                          }`}
-                        >
-                          <Link className="w-3.5 h-3.5" />
-                          <span>URL Upload</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {newEpSourceType === 'url' ? (
-                      <div className="space-y-1.5">
-                        <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                            <Link className="w-4 h-4 text-amber-500" />
-                          </div>
-                          <input
-                            type="url"
-                            placeholder="https://cdn.example.com/episodes/ep_01_vertical_1080p.mp4"
-                            value={newEpVideoUrl}
-                            onChange={(e) => setNewEpVideoUrl(e.target.value)}
-                            className="w-full pl-10 pr-20 py-2.5 text-xs font-mono bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-amber-400 text-slate-950 dark:text-white shadow-2xs"
-                          />
-                          {newEpVideoUrl && (
-                            <button
-                              type="button"
-                              onClick={() => setNewEpVideoUrl('')}
-                              className="absolute inset-y-0 right-2 my-auto h-6 px-2 text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                            >
-                              Clear
-                            </button>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-slate-400 pl-1">
-                          Direct HTTPS stream links supported (MP4, HLS .m3u8).
-                        </p>
-                      </div>
-                    ) : newEpVideoUrl ? (
-                      /* Attached Video File Card */
-                      <div className="p-3.5 rounded-xl bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700/80 flex items-center justify-between shadow-2xs">
-                        <div className="flex items-center space-x-3 min-w-0">
-                          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
-                            <CheckCircle2 className="w-4 h-4" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                              {newEpFileName || newEpVideoUrl}
-                            </p>
-                            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">
-                              ✓ Uploaded to Server storage {newEpFileSize ? `(${newEpFileSize})` : ''}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 shrink-0">
-                          <label
-                            htmlFor="single-ep-file-replace"
-                            className="px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-colors shadow-2xs"
-                          >
-                            Replace
-                            <input
-                              type="file"
-                              id="single-ep-file-replace"
-                              accept="video/*,.mp4,.mov,.m4v"
-                              className="hidden"
-                              disabled={singleEpFileUploading}
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleSingleEpFileSelect(file);
-                              }}
-                            />
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setNewEpVideoUrl('');
-                              setNewEpFileName('');
-                              setNewEpFileSize('');
-                            }}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer"
-                            title="Remove file"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      /* Interactive Video File Upload Dropzone */
-                      <label
-                        htmlFor="single-ep-file-input"
-                        className="border border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-400 dark:hover:border-amber-400/80 rounded-xl p-4 sm:p-5 bg-white dark:bg-[#151515] hover:bg-amber-50/20 dark:hover:bg-amber-950/10 transition-all cursor-pointer flex flex-col sm:flex-row items-center justify-between gap-3 group"
-                      >
-                        <input
-                          type="file"
-                          id="single-ep-file-input"
-                          accept="video/*,.mp4,.mov,.m4v"
-                          className="hidden"
-                          disabled={singleEpFileUploading}
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleSingleEpFileSelect(file);
-                          }}
-                        />
-                        <div className="flex items-center space-x-3 text-center sm:text-left">
-                          <div className="w-10 h-10 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                            {singleEpFileUploading ? (
-                              <RotateCcw className="w-5 h-5 animate-spin" />
-                            ) : (
-                              <FileVideo className="w-5 h-5" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-slate-900 dark:text-white">
-                              {singleEpFileUploading ? 'Uploading Video to Server...' : 'Choose Episode Video File'}
-                            </p>
-                            <p className="text-[11px] text-slate-400 mt-0.5">
-                              Vertical format recommended: 1080×1920 (.mp4, .mov)
-                            </p>
-                          </div>
-                        </div>
-                        <span className="px-4 py-2 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all shadow-2xs shrink-0">
-                          {singleEpFileUploading ? 'Uploading...' : 'Select Video File'}
-                        </span>
-                      </label>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-200/70 dark:border-slate-800">
+                  {(newEpTitle || newEpVideoUrl) && (
                     <button
                       type="button"
                       onClick={() => {
@@ -1506,45 +1291,233 @@ export default function UploadContentPage({ onNavigate }) {
                         setNewEpFileName('');
                         setNewEpFileSize('');
                       }}
-                      className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                      className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+                      title="Clear fields"
                     >
-                      Cancel
+                      <X className="w-3.5 h-3.5" />
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleAddNewEpisode}
-                      disabled={!newEpVideoUrl || singleEpFileUploading}
-                      className="px-4 py-1.5 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all shadow-2xs disabled:opacity-40 cursor-pointer"
-                    >
-                      Add Episode
-                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+                  <div className="sm:col-span-3">
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Episode Title
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Episode 1: The Incognito Meeting"
+                      value={newEpTitle}
+                      onChange={(e) => setNewEpTitle(e.target.value)}
+                      className="w-full px-2.5 py-1.5 text-xs font-semibold bg-white dark:bg-[#121216] border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:border-[#FEF08A] text-slate-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Duration
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="2:15"
+                      value={newEpDuration}
+                      onChange={(e) => setNewEpDuration(e.target.value)}
+                      className="w-full px-2.5 py-1.5 text-xs font-semibold bg-white dark:bg-[#121216] border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:border-[#FEF08A] text-slate-950 dark:text-white"
+                    />
                   </div>
                 </div>
 
+                {/* Media Source & Dropzone */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                      Episode Media
+                    </span>
+                    <div className="inline-flex p-0.5 rounded-md bg-slate-200/80 dark:bg-[#121216] text-[10px] font-bold">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNewEpSourceType('file');
+                          if (newEpVideoUrl?.startsWith('http')) setNewEpVideoUrl('');
+                        }}
+                        className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                          newEpSourceType === 'file'
+                            ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs'
+                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        Media File
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setNewEpSourceType('url')}
+                        className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                          newEpSourceType === 'url'
+                            ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs'
+                            : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        Stream URL
+                      </button>
+                    </div>
+                  </div>
+
+                  {newEpSourceType === 'url' ? (
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+                        <Link className="w-3.5 h-3.5 text-amber-500" />
+                      </div>
+                      <input
+                        type="url"
+                        placeholder="https://cdn.example.com/episodes/ep_01_vertical.mp4"
+                        value={newEpVideoUrl}
+                        onChange={(e) => setNewEpVideoUrl(e.target.value)}
+                        className="w-full pl-8 pr-16 py-1.5 text-xs font-mono bg-white dark:bg-[#121216] border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:border-[#FEF08A] text-slate-950 dark:text-white shadow-2xs"
+                      />
+                      {newEpVideoUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setNewEpVideoUrl('')}
+                          className="absolute inset-y-0 right-2 my-auto h-5 px-1.5 text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                  ) : newEpVideoUrl ? (
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-[#121216] border border-slate-200 dark:border-white/10 flex items-center justify-between shadow-2xs">
+                      <div className="flex items-center space-x-2.5 min-w-0">
+                        <div className="w-7 h-7 rounded-md bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-300/40">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                            {newEpFileName || newEpVideoUrl}
+                          </p>
+                          <p className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold mt-0.5">
+                            ✓ Ready for ingestion {newEpFileSize ? `(${newEpFileSize})` : ''}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-1.5 shrink-0">
+                        <label
+                          htmlFor="single-ep-file-replace"
+                          className="px-2.5 py-1 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 rounded-md cursor-pointer transition-colors shadow-2xs"
+                        >
+                          Replace
+                          <input
+                            type="file"
+                            id="single-ep-file-replace"
+                            accept="video/*,.mp4,.mov,.m4v"
+                            className="hidden"
+                            disabled={singleEpFileUploading}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleSingleEpFileSelect(file);
+                            }}
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNewEpVideoUrl('');
+                            setNewEpFileName('');
+                            setNewEpFileSize('');
+                          }}
+                          className="p-1 text-slate-400 hover:text-rose-600 rounded-md transition-colors cursor-pointer"
+                          title="Remove file"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label
+                      htmlFor="single-ep-file-input"
+                      className="border border-dashed border-slate-300 dark:border-white/10 hover:border-amber-400 rounded-lg p-2.5 sm:p-3 bg-white dark:bg-[#121216] transition-all cursor-pointer flex items-center justify-between gap-2.5 group"
+                    >
+                      <input
+                        type="file"
+                        id="single-ep-file-input"
+                        accept="video/*,.mp4,.mov,.m4v"
+                        className="hidden"
+                        disabled={singleEpFileUploading}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleSingleEpFileSelect(file);
+                        }}
+                      />
+                      <div className="flex items-center space-x-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-300/40">
+                          {singleEpFileUploading ? (
+                            <RotateCcw className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <FileVideo className="w-4 h-4" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-slate-900 dark:text-white">
+                            {singleEpFileUploading ? 'Uploading Video...' : 'Choose Episode Video File'}
+                          </p>
+                          <p className="text-[10px] text-slate-400">
+                            Portrait 9:16 recommended (1080×1920)
+                          </p>
+                        </div>
+                      </div>
+                      <span className="px-3 py-1 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all shadow-2xs shrink-0">
+                        {singleEpFileUploading ? 'Uploading...' : 'Browse'}
+                      </span>
+                    </label>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-end space-x-2 pt-1 border-t border-slate-200/70 dark:border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewEpTitle('');
+                      setNewEpVideoUrl('');
+                      setNewEpFileName('');
+                      setNewEpFileSize('');
+                    }}
+                    className="px-2.5 py-1 text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 rounded-md transition-colors cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddNewEpisode}
+                    disabled={!newEpVideoUrl || singleEpFileUploading}
+                    className="px-3.5 py-1 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all shadow-2xs disabled:opacity-40 cursor-pointer active:scale-95"
+                  >
+                    Add Episode
+                  </button>
+                </div>
+              </div>
+
               {/* Episodes Queue Table */}
-              <div className="border border-slate-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xs bg-white dark:bg-[#121612]">
+              <div className="border border-slate-200/80 dark:border-white/10 rounded-xl overflow-hidden shadow-2xs bg-white dark:bg-[#121216]">
                 
                 {/* Table Top Toolbar */}
-                <div className="px-5 py-3.5 bg-slate-50/70 dark:bg-[#161B16] border-b border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center space-x-2.5">
+                <div className="px-3 py-2 bg-slate-50/70 dark:bg-[#18181E] border-b border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2">
                     <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                       Episodes Queue
                     </span>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                       {episodes.length} Total
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {/* Search filter */}
                     <div className="relative">
-                      <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" />
+                      <Search className="w-3 h-3 text-slate-400 absolute left-2 top-2 pointer-events-none" />
                       <input
                         type="text"
-                        placeholder="Filter episodes..."
+                        placeholder="Filter..."
                         value={episodeSearchQuery}
                         onChange={(e) => setEpisodeSearchQuery(e.target.value)}
-                        className="pl-7 pr-2.5 py-1 text-xs bg-white dark:bg-[#151515] border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-amber-400 w-36 sm:w-44"
+                        className="pl-6 pr-2 py-0.5 text-xs bg-white dark:bg-[#121216] border border-slate-200 dark:border-white/10 rounded-md text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] w-28 sm:w-36"
                       />
                     </div>
 
@@ -1555,10 +1528,10 @@ export default function UploadContentPage({ onNavigate }) {
                           key={cnt}
                           type="button"
                           onClick={() => handleQuickFreeCutoff(cnt)}
-                          className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border transition-all ${
+                          className={`px-2 py-0.5 text-[10px] font-bold rounded-md border transition-all cursor-pointer ${
                             freeEpisodes === cnt
-                              ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-2xs'
-                              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                              ? 'bg-[#FEF08A] text-slate-950 border-amber-300 shadow-2xs font-black'
+                              : 'bg-white dark:bg-[#121216] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
                           }`}
                         >
                           {cnt} Free
@@ -1567,13 +1540,13 @@ export default function UploadContentPage({ onNavigate }) {
                       <button
                         type="button"
                         onClick={() => handleQuickFreeCutoff(0)}
-                        className={`px-2.5 py-1 text-[11px] font-bold rounded-lg border transition-all ${
+                        className={`px-2 py-0.5 text-[10px] font-bold rounded-md border transition-all cursor-pointer ${
                           freeEpisodes === 0
-                            ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-2xs'
-                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                            ? 'bg-[#FEF08A] text-slate-950 border-amber-300 shadow-2xs font-black'
+                            : 'bg-white dark:bg-[#121216] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:border-slate-300'
                         }`}
                       >
-                        All Subscribers
+                        All Paid
                       </button>
                     </div>
 
@@ -1581,7 +1554,7 @@ export default function UploadContentPage({ onNavigate }) {
                       <button
                         type="button"
                         onClick={handleClearEpisodes}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors ml-1"
+                        className="p-1 text-slate-400 hover:text-rose-600 rounded-md transition-colors ml-1 cursor-pointer"
                         title="Clear all episodes"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1592,22 +1565,22 @@ export default function UploadContentPage({ onNavigate }) {
 
                 {/* Table Content */}
                 {episodes.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <FileVideo className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
+                  <div className="p-6 text-center">
+                    <FileVideo className="w-6 h-6 text-slate-400 dark:text-slate-600 mx-auto mb-1.5" />
                     <p className="text-xs font-bold text-slate-700 dark:text-slate-300">No episodes in queue</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Use File Upload or Direct URL above to add episodes.</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Use File Upload or Direct URL above to add episodes.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto max-h-[380px] overflow-y-auto">
+                  <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
                     <table className="w-full text-left text-xs border-collapse">
-                      <thead className="bg-slate-50/90 dark:bg-[#161B16] sticky top-0 z-10 border-b border-slate-200/80 dark:border-white/10 text-slate-400 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                      <thead className="bg-slate-50/90 dark:bg-[#18181E] sticky top-0 z-10 border-b border-slate-200/80 dark:border-white/10 text-slate-400 font-bold uppercase tracking-wider text-[9.5px]">
                         <tr>
-                          <th className="py-2.5 px-4 w-12 text-center">#</th>
-                          <th className="py-2.5 px-4 min-w-[220px]">Episode Title</th>
-                          <th className="py-2.5 px-4 w-36">Media Source</th>
-                          <th className="py-2.5 px-4 w-24">Duration</th>
-                          <th className="py-2.5 px-4 w-28 text-center">Paywall</th>
-                          <th className="py-2.5 px-4 w-16 text-right">Action</th>
+                          <th className="py-1.5 px-3 w-10 text-center">#</th>
+                          <th className="py-1.5 px-3 min-w-[200px]">Episode Title</th>
+                          <th className="py-1.5 px-3 w-32">Source</th>
+                          <th className="py-1.5 px-3 w-20">Duration</th>
+                          <th className="py-1.5 px-3 w-24 text-center">Access</th>
+                          <th className="py-1.5 px-3 w-14 text-right">Action</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
@@ -1619,15 +1592,15 @@ export default function UploadContentPage({ onNavigate }) {
                           .map((ep) => (
                             <tr
                               key={ep.id}
-                              className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
+                              className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors"
                             >
-                              <td className="py-2.5 px-4 text-center">
-                                <span className="w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-800 font-bold text-[11px] inline-flex items-center justify-center text-slate-600 dark:text-slate-300">
+                              <td className="py-1.5 px-3 text-center">
+                                <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-[#18181E] font-bold text-[10px] inline-flex items-center justify-center text-slate-600 dark:text-slate-300">
                                   {ep.id}
                                 </span>
                               </td>
-                              <td className="py-2.5 px-4">
-                                <div className="flex items-center space-x-2.5">
+                              <td className="py-1.5 px-3">
+                                <div className="flex items-center space-x-2">
                                   <button
                                     type="button"
                                     disabled={!ep.videoUrl}
@@ -1639,71 +1612,71 @@ export default function UploadContentPage({ onNavigate }) {
                                         });
                                       }
                                     }}
-                                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0 shadow-2xs ${
+                                    className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors shrink-0 shadow-2xs ${
                                       ep.videoUrl
-                                        ? 'bg-slate-100 dark:bg-slate-800 hover:bg-[#FEF08A] hover:text-slate-950 text-slate-600 dark:text-slate-400 cursor-pointer'
-                                        : 'bg-slate-100/40 dark:bg-slate-800/30 text-slate-300 dark:text-slate-600 cursor-not-allowed'
+                                        ? 'bg-slate-100 dark:bg-[#18181E] hover:bg-[#FACC15] hover:text-slate-950 text-slate-600 dark:text-slate-300 cursor-pointer'
+                                        : 'bg-slate-100/40 dark:bg-slate-800/30 text-slate-400 cursor-not-allowed'
                                     }`}
-                                    title={ep.videoUrl ? "Play preview" : "No video uploaded for this episode"}
+                                    title={ep.videoUrl ? "Play preview" : "No video uploaded"}
                                   >
-                                    <Play className="w-3 h-3 fill-current ml-0.5" />
+                                    <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
                                   </button>
                                   <input
                                     type="text"
                                     value={ep.title}
                                     onChange={(e) => handleUpdateEpisodeTitle(ep.id, e.target.value)}
                                     placeholder={`Episode ${ep.id} Title...`}
-                                    className="font-bold text-xs bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800/80 focus:bg-white dark:focus:bg-[#151515] border border-transparent hover:border-slate-200 dark:hover:border-slate-700 focus:border-amber-400 rounded-lg px-2 py-1 text-slate-900 dark:text-white transition-colors w-full"
+                                    className="font-bold text-xs bg-transparent hover:bg-slate-100 dark:hover:bg-[#18181E] focus:bg-white dark:focus:bg-[#121216] border border-transparent hover:border-slate-200 dark:hover:border-white/10 focus:border-[#FEF08A] rounded-md px-1.5 py-0.5 text-slate-900 dark:text-white transition-colors w-full"
                                   />
                                 </div>
                               </td>
-                              <td className="py-2.5 px-4">
-                                <span className="inline-flex items-center space-x-1 text-[11px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100/80 dark:bg-slate-800/60 px-2 py-0.5 rounded-md truncate max-w-[140px]">
+                              <td className="py-1.5 px-3">
+                                <span className="inline-flex items-center space-x-1 text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100/80 dark:bg-white/[0.04] px-1.5 py-0.5 rounded truncate max-w-[120px]">
                                   {ep.sourceType === 'url' || ep.videoUrl?.startsWith('http') ? (
                                     <>
-                                      <Link className="w-3 h-3 text-amber-500 shrink-0" />
+                                      <Link className="w-2.5 h-2.5 text-amber-500 shrink-0" />
                                       <span className="truncate">Stream URL</span>
                                     </>
                                   ) : (
                                     <>
-                                      <FileVideo className="w-3 h-3 text-amber-500 shrink-0" />
+                                      <FileVideo className="w-2.5 h-2.5 text-amber-500 shrink-0" />
                                       <span className="truncate">{ep.fileName || `ep_${ep.id}.mp4`}</span>
                                     </>
                                   )}
                                 </span>
                               </td>
-                              <td className="py-2.5 px-4 text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                              <td className="py-1.5 px-3 text-[10.5px] font-semibold text-slate-600 dark:text-slate-400">
                                 {ep.duration}
                               </td>
-                              <td className="py-2.5 px-4 text-center">
+                              <td className="py-1.5 px-3 text-center">
                                 <button
                                   type="button"
                                   onClick={() => handleToggleEpisodeFree(ep.id)}
-                                  className={`inline-flex items-center space-x-1 px-2.5 py-1 text-[10px] font-extrabold rounded-lg border transition-all ${
+                                  className={`inline-flex items-center space-x-1 px-2 py-0.5 text-[9.5px] font-black rounded-full transition-all cursor-pointer ${
                                     ep.isFree
-                                      ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60 shadow-2xs'
-                                      : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/60 shadow-2xs'
+                                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25'
+                                      : 'bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-950 dark:text-amber-300 border border-amber-300/50'
                                   }`}
                                   title="Click to toggle Free vs Subscribers"
                                 >
                                   {ep.isFree ? (
                                     <>
-                                      <Unlock className="w-2.5 h-2.5 text-emerald-500" />
+                                      <Unlock className="w-2.5 h-2.5" />
                                       <span>Free</span>
                                     </>
                                   ) : (
                                     <>
-                                      <Lock className="w-2.5 h-2.5 text-amber-500" />
-                                      <span>Subscribers</span>
+                                      <Lock className="w-2.5 h-2.5" />
+                                      <span>Subscriber</span>
                                     </>
                                   )}
                                 </button>
                               </td>
-                              <td className="py-2.5 px-4 text-right">
+                              <td className="py-1.5 px-3 text-right">
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveEpisode(ep.id)}
-                                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors inline-flex items-center justify-center"
+                                  className="p-1 text-slate-400 hover:text-rose-600 rounded-md transition-colors inline-flex items-center justify-center cursor-pointer"
                                   title="Remove episode"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -1727,105 +1700,144 @@ export default function UploadContentPage({ onNavigate }) {
       {/* STEP 3: PAYWALL & LAUNCH */}
       {/* ======================================================== */}
       {currentStep === 3 && (
-        <div className="space-y-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#121612] rounded-xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-4">
+        <div className="space-y-3 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#121216] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3.5">
             
             {/* Step 3 Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-slate-100 dark:border-white/10 gap-2.5">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 text-slate-950 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center font-extrabold shadow-xs shrink-0">
-                  <Lock className="w-4 h-4 stroke-[2.2]" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10 gap-2">
+              <div className="flex items-center space-x-2">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center font-extrabold shadow-xs shrink-0">
+                  <Lock className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base tracking-tight">
-                    Step 3: Paywall &amp; Launch
+                  <h3 className="font-extrabold text-slate-950 dark:text-white text-xs sm:text-sm tracking-tight">
+                    Step 3: Paywall & Launch
                   </h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                    Configure Free Preview vs Subscriber Paywall rules, set coin pricing, and publish series.
+                  <p className="text-[10.5px] text-slate-500 dark:text-slate-400 font-medium">
+                    Configure Free Preview vs Subscriber Paywall rules and distribution settings.
                   </p>
                 </div>
               </div>
 
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                 Step 3 of 3
               </span>
             </div>
 
-            {/* Quick Metrics Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
-                <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Total Episodes</span>
-                <div className="flex items-center space-x-2 mt-0.5">
-                  <span className="text-lg sm:text-xl font-black text-slate-950 dark:text-white">
+            {/* Quick Metrics Bar (Theme Aligned) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                  <Film className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Total Episodes</span>
+                  <span className="text-base sm:text-lg font-black text-slate-950 dark:text-white">
                     {totalEpisodes}
                   </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Episodes (From Media Studio)</span>
                 </div>
               </div>
 
-              <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
-                <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Free Preview Episodes</span>
-                <div className="flex items-center space-x-2 mt-0.5">
-                  <span className="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400">
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                  <Unlock className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Free Preview</span>
+                  <span className="text-base sm:text-lg font-black text-slate-950 dark:text-white">
                     {episodes.filter((ep) => ep.isFree).length}
                   </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Free (Click badge to toggle)</span>
                 </div>
               </div>
 
-              <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10">
-                <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Subscriber Paywall Locked</span>
-                <div className="flex items-center space-x-2 mt-0.5">
-                  <span className="text-lg sm:text-xl font-black text-amber-600 dark:text-[#FEF08A]">
+              <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                  <Lock className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Subscriber Locked</span>
+                  <span className="text-base sm:text-lg font-black text-slate-950 dark:text-white">
                     {episodes.filter((ep) => !ep.isFree).length}
                   </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Episodes (Requires Coins/Pass)</span>
                 </div>
               </div>
             </div>
 
+            {/* Distribution Switches */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              <SlideSwitch
+                checked={isVipPaywallActive}
+                onChange={() => setIsVipPaywallActive(!isVipPaywallActive)}
+                label="VIP Subscriber Paywall"
+                sublabel="Require coins or active VIP membership after free chapters"
+                icon={Crown}
+                badge="Monetization"
+              />
+              <SlideSwitch
+                checked={isPublished}
+                onChange={() => setIsPublished(!isPublished)}
+                label="Publish Directly to Live App"
+                sublabel="Make catalog stream instantly searchable on mobile devices"
+                icon={Globe}
+                badge="Live"
+              />
+              <SlideSwitch
+                checked={isFeatured}
+                onChange={() => setIsFeatured(!isFeatured)}
+                label="Hero Billboard Spotlight"
+                sublabel="Feature on mobile home top banner carousel"
+                icon={Film}
+                badge="Spotlight"
+              />
+              <SlideSwitch
+                checked={isTrending}
+                onChange={() => setIsTrending(!isTrending)}
+                label="Trending Series Badge"
+                sublabel="Display fire trending badge on catalog poster"
+                icon={Flame}
+                badge="Hot"
+              />
+            </div>
+
             {/* Episode Paywall Access Table */}
-            <div className="border border-slate-200/80 dark:border-white/10 rounded-xl overflow-hidden shadow-xs">
-              <div className="bg-slate-100/70 dark:bg-[#161B16] px-3.5 py-2.5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+            <div className="border border-slate-200/80 dark:border-white/10 rounded-xl overflow-hidden shadow-2xs mt-2">
+              <div className="bg-slate-100/70 dark:bg-[#18181E] px-3 py-2 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between text-[10.5px] font-bold text-slate-500 dark:text-slate-400">
                 <span>Episode ({episodes.length} total)</span>
-                <span>Paywall Status (Click badge to toggle Free / Subscriber)</span>
+                <span>Click badge to toggle Free / Subscriber</span>
               </div>
 
               {episodes.length === 0 ? (
-                <div className="p-6 text-center bg-white dark:bg-[#121612]">
-                  <FileVideo className="w-8 h-8 text-slate-300 dark:text-slate-700 mx-auto mb-2" />
+                <div className="p-5 text-center bg-white dark:bg-[#121216]">
+                  <FileVideo className="w-6 h-6 text-slate-400 dark:text-slate-600 mx-auto mb-1.5" />
                   <p className="text-xs font-bold text-slate-700 dark:text-slate-300">No episodes found</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Please go back to Step 2 (Media Studio) to add episode videos.</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Please go back to Step 2 to add episode videos.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[380px] overflow-y-auto">
+                <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[280px] overflow-y-auto">
                   {episodes.map((ep) => (
                     <div
                       key={ep.id}
-                      className="px-3.5 py-2.5 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors bg-white dark:bg-[#121612]"
+                      className="px-3 py-2 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors bg-white dark:bg-[#121216]"
                     >
-                      <div className="flex items-center space-x-2.5 min-w-0 pr-3 flex-1">
-                        <span className="w-6 h-6 rounded-md bg-slate-100 dark:bg-slate-800 font-black text-[11px] flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0">
+                      <div className="flex items-center space-x-2 min-w-0 pr-2 flex-1">
+                        <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-[#18181E] font-black text-[10px] flex items-center justify-center text-slate-700 dark:text-slate-300 shrink-0">
                           {ep.id}
                         </span>
                         <div className="min-w-0">
                           <p className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate">
                             {ep.title}
                           </p>
-                          <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-2">
-                            <span className="flex items-center gap-1 font-mono text-slate-500">
-                              <Clock className="w-3 h-3" />
-                              {ep.duration}
-                            </span>
+                          <div className="text-[10px] text-slate-400 mt-0.2 flex items-center gap-1.5 font-mono">
+                            <span>{ep.duration}</span>
                             <span>•</span>
-                            <span className="truncate max-w-[240px] font-mono text-[10px] text-slate-400">
-                              {ep.sourceType === 'url' ? `🔗 ${ep.videoUrl || 'Video Stream URL'}` : `📁 ${ep.fileName || `ep_${String(ep.id).padStart(2, '0')}.mp4`}`}
+                            <span className="truncate max-w-[180px]">
+                              {ep.sourceType === 'url' ? '🔗 URL' : `📁 ${ep.fileName || `ep_${ep.id}.mp4`}`}
                             </span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-2 shrink-0">
+                      <div className="shrink-0">
                         <button
                           type="button"
                           onClick={() => {
@@ -1837,22 +1849,21 @@ export default function UploadContentPage({ onNavigate }) {
                               )
                             );
                           }}
-                          title="Click to toggle Free Preview or Subscriber Locked"
-                          className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold tracking-wide flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95 ${
+                          className={`px-2.5 py-0.5 rounded-full text-[9.5px] font-black flex items-center gap-1 cursor-pointer transition-all active:scale-95 ${
                             ep.isFree
-                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
-                              : 'bg-[#FEF08A] text-slate-950 font-black border border-amber-300/80'
+                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25'
+                              : 'bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-950 dark:text-amber-300 border border-amber-300/50'
                           }`}
                         >
                           {ep.isFree ? (
                             <>
-                              <Unlock className="w-3 h-3 stroke-[2.5]" />
-                              <span>FREE PREVIEW</span>
+                              <Unlock className="w-2.5 h-2.5" />
+                              <span>FREE</span>
                             </>
                           ) : (
                             <>
-                              <Lock className="w-3 h-3 stroke-[2.5]" />
-                              <span>SUBSCRIBER LOCKED</span>
+                              <Lock className="w-2.5 h-2.5" />
+                              <span>SUBSCRIBER</span>
                             </>
                           )}
                         </button>
@@ -1863,7 +1874,6 @@ export default function UploadContentPage({ onNavigate }) {
               )}
             </div>
 
-
           </div>
         </div>
       )}
@@ -1871,45 +1881,45 @@ export default function UploadContentPage({ onNavigate }) {
       {/* ======================================================== */}
       {/* BOTTOM FIXED NAVIGATION BAR */}
       {/* ======================================================== */}
-      <div className="bg-white/95 dark:bg-[#141914]/95 backdrop-blur-md rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-md flex items-center justify-between gap-3 sticky bottom-3 z-40">
+      <div className="bg-white/95 dark:bg-[#141419]/95 backdrop-blur-md rounded-xl p-2.5 sm:px-4 border border-slate-200/80 dark:border-white/10 shadow-md flex items-center justify-between gap-3 sticky bottom-3 z-40">
         
         <button
           type="button"
           onClick={handlePrevStep}
           disabled={currentStep === 1}
-          className={`inline-flex items-center space-x-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
-            currentStep === 1
-              ? 'opacity-40 cursor-not-allowed text-slate-400'
-              : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
-          }`}
+          className="h-8.5 px-4 rounded-lg text-xs font-bold transition-all border border-slate-200/80 dark:border-white/10 bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:hover:bg-slate-100 dark:disabled:hover:bg-white/[0.06] disabled:cursor-not-allowed cursor-pointer active:scale-95 select-none"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Previous Step</span>
+          Previous
         </button>
 
-        <div className="hidden sm:flex items-center space-x-2 text-xs font-bold text-slate-400">
+        <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
           <span>Step {currentStep} of {totalSteps}:</span>
-          <span className="text-slate-900 dark:text-slate-100">{stepsConfig[currentStep - 1].label}</span>
+          <span className="text-slate-900 dark:text-white font-bold">{stepsConfig[currentStep - 1].label}</span>
         </div>
 
         {currentStep < totalSteps ? (
           <button
             type="button"
             onClick={handleNextStep}
-            className="inline-flex items-center space-x-2 px-4.5 py-2 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-black transition-all shadow-xs hover:scale-[1.02] active:scale-[0.98]"
+            className="h-8.5 px-5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer select-none"
           >
-            <span>Continue to {stepsConfig[currentStep].label}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            Continue
           </button>
         ) : (
           <button
             type="button"
             onClick={handlePublish}
             disabled={isPublishing}
-            className="inline-flex items-center space-x-2 px-4.5 py-2 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-black transition-all shadow-xs hover:scale-[1.02] active:scale-[0.98]"
+            className="h-8.5 px-5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed select-none"
           >
-            <Sparkles className="w-3.5 h-3.5 text-slate-950" />
-            <span>Publish Series</span>
+            {isPublishing ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950 stroke-[2.5]" />
+                <span>Publishing...</span>
+              </span>
+            ) : (
+              <span>Publish Series</span>
+            )}
           </button>
         )}
 
@@ -1917,53 +1927,55 @@ export default function UploadContentPage({ onNavigate }) {
 
       {/* Video Preview Lightbox Modal */}
       {previewVideo && (
-        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-[#121212] border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 max-w-lg w-full shadow-2xl relative animate-in zoom-in-95 duration-150 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center space-x-2.5 min-w-0 pr-3">
-                <div className="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                  <Play className="w-4 h-4 fill-current" />
+        <ModalPortal>
+          <div className="fixed inset-0 z-[99999] bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+            <div className="bg-white dark:bg-[#24242E] border border-slate-200/80 dark:border-white/12 rounded-2xl p-4 sm:p-5 max-w-sm w-full shadow-2xl relative animate-in zoom-in-95 duration-150 space-y-3.5">
+              <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
+                <div className="flex items-center space-x-2 min-w-0 pr-2">
+                  <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center shrink-0">
+                    <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-extrabold text-xs sm:text-sm text-slate-950 dark:text-white truncate">
+                      {previewVideo?.title}
+                    </h3>
+                    <p className="text-[10px] text-slate-400 font-mono truncate">
+                      {previewVideo?.url}
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="font-extrabold text-sm text-slate-950 dark:text-white truncate">
-                    {previewVideo.title}
-                  </h3>
-                  <p className="text-[11px] text-slate-400 font-mono truncate">
-                    {previewVideo.url}
-                  </p>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setPreviewVideo(null)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors shrink-0 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setPreviewVideo(null)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            <div className="aspect-[9/16] max-h-[60vh] mx-auto rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-slate-800 relative shadow-inner">
-              <video
-                src={previewVideo.url}
-                controls
-                autoPlay
-                playsInline
-                className="w-full h-full object-contain"
-              />
-            </div>
+              <div className="aspect-[9/16] max-h-[55vh] mx-auto rounded-xl overflow-hidden bg-black flex items-center justify-center border border-white/10 relative shadow-inner">
+                <video
+                  src={previewVideo?.url}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-contain"
+                />
+              </div>
 
-            <div className="flex items-center justify-between text-xs pt-1">
-              <span className="text-[11px] font-bold text-slate-400">Vertical 9:16 Video Player</span>
-              <button
-                type="button"
-                onClick={() => setPreviewVideo(null)}
-                className="px-4 py-1.5 rounded-xl bg-slate-950 dark:bg-white text-white dark:text-slate-950 font-bold hover:opacity-90 transition-opacity text-xs"
-              >
-                Done
-              </button>
+              <div className="flex items-center justify-between text-xs pt-0.5">
+                <span className="text-[10px] font-bold text-slate-400">Vertical 9:16 Preview</span>
+                <button
+                  type="button"
+                  onClick={() => setPreviewVideo(null)}
+                  className="px-3 py-1 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold transition-all text-xs cursor-pointer shadow-xs active:scale-95"
+                >
+                  Done
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>

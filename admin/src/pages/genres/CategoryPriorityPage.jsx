@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { homeService } from '../../services/homeService';
 import PageLoader from '../../components/common/PageLoader';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
 import {
   SlidersHorizontal,
   ChevronUp,
@@ -11,7 +12,6 @@ import {
   Search,
   CheckCircle2,
   AlertCircle,
-  Eye,
   Tv,
   Tags,
   Sparkles,
@@ -25,7 +25,9 @@ import {
   Smile,
   Heart,
   Briefcase,
-  ShieldAlert
+  ShieldAlert,
+  GripVertical,
+  ArrowUpRight
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -53,14 +55,18 @@ export default function CategoryPriorityPage({ onNavigate }) {
 
   // Search & Filter
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('ALL'); // 'ALL' | 'CATEGORIES' | 'FEATURED' | 'ACTIVE' | 'HIDDEN'
+  const [filterType, setFilterType] = useState('ALL'); // 'ALL' | 'CATEGORIES' | 'CURATED' | 'ACTIVE' | 'HIDDEN'
 
   // Tracks whether local priority has been modified
   const [isDirty, setIsDirty] = useState(false);
 
+  // Drag-and-drop reorder state for moving dots handle
+  const [draggedId, setDraggedId] = useState(null);
+  const [dragOverId, setDragOverId] = useState(null);
+
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
+    setTimeout(() => setToast(null), 3000);
   };
 
   // Fetch live homepage sections
@@ -101,7 +107,7 @@ export default function CategoryPriorityPage({ onNavigate }) {
 
       let matchesFilter = true;
       if (filterType === 'CATEGORIES') matchesFilter = s.sectionType === 'GENRE';
-      if (filterType === 'FEATURED') matchesFilter = s.sectionType !== 'GENRE';
+      if (filterType === 'CURATED') matchesFilter = s.sectionType !== 'GENRE';
       if (filterType === 'ACTIVE') matchesFilter = !!s.isActive;
       if (filterType === 'HIDDEN') matchesFilter = !s.isActive;
 
@@ -111,8 +117,22 @@ export default function CategoryPriorityPage({ onNavigate }) {
 
   // Counts for filter tabs
   const categoryCount = useMemo(() => sections.filter((s) => s.sectionType === 'GENRE').length, [sections]);
-  const featuredCount = useMemo(() => sections.filter((s) => s.sectionType !== 'GENRE').length, [sections]);
+  const curatedCount = useMemo(() => sections.filter((s) => s.sectionType !== 'GENRE').length, [sections]);
   const activeCount = useMemo(() => sections.filter((s) => s.isActive).length, [sections]);
+  const hiddenCount = useMemo(() => sections.length - activeCount, [sections, activeCount]);
+
+  const filterTabs = useMemo(() => [
+    { id: 'ALL', label: 'All', count: sections.length },
+    { id: 'CATEGORIES', label: 'Categories', count: categoryCount },
+    { id: 'CURATED', label: 'Featured', count: curatedCount },
+    { id: 'ACTIVE', label: 'Active', count: activeCount },
+    { id: 'HIDDEN', label: 'Hidden', count: hiddenCount }
+  ], [sections.length, categoryCount, curatedCount, activeCount, hiddenCount]);
+
+  const selectedTabIndex = useMemo(() => {
+    const idx = filterTabs.findIndex((t) => t.id === filterType);
+    return idx >= 0 ? idx : 0;
+  }, [filterTabs, filterType]);
 
   // Shift Up
   const handleMoveUp = (index) => {
@@ -164,7 +184,57 @@ export default function CategoryPriorityPage({ onNavigate }) {
 
     setSections(updated);
     setIsDirty(true);
-    showToast(`"${target.title}" set to Top Priority (Rank 1)`, 'info');
+    showToast(`"${target.title}" moved to Rank 1`, 'info');
+  };
+
+  // HTML5 Drag and Drop handlers for moving dots handle
+  const handleDragStart = (e, id) => {
+    setDraggedId(id);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', id);
+  };
+
+  const handleDragOver = (e, id) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverId !== id) {
+      setDragOverId(id);
+    }
+  };
+
+  const handleDrop = (e, targetId) => {
+    e.preventDefault();
+    const sourceId = draggedId || e.dataTransfer.getData('text/plain');
+    if (!sourceId || !targetId || sourceId === targetId) {
+      setDraggedId(null);
+      setDragOverId(null);
+      return;
+    }
+
+    setSections((prev) => {
+      const fromIndex = prev.findIndex((s) => s.id === sourceId);
+      const toIndex = prev.findIndex((s) => s.id === targetId);
+      if (fromIndex === -1 || toIndex === -1) return prev;
+
+      const newSections = [...prev];
+      const [movedItem] = newSections.splice(fromIndex, 1);
+      newSections.splice(toIndex, 0, movedItem);
+
+      return newSections.map((s, idx) => ({
+        ...s,
+        displayOrder: idx + 1
+      }));
+    });
+
+    setIsDirty(true);
+    setDraggedId(null);
+    setDragOverId(null);
+    showToast('Section order changed. Remember to click "Save Order".', 'info');
+  };
+
+  const handleDragEnd = () => {
+    setDraggedId(null);
+    setDragOverId(null);
   };
 
   // Toggle section active/hidden
@@ -181,7 +251,7 @@ export default function CategoryPriorityPage({ onNavigate }) {
     try {
       await homeService.toggleSectionStatus(id);
       showToast(
-        `"${target.title}" is now ${newActiveState ? 'active on Homepage' : 'hidden from Homepage'}`,
+        `"${target.title}" ${newActiveState ? 'activated' : 'hidden'}`,
         'info'
       );
     } catch (err) {
@@ -205,7 +275,7 @@ export default function CategoryPriorityPage({ onNavigate }) {
 
       await homeService.reorderSections(items);
       setIsDirty(false);
-      showToast('Homepage section priority ranks saved successfully!', 'success');
+      showToast('Priority ranks saved successfully', 'success');
     } catch (err) {
       console.error('Batch save priority error:', err);
       showToast('Failed to save priority order: ' + (err.message || 'Server error'), 'error');
@@ -214,342 +284,374 @@ export default function CategoryPriorityPage({ onNavigate }) {
     }
   };
 
-  // Helper for Section Icon & Color
-  const getSectionIconInfo = (section) => {
-    if (section.sectionType === 'TRENDING') {
-      return { Icon: Flame, color: '#F59E0B' };
-    }
-    if (section.sectionType === 'POPULAR' || section.sectionType === 'POPULAR_GENRES') {
-      return { Icon: Sparkles, color: '#EC4899' };
-    }
-    if (section.sectionType === 'NEW_RELEASES') {
-      return { Icon: Zap, color: '#3B82F6' };
-    }
+  // Consistent Theme-Based Icon Resolver (Zero rainbow colors)
+  const getSectionIcon = (section) => {
+    if (section.sectionType === 'TRENDING') return Flame;
+    if (section.sectionType === 'POPULAR' || section.sectionType === 'POPULAR_GENRES') return Sparkles;
+    if (section.sectionType === 'NEW_RELEASES') return Zap;
     if (section.genreId && section.genreId.icon) {
-      const Comp = ICON_MAP[section.genreId.icon] || Tags;
-      return { Icon: Comp, color: section.genreId.color || '#F59E0B' };
+      return ICON_MAP[section.genreId.icon] || Tags;
     }
-    return { Icon: Layers, color: '#8B5CF6' };
+    return Layers;
   };
 
-  // Helper for Section Type Label
+  // Consistent Clean Type Label Resolver
   const getSectionTypeLabel = (section) => {
-    if (section.sectionType === 'TRENDING') {
-      return { label: 'Trending Section', style: 'text-amber-500 bg-amber-400/10 border-amber-400/20' };
-    }
-    if (section.sectionType === 'POPULAR' || section.sectionType === 'POPULAR_GENRES') {
-      return { label: 'Popular Genres', style: 'text-purple-400 bg-purple-500/10 border-purple-500/20' };
-    }
-    if (section.sectionType === 'NEW_RELEASES') {
-      return { label: 'New Releases', style: 'text-sky-400 bg-sky-500/10 border-sky-500/20' };
-    }
-    if (section.sectionType === 'GENRE') {
-      return { label: 'Category Section', style: 'text-slate-400 bg-slate-500/10 border-slate-500/20' };
-    }
-    return { label: 'Curated Section', style: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' };
+    if (section.sectionType === 'TRENDING') return 'Trending';
+    if (section.sectionType === 'POPULAR' || section.sectionType === 'POPULAR_GENRES') return 'Popular';
+    if (section.sectionType === 'NEW_RELEASES') return 'New Releases';
+    if (section.sectionType === 'GENRE') return 'Category';
+    return 'Curated';
   };
 
   return (
-    <div className="space-y-3.5 font-urbanist selection:bg-[#FEF08A] selection:text-black pb-8">
+    <div className="space-y-3 font-urbanist selection:bg-[#FACC15] selection:text-slate-950 pb-8 animate-fade-in text-xs">
 
-      {/* Floating Action Toast Notification */}
+      {/* Floating Toast Notification */}
       {toast && (
-        <div className="fixed top-5 right-5 z-50 animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="fixed top-4 right-4 z-50 animate-in fade-in duration-150">
           <div
-            className={`flex items-center space-x-2.5 px-3.5 py-2.5 rounded-xl shadow-2xl border text-xs font-bold ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg shadow-xl border text-xs font-semibold ${
               toast.type === 'error'
-                ? 'bg-rose-950/90 text-rose-200 border-rose-800 backdrop-blur-md'
+                ? 'bg-rose-950 text-rose-200 border-rose-800'
                 : toast.type === 'info'
-                ? 'bg-slate-900/95 text-white border-white/20 backdrop-blur-md'
-                : 'bg-[#1A1F1A]/95 text-emerald-300 border-emerald-500/40 backdrop-blur-md'
+                ? 'bg-[#18181E] text-white border-white/20'
+                : 'bg-[#121216] text-amber-300 border-amber-400/30'
             }`}
           >
             {toast.type === 'error' ? (
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+              <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
             ) : (
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
             )}
             <span>{toast.message}</span>
             <button
               onClick={() => setToast(null)}
-              className="text-white/60 hover:text-white ml-2 cursor-pointer"
+              className="text-white/40 hover:text-white ml-1.5 cursor-pointer"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-3 h-3" />
             </button>
           </div>
         </div>
       )}
 
-      {/* Top Header Card with Save Action */}
-      <div className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs relative overflow-hidden transition-all">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-start space-x-3">
-            <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
-              <SlidersHorizontal className="w-4.5 h-4.5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <h1 className="text-base sm:text-lg font-extrabold text-slate-950 dark:text-white tracking-tight">
-                  Homepage Section Priority Manager
-                </h1>
-                <span className="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase bg-[#FEF08A] text-slate-950 shadow-xs">
-                  Home Feed Curation
+      {/* ─────────────────────────────────────────────────────────────
+          1. COMPACT MINIMAL HEADER
+         ───────────────────────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-[#121216] rounded-xl px-4 py-3 border border-slate-200/90 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        
+        {/* Title, Badge & Clean Inline Metadata */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+            <SlidersHorizontal className="w-4 h-4 stroke-[2.2]" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-sm sm:text-base font-bold text-slate-950 dark:text-white tracking-tight">
+                Section Priority Manager
+              </h1>
+              {isDirty && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-400/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  Unsaved Ranks
                 </span>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                Decide the exact rank priority (1, 2, 3...) for sections and category trays on the mobile app homepage feed.
-              </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              <span className="font-semibold text-slate-700 dark:text-slate-300">{sections.length} total sections</span>
+              <span>•</span>
+              <span className="text-amber-600 dark:text-amber-400 font-semibold">{activeCount} active</span>
+              {hiddenCount > 0 && (
+                <>
+                  <span>•</span>
+                  <span>{hiddenCount} hidden</span>
+                </>
+              )}
             </div>
           </div>
+        </div>
 
-          <div className="flex items-center space-x-2 shrink-0 self-start md:self-center">
-            {/* Refresh Button */}
-            <button
-              onClick={() => fetchData(true)}
-              disabled={isRefreshing}
-              className="p-2 rounded-lg bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white border border-slate-200 dark:border-white/10 text-xs font-bold transition-all cursor-pointer"
-              title="Refresh Live Data"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-400' : ''}`} />
-            </button>
+        {/* Header Action Buttons */}
+        <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+          <button
+            onClick={() => fetchData(true)}
+            disabled={isRefreshing}
+            className="h-8 px-2.5 rounded-lg bg-slate-100 dark:bg-[#18181E] text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/[0.06] border border-slate-200/90 dark:border-white/10 text-xs font-semibold transition-all cursor-pointer inline-flex items-center gap-1.5 leading-none disabled:opacity-50"
+            title="Refresh Live Data"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-400' : 'text-slate-400'}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
 
-            {/* Save Priority Order CTA */}
-            <button
-              onClick={handleSavePriorityOrder}
-              disabled={isSaving || !isDirty}
-              className={`px-3.5 py-1.5 rounded-lg font-bold text-xs flex items-center space-x-1.5 transition-all cursor-pointer shadow-xs ${
-                isDirty
-                  ? 'bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 shadow-md ring-2 ring-amber-400/50 animate-pulse'
-                  : 'bg-slate-200/80 dark:bg-white/[0.08] text-slate-400 dark:text-slate-500 cursor-not-allowed'
-              }`}
-            >
-              {isSaving ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950" />
-              ) : (
-                <Save className="w-3.5 h-3.5 stroke-[2.5]" />
-              )}
-              <span>{isDirty ? 'Save Priority Order' : 'Priority Saved'}</span>
-            </button>
-          </div>
+          <button
+            onClick={handleSavePriorityOrder}
+            disabled={isSaving || !isDirty}
+            className={`h-8 px-4 rounded-lg font-bold text-xs inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer leading-none active:scale-[0.98] ${
+              isDirty
+                ? 'bg-[#FACC15] hover:bg-[#EAB308] active:bg-[#CA8A04] text-slate-950 shadow-sm'
+                : 'bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 border border-slate-200/80 dark:border-white/5 cursor-not-allowed'
+            }`}
+          >
+            {isSaving ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950 stroke-[2.2]" />
+            ) : (
+              <Save className="w-3.5 h-3.5 text-slate-950 stroke-[2.2]" />
+            )}
+            <span>{isSaving ? 'Saving...' : isDirty ? 'Save Order' : 'Saved'}</span>
+          </button>
         </div>
       </div>
 
-      {/* Search & Filter Bar */}
-      <div className="bg-white dark:bg-[#121612] rounded-xl p-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      {/* ─────────────────────────────────────────────────────────────
+          2. COMPACT SEARCH & FILTER CONTROLS BAR
+         ───────────────────────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-[#121216] rounded-xl px-3 py-2 border border-slate-200/90 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2">
+        
+        {/* Search Input & Segmented Pills */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
+          
+          {/* Search Box */}
+          <div className="relative w-full sm:w-56 shrink-0">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search sections by title or slug..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl text-xs bg-slate-100 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#FEF08A] focus:outline-none transition-all font-medium"
+              placeholder="Search section..."
+              className="w-full pl-8 pr-7 py-1.5 rounded-lg text-xs bg-slate-100/90 dark:bg-[#18181E] border border-slate-200/90 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-[#121216] focus:border-[#FACC15] focus:outline-hidden transition-all font-medium"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 cursor-pointer"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-3 h-3" />
               </button>
             )}
           </div>
 
-          {/* Quick Filter Tabs */}
-          <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 sm:pb-0">
-            {[
-              { id: 'ALL', label: 'All Sections', count: sections.length },
-              { id: 'CATEGORIES', label: 'Category Sections', count: categoryCount },
-              { id: 'FEATURED', label: 'Featured (Trending/Popular)', count: featuredCount },
-              { id: 'ACTIVE', label: 'Active', count: activeCount },
-              { id: 'HIDDEN', label: 'Hidden', count: sections.length - activeCount }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setFilterType(tab.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 shrink-0 cursor-pointer ${
-                  filterType === tab.id
-                    ? 'bg-[#FEF08A] text-slate-950 font-extrabold shadow-xs'
-                    : 'bg-slate-100 dark:bg-[#161B16] text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white border border-slate-200/70 dark:border-white/10'
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span
-                  className={`px-1.5 py-0.2 rounded-md text-[10px] font-mono ${
-                    filterType === tab.id
-                      ? 'bg-black/15 text-slate-950'
-                      : 'bg-black/10 dark:bg-white/10 text-slate-500 dark:text-slate-400'
-                  }`}
-                >
-                  {tab.count}
-                </span>
-              </button>
-            ))}
+          {/* Segmented Sliding Toggle Track (Smooth Sliding Indicator) */}
+          <div className="relative bg-slate-100/90 dark:bg-[#18181E] p-1 rounded-xl border border-slate-200/70 dark:border-white/10 shadow-2xs w-full sm:w-[460px] max-w-full">
+            {/* Smooth Sliding Active Indicator Pill */}
+            <span
+              className="absolute top-1 bottom-1 left-1 rounded-lg bg-[#FEF08A] shadow-xs transition-transform duration-300 ease-out pointer-events-none border border-amber-300/70"
+              style={{
+                width: 'calc((100% - 8px) / 5)',
+                transform: `translateX(${selectedTabIndex * 100}%)`,
+              }}
+            />
+
+            {/* 5 Equal Column Buttons */}
+            <div className="grid grid-cols-5 relative z-10 w-full items-center">
+              {filterTabs.map((tab) => {
+                const isSelected = filterType === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setFilterType(tab.id)}
+                    className={`h-7 px-1 text-[11px] sm:text-xs font-bold text-center flex items-center justify-center gap-1 transition-colors duration-200 select-none cursor-pointer leading-none ${
+                      isSelected
+                        ? 'text-slate-950 font-black'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                    }`}
+                  >
+                    <span className="truncate">{tab.label}</span>
+                    <span
+                      className={`px-1 py-0.2 rounded text-[9.5px] sm:text-[10px] font-mono leading-none ${
+                        isSelected
+                          ? 'bg-black/15 text-slate-950 font-black'
+                          : 'bg-black/5 dark:bg-white/10 text-slate-500 dark:text-slate-400'
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
+        {/* Manage Categories Link */}
         <button
           onClick={() => onNavigate && onNavigate('genres')}
-          className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer shrink-0 self-start md:self-center"
+          className="h-7 px-2.5 rounded-lg bg-slate-100 dark:bg-white/[0.04] hover:bg-slate-200 dark:hover:bg-white/[0.08] text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white text-xs font-semibold transition-all cursor-pointer shrink-0 inline-flex items-center gap-1 leading-none self-start md:self-center border border-slate-200/80 dark:border-white/10"
         >
-          Manage Categories
+          <Tags className="w-3 h-3 text-slate-400" />
+          <span>Manage Categories</span>
+          <ArrowUpRight className="w-3 h-3 text-slate-400" />
         </button>
       </div>
 
-      {/* Main Priority Reorder Table */}
+      {/* ─────────────────────────────────────────────────────────────
+          3. CLEAN & MINIMALIST LIST VIEW TABLE
+         ───────────────────────────────────────────────────────────── */}
       {isLoading ? (
-        <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
-          <PageLoader text="Loading..." minHeight="min-h-[360px]" />
+        <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden">
+          <PageLoader text="Loading live sections..." minHeight="min-h-[260px]" />
         </div>
       ) : filteredSections.length === 0 ? (
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-12 text-center border border-slate-200/80 dark:border-white/10 shadow-nodus">
-          <div className="w-14 h-14 rounded-2xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 mx-auto mb-3 shadow-xs">
-            <SlidersHorizontal className="w-7 h-7 stroke-[2.2]" />
-          </div>
-          <h3 className="text-base font-extrabold text-slate-950 dark:text-white">
-            No matching sections found
-          </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-            Try adjusting your search query or filter.
+        <div className="bg-white dark:bg-[#121216] rounded-xl p-8 text-center border border-slate-200/90 dark:border-white/10 shadow-xs">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            No sections match your search or filter.
           </p>
+          <button
+            onClick={() => {
+              setSearchTerm('');
+              setFilterType('ALL');
+            }}
+            className="mt-2.5 px-3 py-1.5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all cursor-pointer"
+          >
+            Reset Filters
+          </button>
         </div>
       ) : (
-        <div className="bg-white dark:bg-[#121612] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
+        <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-urbanist">
-              <thead className="bg-slate-50/70 dark:bg-[#161B16]/80 border-b border-slate-200/80 dark:border-white/10 text-slate-400 dark:text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+              <thead className="bg-slate-50/90 dark:bg-[#18181E] border-b border-slate-200/90 dark:border-white/10 text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider select-none">
                 <tr>
-                  <th className="py-2.5 px-3.5 text-center w-14">Rank</th>
-                  <th className="py-2.5 px-3.5">Section / Category</th>
-                  <th className="py-2.5 px-3.5 text-center w-32">Section Type</th>
-                  <th className="py-2.5 px-3.5 text-center w-24">Content</th>
-                  <th className="py-2.5 px-3.5 text-center w-24">Status</th>
-                  <th className="py-2.5 px-3.5 text-right w-24 pr-4">Priority</th>
+                  <th className="py-2.5 px-3 text-center w-12">#</th>
+                  <th className="py-2.5 px-3">Section Name</th>
+                  <th className="py-2.5 px-3 text-center w-28">Type</th>
+                  <th className="py-2.5 px-3 text-center w-24">Content</th>
+                  <th className="py-2.5 px-3 text-center w-24">Status</th>
+                  <th className="py-2.5 px-3 text-right w-28 pr-4">Order Priority</th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
                 {filteredSections.map((section, index) => {
-                  const { Icon, color } = getSectionIconInfo(section);
-                  const typeInfo = getSectionTypeLabel(section);
+                  const Icon = getSectionIcon(section);
+                  const typeLabel = getSectionTypeLabel(section);
                   const isTop = index === 0;
                   const isBottom = index === filteredSections.length - 1;
 
                   return (
                     <tr
                       key={section.id}
-                      className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition-colors group"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, section.id)}
+                      onDragOver={(e) => handleDragOver(e, section.id)}
+                      onDrop={(e) => handleDrop(e, section.id)}
+                      onDragEnd={handleDragEnd}
+                      className={`transition-all duration-150 group select-none ${
+                        draggedId === section.id
+                          ? 'opacity-40 bg-amber-400/10 border-2 border-dashed border-amber-400'
+                          : dragOverId === section.id
+                          ? 'bg-amber-400/20 dark:bg-amber-400/15 border-t-2 border-amber-400'
+                          : isTop
+                          ? 'bg-amber-400/[0.04] dark:bg-amber-400/[0.03] hover:bg-amber-400/[0.07]'
+                          : 'hover:bg-slate-50/80 dark:hover:bg-white/[0.02]'
+                      }`}
                     >
-                      {/* Priority Rank (Clean number without #) */}
-                      <td className="py-2.5 px-3.5 text-center">
-                        <span
-                          className={`inline-flex items-center justify-center text-xs ${
-                            index === 0
-                              ? 'w-6 h-6 rounded-lg bg-[#FEF08A] text-slate-950 font-black shadow-xs'
-                              : 'w-6 h-6 font-semibold text-slate-400 dark:text-slate-500'
-                          }`}
-                        >
-                          {index + 1}
-                        </span>
+                      {/* Compact Rank Number */}
+                      <td className="py-2 px-3 text-center">
+                        <div className="inline-flex items-center justify-center">
+                          {isTop ? (
+                            <span className="w-6 h-6 rounded-md bg-[#FACC15] text-slate-950 font-black text-xs flex items-center justify-center shadow-xs">
+                              1
+                            </span>
+                          ) : (
+                            <span className="w-6 h-6 rounded-md bg-slate-100 dark:bg-[#18181E] text-slate-600 dark:text-slate-400 font-bold text-xs flex items-center justify-center border border-slate-200/70 dark:border-white/5">
+                              {index + 1}
+                            </span>
+                          )}
+                        </div>
                       </td>
 
-                      {/* Section Title & Slug */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center space-x-3">
+                      {/* Section Info (Grip + Theme Icon + Title & Slug) */}
+                      <td className="py-2 px-3">
+                        <div className="flex items-center gap-2.5">
+                          {/* Tactile Moving Dots Grip Handle */}
                           <div
-                            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border shadow-xs"
-                            style={{
-                              backgroundColor: `${color}15`,
-                              borderColor: `${color}25`,
-                              color: color
-                            }}
+                            className="p-1 -ml-1 rounded-md text-slate-400 dark:text-slate-500 group-hover:text-amber-500 hover:bg-amber-400/10 active:scale-95 cursor-grab active:cursor-grabbing transition-all flex items-center justify-center shrink-0"
+                            title="Drag moving dots to reorder priority"
                           >
-                            <Icon className="w-4 h-4 stroke-[2]" />
+                            <GripVertical className="w-4 h-4 stroke-[2.2]" />
                           </div>
 
-                          <div>
-                            <div className="flex items-center space-x-2">
-                              <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                          {/* Unified Theme Icon Badge (No rainbow colors) */}
+                          <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 text-slate-950 dark:text-amber-300 flex items-center justify-center shrink-0">
+                            <Icon className="w-3.5 h-3.5 stroke-[2.2]" />
+                          </div>
+
+                          {/* Title & Slug */}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold text-slate-900 dark:text-white text-xs truncate">
                                 {section.title}
                               </span>
-                              {index === 0 && (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#FEF08A]/30 text-amber-700 dark:text-amber-300 border border-amber-300/40 uppercase tracking-wide">
-                                  Top 1 Row
-                                </span>
-                              )}
                             </div>
-                            <span className="text-[11px] font-mono text-slate-400 block mt-0.5">
+                            <span className="text-[10.5px] font-mono text-slate-400 dark:text-slate-500 block leading-tight">
                               /{section.slug}
                             </span>
                           </div>
                         </div>
                       </td>
 
-                      {/* Section Type Badge */}
-                      <td className="py-3.5 px-4 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${typeInfo.style}`}>
-                          {typeInfo.label}
+                      {/* Clean Theme Type Badge */}
+                      <td className="py-2 px-3 text-center">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10.5px] font-medium bg-slate-100 dark:bg-[#18181E] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10">
+                          {typeLabel}
                         </span>
                       </td>
 
-                      {/* Content / Drama Count */}
-                      <td className="py-3.5 px-4 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
-                        {section.dramaCount || 0} series
+                      {/* Drama / Content Count */}
+                      <td className="py-2 px-3 text-center">
+                        <span className="text-slate-600 dark:text-slate-400 font-medium text-[11px]">
+                          {section.dramaCount || 0} series
+                        </span>
                       </td>
 
-                      {/* Status Dot Toggle */}
-                      <td className="py-3.5 px-4 text-center">
-                        <button
-                          onClick={() => handleToggleActive(section.id)}
-                          className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs cursor-pointer transition-colors hover:bg-slate-100 dark:hover:bg-white/5"
-                          title="Click to toggle Active / Hidden"
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              section.isActive ? 'bg-emerald-500' : 'bg-slate-400'
-                            }`}
+                      {/* Status Toggle with Smooth Sliding ToggleSwitch */}
+                      <td className="py-2 px-3 text-center" onMouseDown={(e) => e.stopPropagation()}>
+                        <div className="inline-flex items-center gap-1.5 justify-center">
+                          <ToggleSwitch
+                            checked={Boolean(section.isActive)}
+                            onChange={() => handleToggleActive(section.id)}
+                            activeColor="amber"
+                            size="sm"
+                            title={section.isActive ? 'Active on feed (Click to hide)' : 'Hidden from feed (Click to activate)'}
                           />
-                          <span
-                            className={
-                              section.isActive
-                                ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
-                                : 'text-slate-400 dark:text-slate-500'
-                            }
-                          >
+                          <span className={`text-[10.5px] font-semibold select-none ${section.isActive ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'}`}>
                             {section.isActive ? 'Active' : 'Hidden'}
                           </span>
-                        </button>
+                        </div>
                       </td>
 
-                      {/* Shift Priority & Top Actions */}
-                      <td className="py-3.5 px-4 text-right pr-6">
-                        <div className="flex items-center justify-end space-x-1">
+                      {/* Reorder Buttons (Compact) */}
+                      <td className="py-2 px-3 text-right pr-4" onMouseDown={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1">
+                          {/* Move Up */}
                           <button
                             onClick={() => handleMoveUp(index)}
                             disabled={isTop}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] disabled:opacity-20 disabled:hover:bg-transparent transition-all cursor-pointer"
-                            title="Shift Up"
+                            className="w-7 h-7 rounded-md flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-[#18181E] hover:bg-slate-200 dark:hover:bg-white/[0.08] border border-slate-200/80 dark:border-white/10 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+                            title="Move Up"
                           >
-                            <ChevronUp className="w-4 h-4 stroke-[2.2]" />
+                            <ChevronUp className="w-3.5 h-3.5 stroke-[2.2]" />
                           </button>
 
+                          {/* Move Down */}
                           <button
                             onClick={() => handleMoveDown(index)}
                             disabled={isBottom}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] disabled:opacity-20 disabled:hover:bg-transparent transition-all cursor-pointer"
-                            title="Shift Down"
+                            className="w-7 h-7 rounded-md flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-[#18181E] hover:bg-slate-200 dark:hover:bg-white/[0.08] border border-slate-200/80 dark:border-white/10 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+                            title="Move Down"
                           >
-                            <ChevronDown className="w-4 h-4 stroke-[2.2]" />
+                            <ChevronDown className="w-3.5 h-3.5 stroke-[2.2]" />
                           </button>
 
+                          {/* Promote to Top Hero */}
                           <button
                             onClick={() => handleMoveToTop(section.id)}
                             disabled={isTop}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-400/10 disabled:opacity-20 disabled:hover:bg-transparent transition-all cursor-pointer"
-                            title="Move directly to Rank 1"
+                            className="w-7 h-7 rounded-md flex items-center justify-center text-amber-600 dark:text-amber-400 hover:text-slate-950 dark:hover:text-slate-950 bg-amber-50 dark:bg-amber-400/10 hover:bg-[#FACC15] border border-amber-300/60 dark:border-amber-400/20 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+                            title="Promote to Top"
                           >
-                            <ChevronsUp className="w-4 h-4 stroke-[2.2]" />
+                            <ChevronsUp className="w-3.5 h-3.5 stroke-[2.4]" />
                           </button>
                         </div>
                       </td>

@@ -47,7 +47,7 @@ export default function PageLoader({
   if (fullScreen) {
     return (
       <div
-        className={`min-h-screen w-full bg-[#F3F4F7] dark:bg-[#080B08] flex items-center justify-center fixed inset-0 z-50 font-urbanist selection:bg-[#FEF08A] selection:text-black ${className}`}
+        className={`min-h-screen w-full bg-[#F3F4F7] dark:bg-[#0A0A0C] flex items-center justify-center fixed inset-0 z-50 font-urbanist selection:bg-[#FEF08A] selection:text-black ${className}`}
       >
         {content}
       </div>

@@ -170,15 +170,15 @@ All errors propagate to a single centralized Express middleware (`errorHandler.j
 ## 6. Frontend & Admin UI Theme Standards
 
 ### 6.1 Material Design 2 Dark Theme Implementation
-- **Base Surfaces**: Use deep charcoal/slate (`#080B08` to `#121612`). Never use pure `#000000` for surface fills.
+- **Base Surfaces**: Use deep charcoal/slate (`#0A0A0C` to `#121216`). Never use pure `#000000` for surface fills.
 - **Elevation Hierarchy**: Communicated via surface lightness overlays:
-  - 00dp: `#080B08` (Base layout canvas)
-  - 01dp: `bg-[#121612]` (Cards, table rows, input containers, 5% overlay)
-  - 02dp: `bg-[#161B16]` (Elevated cards, widgets, 7% overlay)
-  - 04dp: `bg-[#1A1F1A]` (App bar, sticky header, 9% overlay)
-  - 08dp: `bg-[#202620]` (Dropdown menus, popovers, 12% overlay)
-  - 16dp: `bg-[#242A24]` (Slide-over drawers, 15% overlay)
-  - 24dp: `bg-[#282E28]` (Modals, dialogs, 16% overlay)
+  - 00dp: `#0A0A0C` (Base layout canvas)
+  - 01dp: `bg-[#121216]` (Cards, table rows, input containers, 5% overlay)
+  - 02dp: `bg-[#18181E]` (Elevated cards, widgets, 7% overlay)
+  - 04dp: `bg-[#1E1E26]` (App bar, sticky header, 9% overlay)
+  - 08dp: `bg-[#24242E]` (Dropdown menus, popovers, 12% overlay)
+  - 16dp: `bg-[#2A2A35]` (Slide-over drawers, 15% overlay)
+  - 24dp: `bg-[#30303D]` (Modals, dialogs, 16% overlay)
 - **Drop Shadows**: Retain natural z-axis shadows (`shadow-md`, `shadow-xl`) to define clear boundaries. Never replace shadows with colored glowing outlines.
 - **Text & Contrast (WCAG AA)**:
   - High-emphasis text & icons: 87%–90% White (`text-white/90` or `text-slate-100`, ≥15.8:1 contrast).

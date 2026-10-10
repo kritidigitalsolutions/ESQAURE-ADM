@@ -18,6 +18,8 @@ export default function ToggleSwitch({
   ariaLabel,
   title,
   className = '',
+  activeColor = 'emerald',
+  size = 'sm'
 }) {
   const isChecked = Boolean(checked ?? enabled);
 
@@ -37,6 +39,18 @@ export default function ToggleSwitch({
     }
   };
 
+  const isMd = size === 'md';
+  const trackSize = isMd ? 'h-6 w-11' : 'h-5 w-9';
+  const knobSize = isMd ? 'h-5 w-5' : 'h-4 w-4';
+  const knobTranslate = isMd ? 'translate-x-5' : 'translate-x-4';
+
+  const activeBgClass =
+    activeColor === 'red'
+      ? 'bg-[#E50914] focus:ring-red-500/40'
+      : activeColor === 'amber'
+      ? 'bg-amber-400 focus:ring-amber-400/40'
+      : 'bg-[#10B981] focus:ring-emerald-500/40';
+
   return (
     <button
       id={id}
@@ -49,17 +63,17 @@ export default function ToggleSwitch({
       disabled={disabled}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden focus:ring-2 focus:ring-emerald-500/40 select-none ${
+      className={`relative inline-flex ${trackSize} shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden focus:ring-2 select-none ${
         disabled ? 'opacity-50 cursor-not-allowed' : ''
       } ${
         isChecked
-          ? 'bg-[#10B981]'
+          ? activeBgClass
           : 'bg-slate-300 dark:bg-slate-700'
       } ${className}`}
     >
       <span
-        className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-md transform ring-0 transition duration-200 ease-in-out ${
-          isChecked ? 'translate-x-4' : 'translate-x-0'
+        className={`pointer-events-none inline-block ${knobSize} rounded-full bg-white shadow-md transform ring-0 transition duration-200 ease-in-out ${
+          isChecked ? knobTranslate : 'translate-x-0'
         }`}
       />
     </button>

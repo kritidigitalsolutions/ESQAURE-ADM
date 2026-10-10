@@ -3,6 +3,7 @@ import { Subscription } from '../models/Subscription.js';
 import { SubscriptionTransaction } from '../models/SubscriptionTransaction.js';
 import { SubscriptionSetting, getOrCreateSubscriptionSettings } from '../models/SubscriptionSetting.js';
 import { User } from '../models/User.js';
+import { Promo } from '../models/Promo.js';
 import { RazorpayService } from '../services/razorpay.service.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { AppError } from '../utils/appError.js';
@@ -101,7 +102,7 @@ export class SubscriptionController {
    */
   static async initiateSubscription(req, res, next) {
     try {
-      const { planId, isTrial = false } = req.body;
+      const { planId, isTrial = false, promoCode } = req.body;
 
       if (!planId) {
         return next(new AppError('Plan ID is required.', 400, ERROR_CODES.VALIDATION_ERROR));
@@ -119,6 +120,7 @@ export class SubscriptionController {
 
       let amountToCharge = plan.price;
       let orderType = 'NEW_PURCHASE';
+      let appliedPromo = null;
 
       if (isTrial) {
         // Anti-Abuse Rule: 1 trial per phone number
@@ -138,6 +140,27 @@ export class SubscriptionController {
 
         amountToCharge = plan.trialFee || 2;
         orderType = 'TRIAL_TOKEN';
+      } else if (promoCode) {
+        const cleanPromo = String(promoCode).toUpperCase().trim();
+        const promo = await Promo.findOne({ code: cleanPromo });
+        if (promo && promo.status === 'ACTIVE' && new Date(promo.expiryDate) > new Date() && promo.currentUses < promo.maxUses) {
+          if (promo.applicablePlan === 'ALL' || promo.applicablePlan === plan.code || promo.applicablePlan === plan._id.toString()) {
+            let discountAmount = 0;
+            if (promo.discountType === 'PERCENTAGE') {
+              discountAmount = Math.round((plan.price * promo.discountValue) / 100);
+            } else if (promo.discountType === 'FLAT') {
+              discountAmount = Math.min(plan.price, promo.discountValue);
+            }
+            amountToCharge = Math.max(1, plan.price - discountAmount);
+            appliedPromo = {
+              code: promo.code,
+              discountType: promo.discountType,
+              discountValue: promo.discountValue,
+              discountAmount,
+              finalPrice: amountToCharge
+            };
+          }
+        }
       }
 
       const amountInPaise = Math.round(amountToCharge * 100);
@@ -153,7 +176,8 @@ export class SubscriptionController {
           planId: plan._id.toString(),
           planCode: plan.code,
           isTrial: String(isTrial),
-          type: orderType
+          type: orderType,
+          promoCode: appliedPromo ? appliedPromo.code : ''
         }
       });
 
@@ -170,6 +194,7 @@ export class SubscriptionController {
           price: plan.price,
           durationDays: plan.durationDays
         },
+        appliedPromo,
         isTrial
       });
     } catch (err) {
@@ -183,7 +208,7 @@ export class SubscriptionController {
    */
   static async verifySubscription(req, res, next) {
     try {
-      const { orderId, paymentId, signature, planId, isTrial = false } = req.body;
+      const { orderId, paymentId, signature, planId, isTrial = false, promoCode } = req.body;
 
       if (!orderId || !paymentId || !planId) {
         return next(new AppError('Payment verification parameters missing.', 400, ERROR_CODES.VALIDATION_ERROR));
@@ -248,6 +273,18 @@ export class SubscriptionController {
       user.plan = plan.name;
       if (isTrial) {
         user.hasUsedFreeTrial = true;
+      }
+      if (promoCode) {
+        const cleanPromo = String(promoCode).toUpperCase().trim();
+        const promo = await Promo.findOne({ code: cleanPromo });
+        if (promo) {
+          promo.currentUses = (promo.currentUses || 0) + 1;
+          if (promo.currentUses >= promo.maxUses) {
+            promo.status = 'EXHAUSTED';
+          }
+          await promo.save();
+          user.promoCode = promo.code;
+        }
       }
       await user.save();
 

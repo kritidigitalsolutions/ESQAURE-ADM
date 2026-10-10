@@ -24,14 +24,14 @@ export default function DramaIngestModal({ isOpen, onClose }) {
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[1000] overflow-y-auto bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 selection:bg-[#FEF08A] selection:text-black animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[99999] overflow-y-auto bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 selection:bg-[#FEF08A] selection:text-black animate-in fade-in duration-200">
       
-      <div className="bg-white dark:bg-[#202620] rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-200/80 dark:border-white/15 overflow-hidden animate-in fade-in zoom-in-95 duration-200 font-urbanist">
+      <div className="bg-white dark:bg-[#24242E] rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-200/80 dark:border-white/15 overflow-hidden animate-in fade-in zoom-in-95 duration-200 font-urbanist">
         
         {/* Modal Header */}
         <div className="p-6 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/60 dark:bg-white/[0.03]">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-400/15 dark:bg-amber-400/10 text-amber-600 dark:text-amber-400 border border-amber-400/30 flex items-center justify-center font-extrabold shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center font-extrabold shadow-xs">
               <Film className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>
@@ -120,7 +120,7 @@ export default function DramaIngestModal({ isOpen, onClose }) {
           </div>
 
           {/* Curation Flags */}
-          <div className="bg-slate-50 dark:bg-[#161B16] p-4 rounded-2xl border border-slate-200 dark:border-white/10 space-y-3">
+          <div className="bg-slate-50 dark:bg-[#18181E] p-4 rounded-2xl border border-slate-200 dark:border-white/10 space-y-3">
             <span className="font-bold text-slate-900 dark:text-white text-xs uppercase tracking-wider block">Display Options</span>
 
             <div className="flex items-center justify-between">
@@ -160,7 +160,7 @@ export default function DramaIngestModal({ isOpen, onClose }) {
           </button>
           <button
             onClick={onClose}
-            className="px-6 py-2.5 rounded-xl font-extrabold text-slate-950 bg-[#FEF08A] hover:bg-[#FDE047] shadow-xs transition-all cursor-pointer"
+            className="px-6 py-2.5 rounded-xl font-extrabold text-slate-950 bg-[#FACC15] hover:bg-[#EAB308] shadow-xs transition-all cursor-pointer"
           >
             Upload Series
           </button>

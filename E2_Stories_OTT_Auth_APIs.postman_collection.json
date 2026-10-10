@@ -131,6 +131,66 @@
       "value": "6ac77e265dd8236bc5e8c4f1",
       "type": "string",
       "description": "MongoDB ObjectId of a Custom Ad campaign for testing"
+    },
+    {
+      "key": "promoId",
+      "value": "",
+      "type": "string",
+      "description": "MongoDB ObjectId of a Promo discount code"
+    },
+    {
+      "key": "voucherId",
+      "value": "",
+      "type": "string",
+      "description": "MongoDB ObjectId of a Plan Voucher"
+    },
+    {
+      "key": "promoCode",
+      "value": "WELCOME20",
+      "type": "string",
+      "description": "Sample promo code for discount checkout"
+    },
+    {
+      "key": "voucherCode",
+      "value": "VIPFREE30",
+      "type": "string",
+      "description": "Sample voucher code for full plan grant"
+    },
+    {
+      "key": "rootUrl",
+      "value": "http://localhost:5001",
+      "type": "string",
+      "description": "Server root HTTP address"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string",
+      "description": "Auto-filled by Firebase Admin Login script or static admin JWT"
+    },
+    {
+      "key": "firebaseIdToken",
+      "value": "",
+      "type": "string",
+      "description": "Firebase Auth ID token for admin verification"
+    },
+    {
+      "key": "announcementId",
+      "value": "",
+      "type": "string",
+      "description": "MongoDB ObjectId of an In-App Announcement"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string",
+      "description": "MongoDB ObjectId of a user notification"
+    },
+    {
+      "key": "legalSlug",
+      "value": "privacy-policy",
+      "type": "string",
+      "description": "Slug of statutory legal policy"
     }
   ],
   "item": [
@@ -276,7 +336,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n \"phoneNumber\": \"{{phoneNumber}}\",\n \"countryCode\": \"{{countryCode}}\",\n \"otp\": \"{{otp}}\"\n}",
+                  "raw": "{\n  \"phoneNumber\": \"{{phoneNumber}}\",\n  \"countryCode\": \"{{countryCode}}\",\n  \"otp\": \"{{otp}}\",\n  \"fcmToken\": \"OPTIONAL_FCM_DEVICE_TOKEN\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -293,7 +353,7 @@
                     "verify-otp"
                   ]
                 },
-                "description": "Verify the OTP and log in.\n\n**Auto-saves:** `authToken`, `refreshToken`, `userId`\n\n**Response fields:**\n- `token` — short-lived access token\n- `refreshToken` — long-lived token for silent renewal\n- `isNewUser` — true = navigate to profile setup (Screen 3)\n- `isProfileCompleted` — false = show onboarding, true = go to home"
+                "description": "Verify the OTP and log in.\n\n**Auto-saves:** `authToken`, `refreshToken`, `userId`\n\n**Response fields:**\n- `token` — short-lived access token\n- `refreshToken` — long-lived token for silent renewal\n- `isNewUser` — true = navigate to profile setup (Screen 3)\n- `isProfileCompleted` — false = show onboarding, true = go to home\n- `fcmToken` (optional) — immediately saves device push token on successful login"
               },
               "response": []
             },
@@ -660,6 +720,45 @@
                 "description": "Delete the user's own account.\n\n- **Default (soft delete):** status set to DELETED, data cleared, user can re-register with same number\n- **Hard delete** (`?hardDelete=true`): permanently removed from database — irreversible"
               },
               "response": []
+            },
+            {
+              "name": "2.7 Edit Profile (Partial Update - PATCH)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "profile"
+                  ]
+                },
+                "description": "Partially update user profile fields using PATCH method.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Kartik\",\n  \"lastName\": \"Sharma\",\n  \"email\": \"kartik.sharma@example.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
             }
           ]
         },
@@ -715,7 +814,7 @@
                     }
                   ]
                 },
-                "description": "Fetch the notification list grouped by date section: **Today / Yesterday / N Days Ago**.\n\nEach notification includes:\n- `title`, `body`, `imageUrl` (thumbnail)\n- `isRead` — drives the red dot\n- `timeAgo` — human label (12 min ago, 2 days ago)\n- `deepLink` — app route to open on tap"
+                "description": "Fetch paginated notification list.\n\nReturns both `notifications: [...]` (flat list) and `groups: [...]` (date-grouped sections Today, Yesterday, X Days Ago) for complete mobile app compatibility."
               },
               "response": [
                 {
@@ -1003,7 +1102,7 @@
                     "register-device"
                   ]
                 },
-                "description": "Save the device's FCM push notification token.\n\nCall this on every app launch or when the OS issues a new token. Duplicate tokens are automatically ignored (`$addToSet`)."
+                "description": "Save device FCM push notification token.\n\nCall on app startup or when OS issues a new token. Supports optional Bearer token (attaches to authenticated user, or registers guest device). Accepts `fcmToken`, `deviceToken`, or `token`."
               },
               "response": []
             },
@@ -1046,7 +1145,7 @@
                     "unregister-device"
                   ]
                 },
-                "description": "Remove the device's FCM token on user logout so the device stops receiving push notifications."
+                "description": "Unregister device FCM push token on user logout.\n\nAccepts `fcmToken`, `deviceToken`, or `token`."
               },
               "response": []
             },
@@ -1089,7 +1188,7 @@
           ]
         },
         {
-          "name": "4. Subscriptions",
+          "name": "4. Subscriptions & Paywall",
           "description": "Subscription and Razorpay UPI AutoPay flow. Covers fetching plans, 7-day Rs. 2 trial initiation, payment verification, mid-cycle upgrades (time stacking), and webhook events.",
           "item": [
             {
@@ -1396,11 +1495,167 @@
                 "description": "Automated webhook listener for Razorpay events:\n- subscription.charged: Auto-debit succeeded -> extends subscription period.\n- payment.failed: Zero Grace Period -> immediately expires plan and locks paywalled episodes.\n- mandate.revoked: User cancelled mandate in Google Pay or PhonePe -> sets autoRenew to false while preserving access until current period end date."
               },
               "response": []
+            },
+            {
+              "name": "4.8 Validate Promo Discount Code",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"{{promoCode}}\",\n  \"planCode\": \"PLAN_1M\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/promos/validate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promos",
+                    "validate"
+                  ]
+                },
+                "description": "Validates promotional discount code during checkout and previews discounted plan pricing."
+              }
+            },
+            {
+              "name": "4.9 Apply Promo Code (Checkout Pricing Calculation)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"{{promoCode}}\",\n  \"planId\": \"{{planId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/promos/apply",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promos",
+                    "apply"
+                  ]
+                },
+                "description": "Applies promo code to checkout session, verifying plan eligibility and returning complete discount breakdown."
+              }
+            },
+            {
+              "name": "4.10 Validate Plan Voucher",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"{{voucherCode}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/vouchers/validate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vouchers",
+                    "validate"
+                  ]
+                },
+                "description": "Checks if a plan voucher is valid and previews the complete plan granted."
+              }
+            },
+            {
+              "name": "4.11 Redeem Plan Voucher (Instant VIP Activation)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"{{voucherCode}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/vouchers/redeem",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vouchers",
+                    "redeem"
+                  ]
+                },
+                "description": "Redeems voucher code and instantly grants the user 100% free VIP subscription access."
+              }
+            },
+            {
+              "name": "4.12 Get My Voucher Redemption History",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/vouchers/my-history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vouchers",
+                    "my-history"
+                  ]
+                },
+                "description": "Fetches the list of all plan vouchers redeemed by the current logged-in user."
+              }
             }
           ]
         },
         {
-          "name": "5. Video Player & Content",
+          "name": "5. Video Player & Stream Engine",
           "description": "Short, simple, high-performance APIs for content streaming, access permission evaluation as per user plan, and paginated drama/episode lists.",
           "item": [
             {
@@ -1606,15 +1861,435 @@
                 "description": "Fetches single drama metadata, synopsis, poster, genre tags, first episode info, and user's continue watching state."
               },
               "response": []
+            },
+            {
+              "name": "5.7 Check Episode Access (POST Body)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/player/access",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "player",
+                    "access"
+                  ]
+                },
+                "description": "Verify user entitlement and lock/unlock status for a specific episode using JSON payload.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dramaId\": \"{{dramaId}}\",\n  \"episodeNumber\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "5.8 Continue Watching (Player Shortcut)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/player/continue-watching?page=1&limit=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "player",
+                    "continue-watching"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Number of items per page"
+                    }
+                  ]
+                },
+                "description": "Direct player shortcut to fetch ongoing watch progress and unfinished episodes."
+              },
+              "response": []
             }
           ]
         },
         {
-          "name": "6. Search & Discovery",
+          "name": "6. Content Catalog (Dramas & Series)",
+          "description": "Endpoints for browsing drama catalogs, priority listings, new releases, and drama-specific streaming endpoints.",
+          "item": [
+            {
+              "name": "6.1 Get All Dramas (Paginated)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas?page=1&limit=10&genre=&search=&trending=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Items per page"
+                    },
+                    {
+                      "key": "genre",
+                      "value": "",
+                      "description": "Filter by genre slug/ID"
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "Search drama titles"
+                    },
+                    {
+                      "key": "trending",
+                      "value": "",
+                      "description": "Filter trending only (true/false)"
+                    }
+                  ]
+                },
+                "description": "Get active dramas with pagination, optional genre filter, keyword search, and trending sort."
+              },
+              "response": []
+            },
+            {
+              "name": "6.2 Get Single Drama Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}"
+                  ]
+                },
+                "description": "Get comprehensive details of a drama, including synopsis, cast, director, total episodes, freeEpisodes, and tags."
+              },
+              "response": []
+            },
+            {
+              "name": "6.3 Get Dramas by Admin Priority Rank",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/prioritized?page=1&limit=10&genre=&sortOrder=asc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "prioritized"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Items per page"
+                    },
+                    {
+                      "key": "genre",
+                      "value": "",
+                      "description": "Optional genre filter"
+                    },
+                    {
+                      "key": "sortOrder",
+                      "value": "asc",
+                      "description": "Sort priority: asc (highest priority first) or desc"
+                    }
+                  ]
+                },
+                "description": "Retrieve content sorted by editorial priority rank assigned by administrators."
+              },
+              "response": []
+            },
+            {
+              "name": "6.4 Get New Releases Catalog",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/new-releases?page=1&limit=10&genre=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "new-releases"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Items per page"
+                    },
+                    {
+                      "key": "genre",
+                      "value": "",
+                      "description": "Optional genre filter"
+                    }
+                  ]
+                },
+                "description": "Fetch freshly published drama series released within the latest release window."
+              },
+              "response": []
+            },
+            {
+              "name": "6.5 Toggle Save Drama (Watch Later Shortcut)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}/save",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}",
+                    "save"
+                  ]
+                },
+                "description": "Convenience shortcut to add/remove a drama from user watch later / saved series directly from drama view."
+              },
+              "response": []
+            },
+            {
+              "name": "6.6 Get Drama Episodes List Drawer",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}/episodes?page=1&limit=20&current=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}",
+                    "episodes"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Episodes per page"
+                    },
+                    {
+                      "key": "current",
+                      "value": "1",
+                      "description": "Currently playing episode"
+                    }
+                  ]
+                },
+                "description": "Fetch paginated episodes with lock/unlock status, thumbnail, duration, and user completion flags."
+              },
+              "response": []
+            },
+            {
+              "name": "6.7 Check Drama Episode Access",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}/access/{{episodeNumber}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}",
+                    "access",
+                    "{{episodeNumber}}"
+                  ]
+                },
+                "description": "Check whether user plan unlocks this episode or requires paywall initiation."
+              },
+              "response": []
+            },
+            {
+              "name": "6.8 Play Drama Episode Stream",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}/play/{{episodeNumber}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}",
+                    "play",
+                    "{{episodeNumber}}"
+                  ]
+                },
+                "description": "Resolve video stream URL, subtitles, and resume position for episode playback."
+              },
+              "response": []
+            },
+            {
+              "name": "6.9 Stream Drama Episode (Stream Route Alias)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}/episodes/{{episodeNumber}}/stream",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}",
+                    "episodes",
+                    "{{episodeNumber}}",
+                    "stream"
+                  ]
+                },
+                "description": "RESTful streaming alias matching PRD specification."
+              },
+              "response": []
+            },
+            {
+              "name": "6.10 Record Drama Playback Progress",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/{{dramaId}}/progress",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "{{dramaId}}",
+                    "progress"
+                  ]
+                },
+                "description": "Save playback resume position and trigger Continue Watching synchronization.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"episodeNumber\": 2,\n  \"lastPosition\": 120,\n  \"duration\": 600,\n  \"isCompleted\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "7. Search & Discovery",
           "description": "Search screen discovery and query APIs matching the mobile UI. Includes ranked Popular Searches (01, 02, 03...), Recommended For You personalized as per genre(s) selected in user profile build (user.interests), live autocomplete suggestions, and multi-field search. Strictly NO recent search history.",
           "item": [
             {
-              "name": "6.1 Search Landing Screen (Popular & Recommended)",
+              "name": "7.1 Search Landing Screen (Popular & Recommended)",
               "request": {
                 "method": "GET",
                 "header": [
@@ -1652,7 +2327,7 @@
               "response": []
             },
             {
-              "name": "6.2 Popular Searches (Ranked 01..N)",
+              "name": "7.2 Popular Searches (Ranked 01..N)",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -1678,7 +2353,7 @@
               "response": []
             },
             {
-              "name": "6.3 Recommended For You (Personalized by Profile Genres)",
+              "name": "7.3 Recommended For You (Personalized by Profile Genres)",
               "request": {
                 "method": "GET",
                 "header": [
@@ -1716,7 +2391,7 @@
               "response": []
             },
             {
-              "name": "6.4 Fast Live Autocomplete Suggestions",
+              "name": "7.4 Fast Live Autocomplete Suggestions",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -1747,7 +2422,7 @@
               "response": []
             },
             {
-              "name": "6.5 Multi-Field Search Query",
+              "name": "7.5 Multi-Field Search Query",
               "request": {
                 "method": "GET",
                 "header": [
@@ -1794,7 +2469,7 @@
               "response": []
             },
             {
-              "name": "6.6 Unified Search Route (Empty Query Defaults to Landing)",
+              "name": "7.6 Unified Search Route (Empty Query Defaults to Landing)",
               "request": {
                 "method": "GET",
                 "header": [
@@ -1815,6 +2490,342 @@
                   ]
                 },
                 "description": "Unified search endpoint. When query parameter q is omitted or empty, automatically serves the Search Landing Screen discovery data."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "8. Home & Discovery Feed",
+          "description": "APIs powering the OTT Home Screen feed. Includes prioritized content by admin, continue watching row with playback progress, categories ordered by admin priority, recommended categories as genres, new releases, and dynamic admin-configured category sections. All endpoints support standard pagination.",
+          "item": [
+            {
+              "name": "8.1 Active Home Hero Banners Carousel",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/home/banners?limit=5&genre=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "banners"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "5",
+                      "description": "Number of active banners (default 5)"
+                    },
+                    {
+                      "key": "genre",
+                      "value": "",
+                      "description": "Optional genre filter"
+                    }
+                  ]
+                },
+                "description": "Fetch active hero carousel banners for mobile home screen with linked drama metadata and CTA."
+              },
+              "response": []
+            },
+            {
+              "name": "8.2 All Content by Admin Priority",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/content?page=1&limit=10&sortOrder=asc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "content"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default: 1)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Items per page (default: 10, max: 50)"
+                    },
+                    {
+                      "key": "genre",
+                      "value": "",
+                      "description": "Optional genre ID or slug filter"
+                    },
+                    {
+                      "key": "sortOrder",
+                      "value": "asc",
+                      "description": "Sorting direction: 'asc' (1, 2, 3... top priority first) or 'desc'"
+                    }
+                  ]
+                },
+                "description": "Fetches all published drama content ordered by priority set by admin. Dramas with lower priority numbers (1, 2, 3...) appear first, followed by viewsCount and recency. Standard pagination included."
+              },
+              "response": []
+            },
+            {
+              "name": "8.3 Continue Watching",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Optional — returns user watch history; graceful empty list for guests"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/home/continue-watching?page=1&limit=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "continue-watching"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default: 1)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Items per page (default: 10)"
+                    }
+                  ]
+                },
+                "description": "Returns the active Continue Watching row with watch history for the authenticated user (progress < 95%), sorted by lastWatchedAt descending. Includes watched seconds, remaining seconds, duration, progress percentage, episode badge, and drama card. Returns empty list for guests without erroring."
+              },
+              "response": []
+            },
+            {
+              "name": "8.4 All Categories (as per Admin Priority)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/categories?page=1&limit=10&includeDramas=false&dramasLimit=6",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "categories"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default: 1)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Categories per page (default: 10)"
+                    },
+                    {
+                      "key": "includeDramas",
+                      "value": "false",
+                      "description": "Set to true to embed a preview tray of top dramas for each category"
+                    },
+                    {
+                      "key": "dramasLimit",
+                      "value": "6",
+                      "description": "Number of sample dramas per category when includeDramas=true"
+                    }
+                  ]
+                },
+                "description": "Fetches all active OTT genres/categories strictly ordered by admin displayOrder (priority). Returns category details, icon URLs, published drama count, and optional top drama cards. Standard pagination included."
+              },
+              "response": []
+            },
+            {
+              "name": "8.5 Recommended Categories as Genres",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Optional — personalizes categories based on profile build interests"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/home/recommended-categories?page=1&limit=10&includeDramas=true&dramasLimit=6",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "recommended-categories"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default: 1)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Categories per page (default: 10)"
+                    },
+                    {
+                      "key": "includeDramas",
+                      "value": "true",
+                      "description": "Embeds top preview dramas for each recommended category"
+                    },
+                    {
+                      "key": "dramasLimit",
+                      "value": "6",
+                      "description": "Max dramas to return inside each category tray"
+                    }
+                  ]
+                },
+                "description": "Recommends categories as genres. Prioritizes genres chosen during profile onboarding (user.interests, tagged isUserInterest: true), followed by top-performing genres ranked by views and admin priority. Returns category details and preview drama cards. Standard pagination included."
+              },
+              "response": []
+            },
+            {
+              "name": "8.6 New Releases Section",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/new-releases?page=1&limit=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "new-releases"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default: 1)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Items per page (default: 10)"
+                    },
+                    {
+                      "key": "genre",
+                      "value": "",
+                      "description": "Optional genre filter ID or slug"
+                    }
+                  ]
+                },
+                "description": "Fetches the New Releases section for the Home screen. Returns chronologically sorted latest published dramas (prioritizing isNewRelease: true) with release date, views count formatted, and ratings. Standard pagination included."
+              },
+              "response": []
+            },
+            {
+              "name": "8.7 Dynamic Home Category Sections",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/sections?page=1&limit=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "sections"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default: 1)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Sections per page (default: 10)"
+                    }
+                  ]
+                },
+                "description": "Fetches all active home category sections dynamically configured and prioritized by admin. Automatically resolves and embeds dramas for each section based on its sectionType (GENRE, CUSTOM_CURATED, NEW_RELEASES, TRENDING, PRIORITY_CONTENT). Standard pagination included."
+              },
+              "response": []
+            },
+            {
+              "name": "8.8 View All Section Content",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/home/sections/{{sectionSlug}}?page=1&limit=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "sections",
+                    "{{sectionSlug}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default: 1)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Items per page (default: 10)"
+                    }
+                  ]
+                },
+                "description": "View All screen for a specific home category section (by ID or slug). Returns paginated list of all drama cards belonging to that section."
+              },
+              "response": []
+            },
+            {
+              "name": "8.9 Unified Home Screen Feed",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text",
+                    "description": "Optional — personalizes feed and loads continue watching"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/home/feed",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "home",
+                    "feed"
+                  ]
+                },
+                "description": "Single pre-aggregated API for the entire mobile Home screen. Loads Hero Carousel, Continue Watching, Categories pills, Admin Prioritized Content, New Releases, and Dynamic Category Sections in one lightning-fast request."
               },
               "response": []
             }
@@ -2094,314 +3105,81 @@
                 "description": "Updates playback preferences (autoplay, video quality 1080p/720p/Auto, subtitles) and notifications."
               },
               "response": []
-            }
-          ]
-        },
-        {
-          "name": "7. Home & Discovery Feed",
-          "description": "APIs powering the OTT Home Screen feed. Includes prioritized content by admin, continue watching row with playback progress, categories ordered by admin priority, recommended categories as genres, new releases, and dynamic admin-configured category sections. All endpoints support standard pagination.",
-          "item": [
-            {
-              "name": "7.1 All Content by Admin Priority",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/home/content?page=1&limit=10&sortOrder=asc",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "content"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "1",
-                      "description": "Page number (default: 1)"
-                    },
-                    {
-                      "key": "limit",
-                      "value": "10",
-                      "description": "Items per page (default: 10, max: 50)"
-                    },
-                    {
-                      "key": "genre",
-                      "value": "",
-                      "description": "Optional genre ID or slug filter"
-                    },
-                    {
-                      "key": "sortOrder",
-                      "value": "asc",
-                      "description": "Sorting direction: 'asc' (1, 2, 3... top priority first) or 'desc'"
-                    }
-                  ]
-                },
-                "description": "Fetches all published drama content ordered by priority set by admin. Dramas with lower priority numbers (1, 2, 3...) appear first, followed by viewsCount and recency. Standard pagination included."
-              },
-              "response": []
             },
             {
-              "name": "7.2 Continue Watching",
+              "name": "9.9 Check Series Saved Status (Status Alias)",
               "request": {
                 "method": "GET",
                 "header": [
                   {
                     "key": "Authorization",
                     "value": "Bearer {{authToken}}",
-                    "type": "text",
-                    "description": "Optional — returns user watch history; graceful empty list for guests"
+                    "type": "text"
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/home/continue-watching?page=1&limit=10",
+                  "raw": "{{baseUrl}}/user/saved-series/{{dramaId}}/status",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "home",
-                    "continue-watching"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "1",
-                      "description": "Page number (default: 1)"
-                    },
-                    {
-                      "key": "limit",
-                      "value": "10",
-                      "description": "Items per page (default: 10)"
-                    }
+                    "user",
+                    "saved-series",
+                    "{{dramaId}}",
+                    "status"
                   ]
                 },
-                "description": "Returns the active Continue Watching row with watch history for the authenticated user (progress < 95%), sorted by lastWatchedAt descending. Includes watched seconds, remaining seconds, duration, progress percentage, episode badge, and drama card. Returns empty list for guests without erroring."
+                "description": "Alternative status endpoint checking whether drama is currently in watchlist."
               },
               "response": []
             },
             {
-              "name": "7.3 All Categories (as per Admin Priority)",
+              "name": "9.10 Update Playback & App Settings (PATCH Partial)",
               "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/home/categories?page=1&limit=10&includeDramas=false&dramasLimit=6",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "categories"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "1",
-                      "description": "Page number (default: 1)"
-                    },
-                    {
-                      "key": "limit",
-                      "value": "10",
-                      "description": "Categories per page (default: 10)"
-                    },
-                    {
-                      "key": "includeDramas",
-                      "value": "false",
-                      "description": "Set to true to embed a preview tray of top dramas for each category"
-                    },
-                    {
-                      "key": "dramasLimit",
-                      "value": "6",
-                      "description": "Number of sample dramas per category when includeDramas=true"
-                    }
-                  ]
-                },
-                "description": "Fetches all active OTT genres/categories strictly ordered by admin displayOrder (priority). Returns category details, icon URLs, published drama count, and optional top drama cards. Standard pagination included."
-              },
-              "response": []
-            },
-            {
-              "name": "7.4 Recommended Categories as Genres",
-              "request": {
-                "method": "GET",
+                "method": "PATCH",
                 "header": [
                   {
                     "key": "Authorization",
                     "value": "Bearer {{authToken}}",
-                    "type": "text",
-                    "description": "Optional — personalizes categories based on profile build interests"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/home/recommended-categories?page=1&limit=10&includeDramas=true&dramasLimit=6",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "recommended-categories"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "1",
-                      "description": "Page number (default: 1)"
-                    },
-                    {
-                      "key": "limit",
-                      "value": "10",
-                      "description": "Categories per page (default: 10)"
-                    },
-                    {
-                      "key": "includeDramas",
-                      "value": "true",
-                      "description": "Embeds top preview dramas for each recommended category"
-                    },
-                    {
-                      "key": "dramasLimit",
-                      "value": "6",
-                      "description": "Max dramas to return inside each category tray"
-                    }
-                  ]
-                },
-                "description": "Recommends categories as genres. Prioritizes genres chosen during profile onboarding (user.interests, tagged isUserInterest: true), followed by top-performing genres ranked by views and admin priority. Returns category details and preview drama cards. Standard pagination included."
-              },
-              "response": []
-            },
-            {
-              "name": "7.5 New Releases Section",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/home/new-releases?page=1&limit=10",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "new-releases"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "1",
-                      "description": "Page number (default: 1)"
-                    },
-                    {
-                      "key": "limit",
-                      "value": "10",
-                      "description": "Items per page (default: 10)"
-                    },
-                    {
-                      "key": "genre",
-                      "value": "",
-                      "description": "Optional genre filter ID or slug"
-                    }
-                  ]
-                },
-                "description": "Fetches the New Releases section for the Home screen. Returns chronologically sorted latest published dramas (prioritizing isNewRelease: true) with release date, views count formatted, and ratings. Standard pagination included."
-              },
-              "response": []
-            },
-            {
-              "name": "7.6 Dynamic Home Category Sections",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/home/sections?page=1&limit=10",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "sections"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "1",
-                      "description": "Page number (default: 1)"
-                    },
-                    {
-                      "key": "limit",
-                      "value": "10",
-                      "description": "Sections per page (default: 10)"
-                    }
-                  ]
-                },
-                "description": "Fetches all active home category sections dynamically configured and prioritized by admin. Automatically resolves and embeds dramas for each section based on its sectionType (GENRE, CUSTOM_CURATED, NEW_RELEASES, TRENDING, PRIORITY_CONTENT). Standard pagination included."
-              },
-              "response": []
-            },
-            {
-              "name": "7.7 View All Section Content",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/home/sections/{{sectionSlug}}?page=1&limit=10",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "home",
-                    "sections",
-                    "{{sectionSlug}}"
-                  ],
-                  "query": [
-                    {
-                      "key": "page",
-                      "value": "1",
-                      "description": "Page number (default: 1)"
-                    },
-                    {
-                      "key": "limit",
-                      "value": "10",
-                      "description": "Items per page (default: 10)"
-                    }
-                  ]
-                },
-                "description": "View All screen for a specific home category section (by ID or slug). Returns paginated list of all drama cards belonging to that section."
-              },
-              "response": []
-            },
-            {
-              "name": "7.8 Unified Home Screen Feed",
-              "request": {
-                "method": "GET",
-                "header": [
+                    "type": "text"
+                  },
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
-                    "type": "text",
-                    "description": "Optional — personalizes feed and loads continue watching"
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/home/feed",
+                  "raw": "{{baseUrl}}/user/settings",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    "home",
-                    "feed"
+                    "user",
+                    "settings"
                   ]
                 },
-                "description": "Single pre-aggregated API for the entire mobile Home screen. Loads Hero Carousel, Continue Watching, Categories pills, Admin Prioritized Content, New Releases, and Dynamic Category Sections in one lightning-fast request."
+                "description": "Partially update user video player preferences and application settings.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"autoplayNext\": true,\n  \"streamQuality\": \"auto\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
               },
               "response": []
             }
           ]
         },
         {
-          "name": "8. Genres & Categories",
+          "name": "10. Genres & Categories",
           "description": "Public and onboarding endpoints for fetching genres and interest categories with real-time drama counts.",
           "item": [
             {
-              "name": "8.1 Get Active Genres with Drama Counts",
+              "name": "10.1 Get Active Genres with Drama Counts",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2419,7 +3197,7 @@
               "response": []
             },
             {
-              "name": "8.2 Get Genre Details with Associated Dramas",
+              "name": "10.2 Get Genre Details with Associated Dramas",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2440,11 +3218,11 @@
           ]
         },
         {
-          "name": "10. Ads & Monetization",
+          "name": "11. Ads & Monetization",
           "description": "Mobile client endpoints for retrieving live Google AdMob configuration, querying dynamic mediation ad server (Custom Ad vs AdMob), and tracking custom ad impressions & clicks.",
           "item": [
             {
-              "name": "10.1 Get Mobile Ads Configuration",
+              "name": "11.1 Get Mobile Ads Configuration",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2470,7 +3248,7 @@
               "response": []
             },
             {
-              "name": "10.2 Dynamic Mediation Ad Serving",
+              "name": "11.2 Dynamic Mediation Ad Serving",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2511,7 +3289,7 @@
               "response": []
             },
             {
-              "name": "10.3 Track Custom Ad Impression",
+              "name": "11.3 Track Custom Ad Impression",
               "request": {
                 "method": "POST",
                 "header": [],
@@ -2532,7 +3310,7 @@
               "response": []
             },
             {
-              "name": "10.4 Track Custom Ad Click",
+              "name": "11.4 Track Custom Ad Click",
               "request": {
                 "method": "POST",
                 "header": [],
@@ -2564,7 +3342,7 @@
           "name": "1. Admin Authentication",
           "item": [
             {
-              "name": "Firebase Admin Login & Token Verification",
+              "name": "1.1 Firebase Admin Login & Token Verification",
               "event": [
                 {
                   "listen": "test",
@@ -2617,11 +3395,11 @@
           ]
         },
         {
-          "name": "4. User Management",
+          "name": "2. User Management",
           "description": "View, search, filter, edit, suspend, grant subscription, and delete users.",
           "item": [
             {
-              "name": "4.1 List All Users",
+              "name": "2.1 List All Users",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2662,7 +3440,7 @@
               "response": []
             },
             {
-              "name": "4.2 Search Users",
+              "name": "2.2 Search Users",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2699,7 +3477,7 @@
               "response": []
             },
             {
-              "name": "4.3 Filter — Subscribed Users",
+              "name": "2.3 Filter — Subscribed Users",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2731,7 +3509,7 @@
               "response": []
             },
             {
-              "name": "4.4 Filter — Free Users",
+              "name": "2.4 Filter — Free Users",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2763,7 +3541,7 @@
               "response": []
             },
             {
-              "name": "4.5 Filter — Suspended Users",
+              "name": "2.5 Filter — Suspended Users",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2795,7 +3573,7 @@
               "response": []
             },
             {
-              "name": "4.6 Get User by ID",
+              "name": "2.6 Get User by ID",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2814,7 +3592,7 @@
               "response": []
             },
             {
-              "name": "4.7 Edit User Details",
+              "name": "2.7 Edit User Details",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -2847,7 +3625,7 @@
               "response": []
             },
             {
-              "name": "4.8 Activate User",
+              "name": "2.8 Activate User",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -2881,7 +3659,7 @@
               "response": []
             },
             {
-              "name": "4.9 Suspend User",
+              "name": "2.9 Suspend User",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -2915,7 +3693,7 @@
               "response": []
             },
             {
-              "name": "4.10 Grant Subscription",
+              "name": "2.10 Grant Subscription",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -2949,7 +3727,7 @@
               "response": []
             },
             {
-              "name": "4.11 Revoke Subscription",
+              "name": "2.11 Revoke Subscription",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -2983,7 +3761,7 @@
               "response": []
             },
             {
-              "name": "4.12 Delete User (Permanent)",
+              "name": "2.12 Delete User (Permanent)",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -3004,11 +3782,11 @@
           ]
         },
         {
-          "name": "5. Send Notifications (Admin)",
+          "name": "3. Push Notifications & In-App Announcements",
           "description": "Create and push notifications to specific users. Notifications are saved to the DB and respect the user's opt-in toggle preferences.",
           "item": [
             {
-              "name": "5.1 Send — New Episode",
+              "name": "3.1 Send — New Episode",
               "request": {
                 "auth": {
                   "type": "bearer",
@@ -3051,7 +3829,7 @@
               "response": []
             },
             {
-              "name": "5.2 Send — New Release",
+              "name": "3.2 Send — New Release",
               "request": {
                 "auth": {
                   "type": "bearer",
@@ -3094,7 +3872,7 @@
               "response": []
             },
             {
-              "name": "5.3 Send — Recommendation",
+              "name": "3.3 Send — Recommendation",
               "request": {
                 "auth": {
                   "type": "bearer",
@@ -3137,7 +3915,7 @@
               "response": []
             },
             {
-              "name": "5.4 Send — System Message",
+              "name": "3.4 Send — System Message",
               "request": {
                 "auth": {
                   "type": "bearer",
@@ -3180,7 +3958,7 @@
               "response": []
             },
             {
-              "name": "5.5 Get Push Broadcast Campaigns & Stats",
+              "name": "3.5 Get Push Broadcast Campaigns & Stats",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -3200,7 +3978,7 @@
               "response": []
             },
             {
-              "name": "5.6 Broadcast Push Notification (FCM)",
+              "name": "3.6 Broadcast Push Notification (FCM)",
               "request": {
                 "method": "POST",
                 "header": [
@@ -3234,7 +4012,7 @@
               "response": []
             },
             {
-              "name": "5.7 Get In-App Announcements",
+              "name": "3.7 Get In-App Announcements",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -3254,7 +4032,7 @@
               "response": []
             },
             {
-              "name": "5.8 Create In-App Announcement",
+              "name": "3.8 Create In-App Announcement",
               "request": {
                 "method": "POST",
                 "header": [
@@ -3288,12 +4066,12 @@
               "response": []
             },
             {
-              "name": "5.9 Delete In-App Announcement",
+              "name": "3.9 Delete In-App Announcement",
               "request": {
                 "method": "DELETE",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/notifications/admin/announcements/ANNOUNCEMENT_ID",
+                  "raw": "{{baseUrl}}/notifications/admin/announcements/{{announcementId}}",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -3301,21 +4079,49 @@
                     "notifications",
                     "admin",
                     "announcements",
-                    "ANNOUNCEMENT_ID"
+                    "{{announcementId}}"
                   ]
                 },
                 "description": "Permanently delete an in-app announcement from MongoDB by its ID."
+              },
+              "response": []
+            },
+            {
+              "name": "3.10 Toggle In-App Announcement Active Status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/notifications/admin/announcements/{{announcementId}}/toggle",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    "admin",
+                    "announcements",
+                    "{{announcementId}}",
+                    "toggle"
+                  ]
+                },
+                "description": "Toggle active visibility of an in-app banner announcement on/off."
               },
               "response": []
             }
           ]
         },
         {
-          "name": "6. Subscription Management",
+          "name": "4. Subscription & Monetization Management",
           "description": "Admin APIs for managing subscription plans, live 7-day trial configurations, transaction ledger, and subscriber directory with manual override controls.",
           "item": [
             {
-              "name": "6.1 Get Monetization Overview",
+              "name": "4.1 Get Monetization Overview",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -3335,7 +4141,7 @@
               "response": []
             },
             {
-              "name": "6.2 List All Plans (Admin)",
+              "name": "4.2 List All Plans (Admin)",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -3355,7 +4161,7 @@
               "response": []
             },
             {
-              "name": "6.3 Create New Plan",
+              "name": "4.3 Create New Plan",
               "request": {
                 "method": "POST",
                 "header": [
@@ -3389,7 +4195,7 @@
               "response": []
             },
             {
-              "name": "6.4 Update Plan",
+              "name": "4.4 Update Plan",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -3424,7 +4230,7 @@
               "response": []
             },
             {
-              "name": "6.5 Delete or Archive Plan",
+              "name": "4.5 Delete or Archive Plan",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -3445,7 +4251,7 @@
               "response": []
             },
             {
-              "name": "6.6 Get 7-Day Trial Settings",
+              "name": "4.6 Get 7-Day Trial Settings",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -3465,7 +4271,7 @@
               "response": []
             },
             {
-              "name": "6.7 Update 7-Day Trial Settings",
+              "name": "4.7 Update 7-Day Trial Settings",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -3499,7 +4305,7 @@
               "response": []
             },
             {
-              "name": "6.8 List Transactions Ledger",
+              "name": "4.8 List Transactions Ledger",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -3536,7 +4342,7 @@
               "response": []
             },
             {
-              "name": "6.9 List Subscribers Directory",
+              "name": "4.9 List Subscribers Directory",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -3573,7 +4379,7 @@
               "response": []
             },
             {
-              "name": "6.10 Manual Override Subscription Access",
+              "name": "4.10 Manual Override Subscription Access",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -3611,11 +4417,11 @@
           ]
         },
         {
-          "name": "8. Content Library & Drama Management",
+          "name": "5. Content Library & Drama Management",
           "description": "Admin panel management APIs for Content Library (Dramas/Series). Includes fetching real dynamic drama catalog with stats, creating new series, updating metadata, deleting series, toggling active/inactive status, toggling paid/free access, setting priority ranks, and managing episodes.",
           "item": [
             {
-              "name": "8.1 Get Admin Content Library & Catalog Stats",
+              "name": "5.1 Get Admin Content Library & Catalog Stats",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -3634,7 +4440,7 @@
               "response": []
             },
             {
-              "name": "8.2 Create New Drama Series",
+              "name": "5.2 Create New Drama Series",
               "request": {
                 "method": "POST",
                 "header": [
@@ -3661,7 +4467,7 @@
               "response": []
             },
             {
-              "name": "8.3 Update Drama Series Details",
+              "name": "5.3 Update Drama Series Details",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -3689,7 +4495,7 @@
               "response": []
             },
             {
-              "name": "8.4 Toggle Drama Active/Inactive Status",
+              "name": "5.4 Toggle Drama Active/Inactive Status",
               "request": {
                 "method": "PATCH",
                 "header": [],
@@ -3709,7 +4515,7 @@
               "response": []
             },
             {
-              "name": "8.5 Toggle Drama Paid/Free Access",
+              "name": "5.5 Toggle Drama Paid/Free Access",
               "request": {
                 "method": "PATCH",
                 "header": [],
@@ -3729,7 +4535,7 @@
               "response": []
             },
             {
-              "name": "8.6 Set/Update Drama Priority Rank",
+              "name": "5.6 Set/Update Drama Priority Rank",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -3758,7 +4564,7 @@
               "response": []
             },
             {
-              "name": "8.7 Delete Drama Series",
+              "name": "5.7 Delete Drama Series",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -3777,7 +4583,7 @@
               "response": []
             },
             {
-              "name": "8.8 Save/Update Drama Episodes & Paywall",
+              "name": "5.8 Save/Update Drama Episodes & Paywall",
               "request": {
                 "method": "POST",
                 "header": [
@@ -3809,11 +4615,11 @@
           ]
         },
         {
-          "name": "8. Banners & Hero Carousel Management",
+          "name": "6. Banners & Hero Carousel Management",
           "description": "Full administrative management for OTT Hero Banners and Carousel slides. Admins can upload 16:9 banners, link to specific drama series, set custom promotional external URLs, reorder display priorities, and toggle active carousel status.",
           "item": [
             {
-              "name": "8.1 List All Banners (Admin Catalog & Stats)",
+              "name": "6.1 List All Banners (Admin Catalog & Stats)",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -3833,7 +4639,7 @@
               "response": []
             },
             {
-              "name": "8.2 Create New Content Banner",
+              "name": "6.2 Create New Content Banner",
               "request": {
                 "method": "POST",
                 "header": [
@@ -3866,7 +4672,7 @@
               "response": []
             },
             {
-              "name": "8.3 Update Content Banner",
+              "name": "6.3 Update Content Banner",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -3900,7 +4706,7 @@
               "response": []
             },
             {
-              "name": "8.4 Toggle Banner Active/Inactive Status",
+              "name": "6.4 Toggle Banner Active/Inactive Status",
               "request": {
                 "method": "PATCH",
                 "header": [],
@@ -3922,7 +4728,7 @@
               "response": []
             },
             {
-              "name": "8.5 Batch Reorder Banners Display Order",
+              "name": "6.5 Batch Reorder Banners Display Order",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -3957,7 +4763,7 @@
               "response": []
             },
             {
-              "name": "8.6 Delete Banner Permanently",
+              "name": "6.6 Delete Banner Permanently",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -4479,7 +5285,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"admobEnabled\": true,\n  \"testMode\": false,\n  \"publisherAccountId\": \"pub-6490055741105644\",\n  \"appPackageName\": \"com.flix9ott.app\",\n  \"oauthClientId\": \"389814863433-dits4313tlppgv84l.apps.googleusercontent.com\",\n  \"oauthClientSecret\": \"GOCSPX-SampleSecretKey983719\",\n  \"oauthRefreshToken\": \"1//04SampleRefreshToken_AdMobSync\",\n  \"androidAppId\": \"ca-app-pub-6490055741105644~9920192847\",\n  \"iosAppId\": \"ca-app-pub-xxx/yyy\",\n  \"adUnits\": {\n    \"appOpen\": {\n      \"android\": \"ca-app-pub-6490055741105644/4455667788\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true\n    },\n    \"banner\": {\n      \"android\": \"ca-app-pub-6490055741105644/3344556677\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true\n    },\n    \"interstitial\": {\n      \"android\": \"ca-app-pub-6490055741105644/2233445566\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true,\n      \"intervalEpisodes\": 3\n    },\n    \"rewarded\": {\n      \"android\": \"ca-app-pub-6490055741105644/1122334455\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true,\n      \"rewardDescription\": \"Unlock Episode / 1 Free Pass\"\n    },\n    \"rewardedInterstitial\": {\n      \"android\": \"ca-app-pub-6490055741105644/5566778899\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true\n    }\n  },\n  \"mediationMode\": \"CUSTOM_FIRST\",\n  \"customAdSharePercent\": 50,\n  \"vipBypassAds\": true,\n  \"globalAdFrequencyCap\": 6\n}",
+                  "raw": "{\n  \"admobEnabled\": true,\n  \"testMode\": false,\n  \"publisherAccountId\": \"pub-6490055741105644\",\n  \"appPackageName\": \"com.flix9ott.app\",\n  \"oauthClientId\": \"389814863433-dits4313tlppgv84l.apps.googleusercontent.com\",\n  \"oauthClientSecret\": \"GOCSPX-SampleSecretKey983719\",\n  \"oauthRefreshToken\": \"1//04SampleRefreshToken_AdMobSync\",\n  \"androidAppId\": \"ca-app-pub-6490055741105644~9920192847\",\n  \"iosAppId\": \"ca-app-pub-xxx/yyy\",\n  \"adUnits\": {\n    \"appOpen\": {\n      \"android\": \"ca-app-pub-6490055741105644/4455667788\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true\n    },\n    \"banner\": {\n      \"android\": \"ca-app-pub-6490055741105644/3344556677\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true\n    },\n    \"interstitial\": {\n      \"android\": \"ca-app-pub-6490055741105644/2233445566\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true,\n      \"intervalEpisodes\": 3\n    },\n    \"rewarded\": {\n      \"android\": \"ca-app-pub-6490055741105644/1122334455\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true,\n      \"rewardDescription\": \"Unlock Episode / 1 Free Pass\"\n    },\n    \"rewardedInterstitial\": {\n      \"android\": \"ca-app-pub-6490055741105644/5566778899\",\n      \"ios\": \"ca-app-pub-xxx/yyy\",\n      \"enabled\": true\n    }\n  },\n  \"mediationMode\": \"CUSTOM_FIRST\",\n  \"customAdSharePercent\": 50,\n  \"vipBypassAds\": true,\n  \"globalAdFrequencyCap\": 6,\n  \"websiteControls\": {\n    \"websiteAdsEnabled\": true,\n    \"adsenseEnabled\": true,\n    \"customAdsEnabled\": true,\n    \"mediationMode\": \"CUSTOM_FIRST\"\n  }\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -4714,6 +5520,456 @@
               "response": []
             }
           ]
+        },
+        {
+          "name": "10. Promo Codes Management (Discount Coupons)",
+          "description": "Full CRUD, bulk generation, and toggle controls for promotional discount codes (Percentage & Flat discounts on subscription plans).",
+          "item": [
+            {
+              "name": "10.1 List All Promo Codes",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promos/admin?page=1&limit=50&status=ALL&search=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promos",
+                    "admin"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "status",
+                      "value": "ALL"
+                    },
+                    {
+                      "key": "search",
+                      "value": ""
+                    }
+                  ]
+                },
+                "description": "Fetch paginated promotional discount codes along with active, expired, and total redemption counters."
+              }
+            },
+            {
+              "name": "10.2 Create Promo Code",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"FESTIVAL50\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 50,\n  \"applicablePlan\": \"ALL\",\n  \"maxUses\": 500,\n  \"expiryDate\": \"2026-12-31T23:59:59.000Z\",\n  \"description\": \"Special 50% discount on all passes\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/promos/admin",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promos",
+                    "admin"
+                  ]
+                },
+                "description": "Create a new promotional discount coupon."
+              }
+            },
+            {
+              "name": "10.3 Bulk Generate Promo Codes",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"prefix\": \"DIWALI\",\n  \"count\": 10,\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 20,\n  \"applicablePlan\": \"ALL\",\n  \"maxUses\": 100,\n  \"expiryDate\": \"2026-12-31T23:59:59.000Z\",\n  \"description\": \"Diwali festive campaign batch\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/promos/admin/bulk-generate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promos",
+                    "admin",
+                    "bulk-generate"
+                  ]
+                },
+                "description": "Batch generates multiple unique promo discount codes with a common prefix."
+              }
+            },
+            {
+              "name": "10.4 Get Single Promo Code Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promos/admin/{{promoId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promos",
+                    "admin",
+                    "{{promoId}}"
+                  ]
+                },
+                "description": "Fetch details, status, and usage counts for a single promo code by ID or code string."
+              }
+            },
+            {
+              "name": "10.5 Update Promo Code",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"discountValue\": 40,\n  \"maxUses\": 1000,\n  \"description\": \"Updated 40% discount\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/promos/admin/{{promoId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promos",
+                    "admin",
+                    "{{promoId}}"
+                  ]
+                },
+                "description": "Update discount values, usage quota, or expiry of a promo code."
+              }
+            },
+            {
+              "name": "10.6 Toggle Promo Status (Active / Paused)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promos/admin/{{promoId}}/toggle",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promos",
+                    "admin",
+                    "{{promoId}}",
+                    "toggle"
+                  ]
+                },
+                "description": "Instantly pause or reactivate a promo code."
+              }
+            },
+            {
+              "name": "10.7 Delete Promo Code",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/promos/admin/{{promoId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "promos",
+                    "admin",
+                    "{{promoId}}"
+                  ]
+                },
+                "description": "Permanently remove a promo discount code."
+              }
+            }
+          ]
+        },
+        {
+          "name": "11. Plan Vouchers Management (Complete Plan Access)",
+          "description": "Manage 100% complimentary subscription plan vouchers (grant 1M, 6M, 12M passes) for giveaways, partnerships, and influencers.",
+          "item": [
+            {
+              "name": "11.1 List All Plan Vouchers",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/vouchers/admin?page=1&limit=50&status=ALL&search=",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vouchers",
+                    "admin"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    },
+                    {
+                      "key": "status",
+                      "value": "ALL"
+                    },
+                    {
+                      "key": "search",
+                      "value": ""
+                    }
+                  ]
+                },
+                "description": "Fetch paginated subscription plan vouchers with redemptions and quota stats."
+              }
+            },
+            {
+              "name": "11.2 Create Plan Voucher",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"VIPGIFT30\",\n  \"planCode\": \"PLAN_1M\",\n  \"planName\": \"1 Month Pass\",\n  \"durationDays\": 30,\n  \"voucherType\": \"SINGLE_USE\",\n  \"maxUses\": 1,\n  \"expiryDate\": \"2026-12-31T23:59:59.000Z\",\n  \"campaignName\": \"Tech Influencer Review Campaign\",\n  \"notes\": \"Gifted to YouTube reviewer @techguru\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/vouchers/admin",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vouchers",
+                    "admin"
+                  ]
+                },
+                "description": "Create a voucher that grants a full subscription plan directly."
+              }
+            },
+            {
+              "name": "11.3 Bulk Generate Plan Vouchers",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"prefix\": \"CAMPUS\",\n  \"count\": 20,\n  \"planCode\": \"PLAN_1M\",\n  \"voucherType\": \"SINGLE_USE\",\n  \"expiryDate\": \"2026-12-31T23:59:59.000Z\",\n  \"campaignName\": \"College Fest Giveaway\",\n  \"notes\": \"Handed out at annual college fest\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/vouchers/admin/bulk-generate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vouchers",
+                    "admin",
+                    "bulk-generate"
+                  ]
+                },
+                "description": "Generates a batch of unique single-use or multi-use plan vouchers with a given prefix."
+              }
+            },
+            {
+              "name": "11.4 Get Single Plan Voucher Details",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/vouchers/admin/{{voucherId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vouchers",
+                    "admin",
+                    "{{voucherId}}"
+                  ]
+                },
+                "description": "Fetch voucher details including claimant users and timestamps."
+              }
+            },
+            {
+              "name": "11.5 Update Plan Voucher",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"campaignName\": \"Updated Campaign Title\",\n  \"notes\": \"Extended expiry and added notes\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/vouchers/admin/{{voucherId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vouchers",
+                    "admin",
+                    "{{voucherId}}"
+                  ]
+                },
+                "description": "Update voucher parameters, assigned plan duration, and notes."
+              }
+            },
+            {
+              "name": "11.6 Toggle Voucher Status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/vouchers/admin/{{voucherId}}/toggle",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vouchers",
+                    "admin",
+                    "{{voucherId}}",
+                    "toggle"
+                  ]
+                },
+                "description": "Pause or unpause a plan voucher."
+              }
+            },
+            {
+              "name": "11.7 Delete Plan Voucher",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/vouchers/admin/{{voucherId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "vouchers",
+                    "admin",
+                    "{{voucherId}}"
+                  ]
+                },
+                "description": "Delete a plan voucher from database."
+              }
+            }
+          ]
         }
       ]
     },
@@ -4722,11 +5978,11 @@
       "description": "Shared APIs used by both the Mobile App and Admin Panel.",
       "item": [
         {
-          "name": "6. File Uploads",
+          "name": "1. File & Media Uploads",
           "description": "Upload images, videos, audio, and documents. Files are auto-categorised by MIME type into separate subfolders.",
           "item": [
             {
-              "name": "6.1 Upload Single File",
+              "name": "1.1 Upload Single File",
               "request": {
                 "method": "POST",
                 "header": [],
@@ -4762,7 +6018,7 @@
               "response": []
             },
             {
-              "name": "6.2 Upload Multiple Files",
+              "name": "1.2 Upload Multiple Files",
               "request": {
                 "method": "POST",
                 "header": [],
@@ -4800,34 +6056,11 @@
           ]
         },
         {
-          "name": "7. System",
-          "item": [
-            {
-              "name": "7.1 Health Check",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/health",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "health"
-                  ]
-                },
-                "description": "Confirm the backend server is live. Returns service name, version, and current timestamp."
-              },
-              "response": []
-            }
-          ]
-        },
-        {
-          "name": "8. Legal & Compliance",
+          "name": "2. Legal & Statutory Compliance",
           "description": "Public & Admin Legal document APIs (Privacy Policy, Terms & Conditions, Refund Policy, Grievance Redressal statutory compliance).",
           "item": [
             {
-              "name": "8.1 Get All Active Legal Documents",
+              "name": "2.1 Get All Active Legal Documents",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -4852,7 +6085,7 @@
               "response": []
             },
             {
-              "name": "8.2 Get Single Legal Doc by Slug",
+              "name": "2.2 Get Single Legal Doc by Slug",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -4871,7 +6104,7 @@
               "response": []
             },
             {
-              "name": "8.3 Get Grievance & Compliance Officer",
+              "name": "2.3 Get Grievance & Compliance Officer",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -4891,7 +6124,7 @@
               "response": []
             },
             {
-              "name": "8.4 [Admin] List All Legal Documents (Active + Inactive)",
+              "name": "2.4 [Admin] List All Legal Documents (Active + Inactive)",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -4911,7 +6144,7 @@
               "response": []
             },
             {
-              "name": "8.5 [Admin] Upsert Legal Policy Document",
+              "name": "2.5 [Admin] Upsert Legal Policy Document",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -4940,7 +6173,7 @@
               "response": []
             },
             {
-              "name": "8.6 [Admin] Seed Default Legal Policies",
+              "name": "2.6 [Admin] Seed Default Legal Policies",
               "request": {
                 "method": "POST",
                 "header": [
@@ -4965,6 +6198,112 @@
                   ]
                 },
                 "description": "Initializes or restores standard OTT legal policies."
+              },
+              "response": []
+            },
+            {
+              "name": "2.7 [Admin] Toggle Legal Policy Active Status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/legal/admin/{{legalSlug}}/toggle",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "legal",
+                    "admin",
+                    "{{legalSlug}}",
+                    "toggle"
+                  ]
+                },
+                "description": "Toggle published / hidden status of a legal statutory policy."
+              },
+              "response": []
+            },
+            {
+              "name": "2.8 [Admin] Update Grievance & Statutory Compliance Officer",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/legal/admin/compliance",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "legal",
+                    "admin",
+                    "compliance"
+                  ]
+                },
+                "description": "Update statutory Grievance Redressal Officer and age-classification maturity metadata under Indian IT Rules 2021.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Nodal Compliance Officer\",\n  \"designation\": \"Grievance Officer & Legal Head\",\n  \"email\": \"grievance@e2stories.com\",\n  \"address\": \"E2 Stories Digital Media Pvt Ltd, Mumbai, Maharashtra 400001\",\n  \"sla\": \"Within 24 hours acknowledgment, 15 days redressal as per Indian IT Rules 2021\",\n  \"certifiedMaturityTags\": [\n    \"U\",\n    \"U/A 7+\",\n    \"U/A 13+\",\n    \"U/A 16+\",\n    \"A\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "3. System & Health Check",
+          "item": [
+            {
+              "name": "3.1 Health Check",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                },
+                "description": "Confirm the backend server is live. Returns service name, version, and current timestamp."
+              },
+              "response": []
+            },
+            {
+              "name": "3.2 Root Welcome & Service Status",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{rootUrl}}/",
+                  "host": [
+                    "{{rootUrl}}"
+                  ],
+                  "path": []
+                },
+                "description": "Root HTTP welcome ping returning service metadata and API version."
               },
               "response": []
             }

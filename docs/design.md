@@ -23,13 +23,13 @@ The **E² Stories Admin Panel** is designed as a sleek, high-precision, desktop-
 --bg-canvas:          #F8F9FC;      /* Light surface mode */
 --bg-surface:         #FFFFFF;      /* Clean card surface */
 
---bg-canvas-dark:     #080B08;      /* Deep dark slate/charcoal (0dp base canvas, never pure #000000) */
---bg-surface-01dp:    #121612;      /* Level 1: Cards, table rows, input containers (5% overlay) */
---bg-surface-02dp:    #161B16;      /* Level 2: Elevated/hovered cards, widgets (7% overlay) */
---bg-surface-04dp:    #1A1F1A;      /* Level 4: App bars, sticky page headers (9% overlay) */
---bg-surface-08dp:    #202620;      /* Level 8: Menus, dropdowns, filter popovers (12% overlay) */
---bg-surface-16dp:    #242A24;      /* Level 16: Slide-over navigation drawers (15% overlay) */
---bg-surface-24dp:    #282E28;      /* Level 24: Modals, confirmation dialogs (16% overlay) */
+--bg-canvas-dark:     #0A0A0C;      /* Deep dark slate/charcoal (0dp base canvas, never pure #000000) */
+--bg-surface-01dp:    #121216;      /* Level 1: Cards, table rows, input containers (5% overlay) */
+--bg-surface-02dp:    #18181E;      /* Level 2: Elevated/hovered cards, widgets (7% overlay) */
+--bg-surface-04dp:    #1E1E26;      /* Level 4: App bars, sticky page headers (9% overlay) */
+--bg-surface-08dp:    #24242E;      /* Level 8: Menus, dropdowns, filter popovers (12% overlay) */
+--bg-surface-16dp:    #2A2A35;      /* Level 16: Slide-over navigation drawers (15% overlay) */
+--bg-surface-24dp:    #30303D;      /* Level 24: Modals, confirmation dialogs (16% overlay) */
 
 --border-subtle-dark: rgba(255, 255, 255, 0.10); /* 10% white divider/border */
 --border-focus-dark:  rgba(254, 240, 138, 0.40); /* Theme accent focus ring */
@@ -71,7 +71,7 @@ Following [Material Design 2 Dark Theme Guidelines](https://m2.material.io/desig
    - White semi-transparent overlays are applied above the dark base: 0dp (0%), 1dp (5%), 2dp (7%), 4dp (9%), 8dp (12%), 16dp (15%), 24dp (16%).
    - Cast shadows along the z-axis (`shadow-md`, `shadow-xl`) remain active to delineate overlapping surfaces. Never use colored glowing halos as substitutes for shadows.
 2. **Surface Purity vs. Glare**:
-   - Avoid pure `#000000` for surface fills. Dark grey/slate (`#080B08` to `#121612`) mitigates eye strain and allows elevation tiers to be visually discernible.
+   - Avoid pure `#000000` for surface fills. Dark grey/slate (`#0A0A0C` to `#121216`) mitigates eye strain and allows elevation tiers to be visually discernible.
 3. **Accent Restraint**:
    - Saturated colors must not dominate large surface areas. 90%+ of UI real estate consists of dark surfaces.
    - Primary `#FEF08A` is reserved for high-impact focal points (CTA buttons, active navigation, active filters, KPI badges).

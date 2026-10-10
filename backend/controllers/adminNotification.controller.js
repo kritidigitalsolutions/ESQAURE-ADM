@@ -217,21 +217,43 @@ export const createAnnouncement = async (req, res, next) => {
       userQuery.createdAt = { $gte: new Date(Date.now() - 7 * 86400000) };
     }
 
-    const targetUsers = await User.find(userQuery).select('_id');
+    const targetUsers = await User.find(userQuery).select('_id fcmTokens');
+    const allTokens = [];
     if (targetUsers.length > 0) {
-      const notifDocs = targetUsers.map((u) => ({
-        userId: u._id,
-        type: category === 'OFFER' ? 'RECOMMENDATION' : 'SYSTEM',
+      const notifDocs = targetUsers.map((u) => {
+        if (Array.isArray(u.fcmTokens) && u.fcmTokens.length > 0) {
+          allTokens.push(...u.fcmTokens);
+        }
+        return {
+          userId: u._id,
+          type: category === 'OFFER' ? 'RECOMMENDATION' : 'SYSTEM',
+          title: title.trim(),
+          body: body.trim(),
+          isRead: false
+        };
+      });
+      await Notification.insertMany(notifDocs);
+    }
+
+    // 3. Dispatch real FCM push notifications to active app users
+    const uniqueTokens = [...new Set(allTokens)];
+    let pushResult = null;
+    if (uniqueTokens.length > 0) {
+      pushResult = await sendFcmPush(uniqueTokens, {
         title: title.trim(),
         body: body.trim(),
-        isRead: false
-      }));
-      await Notification.insertMany(notifDocs);
+        data: {
+          type: category === 'OFFER' ? 'RECOMMENDATION' : 'SYSTEM',
+          announcementId: String(announcement._id)
+        }
+      });
     }
 
     return ApiResponse.success(res, 'Announcement created successfully', {
       announcement,
-      recipientsCount: targetUsers.length
+      recipientsCount: targetUsers.length,
+      fcmDevicesCount: uniqueTokens.length,
+      pushResult
     }, 201);
   } catch (error) {
     return next(error);

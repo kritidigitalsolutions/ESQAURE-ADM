@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, CheckCircle2, AlertCircle, Loader2, KeyRound } from 'lucide-react';
 import AnimatedGradientBackground from '../../components/ui/AnimatedGradientBackground';
 import InteractiveHoverButton from '../../components/ui/InteractiveHoverButton';
 import { loginWithEmail, sendResetPasswordEmail, getFirebaseErrorMessage } from '../../services/firebase';
 
 export default function LoginPage({ onLoginSuccess }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('e2.storiesofficial@gmail.com');
+  const [password, setPassword] = useState('Admin@123');
   const [showPassword, setShowPassword] = useState(false);
   const [viewMode, setViewMode] = useState('login'); // 'login' | 'forgot_password' | 'reset_sent'
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Auto-fill default credentials
+  const handleAutoFill = () => {
+    setEmail('e2.storiesofficial@gmail.com');
+    setPassword('Admin@123');
+    setErrorMessage('');
+  };
 
   // Handle Firebase Email/Password Login
   const handleLoginSubmit = async (e) => {
@@ -93,7 +100,7 @@ export default function LoginPage({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#080B08] text-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-urbanist relative overflow-hidden selection:bg-[#FEF08A] selection:text-slate-950">
+    <div className="min-h-screen w-full bg-[#0A0A0C] text-slate-100 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-urbanist relative overflow-hidden selection:bg-[#FEF08A] selection:text-slate-950">
       
       {/* Animated Gradient Background */}
       <AnimatedGradientBackground />
@@ -115,7 +122,7 @@ export default function LoginPage({ onLoginSuccess }) {
         </div>
 
         {/* Clean Glassmorphic Card Container */}
-        <div className="w-full relative bg-[#121612]/90 backdrop-blur-2xl border border-white/10 rounded-[22px] p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.8)] transition-all duration-300 animate-login-card">
+        <div className="w-full relative bg-[#121216]/90 backdrop-blur-2xl border border-white/10 rounded-[22px] p-6 sm:p-7 shadow-[0_20px_50px_rgba(0,0,0,0.8)] transition-all duration-300 animate-login-card">
 
           {/* Header inside Card */}
           <div className="text-center mb-6 animate-login-item-1">
@@ -186,8 +193,18 @@ export default function LoginPage({ onLoginSuccess }) {
                 </button>
               </div>
 
-              {/* Forgot password link */}
-              <div className="text-right mb-5 animate-login-item-4">
+              {/* Row with Auto-fill credentials button & Forgot password link */}
+              <div className="flex items-center justify-between mb-5 animate-login-item-4">
+                <button
+                  type="button"
+                  onClick={handleAutoFill}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#FEF08A] hover:text-[#FDE047] hover:underline focus:outline-none transition-colors cursor-pointer"
+                  title="Fill default credentials: e2.storiesofficial@gmail.com / Admin@123"
+                >
+                  <KeyRound className="w-3.5 h-3.5 stroke-[2.2]" />
+                  <span>Auto-fill Credentials</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {

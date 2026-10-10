@@ -97,7 +97,8 @@ export const updateAdSettings = async (req, res, next) => {
       customAdSharePercent,
       placementControls,
       vipBypassAds,
-      globalAdFrequencyCap
+      globalAdFrequencyCap,
+      websiteControls
     } = req.body;
 
     const updateFields = {};
@@ -118,6 +119,7 @@ export const updateAdSettings = async (req, res, next) => {
     if (placementControls !== undefined) updateFields.placementControls = placementControls;
     if (vipBypassAds !== undefined) updateFields.vipBypassAds = Boolean(vipBypassAds);
     if (globalAdFrequencyCap !== undefined) updateFields.globalAdFrequencyCap = Number(globalAdFrequencyCap);
+    if (websiteControls !== undefined) updateFields.websiteControls = websiteControls;
 
     const updated = await AdSetting.findOneAndUpdate(
       { key: 'global' },

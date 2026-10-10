@@ -173,13 +173,13 @@ export default function IncomeChart({ className = '' }) {
 
   return (
     <div
-      className={`w-full rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#121612] p-4 sm:px-5 sm:py-4 shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover font-sans ${className}`}
+      className={`w-full rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#121216] p-4 sm:px-5 sm:py-4 shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover font-sans ${className}`}
     >
       {/* 1. TOP HEADER ROW: Pure clean layout, completely isolated from graph */}
       <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
         {/* Left: Title & Subtle Icon */}
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shadow-2xs shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shadow-2xs shrink-0">
             <IndianRupee className="w-4 h-4 stroke-[2.5]" />
           </div>
           <div>
@@ -190,7 +190,7 @@ export default function IncomeChart({ className = '' }) {
         </div>
 
         {/* Right: Only the 3 clean period pills requested: Today | Monthly | Yearly */}
-        <div className="inline-flex items-center gap-0.5 rounded-lg bg-slate-100/90 dark:bg-[#161B16] p-0.5 border border-slate-200/70 dark:border-white/10 shadow-2xs">
+        <div className="inline-flex items-center gap-0.5 rounded-lg bg-slate-100/90 dark:bg-[#18181E] p-0.5 border border-slate-200/70 dark:border-white/10 shadow-2xs">
           {[
             { id: 'today', label: 'Today' },
             { id: 'monthly', label: 'Monthly' },
@@ -344,7 +344,7 @@ export default function IncomeChart({ className = '' }) {
                 top: activePoint.y < 45 ? '48%' : `${Math.max(6, (activePoint.y / chartBounds.height) * 100 - 28)}%`,
               }}
             >
-              <div className="bg-slate-950/95 dark:bg-[#1C221C]/95 backdrop-blur-md text-white px-3 py-1 rounded-xl shadow-xl text-xs font-semibold whitespace-nowrap flex items-center gap-2 border border-slate-800 dark:border-white/12">
+              <div className="bg-slate-950/95 dark:bg-[#1E1E26]/95 backdrop-blur-md text-white px-3 py-1 rounded-xl shadow-xl text-xs font-semibold whitespace-nowrap flex items-center gap-2 border border-slate-800 dark:border-white/12">
                 <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
                 <span className="font-urbanist font-black text-white">
                   {formatINRFull(activePoint.value)}

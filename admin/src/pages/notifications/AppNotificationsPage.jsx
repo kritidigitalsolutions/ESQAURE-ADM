@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { notificationService } from '../../services/notificationService';
 import PageLoader from '../../components/common/PageLoader';
+import ModalPortal from '../../components/common/ModalPortal';
 import {
   Plus,
   Sparkles,
@@ -166,9 +167,9 @@ export default function AppNotificationsPage() {
     <div className="space-y-3.5 font-urbanist selection:bg-[#FEF08A] selection:text-black">
       
       {/* 1. Header Banner */}
-      <div className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all">
+      <div className="bg-white dark:bg-[#121216] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all">
         <div className="flex items-center space-x-3">
-          <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
+          <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
             <Megaphone className="w-4.5 h-4.5 stroke-[2.2]" />
           </div>
           <div>
@@ -193,7 +194,7 @@ export default function AppNotificationsPage() {
           
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all shadow-xs shrink-0 active:scale-98 cursor-pointer"
+            className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all shadow-xs shrink-0 active:scale-98 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>New Notification</span>
@@ -227,7 +228,7 @@ export default function AppNotificationsPage() {
       )}
 
       {/* 3. Controls & Filter Bar */}
-      <div className="bg-white dark:bg-[#121612] rounded-xl p-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+      <div className="bg-white dark:bg-[#121216] rounded-xl p-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
         
         {/* Category Filter Chips */}
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -260,14 +261,14 @@ export default function AppNotificationsPage() {
               placeholder="Search notifications..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-900 dark:text-white bg-slate-50 dark:bg-[#161B16] focus:bg-white dark:focus:bg-[#121612] focus:outline-hidden focus:ring-1 focus:ring-[#FEF08A]"
+              className="pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-900 dark:text-white bg-slate-50 dark:bg-[#18181E] focus:bg-white dark:focus:bg-[#121216] focus:outline-hidden focus:ring-1 focus:ring-[#FEF08A]"
             />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-[#161B16] focus:outline-hidden"
+            className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-[#18181E] focus:outline-hidden"
           >
             <option value="ALL">All Status</option>
             <option value="ACTIVE">Active Only</option>
@@ -279,11 +280,11 @@ export default function AppNotificationsPage() {
       {/* 4. Notices List / Cards */}
       <div className="space-y-2.5">
         {isLoading ? (
-          <div className="bg-white dark:bg-[#121612] rounded-xl border border-slate-200/80 dark:border-white/10 overflow-hidden">
+          <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 overflow-hidden">
             <PageLoader size="sm" text="Loading..." minHeight="min-h-[220px]" />
           </div>
         ) : filteredNotices.length === 0 ? (
-          <div className="bg-white dark:bg-[#121612] rounded-xl p-10 border border-slate-200/80 dark:border-white/10 text-center text-xs text-slate-400 space-y-2">
+          <div className="bg-white dark:bg-[#121216] rounded-xl p-10 border border-slate-200/80 dark:border-white/10 text-center text-xs text-slate-400 space-y-2">
             <Megaphone className="w-7 h-7 mx-auto text-slate-300 dark:text-slate-600 stroke-[1.5]" />
             <p className="font-bold text-slate-600 dark:text-slate-400">No notifications match your filters.</p>
             <p className="text-[11px] text-slate-400">Click "New Notification" to publish an in-app announcement to user inboxes.</p>
@@ -294,11 +295,11 @@ export default function AppNotificationsPage() {
             return (
               <div
                 key={id}
-                className="bg-white dark:bg-[#121612] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex items-start justify-between gap-3 hover:border-slate-300 dark:hover:border-white/20 transition-all"
+                className="bg-white dark:bg-[#121216] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex items-start justify-between gap-3 hover:border-slate-300 dark:hover:border-white/20 transition-all"
               >
                 <div className="flex items-start space-x-3 min-w-0">
                   {/* Uniform #FEF08A Icon Badge */}
-                  <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
+                  <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
                     {notice.category === 'SYSTEM' ? (
                       <Info className="w-4 h-4 stroke-[2.2]" />
                     ) : notice.category === 'OFFER' ? (
@@ -361,11 +362,12 @@ export default function AppNotificationsPage() {
 
       {/* 5. Modal - Level 24dp Elevated Dialog */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#282E28] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-200 dark:border-white/15 transition-all">
+        <ModalPortal>
+          <div className="fixed inset-0 z-[99999] bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 font-urbanist">
+          <div className="bg-white dark:bg-[#30303D] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-200 dark:border-white/15 transition-all">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center space-x-2.5">
-                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300">
                   <Megaphone className="w-4 h-4" />
                 </div>
                 <h3 className="text-base font-extrabold text-slate-950 dark:text-white">
@@ -391,7 +393,7 @@ export default function AppNotificationsPage() {
                   placeholder="e.g. Scheduled Maintenance Notice"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 font-bold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:bg-white dark:focus:bg-[#121612] focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60 focus:border-[#FEF08A] transition-all"
+                  className="w-full px-3.5 py-2.5 font-bold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:bg-white dark:focus:bg-[#121216] focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60 focus:border-[#FEF08A] transition-all"
                 />
               </div>
 
@@ -403,7 +405,7 @@ export default function AppNotificationsPage() {
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3.5 py-2.5 font-bold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60 focus:border-[#FEF08A] transition-all"
+                    className="w-full px-3.5 py-2.5 font-bold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60 focus:border-[#FEF08A] transition-all"
                   >
                     <option value="SYSTEM">SYSTEM</option>
                     <option value="OFFER">OFFER</option>
@@ -418,7 +420,7 @@ export default function AppNotificationsPage() {
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value)}
-                    className="w-full px-3.5 py-2.5 font-bold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60 focus:border-[#FEF08A] transition-all"
+                    className="w-full px-3.5 py-2.5 font-bold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60 focus:border-[#FEF08A] transition-all"
                   >
                     <option value="Normal">Normal</option>
                     <option value="High">High</option>
@@ -433,7 +435,7 @@ export default function AppNotificationsPage() {
                 <select
                   value={target}
                   onChange={(e) => setTarget(e.target.value)}
-                  className="w-full px-3.5 py-2.5 font-bold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60 focus:border-[#FEF08A] transition-all"
+                  className="w-full px-3.5 py-2.5 font-bold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60 focus:border-[#FEF08A] transition-all"
                 >
                   <option value="All Active Users">All Active Users</option>
                   <option value="Subscribers Only">Subscribers Only</option>
@@ -451,7 +453,7 @@ export default function AppNotificationsPage() {
                   placeholder="Type the message description that will appear in user mobile inboxes..."
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
-                  className="w-full px-3.5 py-2.5 font-medium bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:bg-white dark:focus:bg-[#121612] focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60 focus:border-[#FEF08A] transition-all leading-relaxed"
+                  className="w-full px-3.5 py-2.5 font-medium bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:bg-white dark:focus:bg-[#121216] focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60 focus:border-[#FEF08A] transition-all leading-relaxed"
                 ></textarea>
               </div>
 
@@ -466,7 +468,7 @@ export default function AppNotificationsPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting || !title.trim() || !body.trim()}
-                  className="px-5 py-2 bg-[#FEF08A] hover:bg-[#FDE047] disabled:opacity-50 text-slate-950 font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+                  className="px-5 py-2 bg-[#FACC15] hover:bg-[#EAB308] disabled:opacity-50 text-slate-950 font-bold rounded-xl shadow-xs transition-all cursor-pointer"
                 >
                   {isSubmitting ? 'Publishing...' : 'Publish Notification'}
                 </button>
@@ -474,7 +476,8 @@ export default function AppNotificationsPage() {
             </form>
           </div>
         </div>
-      )}
+      </ModalPortal>
+    )}
 
     </div>
   );

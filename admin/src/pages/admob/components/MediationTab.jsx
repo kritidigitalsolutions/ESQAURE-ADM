@@ -82,7 +82,7 @@ export default function MediationTab({ settings, onSaveSettings }) {
     <form onSubmit={handleSubmit} className="space-y-4 font-urbanist">
       
       {/* Strategy Selection Container */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus">
+      <div className="bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus">
         <div className="mb-4 pb-3 border-b border-slate-100 dark:border-white/10">
           <h3 className="text-base font-black text-slate-950 dark:text-white">
             Mediation & Ad Waterfall Delivery Rules
@@ -104,7 +104,7 @@ export default function MediationTab({ settings, onSaveSettings }) {
                 className={`p-4 rounded-xl border transition-all cursor-pointer ${
                   isSelected
                     ? 'bg-[#FEF08A]/15 dark:bg-[#FEF08A]/10 border-amber-300 dark:border-amber-400 ring-1 ring-amber-300 shadow-xs'
-                    : 'bg-slate-50/70 dark:bg-[#161B16] border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
+                    : 'bg-slate-50/70 dark:bg-[#18181E] border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -121,7 +121,7 @@ export default function MediationTab({ settings, onSaveSettings }) {
                         <span className="text-xs sm:text-sm font-black text-slate-950 dark:text-white">
                           {strat.title}
                         </span>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 dark:bg-[#FEF08A]/20 text-amber-900 dark:text-[#FEF08A] border border-amber-200 dark:border-amber-700/40">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 dark:bg-[#FEF08A]/20 text-amber-900 dark:text-[#FEF08A] border border-amber-200 dark:border-amber-400/30">
                           {strat.badge}
                         </span>
                       </div>
@@ -169,10 +169,10 @@ export default function MediationTab({ settings, onSaveSettings }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         {/* VIP Shield */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col justify-between">
           <div>
             <div className="flex items-center space-x-2.5 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
                 <Crown className="w-4 h-4 stroke-[2.2]" />
               </div>
               <h4 className="text-sm font-black text-slate-950 dark:text-white">
@@ -197,10 +197,10 @@ export default function MediationTab({ settings, onSaveSettings }) {
         </div>
 
         {/* Global Hourly Frequency Capping */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col justify-between">
           <div>
             <div className="flex items-center space-x-2.5 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
                 <Clock className="w-4 h-4 stroke-[2.2]" />
               </div>
               <h4 className="text-sm font-black text-slate-950 dark:text-white">
@@ -223,7 +223,7 @@ export default function MediationTab({ settings, onSaveSettings }) {
                 max="30"
                 value={form.globalAdFrequencyCap}
                 onChange={(e) => setForm(p => ({ ...p, globalAdFrequencyCap: Number(e.target.value) }))}
-                className="w-16 px-2 py-1 text-xs text-center font-black rounded-lg bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                className="w-16 px-2 py-1 text-xs text-center font-black rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
               />
               <span className="text-xs text-slate-400 font-bold">Ads / Hour</span>
             </div>
@@ -233,7 +233,7 @@ export default function MediationTab({ settings, onSaveSettings }) {
       </div>
 
       {/* Save Button Dock */}
-      <div className="sticky bottom-3 p-3.5 rounded-2xl bg-white/95 dark:bg-[#161B16]/95 backdrop-blur-md border border-slate-200 dark:border-white/15 shadow-xl flex items-center justify-between">
+      <div className="sticky bottom-3 p-3.5 rounded-2xl bg-white/95 dark:bg-[#18181E]/95 backdrop-blur-md border border-slate-200 dark:border-white/15 shadow-xl flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {saveSuccess && (
             <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 animate-fade-in">
@@ -250,7 +250,7 @@ export default function MediationTab({ settings, onSaveSettings }) {
         <button
           type="submit"
           disabled={isSaving}
-          className="px-5 py-2.5 rounded-xl text-xs font-black bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+          className="px-5 py-2.5 rounded-xl text-xs font-black bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
         >
           {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           <span>{isSaving ? 'Saving...' : 'Save Mediation Rules'}</span>

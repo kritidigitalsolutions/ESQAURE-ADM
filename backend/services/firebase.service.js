@@ -40,7 +40,8 @@ async function cleanupStaleTokens(staleTokens) {
  * @param {object} [options.data] - Additional key-value payload (must be strings)
  * @returns {Promise<{status: string, sentCount: number, deliveredCount: number, failureCount: number, errors?: any[]}>}
  */
-export async function sendFcmPush(tokens, { title, body, imageUrl, deepLink, data = {} }) {
+export async function sendFcmPush(tokens, options = {}) {
+  const { title, body, imageUrl, deepLink, channelId: paramChannelId, data = {} } = options;
   if (!tokens || tokens.length === 0) {
     return {
       status: 'NO_TOKENS',
@@ -75,9 +76,20 @@ export async function sendFcmPush(tokens, { title, body, imageUrl, deepLink, dat
     };
   }
 
+  const channelId = paramChannelId || process.env.FCM_CHANNEL_ID || 'esquare_alerts';
+
   // Convert all data values to strings (FCM data payload requirement)
-  const stringifiedData = {};
-  if (deepLink) stringifiedData.deepLink = String(deepLink);
+  // Include title, body, and image in data payload so foreground listeners (Flutter/React Native)
+  // and background notification workers can construct and display notifications reliably.
+  const stringifiedData = {
+    click_action: 'FLUTTER_NOTIFICATION_CLICK',
+    channelId: String(channelId),
+    channel_id: String(channelId),
+    android_channel_id: String(channelId),
+    ...(imageUrl ? { imageUrl: String(imageUrl), image: String(imageUrl) } : {}),
+    ...(deepLink ? { deepLink: String(deepLink) } : {})
+  };
+
   for (const [key, val] of Object.entries(data)) {
     if (val !== undefined && val !== null) {
       stringifiedData[key] = typeof val === 'object' ? JSON.stringify(val) : String(val);
@@ -101,9 +113,15 @@ export async function sendFcmPush(tokens, { title, body, imageUrl, deepLink, dat
       data: stringifiedData,
       android: {
         priority: 'high',
+        collapseKey: String(data.collapseKey || data.notificationId || title || 'esquare_alert').slice(0, 32),
         notification: {
           sound: 'default',
-          channelId: 'esquare_alerts',
+          channelId: channelId,
+          defaultSound: true,
+          defaultVibrateTimings: true,
+          priority: 'high',
+          visibility: 'public',
+          tag: String(data.notificationId || title || 'esquare_alert').slice(0, 50),
           clickAction: 'FLUTTER_NOTIFICATION_CLICK',
           ...(imageUrl ? { imageUrl } : {})
         }
@@ -111,8 +129,13 @@ export async function sendFcmPush(tokens, { title, body, imageUrl, deepLink, dat
       apns: {
         payload: {
           aps: {
+            alert: {
+              title: title || '',
+              body: body || ''
+            },
             sound: 'default',
-            badge: 1
+            badge: 1,
+            contentAvailable: true
           }
         },
         fcmOptions: {

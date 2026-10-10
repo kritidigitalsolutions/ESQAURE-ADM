@@ -146,11 +146,11 @@ export default function MetricsOverview({ onOpenIngestModal }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 
         {/* Card 1: User Base */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 min-h-[130px] border border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-xl dark:hover:border-amber-400/40 hover:-translate-y-0.5 relative overflow-hidden group transition-all duration-300 flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-5 min-h-[130px] border border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-xl dark:hover:border-amber-400/40 hover:-translate-y-0.5 relative overflow-hidden group transition-all duration-300 flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2.5">
               <div className="flex items-center space-x-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
                   <Users className="w-4.5 h-4.5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -164,7 +164,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
               </div>
 
               {/* Switcher Buttons */}
-              <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-0.5 rounded-lg w-full sm:w-[260px] border border-slate-200/70 dark:border-white/10 shadow-xs">
+              <div className="relative bg-slate-100/90 dark:bg-[#18181E] p-0.5 rounded-lg w-full sm:w-[260px] border border-slate-200/70 dark:border-white/10 shadow-xs">
                 {/* Sliding Active Indicator Pill */}
                 <span
                   className="absolute top-0.5 bottom-0.5 left-0.5 rounded-md bg-[#FEF08A] shadow-xs transition-transform duration-300 ease-out pointer-events-none border border-amber-300/60"
@@ -230,11 +230,11 @@ export default function MetricsOverview({ onOpenIngestModal }) {
         </div>
 
         {/* Card 2: Paid Subscriptions */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 min-h-[130px] border border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-xl dark:hover:border-amber-400/40 hover:-translate-y-0.5 relative overflow-hidden group transition-all duration-300 flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-5 min-h-[130px] border border-slate-200/90 dark:border-white/10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-xl dark:hover:border-amber-400/40 hover:-translate-y-0.5 relative overflow-hidden group transition-all duration-300 flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2.5">
               <div className="flex items-center space-x-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
                   <ShieldCheck className="w-4.5 h-4.5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -248,7 +248,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
               </div>
 
               {/* Switcher Buttons */}
-              <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-0.5 rounded-lg w-full sm:w-[260px] border border-slate-200/70 dark:border-white/10 shadow-xs">
+              <div className="relative bg-slate-100/90 dark:bg-[#18181E] p-0.5 rounded-lg w-full sm:w-[260px] border border-slate-200/70 dark:border-white/10 shadow-xs">
                 {/* Sliding Active Indicator Pill */}
                 <span
                   className="absolute top-0.5 bottom-0.5 left-0.5 rounded-md bg-[#FEF08A] shadow-xs transition-transform duration-300 ease-out pointer-events-none border border-amber-300/60"
@@ -316,7 +316,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
       </div>
 
       {/* Hero Income / Revenue Banner */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all">
+      <div className="bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
 
           {/* Left: Two Split Metrics + Top Driver */}
@@ -379,7 +379,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
           </div>
 
           {/* Right: Switcher Tabs */}
-          <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-1 rounded-full flex items-center border border-slate-200/70 dark:border-white/10 shadow-xs self-start lg:self-center shrink-0 w-full sm:w-[275px]">
+          <div className="relative bg-slate-100/90 dark:bg-[#18181E] p-1 rounded-full flex items-center border border-slate-200/70 dark:border-white/10 shadow-xs self-start lg:self-center shrink-0 w-full sm:w-[275px]">
             {/* Sliding Pill */}
             <span
               className="absolute top-1 bottom-1 left-1 rounded-full bg-[#FEF08A] shadow-md transition-transform duration-300 ease-out pointer-events-none border border-amber-300/60"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom';
+import ModalPortal from '../../components/common/ModalPortal';
 import { subscriptionService } from '../../services/subscriptionService';
 import Badge from '../../components/common/Badge';
 import AnimatedNumber from '../../components/common/AnimatedNumber';
@@ -450,22 +450,78 @@ export default function SubscriptionsPage() {
 
 
   return (
-    <div className="space-y-3.5 font-urbanist w-full pb-16 selection:bg-[#FEF08A] selection:text-black">
+    <div className="space-y-3 font-urbanist w-full pb-14 selection:bg-[#FEF08A] selection:text-black">
 
       {/* Floating Action Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <div className="bg-slate-950 dark:bg-white text-white dark:text-slate-950 px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-bold border border-slate-800 dark:border-slate-200">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 dark:text-emerald-600 shrink-0" />
+          <div className="bg-slate-950 dark:bg-white text-white dark:text-slate-950 px-3.5 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2 text-xs font-bold border border-slate-800 dark:border-slate-200">
+            <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 dark:text-amber-300 shrink-0" />
             <span>{toastMessage}</span>
           </div>
         </div>
       )}
 
       {/* ======================================================== */}
-      {/* 4 CORE MONETIZATION KPI OVERVIEW CARDS (100% Dynamic)     */}
+      {/* SECTION HEADER & PRIMARY ACTION BAR (Top of Page)        */}
       {/* ======================================================== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div className="flex items-center space-x-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+            <CreditCard className="w-4 h-4 stroke-[2.2]" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="font-extrabold text-slate-950 dark:text-white text-base tracking-tight leading-tight">
+                Subscription Plans & Pricing
+              </h1>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-300/50">
+                {plans.length} Active Plans
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              Manage subscription tiers, pricing, AutoPay renewals, and 7-Day trial settings
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => loadAllData(false)}
+            disabled={isRefreshing}
+            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs"
+            title="Sync live subscription data"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
+            <span>{isRefreshing ? 'Syncing...' : 'Sync'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTrialFormData({ ...trialConfig });
+              setIsTrialModalOpen(true);
+            }}
+            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs"
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-500" />
+            <span>Trial Settings</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleOpenCreateModal}
+            className="px-3.5 py-1.5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all shadow-xs flex items-center justify-center space-x-1.5 cursor-pointer active:scale-95"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Create Plan</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ======================================================== */}
+      {/* 4 CORE MONETIZATION KPI OVERVIEW CARDS (Compact Uniform) */}
+      {/* ======================================================== */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         {/* Metric 1: Monthly Subscription Revenue */}
         <KpiStatCard
           icon={CreditCard}
@@ -474,7 +530,7 @@ export default function SubscriptionsPage() {
           value={`₹${totalMrrEstimated}`}
           footerLeft="Total collected"
           footerRight={`₹${(overviewKpis?.totalRevenueCollected || 0).toLocaleString()}`}
-          footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
+          footerRightColor="text-amber-900 dark:text-amber-300 font-bold"
         />
 
         {/* Metric 2: Active Subscribers */}
@@ -485,8 +541,8 @@ export default function SubscriptionsPage() {
           value={totalSubscribers}
           animateNumber
           footerLeft={`${plans.filter((p) => p.status === 'ACTIVE').length} active plan tiers`}
-          footerRight="Active in DB"
-          footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
+          footerRight="Live in DB"
+          footerRightColor="text-amber-900 dark:text-amber-300 font-bold"
         />
 
         {/* Metric 3: 7-Day Free Trial AutoPay Activations */}
@@ -497,8 +553,8 @@ export default function SubscriptionsPage() {
           value={overviewKpis?.activeTrialUsers ?? 0}
           animateNumber
           footerLeft="Razorpay e-Mandate"
-          footerRight={trialConfig.enabled ? 'Campaign Active' : 'Campaign Paused'}
-          footerRightColor={trialConfig.enabled ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-400 font-bold'}
+          footerRight={trialConfig.enabled ? 'Active' : 'Paused'}
+          footerRightColor="text-amber-900 dark:text-amber-300 font-bold"
         />
 
         {/* Metric 4: Monthly Churn Rate */}
@@ -507,78 +563,39 @@ export default function SubscriptionsPage() {
           title="Monthly Churn"
           subtitle="Retention Cohort"
           value={overviewKpis?.churnRate || '0.0%'}
-          footerLeft="Zero-Grace Enforcement"
+          footerLeft="Zero-Grace Period"
           footerRight="Immediate Lock"
           footerRightColor="text-slate-600 dark:text-slate-400 font-bold"
         />
       </div>
 
       {/* ======================================================== */}
-      {/* SECTION HEADER & PRIMARY ACTION BAR (Website Standard)   */}
-      {/* ======================================================== */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-nodus flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
-            <CreditCard className="w-4 h-4 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
-          </div>
-          <div>
-            <h3 className="font-extrabold text-slate-950 dark:text-white text-base sm:text-lg tracking-tight">
-              E² Stories Subscription Plans ({plans.length})
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-              Manage your pricing tiers, perks, strikethrough savings, and AutoPay renewals directly below.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => loadAllData(false)}
-            disabled={isRefreshing}
-            className="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
-            <span>{isRefreshing ? 'Syncing...' : 'Sync Live Data'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleOpenCreateModal}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all shadow-xs flex items-center justify-center space-x-2 cursor-pointer active:scale-95"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Create New Plan</span>
-          </button>
-        </div>
-      </div>
-
-      {/* ======================================================== */}
       {/* SUBSCRIPTION PLAN CARDS GRID (100% Dynamic from MongoDB)  */}
       {/* ======================================================== */}
       {isLoading && plans.length === 0 ? (
-        <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
-          <PageLoader text="Loading..." minHeight="min-h-[340px]" />
+        <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
+          <PageLoader text="Loading..." minHeight="min-h-[260px]" />
         </div>
       ) : plans.length === 0 ? (
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-10 border border-slate-200/80 dark:border-white/10 text-center space-y-3 shadow-nodus">
-          <CreditCard className="w-10 h-10 mx-auto text-slate-400 stroke-[1.5]" />
-          <h4 className="font-extrabold text-slate-900 dark:text-white text-base">
+        <div className="bg-white dark:bg-[#121216] rounded-xl p-8 border border-slate-200/80 dark:border-white/10 text-center space-y-2.5 shadow-xs">
+          <CreditCard className="w-8 h-8 mx-auto text-slate-400 stroke-[1.5]" />
+          <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">
             No subscription plans created yet
           </h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
             Create your first subscription tier to enable the paywall and AutoPay renewals across the mobile app.
           </p>
           <button
             type="button"
             onClick={handleOpenCreateModal}
-            className="px-4 py-2 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-black text-xs transition-all shadow-xs cursor-pointer inline-flex items-center space-x-1.5"
+            className="px-3.5 py-1.5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs transition-all shadow-xs cursor-pointer inline-flex items-center space-x-1.5"
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>Create First Plan</span>
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
           {plans.map((plan) => {
           const isAnnual = plan.code === 'PLAN_12M' || plan.durationDays === 365 || plan.name?.toLowerCase().includes('12 month');
           const isPopular = plan.badge?.toLowerCase().includes('popular') || plan.badge?.toLowerCase().includes('save 16');
@@ -586,48 +603,45 @@ export default function SubscriptionsPage() {
           return (
             <div
               key={plan.id || plan.code}
-              className={`bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border flex flex-col justify-between relative overflow-hidden transition-all shadow-nodus group ${
+              className={`bg-white dark:bg-[#121216] rounded-xl p-3.5 sm:p-4 border flex flex-col justify-between relative overflow-hidden transition-all shadow-xs group ${
                 isAnnual
-                  ? 'border-amber-300 dark:border-amber-500/50 ring-2 ring-[#FEF08A]/40 dark:ring-amber-500/20'
-                  : 'border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
+                  ? 'border-amber-300/80 dark:border-amber-500/40 ring-1 ring-[#FEF08A]/40 dark:ring-amber-500/20'
+                  : 'border-slate-200/80 dark:border-white/10 hover:border-amber-300/60 dark:hover:border-amber-500/30'
               }`}
             >
               {/* Top Badge & Code */}
               <div>
-                <div className="flex items-center justify-between mb-3.5">
-                  <Badge
-                    plan={plan.name}
-                    size="xs"
-                  >
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    isAnnual || isPopular
+                      ? 'bg-[#FEF08A] text-slate-950 border border-amber-300/80 shadow-2xs'
+                      : 'bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10'
+                  }`}>
                     {plan.badge || plan.name}
-                  </Badge>
-                  <div className="flex items-center space-x-1.5">
-                    {plan.status === 'DRAFT' ? (
-                      <Badge variant="no-plan" size="xs">
-                        Draft
-                      </Badge>
-                    ) : (
-                      <Badge variant="active" size="xs">
-                        Active
-                      </Badge>
-                    )}
-                  </div>
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    plan.status === 'DRAFT'
+                      ? 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
+                      : 'bg-[#FEF08A]/30 text-slate-900 dark:text-amber-300 border border-amber-300/50'
+                  }`}>
+                    {plan.status === 'DRAFT' ? 'Draft' : 'Active'}
+                  </span>
                 </div>
 
                 {/* Plan Title & Pricing */}
-                <h3 className="text-lg sm:text-xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+                <h3 className="text-base font-extrabold text-slate-950 dark:text-white tracking-tight">
                   {plan.name}
                 </h3>
 
-                <div className="mt-2.5 flex items-baseline space-x-2">
-                  <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
+                <div className="mt-1.5 flex items-baseline space-x-1.5">
+                  <span className="text-2xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
                     ₹{plan.price}
                   </span>
-                  <span className="text-xs font-bold text-slate-400">
+                  <span className="text-[11px] font-bold text-slate-400">
                     / {plan.period}
                   </span>
                   {plan.originalPrice && plan.originalPrice > plan.price && (
-                    <span className="text-xs font-bold text-slate-400 line-through ml-1">
+                    <span className="text-[11px] font-bold text-slate-400 line-through ml-1">
                       ₹{plan.originalPrice}
                     </span>
                   )}
@@ -635,54 +649,54 @@ export default function SubscriptionsPage() {
 
                 {/* Savings or Billing Tagline */}
                 {plan.savingsText && (
-                  <div className="mt-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 flex items-center space-x-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
+                  <div className="mt-1 text-[11px] font-bold text-amber-800 dark:text-amber-300 flex items-center space-x-1">
+                    <Sparkles className="w-3 h-3 shrink-0 text-amber-500" />
                     <span>{plan.savingsText}</span>
                   </div>
                 )}
 
                 {/* 7-Day Trial Tag on Plan */}
                 {plan.trialEligible && (
-                  <div className="mt-3 p-2.5 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 flex items-center justify-between text-xs">
-                    <div className="flex items-center space-x-2">
-                      <Zap className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <div className="mt-2.5 p-2 rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200/60 dark:border-white/10 flex items-center justify-between text-xs">
+                    <div className="flex items-center space-x-1.5">
+                      <Zap className="w-3 h-3 text-amber-500 shrink-0" />
                       <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px]">
                         7-Day Trial for ₹{trialConfig.trialFee}
                       </span>
                     </div>
-                    <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                    <span className="text-[9.5px] font-semibold text-slate-500 dark:text-slate-400">
                       AutoPay Mandate
                     </span>
                   </div>
                 )}
 
                 {/* Metrics Strip */}
-                <div className="mt-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 flex items-center justify-between text-xs">
-                  <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">Active Subscribers</span>
-                  <span className="font-extrabold text-slate-900 dark:text-slate-100 text-xs sm:text-sm">
+                <div className="mt-2 p-2 rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200/60 dark:border-white/10 flex items-center justify-between text-[11px]">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Active Subscribers</span>
+                  <span className="font-black text-slate-900 dark:text-slate-100 text-xs">
                     {(plan.activeSubscribers || 0).toLocaleString()}
                   </span>
                 </div>
 
                 {/* Features List */}
-                <div className="mt-4 space-y-2 text-xs">
+                <div className="mt-3 space-y-1.5 text-xs">
                   <p className="font-extrabold text-slate-900 dark:text-slate-100 text-[10px] uppercase tracking-wider">
                     Perks &amp; Entitlements
                   </p>
                   {plan.features?.map((feat, idx) => (
                     <div key={idx} className="flex items-start space-x-2 text-slate-700 dark:text-slate-300">
-                      <div className="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-center shrink-0 mt-0.5">
-                        <Check className="w-2.5 h-2.5 text-emerald-700 dark:text-emerald-400 stroke-[3]" />
+                      <div className="w-3.5 h-3.5 rounded-md bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 mt-0.5">
+                        <Check className="w-2.5 h-2.5 stroke-[3]" />
                       </div>
-                      <span className="leading-snug">{feat}</span>
+                      <span className="leading-snug text-[11.5px]">{feat}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Card Bottom Actions */}
-              <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
-                <span className="text-[11px] text-slate-400 font-medium">
+              <div className="mt-3.5 pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
+                <span className="text-[10px] text-slate-400 font-medium">
                   AutoPay Renewal
                 </span>
                 
@@ -691,14 +705,14 @@ export default function SubscriptionsPage() {
                     type="button"
                     onClick={() => handleDuplicatePlan(plan)}
                     title="Duplicate as draft"
-                    className="p-1.5 rounded-xl bg-slate-100 dark:bg-[#161B16] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-white/10 text-xs transition-all cursor-pointer"
+                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-[#18181E] hover:bg-slate-200 dark:hover:bg-white/[0.1] text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-white/10 text-xs transition-all cursor-pointer"
                   >
                     <Copy className="w-3.5 h-3.5" />
                   </button>
                   <button
                     type="button"
                     onClick={() => handleOpenEditModal(plan)}
-                    className="px-3 py-1.5 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95"
+                    className="px-2.5 py-1.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95"
                   >
                     Edit Plan Pricing &gt;
                   </button>
@@ -714,92 +728,90 @@ export default function SubscriptionsPage() {
       {/* ======================================================== */}
       {/* 7-DAY FREE TRIAL (₹2 TOKEN AUTOPAY MANDATE) SPOTLIGHT    */}
       {/* ======================================================== */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-white/10">
-          <div className="flex items-center space-x-3.5">
-            <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
-              <Zap className="w-5 h-5 stroke-[2.2]" />
+      <div className="bg-white dark:bg-[#121216] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100 dark:border-white/10">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+              <Zap className="w-4 h-4 stroke-[2.2]" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-extrabold text-slate-950 dark:text-white text-base sm:text-lg tracking-tight">
+                <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base tracking-tight">
                   {trialConfig.trialDurationDays}-Day Free Trial (₹{trialConfig.trialFee} Token AutoPay Mandate)
                 </h3>
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black tracking-wide uppercase ${
+                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${
                   trialConfig.enabled
-                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-400 border border-emerald-300/60 dark:border-emerald-700/50'
+                    ? 'bg-[#FEF08A]/30 text-slate-900 dark:text-amber-300 border border-amber-300/50'
                     : 'bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-400 border border-slate-200 dark:border-white/10'
                 }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${trialConfig.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full ${trialConfig.enabled ? 'bg-amber-400 animate-pulse' : 'bg-slate-400'}`} />
                   {trialConfig.enabled ? 'Campaign Active' : 'Paused'}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                 High-conversion subscriber acquisition flow enabled by Razorpay &amp; UPI e-Mandate
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2.5">
+          <div className="flex items-center space-x-2">
             <button
               type="button"
               onClick={() => {
                 setTrialFormData({ ...trialConfig });
                 setIsTrialModalOpen(true);
               }}
-              className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-[#161B16] hover:bg-[#FEF08A] hover:text-slate-950 dark:hover:bg-[#FEF08A] dark:hover:text-slate-950 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-white/10 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer active:scale-95 shadow-2xs"
+              className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-[#18181E] hover:bg-[#FACC15] hover:text-slate-950 dark:hover:bg-[#FACC15] dark:hover:text-slate-950 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-white/10 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer active:scale-95 shadow-2xs"
             >
               <Edit3 className="w-3.5 h-3.5 stroke-[2.2]" />
-              <span>Edit</span>
+              <span>Configure Settings</span>
             </button>
           </div>
         </div>
 
         {/* Trial Architecture Diagram & Flow */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-          
-          <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#161B16] border border-slate-200/70 dark:border-white/10 space-y-2 hover:border-[#FEF08A]/50 dark:hover:border-[#FEF08A]/30 transition-all">
-            <div className="flex items-center space-x-2.5">
-              <span className="w-6 h-6 rounded-lg bg-[#FEF08A] text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">1</span>
-              <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wide">User Signs Up for ₹{trialConfig.trialFee}</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+          <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/70 dark:border-white/10 space-y-1.5 hover:border-amber-300/40 dark:hover:border-amber-500/20 transition-all">
+            <div className="flex items-center space-x-2">
+              <span className="w-5 h-5 rounded-md bg-[#FEF08A] text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">1</span>
+              <h4 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-wide">User Signs Up for ₹{trialConfig.trialFee}</h4>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-              Enjoy a {trialConfig.trialDurationDays}-day free trial for just ₹{trialConfig.trialFee}. The ₹{trialConfig.trialFee} payment is non-refundable and authenticates the user's UPI/Card mandate.
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+              Enjoy a {trialConfig.trialDurationDays}-day free trial for just ₹{trialConfig.trialFee}. Non-refundable payment authenticates user's UPI mandate.
             </p>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#161B16] border border-slate-200/70 dark:border-white/10 space-y-2 hover:border-[#FEF08A]/50 dark:hover:border-[#FEF08A]/30 transition-all">
-            <div className="flex items-center space-x-2.5">
-              <span className="w-6 h-6 rounded-lg bg-[#FEF08A] text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">2</span>
-              <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wide">{trialConfig.trialDurationDays} Days Full Access</h4>
+          <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/70 dark:border-white/10 space-y-1.5 hover:border-amber-300/40 dark:hover:border-amber-500/20 transition-all">
+            <div className="flex items-center space-x-2">
+              <span className="w-5 h-5 rounded-md bg-[#FEF08A] text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">2</span>
+              <h4 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-wide">{trialConfig.trialDurationDays} Days Full Access</h4>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-              Viewer enjoys complete access to all paywalled episodes across all micro-dramas in 1080p Full HD with zero ads.
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+              Viewer enjoys complete access to all paywalled episodes in 1080p Full HD with zero ads.
             </p>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50/80 dark:bg-[#161B16] border border-slate-200/70 dark:border-white/10 space-y-2 hover:border-[#FEF08A]/50 dark:hover:border-[#FEF08A]/30 transition-all">
-            <div className="flex items-center space-x-2.5">
-              <span className="w-6 h-6 rounded-lg bg-[#FEF08A] text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">3</span>
-              <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wide">Automatic AutoPay Renewal</h4>
+          <div className="p-3 rounded-lg bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/70 dark:border-white/10 space-y-1.5 hover:border-amber-300/40 dark:hover:border-amber-500/20 transition-all">
+            <div className="flex items-center space-x-2">
+              <span className="w-5 h-5 rounded-md bg-[#FEF08A] text-slate-950 font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">3</span>
+              <h4 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-wide">Automatic AutoPay Renewal</h4>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-              After {trialConfig.trialDurationDays} days, subscription automatically renews as a paid plan unless cancelled before the trial ends.
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+              After {trialConfig.trialDurationDays} days, subscription automatically renews as a paid plan unless cancelled prior.
             </p>
           </div>
-
         </div>
 
         {/* Trial Terms Callout Box */}
-        <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16]/80 border border-slate-200/80 dark:border-white/10 flex items-start space-x-3 text-xs text-slate-600 dark:text-slate-300">
-          <div className="w-7 h-7 rounded-lg bg-amber-500/10 dark:bg-amber-400/10 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
-            <Info className="w-4 h-4 stroke-[2.2]" />
+        <div className="p-2.5 rounded-lg bg-slate-50/70 dark:bg-[#18181E]/80 border border-slate-200/80 dark:border-white/10 flex items-start space-x-2.5 text-xs text-slate-600 dark:text-slate-300">
+          <div className="w-6 h-6 rounded-md bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 mt-0.5">
+            <Info className="w-3.5 h-3.5 stroke-[2.2]" />
           </div>
-          <div className="space-y-1">
-            <p className="font-bold text-slate-900 dark:text-white text-xs">
+          <div className="space-y-0.5">
+            <p className="font-bold text-slate-900 dark:text-white text-[11px]">
               Statutory In-App Terms &amp; Compliance Notice
             </p>
-            <p className="leading-relaxed text-xs text-slate-600 dark:text-slate-400 italic">
+            <p className="leading-relaxed text-[11px] text-slate-500 dark:text-slate-400 italic">
               "{trialConfig.termsText}"
             </p>
           </div>
@@ -811,97 +823,99 @@ export default function SubscriptionsPage() {
   {/* ======================================================== */}
   {/* CREATE & EDIT SUBSCRIPTION PLAN MODAL (Light & Dark Mode) */}
   {/* ======================================================== */}
-      {isModalOpen && createPortal(
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-xs animate-in fade-in duration-150 font-urbanist"
-          onWheel={(e) => e.stopPropagation()}
-        >
+      {isModalOpen && (
+        <ModalPortal isOpen={isModalOpen}>
           <div
-            className="bg-white dark:bg-[#121612] text-slate-900 dark:text-slate-100 rounded-2xl w-full max-w-5xl shadow-2xl border border-slate-200/90 dark:border-white/12 overflow-hidden flex flex-col h-[88vh] max-h-[820px] animate-in zoom-in-95 duration-150 font-urbanist"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm animate-in fade-in duration-150 font-urbanist"
+            onWheel={(e) => e.stopPropagation()}
+            onClick={() => setIsModalOpen(false)}
           >
-            {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between shrink-0 bg-white dark:bg-[#161B16]">
-              <div className="flex items-center space-x-3.5">
-                <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-xs">
-                  <CreditCard className="w-5 h-5 stroke-[2.2]" />
+            <div
+              className="bg-white dark:bg-[#121216] text-slate-900 dark:text-slate-100 rounded-2xl w-full max-w-5xl shadow-2xl border border-slate-200/90 dark:border-white/12 overflow-hidden flex flex-col h-[88vh] max-h-[820px] animate-in zoom-in-95 duration-150 font-urbanist"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="px-6 py-4 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between shrink-0 bg-white dark:bg-[#18181E]">
+                <div className="flex items-center space-x-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+                    <CreditCard className="w-5 h-5 stroke-[2.2]" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-slate-950 dark:text-white text-base tracking-tight leading-snug">
+                      {modalMode === 'create' ? 'Create New Subscription Plan' : 'Edit Subscription Plan'}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                      Configure tier duration, pricing, perks, and AutoPay mandate eligibility
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-extrabold text-slate-950 dark:text-white text-base tracking-tight leading-snug">
-                    {modalMode === 'create' ? 'Create New Subscription Plan' : 'Edit Subscription Plan'}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    Configure tier duration, pricing, perks, and AutoPay mandate eligibility
-                  </p>
+
+                {/* Header Actions: Mobile Tab Switcher + Status Pill + Close */}
+                <div className="flex items-center space-x-3">
+                  {/* Mobile / Tablet View Switcher (< lg) */}
+                  <div className="flex lg:hidden items-center bg-slate-100 dark:bg-[#1E1E26] p-0.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setModalViewTab('form')}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        modalViewTab === 'form'
+                          ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                      }`}
+                    >
+                      Form
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setModalViewTab('preview')}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        modalViewTab === 'preview'
+                          ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                      }`}
+                    >
+                      Preview
+                    </button>
+                  </div>
+
+                  {/* Plan Status Segmented Control */}
+                  <div className="flex items-center bg-slate-100 dark:bg-[#1E1E26] p-0.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, status: 'ACTIVE' })}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
+                        formData.status === 'ACTIVE'
+                          ? 'bg-[#FEF08A] text-slate-950 font-bold shadow-xs'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                      }`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${formData.status === 'ACTIVE' ? 'bg-amber-600 animate-pulse' : 'bg-slate-400'}`} />
+                      <span>Active</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, status: 'DRAFT' })}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        formData.status === 'DRAFT'
+                          ? 'bg-amber-400 text-slate-950 font-extrabold shadow-xs'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                      }`}
+                    >
+                      <span>Draft</span>
+                    </button>
+                  </div>
+
+                  {/* Close Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="p-1.5 rounded-xl text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
+                    title="Close modal"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
-
-              {/* Header Actions: Mobile Tab Switcher + Status Pill + Close */}
-              <div className="flex items-center space-x-3">
-                {/* Mobile / Tablet View Switcher (< lg) */}
-                <div className="flex lg:hidden items-center bg-slate-100 dark:bg-[#1C221C] p-0.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setModalViewTab('form')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      modalViewTab === 'form'
-                        ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
-                    }`}
-                  >
-                    Form
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setModalViewTab('preview')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      modalViewTab === 'preview'
-                        ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
-                    }`}
-                  >
-                    Preview
-                  </button>
-                </div>
-
-                {/* Plan Status Segmented Control */}
-                <div className="flex items-center bg-slate-100 dark:bg-[#1C221C] p-0.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, status: 'ACTIVE' })}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
-                      formData.status === 'ACTIVE'
-                        ? 'bg-emerald-500 text-white shadow-xs'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
-                    }`}
-                  >
-                    <span className={`w-1.5 h-1.5 rounded-full ${formData.status === 'ACTIVE' ? 'bg-white animate-pulse' : 'bg-slate-400'}`} />
-                    <span>Active</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, status: 'DRAFT' })}
-                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      formData.status === 'DRAFT'
-                        ? 'bg-amber-400 text-slate-950 font-extrabold shadow-xs'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
-                    }`}
-                  >
-                    <span>Draft</span>
-                  </button>
-                </div>
-
-                {/* Close Button */}
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
-                  title="Close modal"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
 
             {/* Modal Body: Responsive 2-Column Split (Left Column Scrolls, Right Column Stays Static) */}
             <form onSubmit={handleSaveModal} className="flex-1 min-h-0 flex flex-col overflow-hidden">
@@ -912,7 +926,7 @@ export default function SubscriptionsPage() {
                 <div className={`${modalViewTab === 'form' ? 'block' : 'hidden lg:block'} lg:col-span-7 space-y-5 overflow-y-auto pr-1 sm:pr-3 max-h-full scroll-smooth`}>
                   
                   {/* 1. Plan Name & Quick Starters */}
-                  <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 space-y-2.5">
+                  <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 space-y-2.5">
                     <label className="block text-xs font-bold text-slate-900 dark:text-slate-200">
                       Plan Name <span className="text-rose-500">*</span>
                     </label>
@@ -924,7 +938,7 @@ export default function SubscriptionsPage() {
                         placeholder="e.g. 1 Month Pass, 6 Months Pass, 12 Months Annual"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full pl-10 pr-4 py-2.5 text-xs font-bold bg-white dark:bg-[#101410] border border-slate-200/90 dark:border-white/10 rounded-xl focus:bg-white dark:focus:bg-[#101410] focus:border-[#FEF08A] text-slate-950 dark:text-white focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        className="w-full pl-10 pr-4 py-2.5 text-xs font-bold bg-white dark:bg-[#101014] border border-slate-200/90 dark:border-white/10 rounded-xl focus:bg-white dark:focus:bg-[#101014] focus:border-[#FEF08A] text-slate-950 dark:text-white focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                       />
                     </div>
 
@@ -951,7 +965,7 @@ export default function SubscriptionsPage() {
                               badge: preset.badge
                             }));
                           }}
-                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-[#1C221C] hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 transition-all cursor-pointer shadow-2xs"
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-[#1E1E26] hover:bg-[#FACC15] hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 transition-all cursor-pointer shadow-2xs"
                         >
                           <Zap className="w-3.5 h-3.5 inline mr-1 text-amber-500 stroke-[2.5]" />
                           {preset.name} (₹{preset.price})
@@ -961,7 +975,7 @@ export default function SubscriptionsPage() {
                   </div>
 
                   {/* 2. Billing Duration Segmented Cards */}
-                  <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 space-y-2.5">
+                  <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 space-y-2.5">
                     <label className="block text-xs font-bold text-slate-900 dark:text-slate-200">
                       Billing Duration / Cadence
                     </label>
@@ -986,7 +1000,7 @@ export default function SubscriptionsPage() {
                             className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
                               isSelected
                                 ? 'bg-[#FEF08A] text-slate-950 border-amber-300 font-extrabold shadow-xs ring-2 ring-amber-300/40'
-                                : 'bg-white dark:bg-[#101410] text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 font-bold'
+                                : 'bg-white dark:bg-[#101014] text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 font-bold'
                             }`}
                           >
                             <span className="block text-xs">{dur.title}</span>
@@ -1000,7 +1014,7 @@ export default function SubscriptionsPage() {
                   </div>
 
                   {/* 3. Pricing & Strikethrough Savings */}
-                  <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 space-y-3.5">
+                  <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 space-y-3.5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       {/* Selling Price */}
                       <div>
@@ -1018,7 +1032,7 @@ export default function SubscriptionsPage() {
                             placeholder="e.g. 99, 499, 899"
                             value={formData.price}
                             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                            className="w-full pl-8 pr-4 py-2.5 text-sm font-black bg-white dark:bg-[#101410] border border-slate-200/90 dark:border-white/10 rounded-xl focus:border-[#FEF08A] text-slate-950 dark:text-white focus:outline-none transition-all"
+                            className="w-full pl-8 pr-4 py-2.5 text-sm font-black bg-white dark:bg-[#101014] border border-slate-200/90 dark:border-white/10 rounded-xl focus:border-[#FEF08A] text-slate-950 dark:text-white focus:outline-none transition-all"
                           />
                         </div>
                       </div>
@@ -1038,7 +1052,7 @@ export default function SubscriptionsPage() {
                             placeholder="e.g. 199, 594, 1188"
                             value={formData.originalPrice}
                             onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
-                            className="w-full pl-8 pr-4 py-2.5 text-sm font-bold bg-white dark:bg-[#101410] border border-slate-200/90 dark:border-white/10 rounded-xl focus:border-[#FEF08A] text-slate-950 dark:text-white focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            className="w-full pl-8 pr-4 py-2.5 text-sm font-bold bg-white dark:bg-[#101014] border border-slate-200/90 dark:border-white/10 rounded-xl focus:border-[#FEF08A] text-slate-950 dark:text-white focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                           />
                         </div>
                       </div>
@@ -1084,7 +1098,7 @@ export default function SubscriptionsPage() {
                           placeholder="e.g. Popular Starter / Save 16% / Best Value (Save ₹289)"
                           value={formData.badge}
                           onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
-                          className="w-full px-4 py-2 text-xs font-bold bg-white dark:bg-[#101410] border border-slate-200/90 dark:border-white/10 rounded-xl focus:border-[#FEF08A] text-slate-950 dark:text-white focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                          className="w-full px-4 py-2 text-xs font-bold bg-white dark:bg-[#101014] border border-slate-200/90 dark:border-white/10 rounded-xl focus:border-[#FEF08A] text-slate-950 dark:text-white focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                         />
 
                         {/* Quick Badge Chips */}
@@ -1094,7 +1108,7 @@ export default function SubscriptionsPage() {
                               key={bText}
                               type="button"
                               onClick={() => setFormData({ ...formData, badge: bText })}
-                              className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-[#1C221C] hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 transition-colors cursor-pointer shadow-2xs"
+                              className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-[#1E1E26] hover:bg-[#FACC15] hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 transition-colors cursor-pointer shadow-2xs"
                             >
                               + {bText}
                             </button>
@@ -1111,7 +1125,7 @@ export default function SubscriptionsPage() {
                           placeholder="e.g. Yearly savings: ₹289 compared with paying ₹99 monthly for 12 months (₹1,188)"
                           value={formData.savingsText}
                           onChange={(e) => setFormData({ ...formData, savingsText: e.target.value })}
-                          className="w-full px-4 py-2 text-xs font-semibold bg-white dark:bg-[#101410] border border-slate-200/90 dark:border-white/10 rounded-xl focus:border-[#FEF08A] text-slate-950 dark:text-white focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                          className="w-full px-4 py-2 text-xs font-semibold bg-white dark:bg-[#101014] border border-slate-200/90 dark:border-white/10 rounded-xl focus:border-[#FEF08A] text-slate-950 dark:text-white focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                         />
                       </div>
                     </div>
@@ -1121,7 +1135,7 @@ export default function SubscriptionsPage() {
                   <div className={`p-4 rounded-xl border transition-all ${
                     formData.trialEligible
                       ? 'bg-amber-500/10 border-amber-300/80 dark:border-amber-500/40 shadow-xs'
-                      : 'bg-slate-50/70 dark:bg-[#161B16] border-slate-200/80 dark:border-white/10'
+                      : 'bg-slate-50/70 dark:bg-[#18181E] border-slate-200/80 dark:border-white/10'
                   }`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3.5">
@@ -1152,7 +1166,7 @@ export default function SubscriptionsPage() {
                   </div>
 
                   {/* 5. Perks & Features List */}
-                  <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 space-y-3">
+                  <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 space-y-3">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-bold text-slate-900 dark:text-slate-200">
                         Perks &amp; Features List ({formData.features.length})
@@ -1178,7 +1192,7 @@ export default function SubscriptionsPage() {
                               setFormData({ ...formData, features: [...formData.features, preset] });
                             }
                           }}
-                          className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-[#1C221C] hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 transition-colors cursor-pointer shadow-2xs"
+                          className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-[#1E1E26] hover:bg-[#FACC15] hover:text-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 transition-colors cursor-pointer shadow-2xs"
                         >
                           + {preset.length > 28 ? preset.slice(0, 26) + '...' : preset}
                         </button>
@@ -1198,12 +1212,12 @@ export default function SubscriptionsPage() {
                             handleAddFeature();
                           }
                         }}
-                        className="flex-1 px-3.5 py-2 text-xs font-semibold bg-white dark:bg-[#101410] border border-slate-200/90 dark:border-white/10 rounded-xl focus:border-[#FEF08A] text-slate-950 dark:text-white focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        className="flex-1 px-3.5 py-2 text-xs font-semibold bg-white dark:bg-[#101014] border border-slate-200/90 dark:border-white/10 rounded-xl focus:border-[#FEF08A] text-slate-950 dark:text-white focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                       />
                       <button
                         type="button"
                         onClick={handleAddFeature}
-                        className="px-4 py-2 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all shrink-0 cursor-pointer shadow-xs active:scale-95"
+                        className="px-4 py-2 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all shrink-0 cursor-pointer shadow-xs active:scale-95"
                       >
                         Add Perk
                       </button>
@@ -1214,7 +1228,7 @@ export default function SubscriptionsPage() {
                       {formData.features.map((feat, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-[#101410] border border-slate-200/80 dark:border-white/10 text-xs group hover:border-slate-300 dark:hover:border-white/20 transition-colors"
+                          className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-[#101014] border border-slate-200/80 dark:border-white/10 text-xs group hover:border-slate-300 dark:hover:border-white/20 transition-colors"
                         >
                           <div className="flex items-center space-x-2.5 text-slate-800 dark:text-slate-200 min-w-0 pr-2">
                             <div className="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-center shrink-0">
@@ -1238,7 +1252,7 @@ export default function SubscriptionsPage() {
                 </div>
 
                 {/* Right Column: Live Subscriber Card Preview (5 cols on lg - Non-Scrollable Static View) */}
-                <div className={`${modalViewTab === 'preview' ? 'flex overflow-y-auto' : 'hidden lg:flex lg:overflow-hidden'} lg:col-span-5 flex-col justify-between p-5 rounded-2xl bg-slate-50/70 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 h-full shrink-0 select-none`}>
+                <div className={`${modalViewTab === 'preview' ? 'flex overflow-y-auto' : 'hidden lg:flex lg:overflow-hidden'} lg:col-span-5 flex-col justify-between p-5 rounded-2xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 h-full shrink-0 select-none`}>
                   <div>
                     {/* Live Preview Header Strip */}
                     <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-200/80 dark:border-white/10">
@@ -1254,7 +1268,7 @@ export default function SubscriptionsPage() {
                     </div>
 
                     {/* The Mirrored Live Plan Card */}
-                    <div className="bg-white dark:bg-[#1A201A] rounded-2xl p-5 border border-amber-300/80 dark:border-amber-400/50 shadow-md dark:shadow-2xl ring-2 ring-[#FEF08A]/40 dark:ring-[#FEF08A]/20 flex flex-col justify-between">
+                    <div className="bg-white dark:bg-[#1E1E26] rounded-2xl p-5 border border-amber-300/80 dark:border-amber-400/50 shadow-md dark:shadow-2xl ring-2 ring-[#FEF08A]/40 dark:ring-[#FEF08A]/20 flex flex-col justify-between">
                       <div>
                         {/* Top Badge */}
                         <div className="flex items-center justify-between mb-3">
@@ -1309,7 +1323,7 @@ export default function SubscriptionsPage() {
 
                         {/* 7-Day Trial Strip in Preview */}
                         {formData.trialEligible && (
-                          <div className="mt-3 p-2.5 rounded-xl bg-slate-50 dark:bg-[#141914] border border-amber-300/60 dark:border-amber-500/30 flex items-center justify-between text-xs">
+                          <div className="mt-3 p-2.5 rounded-xl bg-slate-50 dark:bg-[#141419] border border-amber-300/60 dark:border-amber-500/30 flex items-center justify-between text-xs">
                             <div className="flex items-center space-x-1.5">
                               <Zap className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
                               <span className="font-bold text-slate-900 dark:text-white text-[11px]">
@@ -1364,7 +1378,7 @@ export default function SubscriptionsPage() {
               </div>
 
               {/* Modal Footer Controls */}
-              <div className="px-6 py-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/70 dark:bg-[#161B16] shrink-0">
+              <div className="px-6 py-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/70 dark:bg-[#18181E] shrink-0">
                 <div>
                   {modalMode === 'edit' && plans.length > 1 && (
                     <button
@@ -1388,7 +1402,7 @@ export default function SubscriptionsPage() {
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-2.5 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-black transition-all shadow-md cursor-pointer active:scale-95"
+                    className="px-6 py-2.5 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-black transition-all shadow-md cursor-pointer active:scale-95"
                   >
                     {modalMode === 'create' ? 'Create & Publish Plan' : 'Save Plan Changes'}
                   </button>
@@ -1398,27 +1412,28 @@ export default function SubscriptionsPage() {
             </form>
 
           </div>
-        </div>,
-        document.body
+        </div>
+        </ModalPortal>
       )}
 
       {/* ======================================================== */}
       {/* 7-DAY FREE TRIAL CONFIGURATION MODAL                     */}
       {/* ======================================================== */}
-      {isTrialModalOpen && createPortal(
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-xs animate-in fade-in duration-150 font-urbanist"
-          onWheel={(e) => e.stopPropagation()}
-          onClick={() => setIsTrialModalOpen(false)}
-        >
+      {isTrialModalOpen && (
+        <ModalPortal isOpen={isTrialModalOpen}>
           <div
-            className="bg-white dark:bg-[#161B16] rounded-2xl w-full max-w-lg shadow-2xl border border-slate-200/90 dark:border-white/12 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150 font-urbanist"
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm animate-in fade-in duration-150 font-urbanist"
+            onWheel={(e) => e.stopPropagation()}
+            onClick={() => setIsTrialModalOpen(false)}
+          >
+          <div
+            className="bg-white dark:bg-[#18181E] rounded-2xl w-full max-w-lg shadow-2xl border border-slate-200/90 dark:border-white/12 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150 font-urbanist"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between shrink-0 bg-white dark:bg-[#161B16]">
+            <div className="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between shrink-0 bg-white dark:bg-[#18181E]">
               <div className="flex items-center space-x-3">
-                <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0 shadow-2xs">
+                <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-2xs">
                   <Zap className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1496,7 +1511,7 @@ export default function SubscriptionsPage() {
                       required
                       value={trialFormData.trialFee}
                       onChange={(e) => setTrialFormData((prev) => ({ ...prev, trialFee: Number(e.target.value) }))}
-                      className="w-full pl-8 pr-4 py-2.5 text-xs font-bold bg-slate-50 dark:bg-[#121612] border border-slate-200 dark:border-white/10 rounded-xl text-slate-950 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60"
+                      className="w-full pl-8 pr-4 py-2.5 text-xs font-bold bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-white/10 rounded-xl text-slate-950 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60"
                     />
                   </div>
                   {/* Preset Quick Chips */}
@@ -1530,7 +1545,7 @@ export default function SubscriptionsPage() {
                       required
                       value={trialFormData.trialDurationDays}
                       onChange={(e) => setTrialFormData((prev) => ({ ...prev, trialDurationDays: Number(e.target.value) }))}
-                      className="w-full pl-3.5 pr-14 py-2.5 text-xs font-bold bg-slate-50 dark:bg-[#121612] border border-slate-200 dark:border-white/10 rounded-xl text-slate-950 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60"
+                      className="w-full pl-3.5 pr-14 py-2.5 text-xs font-bold bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-white/10 rounded-xl text-slate-950 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60"
                     />
                     <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-semibold select-none">
                       Days
@@ -1590,7 +1605,7 @@ export default function SubscriptionsPage() {
                   required
                   value={trialFormData.termsText}
                   onChange={(e) => setTrialFormData((prev) => ({ ...prev, termsText: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 dark:bg-[#121612] border border-slate-200 dark:border-white/10 rounded-xl text-slate-950 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60 leading-relaxed resize-none"
+                  className="w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-white/10 rounded-xl text-slate-950 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60 leading-relaxed resize-none"
                 />
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                   This statutory compliance disclosure is presented on user paywalls before UPI/Card mandate authorization.
@@ -1608,7 +1623,7 @@ export default function SubscriptionsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-black shadow-xs active:scale-95 transition-all cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-black shadow-xs active:scale-95 transition-all cursor-pointer"
                 >
                   Save Settings
                 </button>
@@ -1616,8 +1631,8 @@ export default function SubscriptionsPage() {
 
             </form>
           </div>
-        </div>,
-        document.body
+        </div>
+        </ModalPortal>
       )}
 
     </div>

@@ -193,6 +193,14 @@ export class AuthController {
         }
       }
 
+      // 3.1 Save device push token if provided during login
+      const rawFcmToken = req.body.fcmToken || req.body.deviceToken || req.body.token || req.body.fcm_token;
+      if (rawFcmToken && typeof rawFcmToken === 'string' && rawFcmToken.trim().length > 10) {
+        await User.findByIdAndUpdate(user._id, {
+          $addToSet: { fcmTokens: rawFcmToken.trim() }
+        });
+      }
+
       // 4. Generate JWT access token & refresh token
       const token = signJwt({
         userId: user._id.toString(),

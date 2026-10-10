@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
-import KpiStatCard from '../../components/common/KpiStatCard';
 import PageLoader from '../../components/common/PageLoader';
 import adService from '../../services/adService';
 import { uploadService } from '../../services/uploadService';
@@ -30,7 +29,14 @@ import {
   CheckCircle2,
   Loader2,
   Video,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Tag,
+  RefreshCw,
+  Download,
+  X,
+  ExternalLink,
+  Layers,
+  Sparkles
 } from 'lucide-react';
 
 const PLACEMENT_OPTIONS = [
@@ -110,12 +116,13 @@ export default function CustomAdsPage({ onNavigate }) {
     };
   });
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [showRotationPanel, setShowRotationPanel] = useState(false);
 
-  // Filters
+  // Filters & Sorting
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPlacement, setFilterPlacement] = useState('ALL');
-  const [filterPlatform, setFilterPlatform] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
+  const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'impressions' | 'clicks' | 'priority' | 'name'
 
   // Form State
   const [form, setForm] = useState(INITIAL_FORM);
@@ -135,7 +142,7 @@ export default function CustomAdsPage({ onNavigate }) {
     setToast({ show: true, text, type });
     toastTimerRef.current = setTimeout(() => {
       setToast(prev => ({ ...prev, show: false }));
-    }, 3200);
+    }, 3000);
   };
 
   const loadData = useCallback(async (showIndicator = false) => {
@@ -152,7 +159,7 @@ export default function CustomAdsPage({ onNavigate }) {
       if (showIndicator) showToast('Failed to refresh data', 'error');
     } finally {
       setIsLoading(false);
-      if (showIndicator) setTimeout(() => setIsRefreshing(false), 400);
+      if (showIndicator) setTimeout(() => setIsRefreshing(false), 350);
     }
   }, []);
 
@@ -175,7 +182,8 @@ export default function CustomAdsPage({ onNavigate }) {
       } catch (e) {
         // Local persist fallback
       }
-      showToast('Serving & Rotation settings saved successfully!', 'success');
+      showToast('Rotation settings saved successfully!', 'success');
+      setShowRotationPanel(false);
     } catch (err) {
       showToast('Failed to save settings', 'error');
     } finally {
@@ -332,7 +340,7 @@ export default function CustomAdsPage({ onNavigate }) {
         prev.map(a => ((a.id || a._id) === id ? { ...a, status: a.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE' } : a))
       );
       await adService.toggleCustomAdStatus(id);
-      showToast('Campaign status toggled', 'success');
+      showToast('Campaign status updated', 'success');
       loadData();
     } catch (err) {
       showToast('Failed to toggle status', 'error');
@@ -341,8 +349,8 @@ export default function CustomAdsPage({ onNavigate }) {
   };
 
   // Delete Campaign
-  const handleDeleteAd = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this custom ad campaign?')) return;
+  const handleDeleteAd = async (id, title) => {
+    if (!window.confirm(`Are you sure you want to delete campaign "${title || 'Ad'}"?`)) return;
     try {
       setAds(prev => prev.filter(a => (a.id || a._id) !== id));
       await adService.deleteCustomAd(id);
@@ -354,516 +362,661 @@ export default function CustomAdsPage({ onNavigate }) {
     }
   };
 
-  // Filtering
-  const filteredAds = ads.filter((ad) => {
-    if (filterPlacement !== 'ALL' && ad.placement !== filterPlacement) return false;
-    if (filterStatus !== 'ALL' && ad.status !== filterStatus) return false;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchTitle = ad.title?.toLowerCase().includes(q);
-      const matchAdv = ad.advertiser?.toLowerCase().includes(q);
-      if (!matchTitle && !matchAdv) return false;
-    }
-    return true;
-  });
+  // Filtering & Sorting
+  const filteredAds = useMemo(() => {
+    const list = ads.filter((ad) => {
+      if (filterPlacement !== 'ALL' && ad.placement !== filterPlacement) return false;
+      if (filterStatus !== 'ALL' && ad.status !== filterStatus) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchTitle = ad.title?.toLowerCase().includes(q);
+        const matchAdv = ad.advertiser?.toLowerCase().includes(q);
+        if (!matchTitle && !matchAdv) return false;
+      }
+      return true;
+    });
+
+    return list.sort((a, b) => {
+      if (sortBy === 'impressions') {
+        return (b.impressionsCount || 0) - (a.impressionsCount || 0);
+      }
+      if (sortBy === 'clicks') {
+        return (b.clicksCount || 0) - (a.clicksCount || 0);
+      }
+      if (sortBy === 'priority') {
+        return (b.priority || 0) - (a.priority || 0);
+      }
+      if (sortBy === 'name') {
+        return (a.title || '').localeCompare(b.title || '');
+      }
+      return 0; // default newest
+    });
+  }, [ads, filterPlacement, filterStatus, searchQuery, sortBy]);
+
+  // Counts
+  const counts = useMemo(() => {
+    let active = 0;
+    let paused = 0;
+    ads.forEach(a => {
+      if (a.status === 'ACTIVE') active++;
+      else paused++;
+    });
+    return { all: ads.length, active, paused };
+  }, [ads]);
 
   // KPI Calculations
   const totalImpressions = stats?.totalImpressions ?? ads.reduce((s, a) => s + (a.impressionsCount || 0), 0);
   const totalClicks = stats?.totalClicks ?? ads.reduce((s, a) => s + (a.clicksCount || 0), 0);
   const overallCtr = stats?.overallCtr ?? (totalImpressions > 0 ? `${((totalClicks / totalImpressions) * 100).toFixed(2)}%` : '0.00%');
   const totalSkips = ads.reduce((s, a) => s + (a.skipsCount || Math.floor((a.impressionsCount || 0) * 0.12)), 0);
-  const avgPerUser = ads.length > 0 ? Math.round(totalImpressions / (ads.length * 12 + 1) + 8) : 32;
 
   // Placement label helper
   const getPlacementDisplay = (slot) => {
     switch (slot) {
       case 'HOME_BANNER': return 'Banner';
       case 'PLAYER_PREROLL': return 'Player Preroll';
-      case 'EPISODE_TRANSITION': return 'Player Midroll';
+      case 'EPISODE_TRANSITION': return 'Midroll Card';
       case 'DRAWER_CARD': return 'Drawer Card';
       case 'GLOBAL_POPUP': return 'App Splash';
       default: return 'Banner';
     }
   };
 
-  return (
-    <div className="space-y-5 font-urbanist animate-fade-in pb-20 selection:bg-[#FEF08A] selection:text-black">
+  // CSV Export
+  const handleExportCSV = () => {
+    if (filteredAds.length === 0) {
+      alert('No campaigns to export.');
+      return;
+    }
+    const headers = ['Campaign Title,Advertiser,Placement,Type,Priority,Impressions,Clicks,Status,Start Date'];
+    const rows = filteredAds.map((a) =>
+      [
+        `"${a.title || ''}"`,
+        `"${a.advertiser || ''}"`,
+        `"${getPlacementDisplay(a.placement)}"`,
+        `"${a.mediaType || 'IMAGE'}"`,
+        `"${a.priority || 5}"`,
+        `"${a.impressionsCount || 0}"`,
+        `"${a.clicksCount || 0}"`,
+        `"${a.status || 'ACTIVE'}"`,
+        `"${a.startDate || ''}"`
+      ].join(',')
+    );
 
+    const blob = new Blob([[headers, ...rows].join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `custom_ads_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Custom ad campaigns CSV exported successfully.');
+  };
+
+  return (
+    <div className="space-y-3 font-urbanist pb-14 selection:bg-[#FEF08A] selection:text-black">
       {/* ─────────────────────────────────────────────────────────────
           VIEW 1: INVENTORY & DASHBOARD VIEW
          ───────────────────────────────────────────────────────────── */}
       {viewMode === 'inventory' && (
         <>
-          {/* 1. Header Section */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight">
-                Custom Ad Campaigns
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Manage client-sponsored video ads, banner promotions, skips, caps, and sequential rotation strategy rules.
-              </p>
-            </div>
-          </div>
-
-          {/* 2. Top 4 KPI Metric Cards in a Grid (Clean & Minimalistic) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* 4 Compact Uniform KPI Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
             {/* Card 1: Campaign Impressions */}
-            <KpiStatCard
-              icon={Eye}
-              title="Campaign Impressions"
-              subtitle="Total Ad Views"
-              value={totalImpressions > 0 ? totalImpressions.toLocaleString('en-IN') : '687'}
-              badgeVariant="active"
-              badgeLabel="+7 Views"
-              footerLeft="Serving active campaigns"
-              footerRight="Live Feed"
-              footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
-            />
+            <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
+              <div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center space-x-2.5 min-w-0">
+                    <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
+                      <Eye className="w-4 h-4 stroke-[2.2]" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                        Impressions
+                      </span>
+                      <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                        Total Views
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-2.5">
+                  <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+                    {totalImpressions > 0 ? totalImpressions.toLocaleString('en-IN') : '0'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+                <span className="truncate text-slate-500 dark:text-slate-400">
+                  Serving campaigns
+                </span>
+                <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-emerald-600 dark:text-emerald-400 font-bold">
+                  Live Feed
+                </span>
+              </div>
+            </div>
 
             {/* Card 2: Campaign Clicks */}
-            <KpiStatCard
-              icon={MousePointerClick}
-              title="Campaign Clicks"
-              subtitle="User Interactions"
-              value={totalClicks > 0 ? totalClicks.toLocaleString('en-IN') : '8'}
-              badgeVariant="active"
-              badgeLabel={overallCtr !== '0.00%' ? overallCtr : '1.16% CTR'}
-              footerLeft="Direct click-throughs"
-              footerRight="CTR Ratio"
-              footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
-            />
-
-            {/* Card 3: Ad Skips / Skip Rate */}
-            <KpiStatCard
-              icon={Activity}
-              title="Ad Skips / Rate"
-              subtitle="Skip Telemetry"
-              value={totalSkips > 0 ? totalSkips.toLocaleString('en-IN') : '42'}
-              badgeVariant="inactive"
-              badgeLabel="6.11% Skip"
-              footerLeft="Skipped before end"
-              footerRight="Healthy (<10%)"
-              footerRightColor="text-slate-600 dark:text-slate-400 font-bold"
-            />
-
-            {/* Card 4: Ads Shown Per User */}
-            <KpiStatCard
-              icon={Users}
-              title="Shown Per User"
-              subtitle="Frequency Density"
-              value={avgPerUser || '32'}
-              badgeVariant="kpi-amber"
-              badgeLabel="Cap: 5/hr"
-              footerLeft="Unique viewers tracked"
-              footerRight="Optimal"
-              footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
-            />
-          </div>
-
-          {/* 3. Middle 2-Column Split: Serving & Rotation Settings | Campaign Rankings & View Times */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-
-            {/* Left Box: Serving & Rotation Settings (6 cols) */}
-            <div className="lg:col-span-6 bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-xs flex flex-col justify-between">
+            <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
               <div>
-                <div className="flex items-center space-x-2 mb-1">
-                  <SlidersHorizontal className="w-4.5 h-4.5 text-slate-900 dark:text-white" />
-                  <h3 className="text-sm sm:text-base font-black text-slate-950 dark:text-white">
-                    Serving & Rotation Settings
-                  </h3>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center space-x-2.5 min-w-0">
+                    <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
+                      <MousePointerClick className="w-4 h-4 stroke-[2.2]" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                        Ad Clicks
+                      </span>
+                      <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                        Interactions
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-400 font-medium mb-4">
-                  Quick controls for custom ad serving and candidate rotation.
-                </p>
 
-                <div className="space-y-4 pt-1">
-                  {/* Setting 1: Enable Custom Ads */}
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/[0.06]">
-                    <div>
-                      <div className="flex items-center space-x-1.5">
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">Enable Custom Ads</span>
-                        <Info className="w-3.5 h-3.5 text-slate-400" />
-                      </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        Master switch to activate or pause all custom client campaigns.
-                      </p>
-                    </div>
-                    {/* Switch Toggle */}
-                    <ToggleSwitch
-                      enabled={rotationSettings.enabled}
-                      onChange={() => setRotationSettings(p => ({ ...p, enabled: !p.enabled }))}
-                      title="Master switch for custom campaigns"
-                    />
-                  </div>
-
-                  {/* Setting 2: Ad Rotation Policy */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-white/[0.06]">
-                    <div>
-                      <div className="flex items-center space-x-1.5">
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">Ad Rotation Policy</span>
-                        <Info className="w-3.5 h-3.5 text-slate-400" />
-                      </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        How to pick between multiple active campaigns on the same placement.
-                      </p>
-                    </div>
-                    <select
-                      value={rotationSettings.policy}
-                      onChange={(e) => setRotationSettings(p => ({ ...p, policy: e.target.value }))}
-                      className="px-3 py-1.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FEF08A] cursor-pointer"
-                    >
-                      <option value="Equal Random Rotation (Recommended)">Equal Random Rotation (Recommended)</option>
-                      <option value="Weighted Priority (Rank Based)">Weighted Priority (Rank Based)</option>
-                      <option value="Sequential Round Robin">Sequential Round Robin</option>
-                    </select>
-                  </div>
-
-                  {/* Setting 3: Prevent Consecutive Repeats */}
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/[0.06]">
-                    <div>
-                      <div className="flex items-center space-x-1.5">
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">Prevent Consecutive Repeats</span>
-                        <Info className="w-3.5 h-3.5 text-slate-400" />
-                      </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        Avoid serving the exact same ad twice in a row.
-                      </p>
-                    </div>
-                    {/* Switch Toggle */}
-                    <ToggleSwitch
-                      enabled={rotationSettings.preventConsecutive}
-                      onChange={() => setRotationSettings(p => ({ ...p, preventConsecutive: !p.preventConsecutive }))}
-                      title="Prevent consecutive repeats"
-                    />
-                  </div>
-
-                  {/* Alert Info Box */}
-                  <div className="p-3 rounded-xl bg-slate-100 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 flex items-center justify-between text-xs">
-                    <div className="flex items-center space-x-2 text-slate-600 dark:text-slate-400">
-                      <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
-                      <span>Device splits, AdMob/AdSense fallbacks, and page rules are managed in <strong>Ads Control Center</strong>.</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => onNavigate?.('ad_control')}
-                      className="ml-2 px-2.5 py-1 rounded-lg text-xs font-black text-slate-900 dark:text-white hover:text-amber-500 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
-                    >
-                      Ads Control →
-                    </button>
+                <div className="mt-2.5">
+                  <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+                    {totalClicks > 0 ? totalClicks.toLocaleString('en-IN') : '0'}
                   </div>
                 </div>
               </div>
 
-              {/* Save Settings Button */}
-              <div className="pt-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleSaveRotationSettings}
-                  disabled={isSavingSettings}
-                  className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-black bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 shadow-xs transition-all cursor-pointer disabled:opacity-50"
-                >
-                  {isSavingSettings ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                  <span>Save Settings</span>
-                </button>
+              <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+                <span className="truncate text-slate-500 dark:text-slate-400">
+                  CTR Ratio: {overallCtr}
+                </span>
+                <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-emerald-600 dark:text-emerald-400 font-bold">
+                  Interactions
+                </span>
               </div>
             </div>
 
-            {/* Right Box: Campaign Rankings & View Times (6 cols) */}
-            <div className="lg:col-span-6 bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-xs flex flex-col justify-between">
+            {/* Card 3: Ad Skips / Rate */}
+            <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
               <div>
-                <div className="flex items-center space-x-2 mb-3">
-                  <TrendingUp className="w-4.5 h-4.5 text-slate-900 dark:text-white" />
-                  <h3 className="text-sm sm:text-base font-black text-slate-950 dark:text-white">
-                    Campaign Rankings & View Times
-                  </h3>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center space-x-2.5 min-w-0">
+                    <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
+                      <Activity className="w-4 h-4 stroke-[2.2]" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                        Video Skips
+                      </span>
+                      <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                        Skip Telemetry
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs font-urbanist">
-                    <thead>
-                      <tr className="border-b border-slate-200/90 dark:border-white/10 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        <th className="py-2.5 px-2">CAMPAIGN</th>
-                        <th className="py-2.5 px-2 text-right">VIEWS</th>
-                        <th className="py-2.5 px-2 text-right">SKIPS</th>
-                        <th className="py-2.5 px-2 text-right">SKIP %</th>
-                        <th className="py-2.5 px-2 text-right">AVG WATCH</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
-                      {ads.length > 0 ? (
-                        ads.slice(0, 5).map((ad, idx) => {
-                          const views = ad.impressionsCount || (4 - idx * 1 > 0 ? 4 - idx * 1 : 1);
-                          const skips = ad.skipsCount || (idx === 0 ? 29 : idx === 1 ? 12 : 1);
-                          const skipPercent = `${((skips / (views + skips || 1)) * 100).toFixed(2)}%`;
-                          const avgWatch = idx === 0 ? '149.5s' : idx === 1 ? '28.8s' : '0.4s';
-
-                          return (
-                            <tr key={ad.id || ad._id || idx} className="hover:bg-slate-50/70 dark:hover:bg-white/[0.02]">
-                              <td className="py-2.5 px-2">
-                                <span className="font-bold text-slate-900 dark:text-white block truncate max-w-[140px]">
-                                  {ad.title}
-                                </span>
-                                <span className="text-[10px] text-slate-400 block truncate">
-                                  {ad.advertiser}
-                                </span>
-                              </td>
-                              <td className="py-2.5 px-2 text-right font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
-                                {views}
-                              </td>
-                              <td className="py-2.5 px-2 text-right font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
-                                {skips}
-                              </td>
-                              <td className="py-2.5 px-2 text-right font-medium text-slate-700 dark:text-slate-300 tabular-nums">
-                                {skipPercent}
-                              </td>
-                              <td className="py-2.5 px-2 text-right font-medium text-slate-700 dark:text-slate-300 tabular-nums">
-                                {avgWatch}
-                              </td>
-                            </tr>
-                          );
-                        })
-                      ) : (
-                        [
-                          { title: 'sony specs', adv: 'sony', views: 4, skips: 29, skipPct: '48.33%', avgWatch: '149.5s' },
-                          { title: 'AGENT', adv: 'Docks.ai', views: 2, skips: 12, skipPct: '42.86%', avgWatch: '28.8s' },
-                          { title: 'demo banner', adv: 'demo test banner', views: 0, skips: 1, skipPct: '0.32%', avgWatch: '0.1s' },
-                          { title: 'demo 2', adv: 'demo test 2', views: 1, skips: 0, skipPct: '0%', avgWatch: '0.4s' }
-                        ].map((row, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50/70 dark:hover:bg-white/[0.02]">
-                            <td className="py-2.5 px-2">
-                              <span className="font-bold text-slate-900 dark:text-white block">{row.title}</span>
-                              <span className="text-[10px] text-slate-400 block">{row.adv}</span>
-                            </td>
-                            <td className="py-2.5 px-2 text-right font-semibold text-slate-900 dark:text-slate-100 tabular-nums">{row.views}</td>
-                            <td className="py-2.5 px-2 text-right font-semibold text-slate-900 dark:text-slate-100 tabular-nums">{row.skips}</td>
-                            <td className="py-2.5 px-2 text-right font-medium text-slate-700 dark:text-slate-300 tabular-nums">{row.skipPct}</td>
-                            <td className="py-2.5 px-2 text-right font-medium text-slate-700 dark:text-slate-300 tabular-nums">{row.avgWatch}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+                <div className="mt-2.5">
+                  <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+                    {totalSkips > 0 ? totalSkips.toLocaleString('en-IN') : '0'}
+                  </div>
                 </div>
+              </div>
+
+              <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+                <span className="truncate text-slate-500 dark:text-slate-400">
+                  Skipped before completion
+                </span>
+                <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-slate-700 dark:text-slate-300 font-bold">
+                  Monitored
+                </span>
               </div>
             </div>
 
-          </div>
-
-          {/* 4. Active Campaign Inventory Section */}
-          <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden">
-
-            {/* Header + Launch Button */}
-            <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-white/[0.06]">
-              <div className="flex items-start space-x-2.5">
-                <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-900 dark:text-white shrink-0">
-                  <Megaphone className="w-4.5 h-4.5" />
+            {/* Card 4: Active Campaigns */}
+            <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
+              <div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center space-x-2.5 min-w-0">
+                    <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
+                      <Megaphone className="w-4 h-4 stroke-[2.2]" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                        Active Campaigns
+                      </span>
+                      <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                        In Rotation
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm sm:text-base font-black text-slate-950 dark:text-white">
-                    Active Campaign Inventory
-                  </h3>
-                  <p className="text-xs text-slate-400 font-medium">
-                    Manage client uploaded image banners, pre-roll video ads, and overlay modules.
-                  </p>
+
+                <div className="mt-2.5">
+                  <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+                    {counts.active} / {counts.all}
+                  </div>
                 </div>
               </div>
+
+              <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+                <span className="truncate text-slate-500 dark:text-slate-400">
+                  {counts.paused} paused in reserve
+                </span>
+                <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-emerald-600 dark:text-emerald-400 font-bold">
+                  {rotationSettings.enabled ? 'Serving' : 'Disabled'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Page Title & Main Actions */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-0.5">
+            <div>
+              <div className="flex items-center space-x-2">
+                <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
+                  Custom Ad Campaigns
+                </h1>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-900 dark:text-amber-300 border border-amber-300/50">
+                  {filteredAds.length} Campaigns
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Manage client-sponsored video ads, banner promotions, skips, caps, and candidate rotation rules.
+              </p>
+            </div>
+
+            <div className="flex items-center space-x-2 shrink-0 flex-wrap gap-y-1">
+              <button
+                type="button"
+                onClick={() => setShowRotationPanel(!showRotationPanel)}
+                className={`py-1.5 px-3 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-all border cursor-pointer active:scale-95 ${
+                  showRotationPanel
+                    ? 'bg-[#FEF08A] text-slate-950 border-amber-300 shadow-xs'
+                    : 'bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200 border-slate-200/90 dark:border-white/10 shadow-2xs'
+                }`}
+                title="Configure Candidate Rotation Strategy"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Rotation Rules</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => loadData(true)}
+                disabled={isRefreshing}
+                className="p-1.5 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-xl transition-all cursor-pointer active:scale-95 shrink-0"
+                title="Refresh Inventory"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleExportCSV}
+                className="py-1.5 px-3 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all border border-slate-200/90 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95"
+                title="Export CSV list"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export CSV</span>
+              </button>
 
               <button
                 type="button"
                 onClick={handleOpenLaunch}
-                className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-black bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 shadow-xs transition-all cursor-pointer self-start sm:self-auto shrink-0"
+                className="py-1.5 px-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
               >
-                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                 <span>Launch Campaign</span>
               </button>
             </div>
+          </div>
 
-            {/* Filter Toolbar */}
-            <div className="p-3.5 bg-slate-50/60 dark:bg-[#161B16]/50 border-b border-slate-100 dark:border-white/[0.06] flex flex-col md:flex-row md:items-center justify-between gap-2.5">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search campaigns or clients..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-white dark:bg-[#121612] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                />
+          {/* Collapsible Serving & Rotation Settings Panel */}
+          {showRotationPanel && (
+            <div className="bg-white dark:bg-[#121216] rounded-xl p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3 animate-in fade-in duration-200">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
+                <div className="flex items-center space-x-2">
+                  <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                    <SlidersHorizontal className="w-3.5 h-3.5 stroke-[2.2]" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 dark:text-white">
+                      Serving & Rotation Strategy Rules
+                    </h3>
+                    <p className="text-[10.5px] text-slate-400 font-medium">
+                      Configure candidate selection algorithm and consecutive delivery suppression
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={handleSaveRotationSettings}
+                    disabled={isSavingSettings}
+                    className="px-3 py-1 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-lg transition-all shadow-2xs cursor-pointer flex items-center space-x-1"
+                  >
+                    {isSavingSettings ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                    <span>Save Rules</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowRotationPanel(false)}
+                    className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <select
-                  value={filterPlacement}
-                  onChange={(e) => setFilterPlacement(e.target.value)}
-                  className="px-2.5 py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-[#121612] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                >
-                  <option value="ALL">All Placements</option>
-                  <option value="HOME_BANNER">Banner</option>
-                  <option value="PLAYER_PREROLL">Player Preroll</option>
-                  <option value="EPISODE_TRANSITION">Player Midroll</option>
-                  <option value="DRAWER_CARD">Drawer Card</option>
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Rule 1: Master Switch */}
+                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">
+                      Enable Custom Ads
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      Master serving switch
+                    </span>
+                  </div>
+                  <ToggleSwitch
+                    enabled={rotationSettings.enabled}
+                    onChange={() => setRotationSettings((p) => ({ ...p, enabled: !p.enabled }))}
+                    size="sm"
+                  />
+                </div>
 
-                <select
-                  value={filterPlatform}
-                  onChange={(e) => setFilterPlatform(e.target.value)}
-                  className="px-2.5 py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-[#121612] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                >
-                  <option value="ALL">All Platforms</option>
-                  <option value="ANDROID">Mobile App</option>
-                  <option value="WEB">Web Browser</option>
-                </select>
+                {/* Rule 2: Policy */}
+                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 flex items-center justify-between">
+                  <div className="min-w-0 pr-2">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">
+                      Rotation Policy
+                    </span>
+                    <span className="text-[10px] text-slate-400 block truncate">
+                      Algorithm selection
+                    </span>
+                  </div>
+                  <select
+                    value={rotationSettings.policy}
+                    onChange={(e) => setRotationSettings((p) => ({ ...p, policy: e.target.value }))}
+                    className="px-2 py-1 text-[11px] font-bold rounded-lg bg-white dark:bg-[#24242E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white cursor-pointer focus:outline-none"
+                  >
+                    <option value="Equal Random Rotation (Recommended)">Equal Random</option>
+                    <option value="Weighted Priority (Rank Based)">Weighted Priority</option>
+                    <option value="Sequential Round Robin">Round Robin</option>
+                  </select>
+                </div>
 
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-2.5 py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-[#121612] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                >
-                  <option value="ALL">All Status</option>
-                  <option value="ACTIVE">Active</option>
-                  <option value="PAUSED">Paused</option>
-                  <option value="EXPIRED">Expired</option>
-                </select>
+                {/* Rule 3: Consecutive Repeat Suppression */}
+                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">
+                      Prevent Repeats
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      No consecutive identical ads
+                    </span>
+                  </div>
+                  <ToggleSwitch
+                    enabled={rotationSettings.preventConsecutive}
+                    onChange={() => setRotationSettings((p) => ({ ...p, preventConsecutive: !p.preventConsecutive }))}
+                    size="sm"
+                  />
+                </div>
               </div>
             </div>
+          )}
 
-            {/* Inventory Table */}
+          {/* Unified Filter, Search & Placement Toolbar */}
+          <div className="bg-white dark:bg-[#121216] rounded-xl p-2 sm:px-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+            {/* Left: Status Filter Tabs */}
+            <div className="flex items-center space-x-1 p-0.5 bg-slate-100 dark:bg-[#18181E] rounded-lg border border-slate-200/60 dark:border-white/10 shrink-0 overflow-x-auto">
+              {[
+                { id: 'ALL', label: `All (${counts.all})` },
+                { id: 'ACTIVE', label: `Active (${counts.active})` },
+                { id: 'PAUSED', label: `Paused (${counts.paused})` }
+              ].map((item) => {
+                const isSelected = filterStatus === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setFilterStatus(item.id)}
+                    className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                      isSelected
+                        ? 'bg-white dark:bg-[#24242E] text-slate-950 dark:text-white shadow-2xs'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right: Search Box + Placement + Sort Dropdown */}
+            <div className="flex items-center flex-wrap sm:flex-nowrap gap-2 w-full md:w-auto">
+              {/* Search Box */}
+              <div className="relative flex-1 sm:w-56">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search title, advertiser..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-[#121216] focus:outline-none focus:border-[#FEF08A] placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+
+              {/* Placement Filter */}
+              <select
+                value={filterPlacement}
+                onChange={(e) => setFilterPlacement(e.target.value)}
+                className="px-2 py-1.5 text-xs font-semibold rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100 cursor-pointer focus:outline-none focus:border-[#FEF08A]"
+              >
+                <option value="ALL">All Placements</option>
+                <option value="HOME_BANNER">Banner</option>
+                <option value="PLAYER_PREROLL">Player Pre-roll</option>
+                <option value="EPISODE_TRANSITION">Midroll Card</option>
+                <option value="DRAWER_CARD">Drawer Card</option>
+                <option value="GLOBAL_POPUP">App Splash</option>
+              </select>
+
+              {/* Sort By Dropdown */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-2 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+              >
+                <option value="newest">Recent First</option>
+                <option value="impressions">Most Views</option>
+                <option value="clicks">Most Clicks</option>
+                <option value="priority">Priority Rank</option>
+                <option value="name">Title (A - Z)</option>
+              </select>
+
+              <span className="text-[11px] text-slate-400 font-medium shrink-0 hidden lg:inline">
+                <strong className="text-slate-900 dark:text-white font-bold">{filteredAds.length}</strong> campaigns
+              </span>
+            </div>
+          </div>
+
+          {/* Active Campaigns Table Container */}
+          <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden transition-colors">
             {isLoading ? (
-              <PageLoader size="sm" text="Loading..." minHeight="min-h-[220px]" />
+              <PageLoader size="sm" text="Loading campaign inventory..." minHeight="min-h-[200px]" />
             ) : filteredAds.length === 0 ? (
-              <div className="p-12 text-center flex flex-col items-center justify-center">
-                <Megaphone className="w-8 h-8 text-slate-400 mb-2 opacity-50" />
-                <h4 className="text-sm font-black text-slate-900 dark:text-white">No custom campaigns found</h4>
-                <p className="text-xs text-slate-400 mt-0.5 mb-3">Launch a new campaign to begin direct advertiser rotation.</p>
+              <div className="flex flex-col items-center justify-center py-12 space-y-2 text-slate-400">
+                <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400">
+                  <Megaphone className="w-4 h-4" />
+                </div>
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                  No custom campaigns found
+                </p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                  {searchQuery ? `No campaigns matching "${searchQuery}".` : 'Launch a campaign to start direct rotation.'}
+                </p>
                 <button
                   type="button"
                   onClick={handleOpenLaunch}
-                  className="px-3.5 py-1.5 rounded-xl text-xs font-black bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 transition-all cursor-pointer"
+                  className="mt-1 px-3 py-1 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-lg transition-colors cursor-pointer"
                 >
                   + Launch First Campaign
                 </button>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse font-urbanist text-xs">
-                  <thead>
-                    <tr className="border-b border-slate-200/80 dark:border-white/10 text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50/50 dark:bg-[#161B16]/30">
-                      <th className="py-3 px-4">AD CAMPAIGN DETAILS</th>
-                      <th className="py-3 px-3">PLACEMENTS / PLATFORM</th>
-                      <th className="py-3 px-3">PRIORITY / WEIGHT</th>
-                      <th className="py-3 px-3">SCHEDULING TIME</th>
-                      <th className="py-3 px-3">CAPPING LIMITS (SERVED/CAP)</th>
-                      <th className="py-3 px-3">STATUS</th>
-                      <th className="py-3 px-4 text-right">ACTIONS</th>
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 dark:bg-[#18181E] border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10.5px] font-bold">
+                    <tr>
+                      <th className="py-2.5 px-3">Ad Campaign</th>
+                      <th className="py-2.5 px-3">Placement</th>
+                      <th className="py-2.5 px-3">Media Format</th>
+                      <th className="py-2.5 px-3">Priority</th>
+                      <th className="py-2.5 px-3">Telemetry (Imps / Clicks)</th>
+                      <th className="py-2.5 px-3">Schedule</th>
+                      <th className="py-2.5 px-3">Status</th>
+                      <th className="py-2.5 px-3 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium text-slate-900 dark:text-slate-100">
                     {filteredAds.map((ad) => {
                       const id = ad.id || ad._id;
                       const isVideo = ad.type === 'VIDEO_PREROLL' || ad.mediaType === 'VIDEO';
                       const impressions = ad.impressionsCount || 0;
                       const clicks = ad.clicksCount || 0;
-                      const priority = ad.priority || 1;
-                      const weightPct = Math.min(100, Math.round(priority * 10 + 20));
-
-                      const startDate = ad.startDate ? new Date(ad.startDate).toLocaleDateString('en-US') : '9/9/2026';
-                      const endDate = ad.endDate ? new Date(ad.endDate).toLocaleDateString('en-US') : '10/9/2026';
+                      const priority = ad.priority || 5;
+                      const ctr = impressions > 0 ? `${((clicks / impressions) * 100).toFixed(1)}%` : '0%';
+                      const isActive = ad.status === 'ACTIVE';
 
                       return (
-                        <tr key={id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition-colors">
-                          {/* 1. AD CAMPAIGN DETAILS */}
-                          <td className="py-3.5 px-4 align-top">
-                            <span className="font-bold text-slate-900 dark:text-white block text-xs">
-                              {ad.title}
-                            </span>
-                            <span className="text-[11px] text-slate-400 block mt-0.5">
-                              Client: {ad.advertiser}
-                            </span>
-                            <span className="text-[10px] font-bold text-amber-500 dark:text-[#FEF08A] block mt-0.5">
-                              Type: {isVideo ? 'Video' : 'Image'}
-                            </span>
+                        <tr
+                          key={id}
+                          className="hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors"
+                        >
+                          {/* 1. Title & Advertiser */}
+                          <td className="py-2 px-3">
+                            <div className="flex items-center space-x-2.5">
+                              {/* Asset preview icon */}
+                              <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-100 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 flex items-center justify-center shrink-0">
+                                {ad.mediaUrl ? (
+                                  isVideo ? (
+                                    <Video className="w-4 h-4 text-amber-500" />
+                                  ) : (
+                                    <img
+                                      src={ad.mediaUrl}
+                                      alt={ad.title}
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                    />
+                                  )
+                                ) : (
+                                  <ImageIcon className="w-4 h-4 text-slate-400" />
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <span className="font-bold text-xs text-slate-900 dark:text-white block truncate max-w-[150px]">
+                                  {ad.title}
+                                </span>
+                                <span className="text-[10px] text-slate-400 dark:text-slate-500 block truncate max-w-[150px]">
+                                  Client: {ad.advertiser || 'Direct'}
+                                </span>
+                              </div>
+                            </div>
                           </td>
 
-                          {/* 2. PLACEMENTS / PLATFORM */}
-                          <td className="py-3.5 px-3 align-top">
-                            <span className="font-bold text-slate-900 dark:text-white block">
+                          {/* 2. Placement */}
+                          <td className="py-2 px-3">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-[#FEF08A]/35 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] border border-amber-300/40 dark:border-amber-400/25">
                               {getPlacementDisplay(ad.placement)}
                             </span>
-                            <span className="text-[11px] text-slate-400 block mt-0.5">
-                              Device: All
+                          </td>
+
+                          {/* 3. Media Format */}
+                          <td className="py-2 px-3">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-semibold bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10">
+                              {isVideo ? <Video className="w-3 h-3 text-amber-500" /> : <ImageIcon className="w-3 h-3 text-sky-500" />}
+                              <span>{isVideo ? 'Video Stream' : 'Image Banner'}</span>
                             </span>
                           </td>
 
-                          {/* 3. PRIORITY / WEIGHT */}
-                          <td className="py-3.5 px-3 align-top">
-                            <span className="font-bold text-slate-900 dark:text-white block">
-                              Rank Priority: {priority}
-                            </span>
-                            <span className="text-[11px] text-slate-400 block mt-0.5">
-                              Weight: {weightPct}%
+                          {/* 4. Priority */}
+                          <td className="py-2 px-3 font-mono font-bold text-xs text-slate-800 dark:text-slate-200">
+                            Rank #{priority}
+                          </td>
+
+                          {/* 5. Telemetry (Imps / Clicks / CTR) */}
+                          <td className="py-2 px-3">
+                            <div className="flex items-center space-x-1.5 font-mono text-[11px]">
+                              <span className="font-bold text-slate-900 dark:text-white">
+                                {impressions.toLocaleString()} views
+                              </span>
+                              <span className="text-slate-400">/</span>
+                              <span className="text-slate-500 dark:text-slate-400">
+                                {clicks} clicks
+                              </span>
+                              <span className="px-1 py-0.2 rounded text-[9.5px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
+                                {ctr}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* 6. Schedule */}
+                          <td className="py-2 px-3 text-[11px] text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                            {ad.startDate ? new Date(ad.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : 'Always'}
+                            {ad.endDate ? ` – ${new Date(ad.endDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}` : ''}
+                          </td>
+
+                          {/* 7. Status */}
+                          <td className="py-2 px-3">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                isActive
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40'
+                                  : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+                                }`}
+                              />
+                              <span>{isActive ? 'Active' : 'Paused'}</span>
                             </span>
                           </td>
 
-                          {/* 4. SCHEDULING TIME */}
-                          <td className="py-3.5 px-3 align-top whitespace-nowrap">
-                            <span className="font-medium text-slate-800 dark:text-slate-200 block">
-                              {startDate} - {endDate}
-                            </span>
-                            <span className="text-[11px] text-slate-400 block mt-0.5">
-                              Daily: 00:00 to 23:59
-                            </span>
-                          </td>
-
-                          {/* 5. CAPPING LIMITS (SERVED/CAP) */}
-                          <td className="py-3.5 px-3 align-top whitespace-nowrap">
-                            <span className="font-medium text-slate-800 dark:text-slate-200 block tabular-nums">
-                              Imps: {impressions} / ∞
-                            </span>
-                            <span className="text-[11px] text-slate-400 block mt-0.5 tabular-nums">
-                              Clicks: {clicks} / ∞
-                            </span>
-                          </td>
-
-                          {/* 6. STATUS */}
-                          <td className="py-3.5 px-3 align-top">
-                            <span className={`inline-block font-black text-xs ${ad.status === 'ACTIVE'
-                                ? 'text-emerald-600 dark:text-emerald-400'
-                                : 'text-slate-400'
-                              }`}>
-                              {ad.status === 'ACTIVE' ? 'Active' : 'Paused'}
-                            </span>
-                          </td>
-
-                          {/* 7. ACTIONS */}
-                          <td className="py-3.5 px-4 align-top text-right">
-                            <div className="inline-flex items-center space-x-1">
-                              {/* Toggle Pause / Resume */}
+                          {/* 8. Actions */}
+                          <td className="py-2 px-3 text-right">
+                            <div className="flex items-center justify-end space-x-1">
                               <button
                                 type="button"
                                 onClick={() => handleToggleStatus(id)}
-                                title={ad.status === 'ACTIVE' ? 'Pause Campaign' : 'Resume Campaign'}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                                title={isActive ? 'Pause Campaign' : 'Resume Campaign'}
+                                className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                               >
-                                {ad.status === 'ACTIVE' ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                                {isActive ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
                               </button>
-
-                              {/* Edit */}
                               <button
                                 type="button"
                                 onClick={() => handleOpenEdit(ad)}
                                 title="Edit Campaign"
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                                className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                               >
                                 <Pencil className="w-3.5 h-3.5" />
                               </button>
-
-                              {/* Delete */}
                               <button
                                 type="button"
-                                onClick={() => handleDeleteAd(id)}
+                                onClick={() => handleDeleteAd(id, ad.title)}
                                 title="Delete Campaign"
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                                className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -877,172 +1030,205 @@ export default function CustomAdsPage({ onNavigate }) {
               </div>
             )}
 
+            {/* Table Summary Footer */}
+            <div className="px-3 sm:px-4 py-2 bg-slate-50/60 dark:bg-[#18181E]/80 border-t border-slate-100 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+              <span className="font-medium text-[11px] text-slate-500 dark:text-slate-400">
+                Showing <strong className="text-slate-900 dark:text-white">{filteredAds.length}</strong> of {counts.all} campaigns
+              </span>
+              <div className="flex flex-wrap items-center gap-3 text-[10.5px] font-medium">
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Active: <strong className="text-slate-700 dark:text-slate-200">{counts.active}</strong>
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                  Paused: <strong className="text-slate-700 dark:text-slate-200">{counts.paused}</strong>
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                  Total Views: <strong className="text-slate-700 dark:text-slate-200">{totalImpressions.toLocaleString('en-IN')}</strong>
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  Total Clicks: <strong className="text-slate-700 dark:text-slate-200">{totalClicks.toLocaleString('en-IN')}</strong>
+                </span>
+              </div>
+            </div>
           </div>
         </>
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          VIEW 2: CONFIGURE NEW CUSTOM AD (LAUNCH / EDIT CAMPAIGN VIEW)
+          VIEW 2: CONFIGURE / LAUNCH CAMPAIGN VIEW
          ───────────────────────────────────────────────────────────── */}
       {viewMode === 'configure' && (
-        <form onSubmit={handleSubmitForm} className="space-y-4 animate-fade-in">
-
-          {/* Top Header Strip with Back Button */}
-          <div className="flex items-center space-x-3 pb-2">
-            <button
-              type="button"
-              onClick={() => setViewMode('inventory')}
-              className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors cursor-pointer"
-              title="Back to Inventory"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            <div>
-              <div className="flex items-center space-x-2">
-                <h3 className="text-base sm:text-lg font-black text-slate-950 dark:text-white">
-                  {editingAdId ? 'Edit Custom Ad Campaign' : 'Configure New Custom Ad'}
-                </h3>
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-[#FEF08A]/30 text-slate-950 dark:text-amber-300 border border-amber-300/40">
-                  {form.mediaType === 'VIDEO' ? 'VIDEO CAMPAIGN' : 'BANNER CAMPAIGN'}
-                </span>
+        <form onSubmit={handleSubmitForm} className="space-y-3 animate-in fade-in duration-200">
+          {/* Header Row */}
+          <div className="flex items-center justify-between gap-2 pb-1">
+            <div className="flex items-center space-x-2.5">
+              <button
+                type="button"
+                onClick={() => setViewMode('inventory')}
+                className="p-1.5 rounded-xl bg-white dark:bg-[#121216] border border-slate-200/90 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-colors cursor-pointer shadow-2xs"
+                title="Back to Inventory"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h2 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
+                    {editingAdId ? 'Edit Ad Campaign' : 'Launch New Campaign'}
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF08A]/35 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] border border-amber-300/40">
+                    {form.mediaType === 'VIDEO' ? 'VIDEO AD' : 'IMAGE BANNER'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Configure targeting, creative asset, destination redirect, and pacing rules.
+                </p>
               </div>
-              <p className="text-xs text-slate-400 font-medium">
-                Smart campaign setup: auto-detects video length, pairs media types with placements, and hides irrelevant fields.
-              </p>
+            </div>
+
+            <div className="flex items-center space-x-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewMode('inventory')}
+                className="py-1.5 px-3 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="py-1.5 px-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer active:scale-95 disabled:opacity-50"
+              >
+                {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                <span>{editingAdId ? 'Update Campaign' : 'Publish Campaign'}</span>
+              </button>
             </div>
           </div>
 
           {/* Error Message */}
           {formError && (
-            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+            <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{formError}</span>
             </div>
           )}
 
-          {/* ── SECTION 1: CAMPAIGN BASICS & PLACEMENT ── */}
-          <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-xs space-y-4">
-            <div className="flex items-center space-x-1.5 text-xs font-black uppercase tracking-wider text-amber-500 dark:text-[#FEF08A]">
-              <Megaphone className="w-4 h-4" />
-              <span>1. CAMPAIGN BASICS & PLACEMENT</span>
+          {/* Section 1: Campaign Basics & Creative Asset */}
+          <div className="bg-white dark:bg-[#121216] rounded-xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
+            <div className="flex items-center space-x-2 pb-2 border-b border-slate-100 dark:border-white/10">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <Megaphone className="w-3.5 h-3.5 stroke-[2.2]" />
+              </div>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase">
+                1. Campaign Identity & Creative Asset
+              </h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                  CAMPAIGN TITLE NAME *
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Campaign Title *
                 </label>
-                <div className="relative">
-                  <Megaphone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Summer Special Video Promo"
-                    value={form.title}
-                    onChange={(e) => handleFormChange('title', e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                  />
-                </div>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Summer Special Video Promo"
+                  value={form.title}
+                  onChange={(e) => handleFormChange('title', e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
+                />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                  SPONSORING CLIENT NAME *
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Sponsoring Client / Brand *
                 </label>
-                <div className="relative">
-                  <Users className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Acme Corp Inc."
-                    value={form.advertiser}
-                    onChange={(e) => handleFormChange('advertiser', e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                  />
-                </div>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Acme Corp Inc."
+                  value={form.advertiser}
+                  onChange={(e) => handleFormChange('advertiser', e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
+                />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                  TARGET PLACEMENT SLOT *
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Target Placement Slot *
                 </label>
-                <div className="relative">
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <select
-                    value={form.placement}
-                    onChange={(e) => handleFormChange('placement', e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FEF08A] cursor-pointer"
-                  >
-                    {PLACEMENT_OPTIONS.map(p => (
-                      <option key={p.id} value={p.id}>{p.label}</option>
-                    ))}
-                  </select>
-                </div>
+                <select
+                  value={form.placement}
+                  onChange={(e) => handleFormChange('placement', e.target.value)}
+                  className="w-full px-2 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+                >
+                  {PLACEMENT_OPTIONS.map((p) => (
+                    <option key={p.id} value={p.id}>{p.label}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                  CREATIVE MEDIA TYPE *
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Media Creative Type *
                 </label>
-                <div className="relative">
-                  {form.mediaType === 'VIDEO' ? (
-                    <Video className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  ) : (
-                    <ImageIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  )}
-                  <select
-                    value={form.mediaType}
-                    onChange={(e) => handleFormChange('mediaType', e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FEF08A] cursor-pointer"
-                  >
-                    <option value="IMAGE">Static Image Poster / Banner</option>
-                    <option value="VIDEO">Stream Video (MP4 / WebM / HLS)</option>
-                  </select>
-                </div>
+                <select
+                  value={form.mediaType}
+                  onChange={(e) => handleFormChange('mediaType', e.target.value)}
+                  className="w-full px-2 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+                >
+                  <option value="IMAGE">Static Image Poster / Banner</option>
+                  <option value="VIDEO">Stream Video (MP4 / WebM / HLS)</option>
+                </select>
               </div>
             </div>
 
-            {/* Media Asset Creative (Upload or URL) */}
-            <div className="pt-2">
+            {/* Media Asset Creative File / URL */}
+            <div className="pt-2 border-t border-slate-100 dark:border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  MEDIA ASSET CREATIVE *
+                <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                  Media Creative Asset (CDN Upload or URL Link) *
                 </label>
-                <div className="inline-flex rounded-lg p-0.5 bg-slate-100 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-[11px] font-bold">
+                <div className="flex items-center space-x-1 p-0.5 bg-slate-100 dark:bg-[#18181E] rounded-lg border border-slate-200 dark:border-white/10">
                   <button
                     type="button"
                     onClick={() => setUploadMode('file')}
-                    className={`px-3 py-1 rounded-md transition-all cursor-pointer ${uploadMode === 'file'
-                        ? 'bg-[#FEF08A] text-slate-950 font-black shadow-xs'
-                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                      }`}
+                    className={`px-2.5 py-0.5 rounded text-[10.5px] font-bold cursor-pointer ${
+                      uploadMode === 'file'
+                        ? 'bg-white dark:bg-[#24242E] text-slate-950 dark:text-white shadow-2xs'
+                        : 'text-slate-500 dark:text-slate-400'
+                    }`}
                   >
                     Upload File
                   </button>
                   <button
                     type="button"
                     onClick={() => setUploadMode('url')}
-                    className={`px-3 py-1 rounded-md transition-all cursor-pointer ${uploadMode === 'url'
-                        ? 'bg-[#FEF08A] text-slate-950 font-black shadow-xs'
-                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                      }`}
+                    className={`px-2.5 py-0.5 rounded text-[10.5px] font-bold cursor-pointer ${
+                      uploadMode === 'url'
+                        ? 'bg-white dark:bg-[#24242E] text-slate-950 dark:text-white shadow-2xs'
+                        : 'text-slate-500 dark:text-slate-400'
+                    }`}
                   >
-                    Direct URL Link
+                    Direct Link
                   </button>
                 </div>
               </div>
 
               {uploadMode === 'file' ? (
-                <label className="border-2 border-dashed border-slate-200 dark:border-white/15 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-amber-300 dark:hover:border-amber-400/50 bg-slate-50/50 dark:bg-[#161B16]/30 transition-colors group">
-                  <Upload className="w-8 h-8 text-slate-400 group-hover:text-amber-500 transition-colors mb-2" />
-                  <span className="text-xs font-black text-slate-900 dark:text-white">
-                    {isUploading ? 'Uploading file to CDN...' : 'Drag & drop image or video file or click to browse'}
+                <label className="border-2 border-dashed border-slate-200 dark:border-white/15 rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:border-amber-400/50 bg-slate-50/50 dark:bg-[#18181E]/30 transition-colors group">
+                  <Upload className="w-6 h-6 text-slate-400 group-hover:text-amber-500 transition-colors mb-1.5" />
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">
+                    {isUploading ? 'Uploading creative asset...' : 'Click to select or drag & drop media file'}
                   </span>
-                  <span className="text-[11px] text-slate-400 mt-0.5">
-                    Accepts JPEG, PNG, GIF, WebP, MP4
+                  <span className="text-[10px] text-slate-400 mt-0.5">
+                    JPEG, PNG, GIF, WebP, MP4, WebM
                   </span>
                   {form.mediaUrl && (
-                    <span className="mt-2 text-[10px] font-mono text-emerald-600 dark:text-emerald-400 truncate max-w-sm">
+                    <span className="mt-1.5 text-[10px] font-mono text-emerald-600 dark:text-emerald-400 truncate max-w-sm">
                       ✓ Attached: {form.mediaUrl}
                     </span>
                   )}
@@ -1055,288 +1241,168 @@ export default function CustomAdsPage({ onNavigate }) {
                   />
                 </label>
               ) : (
-                <div>
-                  <input
-                    type="url"
-                    required
-                    placeholder={form.mediaType === 'VIDEO' ? 'https://example.com/video.mp4' : 'https://example.com/poster.jpg'}
-                    value={form.mediaUrl}
-                    onChange={(e) => handleFormChange('mediaUrl', e.target.value)}
-                    className="w-full px-3 py-2 text-xs font-mono rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                  />
-                </div>
+                <input
+                  type="url"
+                  required
+                  placeholder={form.mediaType === 'VIDEO' ? 'https://example.com/video.mp4' : 'https://example.com/poster.jpg'}
+                  value={form.mediaUrl}
+                  onChange={(e) => handleFormChange('mediaUrl', e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs font-mono rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                />
               )}
               {uploadError && (
-                <p className="text-[11px] text-rose-500 font-medium mt-1">{uploadError}</p>
-              )}
-            </div>
-
-          </div>
-
-          {/* ── SECTION 2: DESTINATION & AUDIENCE TARGETING ── */}
-          <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-xs space-y-4">
-            <div className="flex items-center space-x-1.5 text-xs font-black uppercase tracking-wider text-amber-500 dark:text-[#FEF08A]">
-              <LinkIcon className="w-4 h-4" />
-              <span>2. DESTINATION & AUDIENCE TARGETING</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                  REDIRECTION CLICK LINK (DESTINATION URL)
-                </label>
-                <div className="relative">
-                  <LinkIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="https://clientwebsite.com/landing-page"
-                    value={form.targetUrl}
-                    onChange={(e) => handleFormChange('targetUrl', e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                  CLICK ANCHOR TARGET WINDOW
-                </label>
-                <div className="relative">
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <select
-                    value={form.targetWindow}
-                    onChange={(e) => handleFormChange('targetWindow', e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FEF08A] cursor-pointer"
-                  >
-                    {TARGET_WINDOW_OPTIONS.map(w => (
-                      <option key={w.id} value={w.id}>{w.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                  TARGET DEVICES
-                </label>
-                <div className="relative">
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <select
-                    value={form.targetDevices}
-                    onChange={(e) => handleFormChange('targetDevices', e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FEF08A] cursor-pointer"
-                  >
-                    {TARGET_DEVICE_OPTIONS.map(d => (
-                      <option key={d.id} value={d.id}>{d.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    TARGET WEBSITE PAGE
-                  </label>
-                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                    STANDARD 16:9 LANDSCAPE CREATIVE (1920X1080)
-                  </span>
-                </div>
-                <div className="relative">
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <select
-                    value={form.targetPage}
-                    onChange={(e) => handleFormChange('targetPage', e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FEF08A] cursor-pointer"
-                  >
-                    {TARGET_PAGE_OPTIONS.map(p => (
-                      <option key={p.id} value={p.id}>{p.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── SECTION 3: PLAYBACK DURATION & SKIP RULES ── */}
-          <div className="bg-white dark:bg-[#121612] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-xs space-y-4">
-            <div className="flex items-center space-x-1.5 text-xs font-black uppercase tracking-wider text-amber-500 dark:text-[#FEF08A]">
-              <Clock className="w-4 h-4" />
-              <span>3. PLAYBACK DURATION & SKIP RULES</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                  {form.mediaType === 'VIDEO' ? 'VIDEO PLAYBACK DURATION (SECONDS) *' : 'DISPLAY BANNER DURATION (SECONDS) *'}
-                </label>
-                <div className="relative">
-                  <Clock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="number"
-                    min="5"
-                    max="60"
-                    value={form.videoDuration}
-                    onChange={(e) => handleFormChange('videoDuration', e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                  />
-                </div>
-                <p className="text-[11px] text-slate-400 mt-1">
-                  How many seconds the ad creative remains displayed before auto-rotating.
-                </p>
-              </div>
-
-              {form.mediaType === 'VIDEO' ? (
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                    SKIP BUTTON DELAY (SECONDS, 0 = NON-SKIP) *
-                  </label>
-                  <div className="relative">
-                    <Clock className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="number"
-                      min="0"
-                      max="30"
-                      value={form.skipAfterSeconds}
-                      onChange={(e) => handleFormChange('skipAfterSeconds', e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                    />
-                  </div>
-                  <p className="text-[11px] text-slate-400 mt-1">
-                    Users can skip video after this duration. Set 0 for forced view.
-                  </p>
-                </div>
-              ) : (
-                <div className="flex items-center p-3 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 text-xs text-slate-400">
-                  <Info className="w-4 h-4 text-amber-500 mr-2 shrink-0" />
-                  <span>Skip controls are disabled for static banner placements.</span>
-                </div>
+                <p className="text-[10.5px] text-rose-500 font-medium mt-1">{uploadError}</p>
               )}
             </div>
           </div>
 
-          {/* ── SECTION 4: ADVANCED SCHEDULE & DELIVERY CAPS (OPTIONAL COLLAPSIBLE) ── */}
-          <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setShowAdvancedSchedule(p => !p)}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50/70 dark:hover:bg-white/[0.02] transition-colors cursor-pointer"
-            >
-              <div className="flex items-center space-x-2">
-                <SlidersHorizontal className="w-4 h-4 text-amber-500 dark:text-[#FEF08A]" />
-                <span className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
-                  Advanced Schedule & Delivery Caps (Optional)
-                </span>
-                <span className="text-[11px] text-slate-400 hidden sm:inline">
-                  (Start/Expiry dates, impressions cap, click cap, priority weights)
-                </span>
+          {/* Section 2: Destination & Audience Targeting */}
+          <div className="bg-white dark:bg-[#121216] rounded-xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
+            <div className="flex items-center space-x-2 pb-2 border-b border-slate-100 dark:border-white/10">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <LinkIcon className="w-3.5 h-3.5 stroke-[2.2]" />
               </div>
-              {showAdvancedSchedule ? (
-                <ChevronUp className="w-4 h-4 text-slate-400" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-slate-400" />
-              )}
-            </button>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase">
+                2. Destination URL & Audience Scope
+              </h3>
+            </div>
 
-            {showAdvancedSchedule && (
-              <div className="p-5 pt-2 border-t border-slate-100 dark:border-white/[0.06] space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      value={form.startDate}
-                      onChange={(e) => handleFormChange('startDate', e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                      Expiry Date (Optional)
-                    </label>
-                    <input
-                      type="date"
-                      value={form.endDate}
-                      onChange={(e) => handleFormChange('endDate', e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                      Impressions Cap (0 = Unlimited)
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="e.g. 50000"
-                      value={form.cappingImpressions}
-                      onChange={(e) => handleFormChange('cappingImpressions', e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                      Priority Rank (1–10)
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="10"
-                      value={form.priority}
-                      onChange={(e) => handleFormChange('priority', e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#FEF08A]"
-                    />
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="md:col-span-2">
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Click Redirection URL (Destination Link)
+                </label>
+                <input
+                  type="text"
+                  placeholder="https://clientwebsite.com/landing-page"
+                  value={form.targetUrl}
+                  onChange={(e) => handleFormChange('targetUrl', e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                />
               </div>
-            )}
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Click Anchor Target
+                </label>
+                <select
+                  value={form.targetWindow}
+                  onChange={(e) => handleFormChange('targetWindow', e.target.value)}
+                  className="w-full px-2 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+                >
+                  {TARGET_WINDOW_OPTIONS.map((w) => (
+                    <option key={w.id} value={w.id}>{w.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Target Devices
+                </label>
+                <select
+                  value={form.targetDevices}
+                  onChange={(e) => handleFormChange('targetDevices', e.target.value)}
+                  className="w-full px-2 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+                >
+                  {TARGET_DEVICE_OPTIONS.map((d) => (
+                    <option key={d.id} value={d.id}>{d.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
 
-          {/* Footer Submit Buttons */}
-          <div className="flex items-center justify-end space-x-2.5 pt-2">
-            <button
-              type="button"
-              onClick={() => setViewMode('inventory')}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
-            >
-              Cancel & Exit
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex items-center space-x-1.5 px-5 py-2 rounded-xl text-xs font-black bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 shadow-xs transition-all cursor-pointer disabled:opacity-50"
-            >
-              {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Megaphone className="w-3.5 h-3.5" />}
-              <span>{editingAdId ? 'Update Ad Campaign' : 'Publish Ad Campaign'}</span>
-            </button>
-          </div>
+          {/* Section 3: Playback Duration & Advanced Controls */}
+          <div className="bg-white dark:bg-[#121216] rounded-xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
+            <div className="flex items-center space-x-2 pb-2 border-b border-slate-100 dark:border-white/10">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <Clock className="w-3.5 h-3.5 stroke-[2.2]" />
+              </div>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase">
+                3. Pacing, Duration & Delivery Limits
+              </h3>
+            </div>
 
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Duration (Seconds)
+                </label>
+                <input
+                  type="number"
+                  min="5"
+                  max="60"
+                  value={form.videoDuration}
+                  onChange={(e) => handleFormChange('videoDuration', e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Skip Delay (Seconds)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="30"
+                  disabled={form.mediaType !== 'VIDEO'}
+                  value={form.skipAfterSeconds}
+                  onChange={(e) => handleFormChange('skipAfterSeconds', e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] disabled:opacity-40"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Priority Rank (1–10)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={form.priority}
+                  onChange={(e) => handleFormChange('priority', e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Expiry Date (Optional)
+                </label>
+                <input
+                  type="date"
+                  value={form.endDate}
+                  onChange={(e) => handleFormChange('endDate', e.target.value)}
+                  className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
         </form>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────
-          TOAST FEEDBACK NOTIFICATION
-         ───────────────────────────────────────────────────────────── */}
+      {/* Floating Toast Notification */}
       {toast.show && (
-        <div className="fixed bottom-6 right-6 z-50 animate-bounce-short">
-          <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-2xl border text-xs font-bold ${toast.type === 'error'
-              ? 'bg-rose-950/90 border-rose-800 text-rose-200'
-              : 'bg-[#121612]/95 border-amber-300/40 text-slate-100 shadow-amber-950/20'
-            }`}>
+        <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <div
+            className={`px-3.5 py-2.5 rounded-xl shadow-xl flex items-center space-x-2 text-xs font-bold border ${
+              toast.type === 'error'
+                ? 'bg-rose-950 text-rose-200 border-rose-800'
+                : 'bg-slate-950 dark:bg-white text-white dark:text-slate-950 border-slate-800 dark:border-slate-200'
+            }`}
+          >
             {toast.type === 'error' ? (
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+              <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
             ) : (
-              <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-600 shrink-0" />
             )}
             <span>{toast.text}</span>
           </div>
         </div>
       )}
-
     </div>
   );
 }

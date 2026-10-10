@@ -7,7 +7,7 @@ import { LineChart, BarChart2 } from 'lucide-react';
  */
 export function ViewToggle({ value = 'curve', onChange }) {
   return (
-    <div className="pointer-events-auto inline-flex items-center gap-0.5 rounded-xl bg-slate-100/90 dark:bg-[#161B16] p-1 border border-slate-200/70 dark:border-white/10 shadow-2xs">
+    <div className="pointer-events-auto inline-flex items-center gap-0.5 rounded-xl bg-slate-100/90 dark:bg-[#18181E] p-1 border border-slate-200/70 dark:border-white/10 shadow-2xs">
       <button
         type="button"
         onClick={() => onChange?.('curve')}
@@ -47,7 +47,7 @@ export function PeriodSelect({
   className = '',
 }) {
   return (
-    <div className={`pointer-events-auto inline-flex items-center gap-1 rounded-xl bg-slate-100/90 dark:bg-[#161B16] p-1 border border-slate-200/70 dark:border-white/10 shadow-2xs ${className}`}>
+    <div className={`pointer-events-auto inline-flex items-center gap-1 rounded-xl bg-slate-100/90 dark:bg-[#18181E] p-1 border border-slate-200/70 dark:border-white/10 shadow-2xs ${className}`}>
       {options.map((opt) => {
         const isSelected = opt.label === value || opt.value === value;
         const labelText = opt.label || opt.value;

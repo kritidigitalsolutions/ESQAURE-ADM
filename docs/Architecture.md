@@ -340,6 +340,6 @@ const AuditLogSchema = new mongoose.Schema({
 The Admin Panel is structured as a single-page application (SPA) using React 18 and Vite:
 - **Routing**: `react-router-dom` with private route guards verifying Admin JWT.
 - **State Management**: TanStack Query (React Query) for server state caching and optimistic UI updates; Zustand for local app state (authenticated admin profile, active drawer/modal).
-- **Styling**: Tailwind CSS configured with Urbanist font and custom color tokens (Deep Black `#080B08`, Soft Card `#16161D`, Accent Pastel Yellow `#FEF08A`, Lime Accent `#8FFE01`).
+- **Styling**: Tailwind CSS configured with Urbanist font and custom color tokens (Deep Black `#0A0A0C`, Soft Card `#16161D`, Accent Pastel Yellow `#FEF08A`, Lime Accent `#8FFE01`).
 - **Data Visualization**: Recharts for audit activity histograms, daily views, and MRR growth curves.
 - **Data Tables**: Headless table components supporting multi-column sorting, search filters, pagination, and CSV export.

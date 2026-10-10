@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const PromoSchema = new mongoose.Schema(
+const VoucherSchema = new mongoose.Schema(
   {
     code: {
       type: String,
@@ -10,45 +10,67 @@ const PromoSchema = new mongoose.Schema(
       trim: true,
       index: true
     },
-    discountType: {
+    // The subscription plan this voucher grants
+    planCode: {
       type: String,
-      enum: ['PERCENTAGE', 'FLAT', 'FREE_DAYS'],
       required: true,
-      default: 'PERCENTAGE'
+      uppercase: true,
+      trim: true,
+      default: 'PLAN_1M'
     },
-    discountValue: {
+    planName: {
+      type: String,
+      required: true,
+      trim: true,
+      default: '1 Month Pass'
+    },
+    durationDays: {
       type: Number,
       required: true,
-      min: 0
+      min: 1,
+      default: 30
     },
-    // "ALL" means applicable to all plans, otherwise store planId reference
-    applicablePlan: {
+    voucherType: {
       type: String,
-      default: 'ALL',
-      trim: true
+      enum: ['SINGLE_USE', 'MULTI_USE'],
+      default: 'SINGLE_USE'
     },
     maxUses: {
       type: Number,
       required: true,
       min: 1,
-      default: 1000
+      default: 1
     },
     currentUses: {
       type: Number,
       default: 0,
       min: 0
     },
+    // Track users who redeemed this voucher
+    usedBy: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        userName: { type: String, default: '' },
+        userPhone: { type: String, default: '' },
+        redeemedAt: { type: Date, default: Date.now }
+      }
+    ],
     expiryDate: {
       type: Date,
       required: true
     },
     status: {
       type: String,
-      enum: ['ACTIVE', 'PAUSED', 'EXPIRED'],
+      enum: ['ACTIVE', 'PAUSED', 'EXPIRED', 'EXHAUSTED'],
       default: 'ACTIVE',
       index: true
     },
-    description: {
+    campaignName: {
+      type: String,
+      default: '',
+      trim: true
+    },
+    notes: {
       type: String,
       default: '',
       trim: true
@@ -69,10 +91,10 @@ const PromoSchema = new mongoose.Schema(
 );
 
 // Virtual: computed status based on expiry
-PromoSchema.virtual('computedStatus').get(function () {
+VoucherSchema.virtual('computedStatus').get(function () {
   if (this.expiryDate < new Date()) return 'EXPIRED';
   if (this.currentUses >= this.maxUses) return 'EXHAUSTED';
   return this.status;
 });
 
-export const Promo = mongoose.model('Promo', PromoSchema);
+export const Voucher = mongoose.model('Voucher', VoucherSchema);

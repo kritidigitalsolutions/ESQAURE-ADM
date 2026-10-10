@@ -682,196 +682,197 @@ export default function UsersPage({ onNavigate }) {
         document.body
       )}
 
-      {/* 4 Core OTT User KPI Metric Cards (Dashboard Aesthetic) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Metric 1: Total Registered Base */}
+      {/* 4 Clean Minimal KPI Metric Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         <KpiStatCard
           icon={Users}
           title="Total Users"
-          subtitle="Registered Base"
           value={counts.all}
           animateNumber
           footerLeft={`${counts.vip} paid subscribers`}
-          footerRight={`${counts.all > 0 ? ((counts.vip / counts.all) * 100).toFixed(1) : '0.0'}% Subscribed share`}
+          footerRight={`${counts.all > 0 ? ((counts.vip / counts.all) * 100).toFixed(1) : '0.0'}% VIP`}
           footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
         />
 
-        {/* Metric 2: Paid Subscribers */}
         <KpiStatCard
-          icon={ShieldCheck}
+          icon={Crown}
           title="Subscribers"
-          subtitle="Active Subscriptions"
           value={counts.vip}
           animateNumber
-          footerLeft={`${counts.free} free tier accounts`}
+          footerLeft={`${counts.free} free accounts`}
           footerRight={`${counts.suspended} suspended`}
           footerRightColor="text-amber-500 dark:text-amber-400 font-bold"
         />
 
-        {/* Metric 3: Daily Active Users (DAU) */}
         <KpiStatCard
           icon={Flame}
           title="Active Today"
-          subtitle="Daily Sessions (DAU)"
           value={counts.activeToday}
           animateNumber
-          footerLeft={`${counts.activeToday} active in last 24 hrs`}
-          footerRight={`${counts.all > 0 ? ((counts.activeToday / counts.all) * 100).toFixed(0) : '0'}% active rate`}
+          footerLeft={`${counts.activeToday} online 24h`}
+          footerRight={`${counts.all > 0 ? ((counts.activeToday / counts.all) * 100).toFixed(0) : '0'}% rate`}
           footerRightColor="text-slate-700 dark:text-slate-300 font-bold"
         />
 
-        {/* Metric 4: Average Watch Time */}
         <KpiStatCard
-          icon={PlayCircle}
+          icon={Clock}
           title="Avg Watch Time"
-          subtitle="Catalog Engagement"
-          value={`${counts.avgWatchTime} hrs / user`}
+          value={`${counts.avgWatchTime} hrs`}
           footerLeft={`Peak: ${counts.peakWatchTime} hrs`}
-          footerRight="Live DB metric"
+          footerRight="Dynamic"
           footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
         />
       </div>
 
-      {/* Unified Controls Toolbar: Filter Pills (Left) & Search + Export (Right) */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-nodus">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+      {/* Page Title & Main Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-0.5">
+        <div>
+          <div className="flex items-center space-x-2">
+            <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
+              User Directory & Access Control
+            </h1>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-900 dark:text-amber-300 border border-amber-300/50">
+              {counts.all} Users
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+            Manage user accounts, active subscriptions, access tiers, and security status.
+          </p>
+        </div>
 
-          {/* Segmented Sliding Toggle Track (Compact & Sleek) */}
-          <div className="relative bg-slate-100/90 dark:bg-[#161B16] p-1 rounded-xl border border-slate-200/70 dark:border-white/10 shadow-2xs w-full sm:w-[420px]">
-            {/* Smooth Sliding Active Indicator Pill */}
-            <span
-              className="absolute top-1 bottom-1 left-1 rounded-lg bg-[#FEF08A] shadow-xs transition-transform duration-300 ease-out pointer-events-none border border-amber-300/70"
-              style={{
-                width: 'calc((100% - 8px) / 4)',
-                transform: `translateX(${filterType === 'ALL'
-                    ? '0%'
-                    : filterType === 'SUBSCRIBED'
-                      ? '100%'
-                      : filterType === 'FREE'
-                        ? '200%'
-                        : '300%'
-                  })`,
-              }}
+        <div className="flex items-center space-x-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => loadUsers(false)}
+            disabled={isLoading}
+            className="p-1.5 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-xl transition-all cursor-pointer active:scale-95 shrink-0"
+            title="Refresh Users"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-amber-500' : ''}`} />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            className="py-1.5 px-3 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all border border-slate-200/90 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95"
+            title="Download CSV report"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Export CSV</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExportPDF}
+            className="py-1.5 px-3 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all border border-slate-200/90 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95"
+            title="Download PDF report"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Export PDF</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Unified Filter & Search Toolbar */}
+      <div className="bg-white dark:bg-[#121216] rounded-xl p-2 sm:px-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+        
+        {/* Left: Status Filter Tabs */}
+        <div className="flex items-center space-x-1 p-0.5 bg-slate-100 dark:bg-[#18181E] rounded-lg border border-slate-200/60 dark:border-white/10 shrink-0 overflow-x-auto">
+          {[
+            { id: 'ALL', label: `All Users (${counts.all})` },
+            { id: 'SUBSCRIBED', label: `Subscribed (${counts.vip})` },
+            { id: 'FREE', label: `Free Tier (${counts.free})` },
+            { id: 'SUSPENDED', label: `Suspended (${counts.suspended})` },
+          ].map((tab) => {
+            const isSelected = filterType === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setFilterType(tab.id)}
+                className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                  isSelected
+                    ? 'bg-white dark:bg-[#24242E] text-slate-950 dark:text-white shadow-2xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Right: Search Box + Clear + Count */}
+        <div className="flex items-center space-x-2 w-full md:w-auto">
+          <div className="relative flex-1 md:w-60">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search phone, name, email..."
+              className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-colors"
             />
-
-            {/* 4 Equal Column Buttons */}
-            <div className="grid grid-cols-4 relative z-10 w-full items-center">
-              {[
-                { id: 'ALL', label: 'All Users' },
-                { id: 'SUBSCRIBED', label: 'Subscribed' },
-                { id: 'FREE', label: 'Free Tier' },
-                { id: 'SUSPENDED', label: 'Suspended' },
-              ].map((tab) => {
-                const isSelected = filterType === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setFilterType(tab.id)}
-                    className={`py-1.5 text-xs font-bold text-center flex items-center justify-center transition-colors duration-200 select-none cursor-pointer ${isSelected
-                        ? 'text-slate-950 font-black'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
-                      }`}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
           </div>
 
-          {/* Search & Export Actions */}
-          <div className="flex items-center space-x-2.5 w-full lg:w-auto">
-            {/* Search Input */}
-            <div className="relative flex-1 lg:w-64">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by phone, name, email..."
-                className="w-full pl-8 pr-7 py-2 text-xs font-semibold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors shadow-2xs"
-              />
-              {searchTerm && (
-                <button
-                  type="button"
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-0.5"
-                  title="Clear search"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Live Refresh Button */}
+          {(searchTerm || filterType !== 'ALL') && (
             <button
               type="button"
-              onClick={() => loadUsers(false)}
-              disabled={isLoading}
-              className="py-2 px-3 bg-slate-100 dark:bg-white/[0.06] hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-white/10 shadow-xs cursor-pointer disabled:opacity-50"
-              title="Refresh live user data"
+              onClick={() => {
+                setSearchTerm('');
+                setFilterType('ALL');
+              }}
+              className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-bold px-1.5 py-0.5 cursor-pointer shrink-0"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-slate-500 dark:text-slate-400 ${isLoading ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
+              Reset
             </button>
+          )}
 
-            {/* Export CSV Button */}
-            <button
-              type="button"
-              onClick={handleExportCSV}
-              className="py-2 px-3 bg-slate-100 dark:bg-white/[0.06] hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-white/10 shadow-xs cursor-pointer"
-              title="Download CSV report"
-            >
-              <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-              <span>Export CSV</span>
-            </button>
-
-            {/* Export PDF Button */}
-            <button
-              type="button"
-              onClick={handleExportPDF}
-              className="py-2 px-3 bg-slate-100 dark:bg-white/[0.06] hover:bg-[#FEF08A] hover:text-slate-950 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shrink-0 active:scale-95 border border-slate-200/70 dark:border-white/10 shadow-xs cursor-pointer"
-              title="Download PDF report"
-            >
-              <FileText className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-              <span>Export PDF</span>
-            </button>
-          </div>
-
+          <span className="text-[11px] text-slate-400 font-medium shrink-0 hidden lg:inline">
+            <strong className="text-slate-900 dark:text-white font-bold">{filteredUsers.length}</strong> matching
+          </span>
         </div>
 
       </div>
 
       {/* Users Registry Table */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
+      <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50/80 dark:bg-[#161B16] border-b border-slate-100 dark:border-white/10 text-slate-400 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead className="bg-slate-50/70 dark:bg-[#18181E] border-b border-slate-200/80 dark:border-white/10 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="py-3 px-3 text-center w-10">#</th>
-                <th className="py-3 px-3.5 whitespace-nowrap">User Account</th>
-                <th className="py-3 px-3.5 whitespace-nowrap">Phone & Email</th>
-                <th className="py-3 px-3.5 whitespace-nowrap">Subscription Plan</th>
-                <th className="py-3 px-3.5 whitespace-nowrap">Joined</th>
-                <th className="py-3 px-3.5 whitespace-nowrap">Voucher / Code</th>
-                <th className="py-3 px-3.5 whitespace-nowrap">Status</th>
-                <th className="py-3 px-3.5 text-right whitespace-nowrap">Actions</th>
+                <th className="py-2.5 px-3 text-center w-10">#</th>
+                <th className="py-2.5 px-3 min-w-[180px]">User Account</th>
+                <th className="py-2.5 px-3 min-w-[170px]">Phone & Email</th>
+                <th className="py-2.5 px-3 w-36">Subscription Plan</th>
+                <th className="py-2.5 px-3 w-24">Joined</th>
+                <th className="py-2.5 px-3 w-24">Voucher</th>
+                <th className="py-2.5 px-3 w-24 text-center">Status</th>
+                <th className="py-2.5 px-3 w-28 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100/80 dark:divide-white/5 font-medium">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
               {isLoading && filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="py-12">
-                    <PageLoader size="sm" text="Loading..." minHeight="min-h-[220px]" />
+                    <PageLoader size="sm" text="Loading users..." minHeight="min-h-[220px]" />
                   </td>
                 </tr>
               ) : apiError && filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="py-12 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/40 flex items-center justify-center text-rose-500">
-                        <AlertCircle className="w-6 h-6" />
+                      <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/60 dark:border-rose-800/40 flex items-center justify-center text-rose-500">
+                        <AlertCircle className="w-5 h-5" />
                       </div>
                       <p className="text-xs font-bold text-slate-900 dark:text-white">
                         Database Connection Error
@@ -882,7 +883,7 @@ export default function UsersPage({ onNavigate }) {
                       <button
                         type="button"
                         onClick={loadUsers}
-                        className="mt-2 px-3.5 py-1.5 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-xl transition-colors shadow-xs flex items-center space-x-1.5 cursor-pointer"
+                        className="mt-2 px-3.5 py-1.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-xl transition-colors shadow-xs flex items-center space-x-1.5 cursor-pointer"
                       >
                         <RefreshCw className="w-3.5 h-3.5" />
                         <span>Retry Connection</span>
@@ -894,8 +895,8 @@ export default function UsersPage({ onNavigate }) {
                 <tr>
                   <td colSpan="8" className="py-12 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center text-slate-400 dark:text-slate-500">
-                        <Search className="w-6 h-6" />
+                      <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 text-slate-950 dark:text-amber-300 flex items-center justify-center">
+                        <Search className="w-5 h-5" />
                       </div>
                       <p className="text-xs font-bold text-slate-900 dark:text-white">
                         No users match your filter criteria
@@ -911,7 +912,7 @@ export default function UsersPage({ onNavigate }) {
                           setSearchTerm('');
                           setFilterType('ALL');
                         }}
-                        className="mt-2 px-3.5 py-1.5 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-xl transition-colors shadow-xs"
+                        className="mt-2 px-3.5 py-1.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-xl transition-colors shadow-xs cursor-pointer"
                       >
                         Reset All Filters
                       </button>
@@ -927,22 +928,22 @@ export default function UsersPage({ onNavigate }) {
                   return (
                     <tr
                       key={user.id}
-                      className="hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors group"
+                      className="hover:bg-slate-50/80 dark:hover:bg-white/[0.03] transition-colors group"
                     >
                       {/* Index Serial No. */}
-                      <td className="py-3 px-3 text-center font-mono font-medium text-[11px] text-slate-400 dark:text-slate-500 select-none">
+                      <td className="py-2 px-3 text-center font-mono font-medium text-[11px] text-slate-400 select-none">
                         {idx + 1}
                       </td>
 
                       {/* User Account */}
-                      <td className="py-3 px-3.5">
+                      <td className="py-2 px-3">
                         <button
                           type="button"
                           onClick={() => setViewUser(user)}
-                          className="flex items-center space-x-2.5 text-left group/user cursor-pointer"
+                          className="flex items-center space-x-2 text-left group/user cursor-pointer"
                         >
                           {/* Profile Picture in Circle */}
-                          <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 shadow-2xs border border-slate-200/80 dark:border-white/10 bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover/user:border-amber-300 transition-colors relative">
+                          <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 shadow-2xs border border-slate-200/80 dark:border-white/10 bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover/user:border-amber-300 transition-colors relative">
                             {user.avatarUrl ? (
                               <img
                                 src={user.avatarUrl}
@@ -960,7 +961,7 @@ export default function UsersPage({ onNavigate }) {
                               className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500"
                               style={{ display: user.avatarUrl ? 'none' : 'flex' }}
                             >
-                              <UserIcon className="w-3.5 h-3.5 stroke-[2.2]" />
+                              <UserIcon className="w-3 h-3 stroke-[2.2]" />
                             </div>
                           </div>
 
@@ -970,9 +971,9 @@ export default function UsersPage({ onNavigate }) {
                         </button>
                       </td>
 
-                      {/* Phone & Email (Single Line Side-by-Side) */}
-                      <td className="py-3 px-3.5 whitespace-nowrap">
-                        <div className="flex items-center space-x-2.5">
+                      {/* Phone & Email */}
+                      <td className="py-2 px-3 whitespace-nowrap">
+                        <div className="flex items-center space-x-2">
                           <span className="font-mono font-medium text-xs text-slate-700 dark:text-slate-300">
                             {user.phone || '—'}
                           </span>
@@ -988,21 +989,21 @@ export default function UsersPage({ onNavigate }) {
                       </td>
 
                       {/* Subscription Plan */}
-                      <td className="py-3 px-3.5">
+                      <td className="py-2 px-3">
                         <Badge plan={user.plan || (isVip ? '1 Month Pass' : 'Free Tier')} size="xs">
                           {cleanPlanName(user.plan || (isVip ? '1 Month Pass' : 'Free Tier'))}
                         </Badge>
                       </td>
 
                       {/* Joined Date */}
-                      <td className="py-3 px-3.5">
-                        <span className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">
+                      <td className="py-2 px-3">
+                        <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
                           {user.joinedAt || '25 Sept 2026'}
                         </span>
                       </td>
 
                       {/* Voucher / Promo Code */}
-                      <td className="py-3 px-3.5">
+                      <td className="py-2 px-3">
                         {user.promoCode ? (
                           <div className="flex flex-col items-start gap-0.5">
                             <Badge variant="given-by-admin" size="xs">
@@ -1017,23 +1018,34 @@ export default function UsersPage({ onNavigate }) {
                       </td>
 
                       {/* Status */}
-                      <td className="py-3 px-3.5">
-                        <Badge
-                          variant={isActive ? 'active' : 'inactive'}
-                          size="xs"
+                      <td className="py-2 px-3 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleUserStatus(user.id)}
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95 ${
+                            isActive
+                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25'
+                              : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/25'
+                          }`}
+                          title="Click to toggle account status"
                         >
-                          {isActive ? 'Active' : 'Inactive'}
-                        </Badge>
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                              isActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
+                            }`}
+                          />
+                          {isActive ? 'Active' : 'Suspended'}
+                        </button>
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3 px-3.5 text-right">
-                        <div className="flex items-center justify-end gap-1">
+                      <td className="py-2 px-3 text-right">
+                        <div className="flex items-center justify-end gap-0.5">
                           <button
                             type="button"
                             title="View Profile"
                             onClick={() => setViewUser(user)}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-[#FEF08A] hover:text-slate-950 text-slate-400 dark:text-slate-400 transition-all active:scale-95 cursor-pointer"
+                            className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
@@ -1041,7 +1053,7 @@ export default function UsersPage({ onNavigate }) {
                             type="button"
                             title="Edit User & Access"
                             onClick={() => handleOpenEditUser(user)}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-[#FEF08A] hover:text-slate-950 text-slate-400 dark:text-slate-400 transition-all active:scale-95 cursor-pointer"
+                            className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
@@ -1049,10 +1061,7 @@ export default function UsersPage({ onNavigate }) {
                             type="button"
                             title={isActive ? 'Suspend User' : 'Unblock User'}
                             onClick={() => handleToggleUserStatus(user.id)}
-                            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-all active:scale-95 cursor-pointer ${isActive
-                                ? 'bg-slate-100 dark:bg-slate-800 hover:bg-orange-50 dark:hover:bg-orange-900/20 text-slate-400 hover:text-orange-500'
-                                : 'bg-orange-100 dark:bg-orange-900/20 text-orange-500 hover:bg-orange-200'
-                              }`}
+                            className="p-1 rounded-md text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-pointer"
                           >
                             <Ban className="w-3.5 h-3.5" />
                           </button>
@@ -1060,7 +1069,7 @@ export default function UsersPage({ onNavigate }) {
                             type="button"
                             title="Delete User"
                             onClick={() => handleDeleteUser(user)}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-all active:scale-95 cursor-pointer"
+                            className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -1072,6 +1081,33 @@ export default function UsersPage({ onNavigate }) {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Table Summary Footer */}
+        <div className="px-3 sm:px-4 py-2 bg-slate-50/60 dark:bg-[#18181E]/80 border-t border-slate-100 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+          <span className="font-medium text-[11px] text-slate-500 dark:text-slate-400">
+            Showing <strong className="text-slate-900 dark:text-white">{filteredUsers.length}</strong> of {counts.all} users
+          </span>
+          <div className="flex flex-wrap items-center gap-3 text-[10.5px] font-medium">
+            <span className="inline-flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              Subscribers: <strong className="text-slate-700 dark:text-slate-200">{counts.vip}</strong>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+              Free Tier: <strong className="text-slate-700 dark:text-slate-200">{counts.free}</strong>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Active Today: <strong className="text-slate-700 dark:text-slate-200">{counts.activeToday}</strong>
+            </span>
+            {counts.suspended > 0 && (
+              <span className="inline-flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                Suspended: <strong className="text-slate-700 dark:text-slate-200">{counts.suspended}</strong>
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -1085,12 +1121,12 @@ export default function UsersPage({ onNavigate }) {
           />
 
           {/* Right-Side Slide-Over Panel */}
-          <div className="relative w-full max-w-md h-full bg-white dark:bg-[#1E241E] shadow-2xl border-l border-slate-200/80 dark:border-white/12 flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out font-urbanist overflow-hidden">
+          <div className="relative w-full max-w-md h-full bg-white dark:bg-[#1E1E26] shadow-2xl border-l border-slate-200/80 dark:border-white/12 flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out font-urbanist overflow-hidden">
 
             {/* Top Bar Header */}
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-white/90 dark:bg-[#161B16]/95 backdrop-blur-md shrink-0">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-white/90 dark:bg-[#18181E]/95 backdrop-blur-md shrink-0">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
                   <Pencil className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1117,9 +1153,9 @@ export default function UsersPage({ onNavigate }) {
             <form onSubmit={handleSaveUser} className="flex-1 overflow-y-auto p-5 sm:p-6 flex flex-col justify-between space-y-4">
               <div className="space-y-3.5">
                 {/* User Identity Preview Banner */}
-                <div className="p-3 bg-slate-50/90 dark:bg-[#161B16] rounded-xl border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3">
+                <div className="p-3 bg-slate-50/90 dark:bg-[#18181E] rounded-xl border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3">
                   <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 dark:bg-[#121612] shadow-xs border border-slate-200/80 dark:border-white/10 shrink-0 flex items-center justify-center relative">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 dark:bg-[#121216] shadow-xs border border-slate-200/80 dark:border-white/10 shrink-0 flex items-center justify-center relative">
                       {(editForm.avatarUrl || overrideUser.avatarUrl) ? (
                         <img
                           src={editForm.avatarUrl || overrideUser.avatarUrl}
@@ -1175,7 +1211,7 @@ export default function UsersPage({ onNavigate }) {
                       value={editForm.avatarUrl}
                       onChange={(e) => setEditForm(prev => ({ ...prev, avatarUrl: e.target.value }))}
                       placeholder="https://... real photo URL"
-                      className="w-full pl-8 pr-3 py-2 text-xs font-medium bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors placeholder:text-slate-400"
+                      className="w-full pl-8 pr-3 py-2 text-xs font-medium bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors placeholder:text-slate-400"
                     />
                   </div>
                 </div>
@@ -1191,7 +1227,7 @@ export default function UsersPage({ onNavigate }) {
                       value={editForm.firstName}
                       onChange={(e) => setEditForm(prev => ({ ...prev, firstName: e.target.value }))}
                       placeholder="First name"
-                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
+                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
                     />
                   </div>
 
@@ -1204,7 +1240,7 @@ export default function UsersPage({ onNavigate }) {
                       value={editForm.lastName}
                       onChange={(e) => setEditForm(prev => ({ ...prev, lastName: e.target.value }))}
                       placeholder="Last name"
-                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
+                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
                     />
                   </div>
                 </div>
@@ -1220,7 +1256,7 @@ export default function UsersPage({ onNavigate }) {
                       value={editForm.phone}
                       onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
                       placeholder="+91..."
-                      className="w-full px-3 py-2 text-xs font-mono font-semibold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
+                      className="w-full px-3 py-2 text-xs font-mono font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
                     />
                   </div>
 
@@ -1233,7 +1269,7 @@ export default function UsersPage({ onNavigate }) {
                       value={editForm.email}
                       onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
                       placeholder="yourname@gmail.com"
-                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
+                      className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors"
                     />
                   </div>
                 </div>
@@ -1265,7 +1301,7 @@ export default function UsersPage({ onNavigate }) {
                         value={promoCode}
                         onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                         placeholder="e.g. WELCOME50, SUBFREE7"
-                        className="w-full pl-8 pr-3 py-2 text-xs font-mono font-bold bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors placeholder:font-normal placeholder:text-slate-400 uppercase"
+                        className="w-full pl-8 pr-3 py-2 text-xs font-mono font-bold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-xl focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 transition-colors placeholder:font-normal placeholder:text-slate-400 uppercase"
                       />
                     </div>
                     {promoCode.trim() ? (
@@ -1274,7 +1310,7 @@ export default function UsersPage({ onNavigate }) {
                         Active
                       </span>
                     ) : (
-                      <span className="px-3 py-2 bg-slate-100 dark:bg-[#161B16] text-slate-500 dark:text-slate-400 font-medium text-[10px] rounded-xl flex items-center shrink-0 border border-slate-200/60 dark:border-white/10">
+                      <span className="px-3 py-2 bg-slate-100 dark:bg-[#18181E] text-slate-500 dark:text-slate-400 font-medium text-[10px] rounded-xl flex items-center shrink-0 border border-slate-200/60 dark:border-white/10">
                         Direct
                       </span>
                     )}
@@ -1295,7 +1331,7 @@ export default function UsersPage({ onNavigate }) {
                     </span>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161B16] overflow-hidden shadow-2xs transition-all">
+                  <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#18181E] overflow-hidden shadow-2xs transition-all">
                     {/* Selected Plan Header (Click to toggle) */}
                     <button
                       type="button"
@@ -1318,7 +1354,7 @@ export default function UsersPage({ onNavigate }) {
 
                     {/* Expanded Options */}
                     {isPlanDropdownOpen && (
-                      <div className="border-t border-slate-100 dark:border-white/10 divide-y divide-slate-100 dark:divide-white/5 bg-slate-50/60 dark:bg-[#121612] max-h-40 overflow-y-auto">
+                      <div className="border-t border-slate-100 dark:border-white/10 divide-y divide-slate-100 dark:divide-white/5 bg-slate-50/60 dark:bg-[#121216] max-h-40 overflow-y-auto">
                         {SUBSCRIPTION_PLANS.map((plan) => {
                           const isSelected = currentPlanItem.id === plan.id;
                           return (
@@ -1351,7 +1387,7 @@ export default function UsersPage({ onNavigate }) {
                 </div>
 
                 {/* Account Status Switch */}
-                <div className="p-3 bg-slate-50 dark:bg-[#161B16] rounded-xl border border-slate-200/80 dark:border-white/10 flex items-center justify-between">
+                <div className="p-3 bg-slate-50 dark:bg-[#18181E] rounded-xl border border-slate-200/80 dark:border-white/10 flex items-center justify-between">
                   <div>
                     <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
                       Account Status
@@ -1383,7 +1419,7 @@ export default function UsersPage({ onNavigate }) {
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-5 py-2 bg-[#FEF08A] hover:bg-[#FDE047] disabled:opacity-50 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer flex items-center space-x-1.5"
+                  className="px-5 py-2 bg-[#FACC15] hover:bg-[#EAB308] disabled:opacity-50 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer flex items-center space-x-1.5"
                 >
                   {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
@@ -1407,12 +1443,12 @@ export default function UsersPage({ onNavigate }) {
           />
 
           {/* Right-Side Slide-Over Panel */}
-          <div className="relative w-full max-w-md h-full bg-white dark:bg-[#1E241E] shadow-2xl border-l border-slate-200/80 dark:border-white/12 flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out font-urbanist overflow-hidden">
+          <div className="relative w-full max-w-md h-full bg-white dark:bg-[#1E1E26] shadow-2xl border-l border-slate-200/80 dark:border-white/12 flex flex-col z-10 animate-in slide-in-from-right duration-300 ease-out font-urbanist overflow-hidden">
 
             {/* Top Bar Header */}
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-white/90 dark:bg-[#161B16]/95 backdrop-blur-md shrink-0">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-white/90 dark:bg-[#18181E]/95 backdrop-blur-md shrink-0">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
                   <Eye className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1483,10 +1519,10 @@ export default function UsersPage({ onNavigate }) {
               </div>
 
               {/* Polished Activity Status Card */}
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3 group">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3 group">
                 <div className="flex items-center space-x-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                    <Clock className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+                  <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
+                    <Clock className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
                   </div>
                   <div className="min-w-0">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -1513,9 +1549,9 @@ export default function UsersPage({ onNavigate }) {
                 </span>
 
                 {/* Phone */}
-                <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/90 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/90 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3">
                   <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#121612] flex items-center justify-center text-slate-500 shrink-0 border border-slate-200/60 dark:border-white/10">
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#121216] flex items-center justify-center text-slate-500 shrink-0 border border-slate-200/60 dark:border-white/10">
                       <Smartphone className="w-4 h-4 text-slate-700 dark:text-slate-300" />
                     </div>
                     <div className="min-w-0">
@@ -1530,7 +1566,7 @@ export default function UsersPage({ onNavigate }) {
                   <button
                     type="button"
                     onClick={() => handleCopyText(viewUser.phone, 'Phone number')}
-                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-[#121612] rounded-lg transition-colors cursor-pointer shrink-0"
+                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-[#121216] rounded-lg transition-colors cursor-pointer shrink-0"
                     title="Copy Phone"
                   >
                     <Copy className="w-3.5 h-3.5" />
@@ -1538,9 +1574,9 @@ export default function UsersPage({ onNavigate }) {
                 </div>
 
                 {/* Email */}
-                <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/90 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/90 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3">
                   <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#121612] flex items-center justify-center text-slate-500 shrink-0 border border-slate-200/60 dark:border-white/10">
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#121216] flex items-center justify-center text-slate-500 shrink-0 border border-slate-200/60 dark:border-white/10">
                       <Mail className="w-4 h-4 text-slate-700 dark:text-slate-300" />
                     </div>
                     <div className="min-w-0">
@@ -1555,7 +1591,7 @@ export default function UsersPage({ onNavigate }) {
                   <button
                     type="button"
                     onClick={() => handleCopyText(viewUser.email, 'Email address')}
-                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-[#121612] rounded-lg transition-colors cursor-pointer shrink-0"
+                    className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-[#121216] rounded-lg transition-colors cursor-pointer shrink-0"
                     title="Copy Email"
                   >
                     <Copy className="w-3.5 h-3.5" />
@@ -1569,7 +1605,7 @@ export default function UsersPage({ onNavigate }) {
                   Membership & Entitlement
                 </span>
 
-                <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/90 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 space-y-2.5">
+                <div className="p-3 sm:p-3.5 rounded-xl bg-slate-50/90 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Crown className="w-4 h-4 text-amber-500" />
@@ -1608,7 +1644,7 @@ export default function UsersPage({ onNavigate }) {
                   <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
                     <span>Acquisition Channel</span>
                     {viewUser.promoCode ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-[#FEF08A]/40 text-slate-950 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700/50 shadow-2xs">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-300/80 dark:border-amber-400/35 shadow-2xs">
                         <Ticket className="w-3 h-3 text-amber-700 dark:text-amber-400 stroke-[2.2]" />
                         <span>{viewUser.promoCode}</span>
                       </span>
@@ -1622,7 +1658,7 @@ export default function UsersPage({ onNavigate }) {
             </div>
 
             {/* Sticky Bottom Action Footer */}
-            <div className="p-3.5 sm:p-4 border-t border-slate-100 dark:border-white/10 bg-white/95 dark:bg-[#161B16]/95 backdrop-blur-sm shrink-0 flex items-center justify-between gap-3">
+            <div className="p-3.5 sm:p-4 border-t border-slate-100 dark:border-white/10 bg-white/95 dark:bg-[#18181E]/95 backdrop-blur-sm shrink-0 flex items-center justify-between gap-3">
               {/* Suspend / Unblock Button */}
               <button
                 type="button"
@@ -1648,7 +1684,7 @@ export default function UsersPage({ onNavigate }) {
                 <button
                   type="button"
                   onClick={() => handleSwitchToEdit(viewUser)}
-                  className="px-4 py-2 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer flex items-center space-x-1.5"
+                  className="px-4 py-2 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer flex items-center space-x-1.5"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   <span>Edit User</span>
@@ -1671,14 +1707,14 @@ export default function UsersPage({ onNavigate }) {
           />
 
           {/* Custom Confirmation Card */}
-          <div className="relative w-full max-w-md bg-white dark:bg-[#202620] rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] border border-slate-200/90 dark:border-white/15 z-10 animate-in fade-in zoom-in-95 duration-200 font-urbanist overflow-hidden">
+          <div className="relative w-full max-w-md bg-white dark:bg-[#24242E] rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] border border-slate-200/90 dark:border-white/15 z-10 animate-in fade-in zoom-in-95 duration-200 font-urbanist overflow-hidden">
 
             <div className="p-6 sm:p-7 space-y-5">
 
               {/* Header: Icon Badge + Title + Close Button */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3.5">
-                  <div className="w-11 h-11 rounded-2xl bg-[#FEF08A]/50 border border-amber-300/80 dark:border-amber-600/40 flex items-center justify-center text-slate-950 dark:text-amber-300 shadow-xs">
+                  <div className="w-11 h-11 rounded-2xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shadow-xs">
                     <Trash2 className="w-5 h-5 stroke-[2.2]" />
                   </div>
                   <div>
@@ -1702,7 +1738,7 @@ export default function UsersPage({ onNavigate }) {
               </div>
 
               {/* Targeted User Info Preview Card */}
-              <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-[#1A201A] border border-slate-200/80 dark:border-white/10 space-y-3">
+              <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-[#1E1E26] border border-slate-200/80 dark:border-white/10 space-y-3">
                 {/* Identity Row */}
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center space-x-3 min-w-0">
@@ -1759,7 +1795,7 @@ export default function UsersPage({ onNavigate }) {
                 <button
                   type="button"
                   onClick={() => setUserToDelete(null)}
-                  className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161B16] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-xs font-bold text-slate-700 dark:text-slate-300 transition-all shadow-2xs active:scale-95 cursor-pointer text-center"
+                  className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#18181E] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-xs font-bold text-slate-700 dark:text-slate-300 transition-all shadow-2xs active:scale-95 cursor-pointer text-center"
                 >
                   Cancel
                 </button>

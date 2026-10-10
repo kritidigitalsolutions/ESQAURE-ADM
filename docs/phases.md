@@ -85,7 +85,7 @@
 
 ### Deliverables & Tasks:
 - [ ] Setup Vite + React 18 + Tailwind CSS project in `admin-panel/`.
-- [ ] Configure Tailwind theme with Urbanist typography and pastel yellow/neon/black color tokens (`#FEF08A`, `#8FFE01`, `#080B08`).
+- [ ] Configure Tailwind theme with Urbanist typography and pastel yellow/neon/black color tokens (`#FEF08A`, `#8FFE01`, `#0A0A0C`).
 - [ ] Build Layout shell: Sidebar navigation, Header with breadcrumbs, Admin profile badge, Notifications.
 - [ ] **Overview / Analytics Dashboard**:
   - KPI metric cards (Total Users, Active Paid Subscribers, Monthly Revenue, Total Views).

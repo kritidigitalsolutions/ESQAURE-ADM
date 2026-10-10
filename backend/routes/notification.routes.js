@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate } from '../middlewares/auth.middleware.js';
+import { authenticate, optionalAuthenticate } from '../middlewares/auth.middleware.js';
 import {
   getNotifications,
   getUnreadCount,
@@ -33,15 +33,25 @@ router.post('/admin/announcements', createAnnouncement);
 router.delete('/admin/announcements/:id', deleteAnnouncement);
 router.patch('/admin/announcements/:id/toggle', toggleAnnouncement);
 
+// ── Device / Push Token Management (supports both authenticated & guest app launches) ──
+// POST   /api/v1/notifications/register-device   → Save FCM token
+router.post('/register-device', optionalAuthenticate, registerDeviceToken);
+
+// DELETE /api/v1/notifications/unregister-device → Remove FCM token (on logout)
+router.delete('/unregister-device', optionalAuthenticate, unregisterDeviceToken);
+
 // ── Mobile App Protected Routes ─────────────────────────────────────────────
-// All mobile notification routes require a valid Bearer token
+// The remaining mobile notification routes require a valid Bearer token
 router.use(authenticate);
 
-// ── Notification List & State ──────────────────────────────────────────────
+// ── Notification Settings (toggles screen) ────────────────────────────────
+// GET  /api/v1/notifications/settings    → Get newEpisodes / newReleases / recommendations
+router.get('/settings', getNotificationSettings);
 
-// GET  /api/v1/notifications             → List notifications (paginated, date-grouped)
-router.get('/', getNotifications);
+// PUT  /api/v1/notifications/settings    → Update one or more toggles
+router.put('/settings', updateNotificationSettings);
 
+// ── Notification List & State (Static routes BEFORE parameterized /:id) ──────
 // GET  /api/v1/notifications/unread-count → App icon badge count
 router.get('/unread-count', getUnreadCount);
 
@@ -51,30 +61,17 @@ router.patch('/read-all', markAllAsRead);
 // DELETE /api/v1/notifications/clear-all → Delete all notifications for user
 router.delete('/clear-all', clearAllNotifications);
 
+// GET  /api/v1/notifications             → List notifications (paginated, date-grouped)
+router.get('/', getNotifications);
+
+// ── Parameterized routes (placed strictly after specific static routes) ─────
 // PATCH /api/v1/notifications/:id/read   → Mark a single notification as read
 router.patch('/:id/read', markAsRead);
 
 // DELETE /api/v1/notifications/:id       → Delete a single notification
 router.delete('/:id', deleteNotification);
 
-// ── Notification Settings (toggles screen) ────────────────────────────────
-
-// GET  /api/v1/notifications/settings    → Get newEpisodes / newReleases / recommendations
-router.get('/settings', getNotificationSettings);
-
-// PUT  /api/v1/notifications/settings    → Update one or more toggles
-router.put('/settings', updateNotificationSettings);
-
-// ── Device / Push Token Management ───────────────────────────────────────
-
-// POST   /api/v1/notifications/register-device   → Save FCM token
-router.post('/register-device', registerDeviceToken);
-
-// DELETE /api/v1/notifications/unregister-device → Remove FCM token (on logout)
-router.delete('/unregister-device', unregisterDeviceToken);
-
 // ── Admin / System: Send Notification ────────────────────────────────────
-
 // POST /api/v1/notifications/seed  → Seed/reset sample notifications for testing
 router.post('/seed', seedNotifications);
 

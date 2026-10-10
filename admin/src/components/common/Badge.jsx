@@ -34,9 +34,9 @@ export const BADGE_CONFIGS = {
   admin: {
     label: 'Admin',
     icon: Shield,
-    bg: 'bg-amber-100 dark:bg-amber-950/50',
+    bg: 'bg-amber-100 dark:bg-amber-400/10',
     text: 'text-amber-800 dark:text-amber-300',
-    border: 'border border-amber-300/50 dark:border-amber-700/40',
+    border: 'border border-amber-300/50 dark:border-amber-400/30',
   },
   'content-manager': {
     label: 'Content Manager',
@@ -105,7 +105,7 @@ export const BADGE_CONFIGS = {
     icon: null,
     bg: 'bg-[#FEF08A]/40 dark:bg-amber-950/40',
     text: 'text-[#854d0e] dark:text-amber-400 font-bold',
-    border: 'border border-amber-300/80 dark:border-amber-700/40',
+    border: 'border border-amber-300/80 dark:border-amber-400/30',
   },
   'flix9-medium': {
     label: '6 Months Pass',
