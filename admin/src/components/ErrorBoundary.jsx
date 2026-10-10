@@ -25,8 +25,8 @@ export default class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center font-urbanist">
-          <div className="bg-white dark:bg-[#121612] border border-slate-200/80 dark:border-white/10 rounded-2xl p-8 max-w-lg w-full shadow-xl">
-            <div className="w-14 h-14 rounded-2xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center mx-auto mb-4 text-slate-950 dark:text-amber-400">
+          <div className="bg-white dark:bg-[#121216] border border-slate-200/80 dark:border-white/10 rounded-2xl p-8 max-w-lg w-full shadow-xl">
+            <div className="w-14 h-14 rounded-2xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center mx-auto mb-4 text-slate-950 dark:text-amber-300">
               <AlertCircle className="w-7 h-7 stroke-[2.2]" />
             </div>
 
@@ -39,7 +39,7 @@ export default class ErrorBoundary extends React.Component {
             </p>
 
             {this.state.error?.message && (
-              <div className="p-3 mb-6 bg-slate-100 dark:bg-[#161B16] rounded-xl text-left border border-slate-200 dark:border-white/10 overflow-x-auto text-[11px] font-mono text-rose-600 dark:text-rose-400">
+              <div className="p-3 mb-6 bg-slate-100 dark:bg-[#18181E] rounded-xl text-left border border-slate-200 dark:border-white/10 overflow-x-auto text-[11px] font-mono text-rose-600 dark:text-rose-400">
                 {this.state.error.message}
               </div>
             )}
@@ -60,7 +60,7 @@ export default class ErrorBoundary extends React.Component {
               <button
                 type="button"
                 onClick={this.handleReset}
-                className="px-4 py-2 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+                className="px-4 py-2 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs"
               >
                 <Home className="w-3.5 h-3.5" />
                 Return to Dashboard

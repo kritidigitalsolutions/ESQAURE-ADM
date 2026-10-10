@@ -8,7 +8,7 @@ trigger: always_on
 ## 1. Theme Identity & Core Palette
 - **Primary Website Theme Accent**: `#FEF08A` (Light Pastel Yellow)
 - **Primary Hover State**: `#FDE047`
-- **Dark Mode Base Background**: `#080B08` / `#111111` (Deep dark slate, never pure `#000000` for surface fills)
+- **Dark Mode Base Background**: `#0A0A0C` (Deep Obsidian / Pure Dark Onyx, never pure `#000000` for surface fills)
 - **Typography**: Urbanist (`font-urbanist`, `font-sans`)
 
 ---
@@ -22,13 +22,13 @@ In dark mode, components communicate elevation by **displaying lighter surface c
 
 | Elevation Level | Component Examples | Surface Treatment |
 |---|---|---|
-| **00dp (Base Canvas)** | Main layout background | `#080B08` / `#0C0F0C` (0% overlay) |
-| **01dp (Base Surface)** | KPI Cards, Table rows, Input containers | `bg-[#121612]` or `bg-slate-900/60`, border `border-white/10` (5% overlay) |
-| **02dp (Elevated Card)** | Hovered cards, Secondary metric widgets | `bg-[#161B16]`, subtle shadow (7% overlay) |
-| **04dp (App Bar)** | Top Navigation, Sticky Page Headers | `bg-[#1A1F1A]/95 backdrop-blur-md`, `border-b border-white/10` (9% overlay) |
-| **08dp (Menus & Sheets)** | Dropdown menus, Popovers, Filter panels | `bg-[#202620]`, `shadow-lg`, `border border-white/12` (12% overlay) |
-| **16dp (Drawers)** | Slide-over drawers, Side sheets | `bg-[#242A24]`, `shadow-xl`, `border-l border-white/12` (15% overlay) |
-| **24dp (Modals)** | Dialogs, Confirmation popups | `bg-[#282E28]`, `shadow-2xl`, `border border-white/15` (16% overlay) |
+| **00dp (Base Canvas)** | Main layout background | `#0A0A0C` (0% overlay) |
+| **01dp (Base Surface)** | KPI Cards, Table rows, Input containers | `bg-[#121216]` or `bg-slate-900/60`, border `border-white/10` (5% overlay) |
+| **02dp (Elevated Card)** | Hovered cards, Secondary metric widgets | `bg-[#18181E]`, subtle shadow (7% overlay) |
+| **04dp (App Bar)** | Top Navigation, Sticky Page Headers | `bg-[#1E1E26]/95 backdrop-blur-md`, `border-b border-white/10` (9% overlay) |
+| **08dp (Menus & Sheets)** | Dropdown menus, Popovers, Filter panels | `bg-[#24242E]`, `shadow-lg`, `border border-white/12` (12% overlay) |
+| **16dp (Drawers)** | Slide-over drawers, Side sheets | `bg-[#2A2A35]`, `shadow-xl`, `border-l border-white/12` (15% overlay) |
+| **24dp (Modals)** | Dialogs, Confirmation popups | `bg-[#30303D]`, `shadow-2xl`, `border border-white/15` (16% overlay) |
 
 ### Strict Surface Principles:
 1. **Never use pure `#000000`** as a component surface; pure black hides shadows and produces harsh glare against white text.
@@ -48,7 +48,7 @@ In dark mode, components communicate elevation by **displaying lighter surface c
 ## 4. Brand Accent Color Restraint
 - **Dark surfaces must occupy 90%+ of the screen**. Saturated surfaces vibrate and cause visual fatigue in dark mode.
 - Use `#FEF08A` as a laser-focused accent:
-  - Primary action buttons: `bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold`
+  - Primary action buttons: `bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold`
   - Active navigation pill / selected tab indicator
   - KPI metric icon badges
   - Table selection highlights / active status tags
@@ -65,17 +65,17 @@ Whenever creating or modifying KPI cards, stat cards, metric overviews, or featu
 
 2. **Standard KPI Metric Icon Badge**:
    ```jsx
-   <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-     <Icon className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+   <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs">
+     <Icon className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
    </div>
    ```
 
 3. **Standard Modal / Header Icon Badge (compact)**:
    ```jsx
-   <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
+   <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
      <Icon className="w-4 h-4 stroke-[2.2]" />
    </div>
    ```
 
 4. **Action Buttons / Active Indicators**:
-   - Primary action buttons, active tab indicators, and search highlights should use `bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold`.
+   - Primary action buttons, active tab indicators, and search highlights should use `bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold`.

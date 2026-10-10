@@ -70,7 +70,7 @@ export default function ThemeToggle({ variant = 'topbar', className = '' }) {
         aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         className={`group relative inline-flex h-[26px] w-[48px] items-center rounded-full p-[2px] transition-all duration-300 cursor-pointer select-none border hover:scale-[1.03] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FEF08A]/80 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-900 ${
           isDark
-            ? 'bg-[#0B0E0B] border-white/[0.08] hover:border-white/[0.16] shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.65)]'
+            ? 'bg-[#0E0E12] border-white/[0.08] hover:border-white/[0.16] shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.65)]'
             : 'bg-slate-200/80 border-slate-300/80 hover:border-slate-400/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)]'
         } ${className}`}
       >
@@ -98,7 +98,7 @@ export default function ThemeToggle({ variant = 'topbar', className = '' }) {
         <span
           className={`absolute top-[2px] left-[2px] flex h-[20px] w-[20px] items-center justify-center rounded-full transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] border ${
             isDark
-              ? 'translate-x-[22px] bg-gradient-to-b from-[#2E372E] to-[#1A211A] border-white/[0.14] text-[#FEF08A] shadow-[0_2px_5px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.18)]'
+              ? 'translate-x-[22px] bg-gradient-to-b from-[#2D2D38] to-[#1E1E26] border-white/[0.14] text-[#FEF08A] shadow-[0_2px_5px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.18)]'
               : 'translate-x-0 bg-gradient-to-b from-white to-slate-50 border-slate-200/90 text-amber-500 shadow-[0_1.5px_3px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,1)]'
           }`}
         >

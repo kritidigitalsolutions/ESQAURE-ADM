@@ -26,7 +26,7 @@ export default function KpiStatCard({
     <div
       onClick={onClick}
       className={`relative overflow-hidden rounded-2xl p-3.5 sm:p-4 transition-all duration-300 flex flex-col justify-between group select-none
-        bg-white dark:bg-[#121612] 
+        bg-white dark:bg-[#121216] 
         border border-slate-200/90 dark:border-white/10 
         shadow-[0_2px_12px_-2px_rgba(0,0,0,0.05)] dark:shadow-none 
         hover:shadow-xl dark:hover:border-amber-400/40 
@@ -38,7 +38,7 @@ export default function KpiStatCard({
           <div className="flex items-center space-x-2.5 min-w-0">
             {/* Standard KPI Metric Icon Badge */}
             {Icon && (
-              <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
+              <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
                 <Icon className="w-4 h-4 stroke-[2.2]" />
               </div>
             )}
@@ -79,7 +79,7 @@ export default function KpiStatCard({
         <div className="mt-3 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10.5px] font-medium leading-normal gap-2">
           {footerLeft && <span className={`truncate ${footerLeftColor}`}>{footerLeft}</span>}
           {footerRight && (
-            <span className={`shrink-0 px-1.5 py-0.5 rounded-md bg-amber-100/60 dark:bg-amber-900/30 border border-amber-300/40 dark:border-amber-700/40 ${footerRightColor}`}>
+            <span className={`shrink-0 px-1.5 py-0.5 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 ${footerRightColor}`}>
               {footerRight}
             </span>
           )}

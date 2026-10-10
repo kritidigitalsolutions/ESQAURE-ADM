@@ -57,14 +57,14 @@ export default function AdOverviewTab({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         
         {/* Card 1: Google AdMob Revenue */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121216] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-urbanist">
                 AdMob Monthly Earnings
               </span>
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-                <Coins className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs">
+                <Coins className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
               </div>
             </div>
             <div className="mt-2">
@@ -86,14 +86,14 @@ export default function AdOverviewTab({
         </div>
 
         {/* Card 2: Custom Sponsor Impressions & CTR */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121216] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-urbanist">
                 Direct Custom Ads CTR
               </span>
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-                <MousePointerClick className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs">
+                <MousePointerClick className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
               </div>
             </div>
             <div className="mt-2">
@@ -119,14 +119,14 @@ export default function AdOverviewTab({
         </div>
 
         {/* Card 3: Combined Impressions */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121216] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-urbanist">
                 Combined Impressions
               </span>
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-                <Eye className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs">
+                <Eye className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
               </div>
             </div>
             <div className="mt-2">
@@ -150,14 +150,14 @@ export default function AdOverviewTab({
         </div>
 
         {/* Card 4: Average eCPM & Fill Rate */}
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#121216] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-nodus relative overflow-hidden group transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-urbanist">
                 Average eCPM & Fill
               </span>
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-                <TrendingUp className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs">
+                <TrendingUp className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
               </div>
             </div>
             <div className="mt-2">
@@ -181,7 +181,7 @@ export default function AdOverviewTab({
       </div>
 
       {/* Quick Monetization Engine Controls Banner */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-nodus">
+      <div className="bg-white dark:bg-[#121216] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-nodus">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/10">
           <div>
             <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -203,7 +203,7 @@ export default function AdOverviewTab({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3">
           
           {/* Toggle 1: AdMob Network Live */}
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/70 dark:border-white/10 flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200/70 dark:border-white/10 flex items-center justify-between">
             <div className="min-w-0 pr-2">
               <span className="text-xs font-extrabold text-slate-900 dark:text-white block">AdMob Network</span>
               <span className="text-[10px] text-slate-400 block">
@@ -224,7 +224,7 @@ export default function AdOverviewTab({
           </div>
 
           {/* Toggle 2: Developer Test Mode */}
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/70 dark:border-white/10 flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200/70 dark:border-white/10 flex items-center justify-between">
             <div className="min-w-0 pr-2">
               <span className="text-xs font-extrabold text-slate-900 dark:text-white block">Test Mode (Sandbox)</span>
               <span className="text-[10px] text-slate-400 block">
@@ -245,7 +245,7 @@ export default function AdOverviewTab({
           </div>
 
           {/* Toggle 3: VIP Ad-Free Shield */}
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/70 dark:border-white/10 flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200/70 dark:border-white/10 flex items-center justify-between">
             <div className="min-w-0 pr-2">
               <span className="text-xs font-extrabold text-slate-900 dark:text-white block flex items-center gap-1">
                 <Crown className="w-3 h-3 text-amber-400" /> VIP Bypass
@@ -268,7 +268,7 @@ export default function AdOverviewTab({
           </div>
 
           {/* Control 4: Mediation Mode */}
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/70 dark:border-white/10 flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200/70 dark:border-white/10 flex items-center justify-between">
             <div className="min-w-0 pr-2">
               <span className="text-xs font-extrabold text-slate-900 dark:text-white block">Mediation Mode</span>
               <span className="text-[10px] text-slate-400 block truncate">
@@ -278,7 +278,7 @@ export default function AdOverviewTab({
             <select
               value={settings?.mediationMode || 'CUSTOM_FIRST'}
               onChange={(e) => handleToggle('mediationMode', e.target.value)}
-              className="text-[11px] font-bold px-2 py-1 rounded-lg bg-white dark:bg-[#202620] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white cursor-pointer"
+              className="text-[11px] font-bold px-2 py-1 rounded-lg bg-white dark:bg-[#24242E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white cursor-pointer"
             >
               <option value="CUSTOM_FIRST">Custom 1st</option>
               <option value="ADMOB_FIRST">AdMob 1st</option>
@@ -295,7 +295,7 @@ export default function AdOverviewTab({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
         
         {/* Left: 6-Month Revenue Growth Trend Chart */}
-        <div className="lg:col-span-7 bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col justify-between transition-colors">
+        <div className="lg:col-span-7 bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col justify-between transition-colors">
           <div>
             <div className="flex items-center justify-between mb-3">
               <div>
@@ -304,7 +304,7 @@ export default function AdOverviewTab({
                 </h3>
                 <p className="text-[11px] text-slate-400 font-medium">6-month growth trajectory (Oct 2025 – Mar 2026)</p>
               </div>
-              <span className="text-[11px] font-black px-2.5 py-1 bg-amber-50 dark:bg-[#FEF08A]/15 text-amber-800 dark:text-[#FEF08A] border border-amber-200 dark:border-amber-700/40 rounded-lg">
+              <span className="text-[11px] font-black px-2.5 py-1 bg-amber-50 dark:bg-[#FEF08A]/15 text-amber-800 dark:text-[#FEF08A] border border-amber-200 dark:border-amber-400/30 rounded-lg">
                 March Peak: ₹4.85L
               </span>
             </div>
@@ -322,7 +322,7 @@ export default function AdOverviewTab({
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
                         return (
-                          <div className="bg-slate-950 dark:bg-[#1C221C] text-white p-3 rounded-xl shadow-xl text-xs space-y-1 border border-slate-800 dark:border-white/12">
+                          <div className="bg-slate-950 dark:bg-[#1E1E26] text-white p-3 rounded-xl shadow-xl text-xs space-y-1 border border-slate-800 dark:border-white/12">
                             <p className="font-bold text-amber-300 dark:text-[#FEF08A]">{data.month}</p>
                             <p className="font-black text-sm text-white">Revenue: ₹{(data.revenue / 100000).toFixed(2)} Lakh</p>
                             <p className="text-slate-300">Avg eCPM: ₹{data.ecpm.toFixed(2)}</p>
@@ -350,7 +350,7 @@ export default function AdOverviewTab({
         </div>
 
         {/* Right: Ad Format Breakdown */}
-        <div className="lg:col-span-5 bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col justify-between transition-colors">
+        <div className="lg:col-span-5 bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 dark:border-white/10 shadow-nodus flex flex-col justify-between transition-colors">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -364,7 +364,7 @@ export default function AdOverviewTab({
             {/* Ad Format Progress List */}
             <div className="space-y-4 mt-2">
               {adFormatBreakdown.map((item, idx) => (
-                <div key={idx} className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 transition-all">
+                <div key={idx} className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 transition-all">
                   <div className="flex items-center justify-between text-xs mb-1.5">
                     <span className="font-extrabold text-slate-950 dark:text-white flex items-center space-x-2">
                       <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
@@ -374,7 +374,7 @@ export default function AdOverviewTab({
                   </div>
                   
                   {/* Progress bar */}
-                  <div className="w-full bg-slate-200/80 dark:bg-[#121612] h-2.5 rounded-full overflow-hidden my-2">
+                  <div className="w-full bg-slate-200/80 dark:bg-[#121216] h-2.5 rounded-full overflow-hidden my-2">
                     <div className={`${item.progressBg} h-full rounded-full transition-all duration-500`} style={{ width: item.share }} />
                   </div>
 
@@ -387,7 +387,7 @@ export default function AdOverviewTab({
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/10 p-3 rounded-xl bg-amber-50/70 dark:bg-[#FEF08A]/10 border border-amber-200 dark:border-amber-700/30 flex items-center space-x-3">
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/10 p-3 rounded-xl bg-amber-50/70 dark:bg-[#FEF08A]/10 border border-amber-200 dark:border-amber-400/25 flex items-center space-x-3">
             <Sparkles className="w-5 h-5 text-amber-600 dark:text-[#FEF08A] shrink-0" />
             <p className="text-xs text-slate-700 dark:text-slate-300 font-medium leading-snug">
               <strong className="text-slate-950 dark:text-white">Optimization Insight:</strong> Rewarded video ads on episode 3 unlocks yield 3.4x higher eCPM than standard banners.

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  TicketPercent,
+  Gift,
   Plus,
   Copy,
   Trash2,
@@ -8,29 +8,26 @@ import {
   Search,
   X,
   Download,
-  Tag,
   Calendar,
   Check,
   CheckCircle2,
-  Percent,
+  Users,
   ToggleLeft,
   ToggleRight,
   Pencil,
   AlertCircle,
-  Sparkles
+  Clock,
+  Sparkles,
+  Layers,
+  Eye,
+  CheckCheck
 } from 'lucide-react';
-import promoService from '../../services/promoService';
+import voucherService from '../../services/voucherService';
 import { subscriptionService } from '../../services/subscriptionService';
 import PageLoader from '../../components/common/PageLoader';
 import ModalPortal from '../../components/common/ModalPortal';
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
-const formatDiscount = (type, value) => {
-  if (type === 'PERCENTAGE') return `${value}% Off`;
-  if (type === 'FLAT') return `Flat ₹${value} Off`;
-  return `${value}`;
-};
-
 const formatDate = (d) => {
   if (!d) return '—';
   return new Date(d).toLocaleDateString('en-IN', {
@@ -40,20 +37,30 @@ const formatDate = (d) => {
   });
 };
 
-const EMPTY_FORM = {
+const DEFAULT_PLAN_OPTIONS = [
+  { code: 'PLAN_1M', name: '1 Month Pass', durationDays: 30, priceLabel: 'Worth ₹99' },
+  { code: 'PLAN_6M', name: '6 Month Pass', durationDays: 180, priceLabel: 'Worth ₹499' },
+  { code: 'PLAN_12M', name: '12 Month Annual Pass', durationDays: 365, priceLabel: 'Worth ₹899' },
+  { code: 'CUSTOM', name: 'Custom VIP Pass', durationDays: 60, priceLabel: 'Custom Plan' }
+];
+
+const EMPTY_VOUCHER_FORM = {
   code: '',
-  discountType: 'PERCENTAGE',
-  discountValue: '',
-  applicablePlan: 'ALL',
-  maxUses: 500,
+  planCode: 'PLAN_1M',
+  planName: '1 Month Pass',
+  durationDays: 30,
+  voucherType: 'SINGLE_USE',
+  maxUses: 1,
   expiryDate: '',
-  description: ''
+  campaignName: '',
+  notes: ''
 };
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
-function StatusBadge({ status }) {
+function VoucherStatusBadge({ status }) {
   const isActive = status === 'ACTIVE';
   const isPaused = status === 'PAUSED';
+  const isExhausted = status === 'EXHAUSTED';
 
   return (
     <span
@@ -62,12 +69,20 @@ function StatusBadge({ status }) {
           ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40'
           : isPaused
           ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40'
+          : isExhausted
+          ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/40'
           : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
       }`}
     >
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          isActive ? 'bg-emerald-500' : isPaused ? 'bg-amber-500' : 'bg-slate-400'
+          isActive
+            ? 'bg-emerald-500'
+            : isPaused
+            ? 'bg-amber-500'
+            : isExhausted
+            ? 'bg-indigo-500'
+            : 'bg-slate-400'
         }`}
       />
       <span>{status || 'EXPIRED'}</span>
@@ -75,42 +90,61 @@ function StatusBadge({ status }) {
   );
 }
 
-// ─── Promo Modal ──────────────────────────────────────────────────────────────
-function PromoModal({ initial, plans = [], onClose, onSaved }) {
+// ─── Create/Edit Voucher Modal ────────────────────────────────────────────────
+function VoucherModal({ initial, planOptions = DEFAULT_PLAN_OPTIONS, onClose, onSaved }) {
   const isEdit = Boolean(initial?.id);
   const [form, setForm] = useState(
     isEdit
       ? {
           code: initial.code,
-          discountType: initial.discountType === 'FLAT' ? 'FLAT' : 'PERCENTAGE',
-          discountValue: initial.discountValue,
-          applicablePlan: initial.applicablePlan || 'ALL',
-          maxUses: initial.maxUses || 500,
+          planCode: initial.planCode || (planOptions[0]?.code || 'PLAN_1M'),
+          planName: initial.planName || (planOptions[0]?.name || '1 Month Pass'),
+          durationDays: initial.durationDays || (planOptions[0]?.durationDays || 30),
+          voucherType: initial.voucherType || 'SINGLE_USE',
+          maxUses: initial.maxUses || 1,
           expiryDate: initial.expiryDate
             ? new Date(initial.expiryDate).toISOString().split('T')[0]
             : '',
-          description: initial.description || ''
+          campaignName: initial.campaignName || '',
+          notes: initial.notes || ''
         }
-      : EMPTY_FORM
+      : {
+          ...EMPTY_VOUCHER_FORM,
+          planCode: planOptions[0]?.code || 'PLAN_1M',
+          planName: planOptions[0]?.name || '1 Month Pass',
+          durationDays: planOptions[0]?.durationDays || 30
+        }
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
+  const handlePlanSelect = (code) => {
+    const p = planOptions.find((item) => item.code === code);
+    if (p) {
+      setForm((prev) => ({
+        ...prev,
+        planCode: p.code,
+        planName: p.name,
+        durationDays: p.durationDays
+      }));
+    }
+  };
+
   const generateCode = () => {
-    const prefixes = ['SAVE', 'DISC', 'OTT', 'FEST', 'VIP'];
+    const prefixes = ['VIP', 'PASS', 'GIFT', 'FREE', 'PRO'];
     const p = prefixes[Math.floor(Math.random() * prefixes.length)];
-    const num = Math.floor(10 + Math.random() * 89);
-    const rnd = Math.random().toString(36).substring(2, 5).toUpperCase();
-    set('code', `${p}${num}${rnd}`);
+    const days = form.durationDays || 30;
+    const rnd = Math.random().toString(36).substring(2, 6).toUpperCase();
+    set('code', `${p}${days}-${rnd}`);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!form.code || !form.discountValue || !form.expiryDate) {
-      setError('Promo code, discount value, and expiry date are required.');
+    if (!form.code || !form.expiryDate) {
+      setError('Voucher code and expiry date are required.');
       return;
     }
     setSaving(true);
@@ -118,13 +152,14 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
       const payload = {
         ...form,
         code: form.code.toUpperCase().trim(),
-        discountValue: Number(form.discountValue),
-        maxUses: Number(form.maxUses) || 500
+        durationDays: Number(form.durationDays) || 30,
+        maxUses: form.voucherType === 'SINGLE_USE' ? 1 : Math.max(1, Number(form.maxUses) || 1)
       };
+
       if (isEdit) {
-        await promoService.updatePromo(initial.id, payload);
+        await voucherService.updateVoucher(initial.id, payload);
       } else {
-        await promoService.createPromo(payload);
+        await voucherService.createVoucher(payload);
       }
       onSaved();
     } catch (err) {
@@ -142,14 +177,14 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
           <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
-                <TicketPercent className="w-4 h-4 stroke-[2.2]" />
+                <Gift className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
                 <h3 className="text-sm sm:text-base font-bold text-slate-950 dark:text-white leading-tight">
-                  {isEdit ? 'Edit Promo Discount Code' : 'Create Promo Discount Code'}
+                  {isEdit ? 'Edit Plan Voucher' : 'Create Plan Voucher'}
                 </h3>
                 <p className="text-[10.5px] text-slate-400 dark:text-slate-500 font-medium">
-                  Configure discount rate, plan scope & redemption quota
+                  Grants 100% complimentary subscription plan upon redemption
                 </p>
               </div>
             </div>
@@ -170,11 +205,11 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Promo Code Input */}
+            {/* Voucher Code */}
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                  Promo Discount Code *
+                  Voucher Code *
                 </label>
                 {!isEdit && (
                   <button
@@ -191,83 +226,92 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
                 value={form.code}
                 onChange={(e) => set('code', e.target.value.toUpperCase().replace(/\s+/g, ''))}
                 disabled={isEdit}
-                placeholder="e.g. WELCOME20, FESTIVAL50"
+                placeholder="e.g. VIP1M-GIFT, ANNUALPASS26"
                 className="w-full px-2.5 py-1.5 font-mono text-xs font-bold uppercase rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-[#121216] focus:outline-none focus:border-[#FEF08A] transition-colors disabled:opacity-60"
                 required
               />
             </div>
 
-            {/* Discount Type & Value Grid */}
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Discount Type *
-                </label>
-                <select
-                  value={form.discountType}
-                  onChange={(e) => set('discountType', e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
-                >
-                  <option value="PERCENTAGE">Percentage (% Off)</option>
-                  <option value="FLAT">Flat Rate (₹ Off)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {form.discountType === 'PERCENTAGE' ? 'Discount % *' : 'Discount ₹ *'}
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max={form.discountType === 'PERCENTAGE' ? '100' : '9999'}
-                  value={form.discountValue}
-                  onChange={(e) => set('discountValue', e.target.value)}
-                  placeholder={form.discountType === 'PERCENTAGE' ? '20' : '50'}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
-                  required
-                />
-              </div>
+            {/* Plan To Grant */}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Subscription Plan Granted *
+              </label>
+              <select
+                value={form.planCode}
+                onChange={(e) => handlePlanSelect(e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+              >
+                {planOptions.map((opt) => (
+                  <option key={opt.code} value={opt.code}>
+                    {opt.name} ({opt.durationDays} Days • {opt.priceLabel})
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Applicable Plan & Usage Quota */}
+            {/* Custom Days if needed */}
+            {form.planCode === 'CUSTOM' && (
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Custom Plan Name
+                  </label>
+                  <input
+                    type="text"
+                    value={form.planName}
+                    onChange={(e) => set('planName', e.target.value)}
+                    placeholder="e.g. 3 Month VIP"
+                    className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Duration (Days)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={form.durationDays}
+                    onChange={(e) => set('durationDays', e.target.value)}
+                    className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Voucher Type & Max Uses */}
             <div className="grid grid-cols-2 gap-2.5">
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Applicable Plan
+                  Voucher Type
                 </label>
                 <select
-                  value={form.applicablePlan}
-                  onChange={(e) => set('applicablePlan', e.target.value)}
+                  value={form.voucherType}
+                  onChange={(e) => {
+                    const t = e.target.value;
+                    set('voucherType', t);
+                    if (t === 'SINGLE_USE') set('maxUses', 1);
+                  }}
                   className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
                 >
-                  <option value="ALL">All Subscription Plans</option>
-                  {plans.map((p) => (
-                    <option key={p.id || p.code} value={p.code}>
-                      {p.name} (₹{p.price})
-                    </option>
-                  ))}
-                  {plans.length === 0 && (
-                    <>
-                      <option value="PLAN_1M">1 Month Pass (₹99)</option>
-                      <option value="PLAN_6M">6 Month Pass (₹499)</option>
-                      <option value="PLAN_12M">12 Month Annual Pass (₹899)</option>
-                    </>
-                  )}
+                  <option value="SINGLE_USE">Single-Use (1 User Gift)</option>
+                  <option value="MULTI_USE">Multi-Use (Campaign Batch)</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Max Redemptions
+                  Redemption Limit
                 </label>
                 <input
                   type="number"
                   min="1"
-                  value={form.maxUses}
+                  value={form.voucherType === 'SINGLE_USE' ? 1 : form.maxUses}
                   onChange={(e) => set('maxUses', e.target.value)}
-                  placeholder="500"
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
+                  disabled={form.voucherType === 'SINGLE_USE'}
+                  placeholder="1"
+                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A] disabled:opacity-60"
                   required
                 />
               </div>
@@ -288,21 +332,35 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
               />
             </div>
 
-            {/* Description / Campaign Note */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Internal Note / Description
-              </label>
-              <input
-                type="text"
-                value={form.description}
-                onChange={(e) => set('description', e.target.value)}
-                placeholder="e.g. Festival launch 20% discount offer"
-                className="w-full px-2.5 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
-              />
+            {/* Campaign Name / Recipient Note */}
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Campaign / Partner
+                </label>
+                <input
+                  type="text"
+                  value={form.campaignName}
+                  onChange={(e) => set('campaignName', e.target.value)}
+                  placeholder="e.g. YouTube Collab"
+                  className="w-full px-2.5 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Recipient / Memo
+                </label>
+                <input
+                  type="text"
+                  value={form.notes}
+                  onChange={(e) => set('notes', e.target.value)}
+                  placeholder="e.g. Gifted to @reviewer"
+                  className="w-full px-2.5 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
+                />
+              </div>
             </div>
 
-            {/* Modal Actions */}
+            {/* Actions */}
             <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100 dark:border-white/10">
               <button
                 type="button"
@@ -316,7 +374,7 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
                 disabled={saving}
                 className="px-3.5 py-1.5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-60"
               >
-                {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Create Promo Code'}
+                {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Create Plan Voucher'}
               </button>
             </div>
           </form>
@@ -326,45 +384,49 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
   );
 }
 
-// ─── Bulk Generate Promo Modal ────────────────────────────────────────────────
-function BulkPromoModal({ plans = [], onClose, onSaved }) {
-  const [prefix, setPrefix] = useState('FEST');
+// ─── Bulk Generate Plan Vouchers Modal ────────────────────────────────────────
+function BulkVoucherModal({ planOptions = DEFAULT_PLAN_OPTIONS, onClose, onSaved }) {
+  const [prefix, setPrefix] = useState('VIP');
   const [count, setCount] = useState(5);
-  const [discountType, setDiscountType] = useState('PERCENTAGE');
-  const [discountValue, setDiscountValue] = useState(20);
-  const [applicablePlan, setApplicablePlan] = useState('ALL');
-  const [maxUses, setMaxUses] = useState(100);
+  const [planCode, setPlanCode] = useState(planOptions[0]?.code || 'PLAN_1M');
+  const [voucherType, setVoucherType] = useState('SINGLE_USE');
+  const [maxUses, setMaxUses] = useState(1);
   const [expiryDate, setExpiryDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() + 30);
     return d.toISOString().split('T')[0];
   });
-  const [description, setDescription] = useState('');
+  const [campaignName, setCampaignName] = useState('');
+  const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  const selectedPlan = planOptions.find((p) => p.code === planCode) || planOptions[0];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!prefix.trim() || !count || !discountValue || !expiryDate) {
-      setError('Prefix, count, discount value, and expiry date are required.');
+    if (!prefix.trim() || !count || !expiryDate) {
+      setError('Prefix, count, and expiry date are required.');
       return;
     }
     setSaving(true);
     try {
-      await promoService.bulkGeneratePromos({
+      await voucherService.bulkGenerateVouchers({
         prefix: prefix.toUpperCase().trim(),
         count: Number(count),
-        discountType,
-        discountValue: Number(discountValue),
-        applicablePlan,
-        maxUses: Number(maxUses) || 100,
+        planCode: selectedPlan?.code || 'PLAN_1M',
+        planName: selectedPlan?.name,
+        durationDays: selectedPlan?.durationDays || 30,
+        voucherType,
+        maxUses: voucherType === 'SINGLE_USE' ? 1 : Math.max(1, Number(maxUses) || 1),
         expiryDate,
-        description: description.trim() || `Batch generated under ${prefix.toUpperCase().trim()}`
+        campaignName: campaignName.trim(),
+        notes: notes.trim()
       });
       onSaved();
     } catch (err) {
-      setError(err?.response?.data?.message || err?.message || 'Failed to bulk generate promos.');
+      setError(err?.response?.data?.message || err?.message || 'Failed to bulk generate vouchers.');
     } finally {
       setSaving(false);
     }
@@ -381,10 +443,10 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
               </div>
               <div>
                 <h3 className="text-sm sm:text-base font-bold text-slate-950 dark:text-white leading-tight">
-                  Bulk Generate Promo Codes
+                  Bulk Generate Plan Vouchers
                 </h3>
                 <p className="text-[10.5px] text-slate-400 dark:text-slate-500 font-medium">
-                  Create a batch of unique discount codes instantly
+                  Create a batch of unique VIP access vouchers instantly
                 </p>
               </div>
             </div>
@@ -408,13 +470,13 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
             <div className="grid grid-cols-2 gap-2.5">
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Prefix (e.g. DIWALI) *
+                  Prefix (e.g. CAMPUS) *
                 </label>
                 <input
                   type="text"
                   value={prefix}
                   onChange={(e) => setPrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-                  placeholder="DIWALI"
+                  placeholder="CAMPUS"
                   className="w-full px-2.5 py-1.5 font-mono text-xs font-bold uppercase rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
                   required
                 />
@@ -435,73 +497,53 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Discount Type *
-                </label>
-                <select
-                  value={discountType}
-                  onChange={(e) => setDiscountType(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
-                >
-                  <option value="PERCENTAGE">Percentage (% Off)</option>
-                  <option value="FLAT">Flat Rate (₹ Off)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {discountType === 'PERCENTAGE' ? 'Discount % *' : 'Discount ₹ *'}
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max={discountType === 'PERCENTAGE' ? '100' : '9999'}
-                  value={discountValue}
-                  onChange={(e) => setDiscountValue(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
-                  required
-                />
-              </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Subscription Plan Granted *
+              </label>
+              <select
+                value={planCode}
+                onChange={(e) => setPlanCode(e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+              >
+                {planOptions.filter(p => p.code !== 'CUSTOM').map((opt) => (
+                  <option key={opt.code} value={opt.code}>
+                    {opt.name} ({opt.durationDays} Days • {opt.priceLabel})
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Applicable Plan
+                  Voucher Type
                 </label>
                 <select
-                  value={applicablePlan}
-                  onChange={(e) => setApplicablePlan(e.target.value)}
+                  value={voucherType}
+                  onChange={(e) => {
+                    const t = e.target.value;
+                    setVoucherType(t);
+                    if (t === 'SINGLE_USE') setMaxUses(1);
+                  }}
                   className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
                 >
-                  <option value="ALL">All Subscription Plans</option>
-                  {plans.map((p) => (
-                    <option key={p.id || p.code} value={p.code}>
-                      {p.name} (₹{p.price})
-                    </option>
-                  ))}
-                  {plans.length === 0 && (
-                    <>
-                      <option value="PLAN_1M">1 Month Pass (₹99)</option>
-                      <option value="PLAN_6M">6 Month Pass (₹499)</option>
-                      <option value="PLAN_12M">12 Month Annual Pass (₹899)</option>
-                    </>
-                  )}
+                  <option value="SINGLE_USE">Single-Use (1 User Gift)</option>
+                  <option value="MULTI_USE">Multi-Use (Shared Code)</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Max Uses Each
+                  Redemption Limit
                 </label>
                 <input
                   type="number"
                   min="1"
-                  value={maxUses}
+                  value={voucherType === 'SINGLE_USE' ? 1 : maxUses}
                   onChange={(e) => setMaxUses(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                  disabled={voucherType === 'SINGLE_USE'}
+                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] disabled:opacity-60"
                   required
                 />
               </div>
@@ -521,17 +563,31 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
               />
             </div>
 
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Campaign Description
-              </label>
-              <input
-                type="text"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="e.g. Diwali festive campaign batch"
-                className="w-full px-2.5 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
-              />
+            <div className="grid grid-cols-2 gap-2.5">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Campaign / Partner
+                </label>
+                <input
+                  type="text"
+                  value={campaignName}
+                  onChange={(e) => setCampaignName(e.target.value)}
+                  placeholder="e.g. College Fest 2026"
+                  className="w-full px-2.5 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Notes / Memo
+                </label>
+                <input
+                  type="text"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="e.g. Batch gift vouchers"
+                  className="w-full px-2.5 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
+                />
+              </div>
             </div>
 
             <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100 dark:border-white/10">
@@ -547,7 +603,7 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
                 disabled={saving}
                 className="px-3.5 py-1.5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-60"
               >
-                {saving ? 'Generating...' : `Generate ${count} Codes`}
+                {saving ? 'Generating...' : `Generate ${count} Vouchers`}
               </button>
             </div>
           </form>
@@ -557,17 +613,209 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
   );
 }
 
-// ─── Main Promo Codes Page ───────────────────────────────────────────────────
-export default function PromosPage() {
-  const [promos, setPromos] = useState([]);
+// ─── Redemption History Drawer/Modal ──────────────────────────────────────────
+function RedemptionsModal({ voucher, onClose }) {
+  const users = voucher?.usedBy || [];
+
+  return (
+    <ModalPortal isOpen={true}>
+      <div className="fixed inset-0 z-[99999] bg-slate-950/60 dark:bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+        <div className="bg-white dark:bg-[#24242E] rounded-xl max-w-lg w-full p-4 sm:p-5 shadow-2xl space-y-3.5 border border-slate-200 dark:border-white/15 font-urbanist animate-in fade-in zoom-in-95 duration-150">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <Users className="w-4 h-4 stroke-[2.2]" />
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-950 dark:text-white leading-tight">
+                  Voucher Claimants: {voucher.code}
+                </h3>
+                <p className="text-[10.5px] text-slate-400 dark:text-slate-500 font-medium">
+                  {voucher.planName} • {voucher.currentUses} of {voucher.maxUses} claimed
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-6 h-6 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {users.length === 0 ? (
+            <div className="py-8 text-center text-slate-400 dark:text-slate-500 text-xs">
+              No users have redeemed this voucher yet.
+            </div>
+          ) : (
+            <div className="max-h-60 overflow-y-auto space-y-1.5 pr-1 divide-y divide-slate-100 dark:divide-white/5">
+              {users.map((u, i) => (
+                <div key={i} className="pt-2 flex items-center justify-between text-xs">
+                  <div>
+                    <div className="font-bold text-slate-900 dark:text-white">
+                      {u.userName || 'Subscriber'}
+                    </div>
+                    <div className="text-[10.5px] text-slate-400 font-mono">
+                      {u.userPhone || 'Registered Account'}
+                    </div>
+                  </div>
+                  <div className="text-[10.5px] text-slate-500 dark:text-slate-400 text-right">
+                    <span>{formatDate(u.redeemedAt)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="pt-2 border-t border-slate-100 dark:border-white/10 flex justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.08] hover:bg-slate-200 dark:hover:bg-white/[0.12] text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </ModalPortal>
+  );
+}
+
+// ─── Test Redeem Voucher Modal ────────────────────────────────────────────────
+function QuickRedeemModal({ voucher, onClose, onRedeemed }) {
+  const [phone, setPhone] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [resMsg, setResMsg] = useState(null);
+
+  const handleRedeem = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setResMsg(null);
+    try {
+      const res = await voucherService.redeemVoucher({
+        code: voucher.code,
+        phoneNumber: phone.trim()
+      });
+      if (res?.success) {
+        setResMsg({ success: true, text: res.message || 'Plan activated successfully!' });
+        setTimeout(() => {
+          onRedeemed();
+        }, 1200);
+      } else {
+        setResMsg({ success: false, text: res?.message || 'Failed to redeem voucher' });
+      }
+    } catch (err) {
+      setResMsg({
+        success: false,
+        text: err?.response?.data?.message || err?.message || 'Error redeeming voucher'
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <ModalPortal isOpen={true}>
+      <div className="fixed inset-0 z-[99999] bg-slate-950/60 dark:bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+        <div className="bg-white dark:bg-[#24242E] rounded-xl max-w-sm w-full p-4 sm:p-5 shadow-2xl space-y-3.5 border border-slate-200 dark:border-white/15 font-urbanist animate-in fade-in zoom-in-95 duration-150">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <Sparkles className="w-4 h-4 stroke-[2.2]" />
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-950 dark:text-white leading-tight">
+                  Grant Plan via Voucher
+                </h3>
+                <p className="text-[10.5px] text-slate-400 dark:text-slate-500 font-medium">
+                  Code: <strong className="font-mono text-[#FEF08A]">{voucher.code}</strong> ({voucher.planName})
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-6 h-6 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {resMsg && (
+            <div
+              className={`p-2.5 rounded-lg text-xs font-semibold border ${
+                resMsg.success
+                  ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200'
+                  : 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border-rose-200'
+              }`}
+            >
+              {resMsg.text}
+            </div>
+          )}
+
+          <form onSubmit={handleRedeem} className="space-y-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Recipient Mobile Number or Email *
+              </label>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. 7600000097 or user@example.com"
+                className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
+                required
+              />
+              <p className="text-[10px] text-slate-400 mt-1">
+                Instantly activates {voucher.planName} ({voucher.durationDays} Days) on this account.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100 dark:border-white/10">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-3.5 py-1.5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+              >
+                {submitting ? 'Activating...' : 'Redeem & Grant Plan'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </ModalPortal>
+  );
+}
+
+// ─── Main Plan Vouchers Page ──────────────────────────────────────────────────
+export default function VouchersPage() {
+  const [vouchers, setVouchers] = useState([]);
   const [plans, setPlans] = useState([]);
-  const [stats, setStats] = useState({ activeCount: 0, expiredCount: 0, totalUses: 0 });
+  const [stats, setStats] = useState({
+    activeCount: 0,
+    pausedCount: 0,
+    expiredCount: 0,
+    exhaustedCount: 0,
+    totalGrantedPlans: 0,
+    totalVouchers: 0
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [sortBy, setSortBy] = useState('newest');
-  const [modal, setModal] = useState(null); // null | { mode: 'create' } | { mode: 'edit', promo: p } | { mode: 'bulk' }
+  const [modal, setModal] = useState(null); // null | { mode: 'create' } | { mode: 'edit', voucher: v } | { mode: 'bulk' }
+  const [viewHistoryVoucher, setViewHistoryVoucher] = useState(null);
+  const [quickRedeemVoucher, setQuickRedeemVoucher] = useState(null);
   const [copiedCode, setCopiedCode] = useState(null);
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [toastMessage, setToastMessage] = useState('');
@@ -583,23 +831,37 @@ export default function PromosPage() {
       const list = res?.plans || (Array.isArray(res) ? res : []);
       if (list.length > 0) setPlans(list);
     } catch (err) {
-      console.warn('Failed to load plans for promos:', err);
+      console.warn('Failed to load plans for vouchers:', err);
     }
   }, []);
+
+  const dynamicPlanOptions = useMemo(() => {
+    if (!plans || plans.length === 0) return DEFAULT_PLAN_OPTIONS;
+    const mapped = plans.map((p) => ({
+      code: p.code,
+      name: p.name,
+      durationDays: p.durationDays || (p.durationMonths ? p.durationMonths * 30 : 30),
+      priceLabel: `Worth ₹${p.price}`
+    }));
+    return [
+      ...mapped,
+      { code: 'CUSTOM', name: 'Custom VIP Pass', durationDays: 60, priceLabel: 'Custom Plan' }
+    ];
+  }, [plans]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await promoService.getAdminPromos({ limit: 100 });
+      const res = await voucherService.getAdminVouchers({ limit: 100 });
       if (res?.success) {
-        setPromos(res.data?.promos || []);
+        setVouchers(res.data?.vouchers || []);
         if (res.data?.stats) setStats(res.data.stats);
       } else {
-        setError(res?.message || 'Failed to fetch promo codes');
+        setError(res?.message || 'Failed to fetch plan vouchers');
       }
     } catch (err) {
-      setError(err?.response?.data?.message || err?.message || 'Network error fetching promos');
+      setError(err?.response?.data?.message || err?.message || 'Network error fetching vouchers');
     } finally {
       setLoading(false);
     }
@@ -620,75 +882,89 @@ export default function PromosPage() {
   const handleToggle = async (id) => {
     setActionLoadingId(id);
     try {
-      const res = await promoService.togglePromoStatus(id);
+      const res = await voucherService.toggleVoucherStatus(id);
       if (res?.success) {
-        setPromos((prev) =>
-          prev.map((p) => (p.id === id ? { ...p, status: res.data.status } : p))
+        setVouchers((prev) =>
+          prev.map((v) => (v.id === id ? { ...v, status: res.data.status } : v))
         );
-        showToast('Promo status updated successfully');
+        showToast('Voucher status updated successfully');
       }
     } catch (err) {
-      showToast(err?.response?.data?.message || 'Failed to toggle promo');
+      showToast(err?.response?.data?.message || 'Failed to toggle voucher');
     } finally {
       setActionLoadingId(null);
     }
   };
 
   const handleDelete = async (id, code) => {
-    if (!window.confirm(`Are you sure you want to delete promo code "${code}"?`)) return;
+    if (!window.confirm(`Are you sure you want to delete voucher "${code}"?`)) return;
     setActionLoadingId(id);
     try {
-      const res = await promoService.deletePromo(id);
+      const res = await voucherService.deleteVoucher(id);
       if (res?.success) {
-        setPromos((prev) => prev.filter((p) => p.id !== id));
-        showToast(`Promo "${code}" deleted successfully`);
+        setVouchers((prev) => prev.filter((v) => v.id !== id));
+        showToast(`Voucher "${code}" deleted successfully`);
       }
     } catch (err) {
-      showToast(err?.response?.data?.message || 'Failed to delete promo');
+      showToast(err?.response?.data?.message || 'Failed to delete voucher');
     } finally {
       setActionLoadingId(null);
     }
   };
 
   const handleExportCSV = () => {
-    if (!promos.length) return;
-    const headers = ['Code', 'Type', 'Value', 'Applicable Plan', 'Current Uses', 'Max Uses', 'Expiry Date', 'Status', 'Description'];
-    const rows = filteredPromos.map((p) => [
-      p.code,
-      p.discountType,
-      p.discountValue,
-      p.applicablePlan,
-      p.currentUses || 0,
-      p.maxUses,
-      formatDate(p.expiryDate),
-      p.status,
-      `"${(p.description || '').replace(/"/g, '""')}"`
+    if (!vouchers.length) return;
+    const headers = [
+      'Voucher Code',
+      'Plan Granted',
+      'Duration (Days)',
+      'Voucher Type',
+      'Redeemed Count',
+      'Max Uses',
+      'Expiry Date',
+      'Status',
+      'Campaign',
+      'Notes'
+    ];
+    const rows = filteredVouchers.map((v) => [
+      v.code,
+      v.planName,
+      v.durationDays,
+      v.voucherType,
+      v.currentUses || 0,
+      v.maxUses,
+      formatDate(v.expiryDate),
+      v.status,
+      `"${(v.campaignName || '').replace(/"/g, '""')}"`,
+      `"${(v.notes || '').replace(/"/g, '""')}"`
     ]);
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const csvContent =
+      'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `promo_codes_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `plan_vouchers_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   // Filter & Sort
-  const filteredPromos = useMemo(() => {
-    let result = [...promos];
+  const filteredVouchers = useMemo(() => {
+    let result = [...vouchers];
 
     if (statusFilter !== 'ALL') {
-      result = result.filter((p) => p.status === statusFilter);
+      result = result.filter((v) => v.status === statusFilter);
     }
 
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase();
       result = result.filter(
-        (p) =>
-          p.code.toLowerCase().includes(q) ||
-          (p.description && p.description.toLowerCase().includes(q)) ||
-          p.applicablePlan.toLowerCase().includes(q)
+        (v) =>
+          v.code.toLowerCase().includes(q) ||
+          v.planName.toLowerCase().includes(q) ||
+          (v.campaignName && v.campaignName.toLowerCase().includes(q)) ||
+          (v.notes && v.notes.toLowerCase().includes(q))
       );
     }
 
@@ -701,9 +977,7 @@ export default function PromosPage() {
     });
 
     return result;
-  }, [promos, statusFilter, searchTerm, sortBy]);
-
-  const pausedCount = promos.filter((p) => p.status === 'PAUSED').length;
+  }, [vouchers, statusFilter, searchTerm, sortBy]);
 
   return (
     <div className="space-y-3 sm:space-y-3.5 font-urbanist text-slate-900 dark:text-slate-100 pb-10">
@@ -717,19 +991,19 @@ export default function PromosPage() {
 
       {/* KPI Overview Cards - Consistent Theme Badge (#FEF08A), Compact */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-        {/* Metric 1: Active Codes */}
+        {/* Metric 1: Active Vouchers */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                <TicketPercent className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+                <Gift className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                  Active Promos
+                  Active Vouchers
                 </span>
                 <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                  Ready at Checkout
+                  Ready to Redeem
                 </span>
               </div>
             </div>
@@ -740,49 +1014,49 @@ export default function PromosPage() {
             </div>
           </div>
           <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium">
-            <span className="text-slate-500 dark:text-slate-400">Discount coupons</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold">Active</span>
+            <span className="text-slate-500 dark:text-slate-400">Available passes</span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">Live</span>
           </div>
         </div>
 
-        {/* Metric 2: Total Redemptions */}
+        {/* Metric 2: Full Plans Granted */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                <Tag className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+                <Sparkles className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                  Discounts Claimed
+                  Plans Granted
                 </span>
                 <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                  Total Redemptions
+                  VIP Activations
                 </span>
               </div>
             </div>
             <div className="mt-2">
               <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none">
-                {(stats.totalUses || 0).toLocaleString('en-IN')}
+                {(stats.totalGrantedPlans || 0).toLocaleString('en-IN')}
               </div>
             </div>
           </div>
           <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium">
-            <span className="text-slate-500 dark:text-slate-400">Claims recorded</span>
-            <span className="text-amber-600 dark:text-amber-400 font-bold">Applied</span>
+            <span className="text-slate-500 dark:text-slate-400">Total claimed passes</span>
+            <span className="text-amber-600 dark:text-amber-400 font-bold">Activated</span>
           </div>
         </div>
 
-        {/* Metric 3: Total Promos Created */}
+        {/* Metric 3: Total Vouchers */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                <Percent className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+                <Layers className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                  Total Promo Codes
+                  Total Vouchers
                 </span>
                 <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
                   All Records
@@ -791,17 +1065,19 @@ export default function PromosPage() {
             </div>
             <div className="mt-2">
               <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none">
-                {promos.length}
+                {vouchers.length}
               </div>
             </div>
           </div>
           <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium">
-            <span className="text-slate-500 dark:text-slate-400">{pausedCount} paused codes</span>
+            <span className="text-slate-500 dark:text-slate-400">
+              {stats.exhaustedCount || 0} fully redeemed
+            </span>
             <span className="text-slate-600 dark:text-slate-300 font-bold">Total</span>
           </div>
         </div>
 
-        {/* Metric 4: Promo Availability Rate */}
+        {/* Metric 4: Campaign Redemption Health */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
@@ -813,19 +1089,23 @@ export default function PromosPage() {
                   Active Ratio
                 </span>
                 <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                  Campaign Rate
+                  Voucher State
                 </span>
               </div>
             </div>
             <div className="mt-2">
               <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none">
-                {promos.length > 0 ? `${Math.round((stats.activeCount / promos.length) * 100)}%` : '100%'}
+                {vouchers.length > 0
+                  ? `${Math.round((stats.activeCount / vouchers.length) * 100)}%`
+                  : '100%'}
               </div>
             </div>
           </div>
           <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium">
-            <span className="text-slate-500 dark:text-slate-400">{stats.expiredCount} expired codes</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold">Healthy</span>
+            <span className="text-slate-500 dark:text-slate-400">
+              {stats.expiredCount || 0} expired
+            </span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">Optimal</span>
           </div>
         </div>
       </div>
@@ -835,14 +1115,14 @@ export default function PromosPage() {
         <div>
           <div className="flex items-center space-x-2">
             <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
-              Promo Codes & Discounts
+              Subscription Plan Vouchers
             </h1>
             <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-900 dark:text-amber-300 border border-amber-300/50">
-              {filteredPromos.length} Codes
+              {filteredVouchers.length} Vouchers
             </span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            Create and manage percentage and flat discount coupons applied during subscription checkout.
+            Create and distribute vouchers that grant complete subscription passes (100% complimentary VIP access).
           </p>
         </div>
 
@@ -852,7 +1132,7 @@ export default function PromosPage() {
             onClick={fetchData}
             disabled={loading}
             className="p-1.5 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-lg transition-all cursor-pointer active:scale-95 shrink-0"
-            title="Refresh promo codes"
+            title="Refresh vouchers"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-amber-500' : ''}`} />
           </button>
@@ -881,7 +1161,7 @@ export default function PromosPage() {
             className="py-1.5 px-3 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Create Promo Code</span>
+            <span>Create Plan Voucher</span>
           </button>
         </div>
       </div>
@@ -891,10 +1171,11 @@ export default function PromosPage() {
         {/* Status Filter Tabs */}
         <div className="flex items-center space-x-1 p-0.5 bg-slate-100 dark:bg-[#18181E] rounded-lg border border-slate-200/60 dark:border-white/10 shrink-0 overflow-x-auto">
           {[
-            { id: 'ALL', label: `All (${promos.length})` },
+            { id: 'ALL', label: `All (${vouchers.length})` },
             { id: 'ACTIVE', label: `Active (${stats.activeCount})` },
-            { id: 'PAUSED', label: `Paused (${pausedCount})` },
-            { id: 'EXPIRED', label: `Expired (${stats.expiredCount})` }
+            { id: 'PAUSED', label: `Paused (${stats.pausedCount || 0})` },
+            { id: 'EXHAUSTED', label: `Redeemed (${stats.exhaustedCount || 0})` },
+            { id: 'EXPIRED', label: `Expired (${stats.expiredCount || 0})` }
           ].map((item) => {
             const isSelected = statusFilter === item.id;
             return (
@@ -919,7 +1200,7 @@ export default function PromosPage() {
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search code, discount..."
+              placeholder="Search voucher, plan, campaign..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-[#121216] focus:outline-none focus:border-[#FEF08A] placeholder:text-slate-400 transition-colors"
@@ -955,20 +1236,20 @@ export default function PromosPage() {
         </div>
       )}
 
-      {/* Promo Codes Table */}
+      {/* Vouchers Table */}
       <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
         {loading ? (
-          <PageLoader size="sm" text="Loading promo codes..." minHeight="min-h-[200px]" />
-        ) : filteredPromos.length === 0 ? (
+          <PageLoader size="sm" text="Loading plan vouchers..." minHeight="min-h-[200px]" />
+        ) : filteredVouchers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 space-y-1.5 text-slate-400">
             <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400">
-              <TicketPercent className="w-4 h-4" />
+              <Gift className="w-4 h-4" />
             </div>
             <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
-              No promo codes found
+              No plan vouchers found
             </p>
             <p className="text-[11px] text-slate-400 dark:text-slate-500">
-              {searchTerm ? `No codes matching "${searchTerm}".` : 'No promo codes in this view.'}
+              {searchTerm ? `No vouchers matching "${searchTerm}".` : 'No vouchers in this view.'}
             </p>
           </div>
         ) : (
@@ -976,86 +1257,90 @@ export default function PromosPage() {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 dark:bg-[#18181E] border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold">
                 <tr>
-                  <th className="py-2.5 px-3">Promo Code</th>
-                  <th className="py-2.5 px-3">Discount Off</th>
-                  <th className="py-2.5 px-3">Applicable Plan</th>
-                  <th className="py-2.5 px-3">Redemption Quota</th>
+                  <th className="py-2.5 px-3">Voucher Code</th>
+                  <th className="py-2.5 px-3">Plan Granted</th>
+                  <th className="py-2.5 px-3">Campaign / Recipient</th>
+                  <th className="py-2.5 px-3">Type & Quota</th>
                   <th className="py-2.5 px-3">Expiry Date</th>
                   <th className="py-2.5 px-3">Status</th>
                   <th className="py-2.5 px-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium text-slate-900 dark:text-slate-100">
-                {filteredPromos.map((p) => {
-                  const pct = Math.round(((p.currentUses || 0) / (p.maxUses || 1)) * 100);
-                  const isBusy = actionLoadingId === p.id;
+                {filteredVouchers.map((v) => {
+                  const pct = Math.round(((v.currentUses || 0) / (v.maxUses || 1)) * 100);
+                  const isBusy = actionLoadingId === v.id;
+                  const hasClaims = (v.usedBy || []).length > 0 || (v.currentUses || 0) > 0;
 
                   return (
                     <tr
-                      key={p.id}
+                      key={v.id}
                       className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors"
                     >
                       {/* Code */}
                       <td className="py-2 px-3">
                         <div className="flex items-center space-x-1.5">
                           <span className="px-2 py-0.5 rounded-md bg-[#FEF08A]/35 dark:bg-[#FEF08A]/15 font-mono font-bold text-xs text-slate-950 dark:text-[#FEF08A] border border-amber-300/40 dark:border-amber-400/25">
-                            {p.code}
+                            {v.code}
                           </span>
                           <button
                             type="button"
-                            onClick={() => handleCopy(p.code)}
+                            onClick={() => handleCopy(v.code)}
                             className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded transition-colors cursor-pointer"
-                            title="Copy code"
+                            title="Copy voucher code"
                           >
-                            {copiedCode === p.code ? (
+                            {copiedCode === v.code ? (
                               <Check className="w-3.5 h-3.5 text-emerald-500 stroke-[3]" />
                             ) : (
                               <Copy className="w-3.5 h-3.5" />
                             )}
                           </button>
                         </div>
-                        {p.description && (
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500 block truncate max-w-[180px] mt-0.5">
-                            {p.description}
+                        {v.notes && (
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 block truncate max-w-[170px] mt-0.5">
+                            {v.notes}
                           </span>
                         )}
                       </td>
 
-                      {/* Benefit */}
-                      <td className="py-2 px-3 font-bold text-slate-950 dark:text-white">
-                        <span className="inline-flex items-center gap-1">
-                          <Tag className="w-3 h-3 text-amber-500" />
-                          <span>{formatDiscount(p.discountType, p.discountValue)}</span>
-                        </span>
-                      </td>
-
-                      {/* Plan Scope */}
+                      {/* Complete Plan Granted */}
                       <td className="py-2 px-3">
-                        <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.06] text-[10px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10">
-                          {p.applicablePlan === 'ALL'
-                            ? 'All Plans'
-                            : plans.find((pl) => pl.code === p.applicablePlan)?.name ||
-                              (p.applicablePlan === 'PLAN_1M'
-                                ? '1 Month Pass'
-                                : p.applicablePlan === 'PLAN_6M'
-                                ? '6 Month Pass'
-                                : p.applicablePlan === 'PLAN_12M'
-                                ? '12 Month Pass'
-                                : p.applicablePlan)}
-                        </span>
+                        <div className="flex items-center space-x-1.5">
+                          <span className="font-bold text-slate-950 dark:text-white text-xs">
+                            {v.planName}
+                          </span>
+                          <span className="px-1.5 py-0.2 rounded-md bg-[#FEF08A]/30 dark:bg-[#FEF08A]/10 text-[9.5px] font-bold text-amber-900 dark:text-amber-300 border border-amber-300/40 dark:border-amber-400/25">
+                            {v.durationDays}d Full VIP
+                          </span>
+                        </div>
                       </td>
 
-                      {/* Usage Progress */}
+                      {/* Campaign / Partner */}
+                      <td className="py-2 px-3">
+                        {v.campaignName ? (
+                          <span className="text-slate-700 dark:text-slate-300 text-[11px] font-semibold block truncate max-w-[160px]">
+                            {v.campaignName}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-500 text-[10px]">
+                            Direct Gift
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Type & Usage Quota */}
                       <td className="py-2 px-3">
                         <div className="space-y-1 w-24">
-                          <div className="flex justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
-                            <span>{(p.currentUses || 0).toLocaleString()}</span>
-                            <span className="text-slate-400">/ {p.maxUses.toLocaleString()}</span>
+                          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                            <span>{v.currentUses || 0} / {v.maxUses}</span>
+                            <span className="text-[9px] uppercase font-bold text-slate-400">
+                              {v.voucherType === 'SINGLE_USE' ? '1-use' : 'Multi'}
+                            </span>
                           </div>
                           <div className="w-full bg-slate-100 dark:bg-[#18181E] rounded-full h-1.5 overflow-hidden border border-slate-200/40 dark:border-white/5">
                             <div
                               className={`h-full rounded-full transition-all ${
-                                pct >= 100 ? 'bg-rose-500' : 'bg-[#FACC15]'
+                                pct >= 100 ? 'bg-indigo-500' : 'bg-[#FACC15]'
                               }`}
                               style={{ width: `${Math.min(pct, 100)}%` }}
                             />
@@ -1065,30 +1350,55 @@ export default function PromosPage() {
 
                       {/* Expiry */}
                       <td className="py-2 px-3 text-slate-600 dark:text-slate-300 text-[11px] font-medium whitespace-nowrap">
-                        {formatDate(p.expiryDate)}
+                        {formatDate(v.expiryDate)}
                       </td>
 
                       {/* Status */}
                       <td className="py-2 px-3">
-                        <StatusBadge status={p.status} />
+                        <VoucherStatusBadge status={v.status} />
                       </td>
 
                       {/* Actions */}
                       <td className="py-2 px-3 text-right">
                         <div className="flex items-center justify-end space-x-1">
-                          {p.status !== 'EXPIRED' && (
+                          {/* Quick Redeem Test */}
+                          {v.status === 'ACTIVE' && (
                             <button
                               type="button"
-                              onClick={() => handleToggle(p.id)}
+                              onClick={() => setQuickRedeemVoucher(v)}
+                              className="px-2 py-0.5 rounded bg-slate-100 dark:bg-white/[0.06] hover:bg-amber-100 dark:hover:bg-amber-950/40 text-[10px] font-bold text-slate-700 dark:text-slate-300 hover:text-amber-800 dark:hover:text-amber-300 transition-colors cursor-pointer"
+                              title="Grant this plan to a user"
+                            >
+                              Grant
+                            </button>
+                          )}
+
+                          {/* View Claimants */}
+                          {hasClaims && (
+                            <button
+                              type="button"
+                              onClick={() => setViewHistoryVoucher(v)}
+                              className="p-1 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-md transition-colors cursor-pointer"
+                              title="View claimants"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+
+                          {/* Toggle Active / Paused */}
+                          {v.status !== 'EXPIRED' && v.status !== 'EXHAUSTED' && (
+                            <button
+                              type="button"
+                              onClick={() => handleToggle(v.id)}
                               disabled={isBusy}
                               className={`p-1 rounded-md transition-colors cursor-pointer ${
-                                p.status === 'ACTIVE'
+                                v.status === 'ACTIVE'
                                   ? 'text-emerald-600 hover:text-emerald-700 dark:text-emerald-400'
                                   : 'text-amber-600 hover:text-amber-700 dark:text-amber-400'
                               }`}
-                              title={p.status === 'ACTIVE' ? 'Pause promo' : 'Activate promo'}
+                              title={v.status === 'ACTIVE' ? 'Pause voucher' : 'Activate voucher'}
                             >
-                              {p.status === 'ACTIVE' ? (
+                              {v.status === 'ACTIVE' ? (
                                 <ToggleRight className="w-4 h-4 stroke-[2.2]" />
                               ) : (
                                 <ToggleLeft className="w-4 h-4 stroke-[2.2]" />
@@ -1096,22 +1406,24 @@ export default function PromosPage() {
                             </button>
                           )}
 
+                          {/* Edit */}
                           <button
                             type="button"
-                            onClick={() => setModal({ mode: 'edit', promo: p })}
+                            onClick={() => setModal({ mode: 'edit', voucher: v })}
                             disabled={isBusy}
                             className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-md transition-colors cursor-pointer"
-                            title="Edit promo code"
+                            title="Edit voucher"
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
 
+                          {/* Delete */}
                           <button
                             type="button"
-                            onClick={() => handleDelete(p.id, p.code)}
+                            onClick={() => handleDelete(v.id, v.code)}
                             disabled={isBusy}
                             className="p-1 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-md transition-colors cursor-pointer"
-                            title="Delete promo"
+                            title="Delete voucher"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -1128,26 +1440,47 @@ export default function PromosPage() {
 
       {/* Modals */}
       {modal?.mode === 'bulk' && (
-        <BulkPromoModal
-          plans={plans}
+        <BulkVoucherModal
+          planOptions={dynamicPlanOptions}
           onClose={() => setModal(null)}
           onSaved={() => {
             setModal(null);
             fetchData();
-            showToast('Batch promo codes generated successfully.');
+            showToast('Batch plan vouchers generated successfully.');
           }}
         />
       )}
 
       {(modal?.mode === 'create' || modal?.mode === 'edit') && (
-        <PromoModal
-          initial={modal.mode === 'edit' ? modal.promo : null}
-          plans={plans}
+        <VoucherModal
+          initial={modal.mode === 'edit' ? modal.voucher : null}
+          planOptions={dynamicPlanOptions}
           onClose={() => setModal(null)}
           onSaved={() => {
             setModal(null);
             fetchData();
-            showToast('Promo code saved successfully.');
+            showToast('Plan voucher saved successfully.');
+          }}
+        />
+      )}
+
+      {/* Claimants History Modal */}
+      {viewHistoryVoucher && (
+        <RedemptionsModal
+          voucher={viewHistoryVoucher}
+          onClose={() => setViewHistoryVoucher(null)}
+        />
+      )}
+
+      {/* Quick Redeem Plan Modal */}
+      {quickRedeemVoucher && (
+        <QuickRedeemModal
+          voucher={quickRedeemVoucher}
+          onClose={() => setQuickRedeemVoucher(null)}
+          onRedeemed={() => {
+            setQuickRedeemVoucher(null);
+            fetchData();
+            showToast('Plan voucher redeemed and activated successfully!');
           }}
         />
       )}

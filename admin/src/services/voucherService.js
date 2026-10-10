@@ -1,5 +1,5 @@
-const API_BASE = '/api/v1/promos';
-const FALLBACK_BASE = 'http://127.0.0.1:5001/api/v1/promos';
+const API_BASE = '/api/v1/vouchers';
+const FALLBACK_BASE = 'http://127.0.0.1:5001/api/v1/vouchers';
 
 const getAuthHeaders = () => {
   try {
@@ -32,49 +32,55 @@ const request = async (endpoint, options = {}) => {
     try {
       return await tryFetch(FALLBACK_BASE);
     } catch {
-      return await tryFetch('http://localhost:5001/api/v1/promos');
+      return await tryFetch('http://localhost:5001/api/v1/vouchers');
     }
   }
 };
 
-const promoService = {
-  /** GET /promos/admin */
-  getAdminPromos: (params = {}) => {
+const voucherService = {
+  /** GET /vouchers/admin */
+  getAdminVouchers: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
     return request(`/admin${qs ? `?${qs}` : ''}`);
   },
 
-  /** GET /promos/admin/:id */
-  getPromoById: (id) =>
+  /** GET /vouchers/admin/:id */
+  getVoucherById: (id) =>
     request(`/admin/${id}`),
 
-  /** POST /promos/admin */
-  createPromo: (data) =>
+  /** POST /vouchers/admin */
+  createVoucher: (data) =>
     request('/admin', { method: 'POST', body: JSON.stringify(data) }),
 
-  /** POST /promos/admin/bulk-generate */
-  bulkGeneratePromos: (data) =>
+  /** POST /vouchers/admin/bulk-generate */
+  bulkGenerateVouchers: (data) =>
     request('/admin/bulk-generate', { method: 'POST', body: JSON.stringify(data) }),
 
-  /** PATCH /promos/admin/:id */
-  updatePromo: (id, data) =>
+  /** PATCH /vouchers/admin/:id */
+  updateVoucher: (id, data) =>
     request(`/admin/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 
-  /** DELETE /promos/admin/:id */
-  deletePromo: (id) =>
+  /** DELETE /vouchers/admin/:id */
+  deleteVoucher: (id) =>
     request(`/admin/${id}`, { method: 'DELETE' }),
 
-  /** PATCH /promos/admin/:id/toggle */
-  togglePromoStatus: (id) =>
+  /** PATCH /vouchers/admin/:id/toggle */
+  toggleVoucherStatus: (id) =>
     request(`/admin/${id}/toggle`, { method: 'PATCH' }),
 
-  /** POST /promos/validate */
-  validatePromo: (code, planId) =>
-    request('/validate', { method: 'POST', body: JSON.stringify({ code, planId }) }),
+  /** POST /vouchers/validate */
+  validateVoucher: (code) =>
+    request('/validate', { method: 'POST', body: JSON.stringify({ code }) }),
 
-  /** POST /promos/apply */
-  applyPromo: (code, planId) =>
-    request('/apply', { method: 'POST', body: JSON.stringify({ code, planId }) }),
+  /** POST /vouchers/redeem */
+  redeemVoucher: (payload) =>
+    request('/redeem', { method: 'POST', body: JSON.stringify(payload) }),
+
+  /** GET /vouchers/my-history */
+  getUserVoucherHistory: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/my-history${qs ? `?${qs}` : ''}`);
+  },
 };
 
-export default promoService;
+export default voucherService;

@@ -153,6 +153,11 @@ export const getNotifications = async (req, res, next) => {
       }
     }
 
+    const formattedList = notifications.map((n) => ({
+      ...n.toJSON(),
+      timeAgo: relativeLabel(n.createdAt)
+    }));
+
     const grouped = groupByDate(notifications);
 
     return ApiResponse.success(res, 'Notifications fetched successfully', {
@@ -165,6 +170,7 @@ export const getNotifications = async (req, res, next) => {
         hasNextPage: (page + 1) * limit < total,
         hasPrevPage: page > 0
       },
+      notifications: formattedList,
       groups: grouped
     });
   } catch (error) {
@@ -344,23 +350,26 @@ export const updateNotificationSettings = async (req, res, next) => {
 // ---------------------------------------------------------------------------
 export const registerDeviceToken = async (req, res, next) => {
   try {
-    const { fcmToken } = req.body;
+    const rawToken = req.body.fcmToken || req.body.token || req.body.deviceToken || req.body.fcm_token;
 
-    if (!fcmToken || typeof fcmToken !== 'string' || fcmToken.trim().length < 10) {
+    if (!rawToken || typeof rawToken !== 'string' || rawToken.trim().length < 10) {
       return next(
         new AppError('A valid fcmToken is required.', 400, ERROR_CODES.VALIDATION_ERROR)
       );
     }
 
-    const token = fcmToken.trim();
+    const token = rawToken.trim();
 
-    // Add token only if it is not already stored (prevent duplicates)
-    await User.findByIdAndUpdate(req.userId, {
-      $addToSet: { fcmTokens: token }
-    });
+    // If request is from an authenticated user, link token to account
+    if (req.userId) {
+      await User.findByIdAndUpdate(req.userId, {
+        $addToSet: { fcmTokens: token }
+      });
+    }
 
     return ApiResponse.success(res, 'Device registered for push notifications', {
-      fcmToken: token
+      fcmToken: token,
+      userId: req.userId || null
     });
   } catch (error) {
     return next(error);
@@ -372,37 +381,44 @@ export const registerDeviceToken = async (req, res, next) => {
 // ---------------------------------------------------------------------------
 export const unregisterDeviceToken = async (req, res, next) => {
   try {
-    const { fcmToken } = req.body;
+    const rawToken = req.body.fcmToken || req.body.token || req.body.deviceToken || req.body.fcm_token;
 
-    if (!fcmToken) {
+    if (!rawToken) {
       return next(
         new AppError('fcmToken is required to unregister device.', 400, ERROR_CODES.VALIDATION_ERROR)
       );
     }
 
-    await User.findByIdAndUpdate(req.userId, {
-      $pull: { fcmTokens: fcmToken.trim() }
-    });
+    const token = rawToken.trim();
 
-    return ApiResponse.success(res, 'Device unregistered from push notifications');
+    if (req.userId) {
+      await User.findByIdAndUpdate(req.userId, {
+        $pull: { fcmTokens: token }
+      });
+    }
+
+    return ApiResponse.success(res, 'Device unregistered from push notifications', {
+      fcmToken: token
+    });
   } catch (error) {
     return next(error);
   }
 };
 
 // ---------------------------------------------------------------------------
-// 11. POST /notifications/send  — Admin: create & send a notification to a user
-//     (You can call this from the admin panel or a background job)
+// 11. POST /notifications/send  — Admin / System: create & send a notification to a user
+//     (Defaults userId to req.userId if not provided)
 // ---------------------------------------------------------------------------
 export const sendNotification = async (req, res, next) => {
   try {
-    const { userId, type, title, body, imageUrl, deepLink, contentId } = req.body;
+    const { type = 'SYSTEM', title, body, imageUrl, deepLink, contentId } = req.body;
+    const userId = req.body.userId || req.userId;
 
     // Basic validation
-    if (!userId || !type || !title || !body) {
+    if (!userId || !title || !body) {
       return next(
         new AppError(
-          'userId, type, title, and body are required to send a notification.',
+          'userId, title, and body are required to send a notification.',
           400,
           ERROR_CODES.VALIDATION_ERROR
         )

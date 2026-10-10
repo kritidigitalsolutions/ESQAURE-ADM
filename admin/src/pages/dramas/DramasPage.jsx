@@ -230,347 +230,360 @@ export default function DramasPage({
   }, [dramas, searchTerm, selectedGenre, selectedStatus, sortBy]);
 
   return (
-    <div className="space-y-3.5 font-urbanist selection:bg-[#FEF08A] selection:text-black">
+    <div className="space-y-3 font-urbanist selection:bg-[#FEF08A] selection:text-black pb-8">
 
-      {/* 4 Core Content Library KPI Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Metric 1: Total Series */}
+      {/* 4 Clean Minimal KPI Metric Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         <KpiStatCard
           icon={Film}
           title="Total Series"
-          subtitle="Catalog Titles"
           value={stats.totalSeries}
-          animateNumber
-          footerLeft={`${stats.published} published series live`}
-          footerRight={`${stats.totalSeries - stats.published} in draft`}
-          footerRightColor="text-amber-600 dark:text-amber-400 font-bold"
+          footerLeft={`${stats.published} live published`}
+          footerRight={`${stats.totalSeries - stats.published} draft`}
+          footerRightColor="text-slate-400 font-medium"
         />
 
-        {/* Metric 2: Total Episodes */}
         <KpiStatCard
           icon={Tv}
           title="Total Episodes"
-          subtitle="Catalog Inventory"
           value={stats.totalEpisodes}
-          animateNumber
-          footerLeft={`Avg ${(stats.totalEpisodes / (stats.totalSeries || 1)).toFixed(0)} eps / series`}
-          footerRight="100% HD Ready"
+          footerLeft="Catalog Inventory"
+          footerRight="HD Ready"
           footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
         />
 
-        {/* Metric 3: Total Streams */}
         <KpiStatCard
           icon={Play}
           title="Total Streams"
-          subtitle="Across All Series"
           value={stats.totalStreams}
-          footerLeft={stats.topDrama?.title ? `Top: ${stats.topDrama.title}` : 'No Series'}
-          footerRight={`${stats.topDrama?.views || '0'} plays`}
-          footerRightColor="text-slate-700 dark:text-slate-300 font-bold"
+          footerLeft="Platform Plays"
+          footerRight="Dynamic"
         />
 
-        {/* Metric 4: Total Watch Time */}
         <KpiStatCard
           icon={Clock}
           title="Watch Time"
-          subtitle="Catalog Engagement"
           value={stats.watchTime}
-          footerLeft="Catalog Total"
-          footerRight="High Retention"
+          footerLeft="Catalog Retention"
+          footerRight="High"
           footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
         />
       </div>
 
-      {/* Clean, Smart & Perfectly Aligned Toolbar */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-nodus space-y-3">
-
-        {/* Row 1: Search & Status (Left) + View Switcher & Upload (Right) */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-
-          {/* Left: Search Bar & Status Tabs */}
-          <div className="flex items-center flex-wrap gap-2.5 flex-1 min-w-0">
-            {/* Search input */}
-            <div className="relative w-full sm:w-72 lg:w-80 shrink-0">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search series or genres..."
-                className="w-full pl-10 pr-9 py-2 text-xs sm:text-sm font-semibold bg-slate-100/80 dark:bg-[#161B16] focus:bg-white dark:focus:bg-[#1A201A] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-xl border border-slate-200 dark:border-white/10 focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/40 focus:outline-none transition-all"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-0.5 rounded-full cursor-pointer"
-                  title="Clear search"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Status Tabs: Segmented control with Active / Inactive / Trending */}
-            <div className="bg-slate-100 dark:bg-[#161B16] p-1 rounded-xl flex items-center border border-slate-200/70 dark:border-white/10 text-xs font-bold">
-              {[
-                { id: 'ALL', label: 'All' },
-                { id: 'ACTIVE', label: 'Active' },
-                { id: 'INACTIVE', label: 'Inactive' },
-                { id: 'TRENDING', label: 'Trending' }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setSelectedStatus(tab.id)}
-                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${selectedStatus === tab.id
-                      ? 'bg-[#FEF08A] text-slate-950 shadow-xs font-black'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-white/[0.05]'
-                    }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+      {/* Page Title & Main Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-0.5">
+        <div>
+          <div className="flex items-center space-x-2">
+            <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
+              Content Library
+            </h1>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-900 dark:text-amber-300 border border-amber-300/50">
+              {dramas.length} Series
+            </span>
           </div>
-
-          {/* Right: View Switcher (Grid/Table) + Upload Button */}
-          <div className="flex items-center space-x-2.5 shrink-0 self-end md:self-auto">
-            {/* View Switcher: Grid vs Table */}
-            <div className="bg-slate-100 dark:bg-[#161B16] p-1 rounded-xl flex items-center border border-slate-200/70 dark:border-white/10">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'grid'
-                    ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-white/[0.05]'
-                  }`}
-                title="Grid View"
-              >
-                <Grid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'table'
-                    ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-white/[0.05]'
-                  }`}
-                title="Table View"
-              >
-                <List className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Upload Button */}
-            <button
-              onClick={() => (onNavigate ? onNavigate('upload') : onOpenIngestModal?.())}
-              className="px-6 py-2 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-extrabold text-xs sm:text-sm rounded-xl flex items-center justify-center space-x-2 shadow-xs hover:shadow transition-all shrink-0 cursor-pointer"
-            >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-              <span>Upload</span>
-            </button>
-          </div>
+          <p className="text-[11.5px] text-slate-500 dark:text-slate-400 mt-0.5">
+            Manage short-drama episodes, catalog status, priority ranking, and monetization.
+          </p>
         </div>
 
-        {/* Row 2: Secondary Filters (Access, Genre, Sort) + Result Counter */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-white/5">
-          {/* Left: Filters and Sorters */}
-          <div className="flex items-center flex-wrap gap-2.5">
-            {/* Access & Plan Filter Dropdown */}
-            <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#161B16] px-3 py-1.5 rounded-xl border border-slate-200/70 dark:border-white/10 text-xs">
-              <Lock className="w-3.5 h-3.5 text-slate-400" />
-              <select
-                value={selectedAccess}
-                onChange={(e) => setSelectedAccess(e.target.value)}
-                className="bg-transparent text-slate-900 dark:text-white font-bold focus:outline-none cursor-pointer text-xs"
-              >
-                <option value="ALL" className="dark:bg-[#1C221C]">All Access</option>
-                <option value="PAID" className="dark:bg-[#1C221C]">Paid</option>
-                <option value="FREE" className="dark:bg-[#1C221C]">Free</option>
-              </select>
-            </div>
+        <div className="flex items-center space-x-2 shrink-0">
+          <button
+            type="button"
+            onClick={loadDramas}
+            disabled={isLoading}
+            className="p-1.5 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-xl transition-all cursor-pointer active:scale-95 shrink-0"
+            title="Refresh Catalog"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-amber-500' : ''}`} />
+          </button>
 
-            {/* Genre Dropdown */}
-            <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#161B16] px-3 py-1.5 rounded-xl border border-slate-200/70 dark:border-white/10 text-xs">
-              <span className="text-slate-400 font-medium">Genre:</span>
-              <select
-                value={selectedGenre}
-                onChange={(e) => setSelectedGenre(e.target.value)}
-                className="bg-transparent text-slate-900 dark:text-white font-bold focus:outline-none cursor-pointer text-xs"
-              >
-                {genres.map(g => (
-                  <option key={g} value={g} className="dark:bg-[#1C221C]">
-                    {g === 'ALL' ? 'All Genres' : g}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <button
+            type="button"
+            onClick={() => (onNavigate ? onNavigate('upload') : onOpenIngestModal?.())}
+            className="py-1.5 px-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Upload Series</span>
+          </button>
+        </div>
+      </div>
 
-            {/* Sort Dropdown */}
-            <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#161B16] px-3 py-1.5 rounded-xl border border-slate-200/70 dark:border-white/10 text-xs">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-transparent text-slate-900 dark:text-white font-bold focus:outline-none cursor-pointer text-xs"
-              >
-                <option value="priority" className="dark:bg-[#1C221C]">Sort: Priority (Catalog Rank)</option>
-                <option value="views" className="dark:bg-[#1C221C]">Sort: Most Views</option>
-                <option value="episodes" className="dark:bg-[#1C221C]">Sort: Most Episodes</option>
-                <option value="newest" className="dark:bg-[#1C221C]">Sort: Newest</option>
-              </select>
-            </div>
-
-            {/* Reset Filters button if any filter is active */}
-            {(searchTerm || selectedStatus !== 'ALL' || selectedGenre !== 'ALL' || selectedAccess !== 'ALL') && (
+      {/* Unified Filter, Search & View Toolbar */}
+      <div className="bg-white dark:bg-[#121216] rounded-xl p-2 sm:px-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+        
+        {/* Left: Status Filter Tabs & Sub-Filters */}
+        <div className="flex items-center flex-wrap gap-2">
+          {/* Status Segmented Control */}
+          <div className="flex items-center space-x-1 p-0.5 bg-slate-100 dark:bg-[#18181E] rounded-lg border border-slate-200/60 dark:border-white/10 shrink-0">
+            {[
+              { id: 'ALL', label: `All (${dramas.length})` },
+              { id: 'ACTIVE', label: `Active (${stats.published})` },
+              { id: 'INACTIVE', label: `Draft (${Math.max(0, dramas.length - stats.published)})` },
+              { id: 'TRENDING', label: `Trending (${dramas.filter(d => d.isTrending).length})` }
+            ].map(tab => (
               <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedStatus('ALL');
-                  setSelectedGenre('ALL');
-                  setSelectedAccess('ALL');
-                  setSortBy('priority');
-                }}
-                className="text-xs text-amber-600 dark:text-amber-400 hover:underline font-bold px-2 py-1 cursor-pointer"
+                key={tab.id}
+                onClick={() => setSelectedStatus(tab.id)}
+                className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                  selectedStatus === tab.id
+                    ? 'bg-white dark:bg-[#24242E] text-slate-950 dark:text-white shadow-2xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
               >
-                Reset filters
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Access Filter (Paid / Free) */}
+          <div className="flex items-center space-x-1.5 bg-slate-50 dark:bg-[#18181E] px-2 py-1 rounded-lg border border-slate-200 dark:border-white/10 text-xs">
+            <Lock className="w-3 h-3 text-slate-400" />
+            <select
+              value={selectedAccess}
+              onChange={(e) => setSelectedAccess(e.target.value)}
+              className="bg-transparent text-slate-900 dark:text-white font-bold focus:outline-none cursor-pointer text-xs"
+            >
+              <option value="ALL" className="dark:bg-[#1E1E26]">All Access</option>
+              <option value="PAID" className="dark:bg-[#1E1E26]">Paid</option>
+              <option value="FREE" className="dark:bg-[#1E1E26]">Free</option>
+            </select>
+          </div>
+
+          {/* Genre Dropdown */}
+          <div className="flex items-center space-x-1.5 bg-slate-50 dark:bg-[#18181E] px-2 py-1 rounded-lg border border-slate-200 dark:border-white/10 text-xs">
+            <span className="text-slate-400 font-medium text-[11px]">Genre:</span>
+            <select
+              value={selectedGenre}
+              onChange={(e) => setSelectedGenre(e.target.value)}
+              className="bg-transparent text-slate-900 dark:text-white font-bold focus:outline-none cursor-pointer text-xs"
+            >
+              {genres.map(g => (
+                <option key={g} value={g} className="dark:bg-[#1E1E26]">
+                  {g === 'ALL' ? 'All Genres' : g}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {(searchTerm || selectedStatus !== 'ALL' || selectedGenre !== 'ALL' || selectedAccess !== 'ALL') && (
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedStatus('ALL');
+                setSelectedGenre('ALL');
+                setSelectedAccess('ALL');
+                setSortBy('priority');
+              }}
+              className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-bold px-1.5 py-0.5 cursor-pointer"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+
+        {/* Right: Search + Sort + View Switcher */}
+        <div className="flex items-center flex-wrap sm:flex-nowrap gap-2 w-full md:w-auto">
+          {/* Search Box */}
+          <div className="relative flex-1 sm:w-48">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search series or genres..."
+              className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-colors"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
+              >
+                <X className="w-3 h-3" />
               </button>
             )}
           </div>
 
-          {/* Right: Counter */}
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">
-            Showing <span className="font-extrabold text-slate-900 dark:text-white">{filteredDramas.length}</span> of {dramas.length} series
+          {/* Sort Dropdown */}
+          <div className="flex items-center space-x-1.5 shrink-0">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+            >
+              <option value="priority">Priority Rank</option>
+              <option value="views">Most Views</option>
+              <option value="episodes">Most Episodes</option>
+              <option value="newest">Newest</option>
+            </select>
           </div>
+
+          {/* View Mode Switcher: Grid vs Table */}
+          <div className="bg-slate-100 dark:bg-[#18181E] p-0.5 rounded-lg flex items-center border border-slate-200/60 dark:border-white/10 shrink-0">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                viewMode === 'grid'
+                  ? 'bg-white dark:bg-[#24242E] text-slate-950 dark:text-white shadow-2xs'
+                  : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+              title="Grid View"
+            >
+              <Grid className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                viewMode === 'table'
+                  ? 'bg-white dark:bg-[#24242E] text-slate-950 dark:text-white shadow-2xs'
+                  : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+              title="Table View"
+            >
+              <List className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <span className="text-[11px] text-slate-400 font-medium shrink-0 hidden lg:inline">
+            <strong className="text-slate-900 dark:text-white font-bold">{filteredDramas.length}</strong> series
+          </span>
         </div>
 
       </div>
 
-      {/* Main Content: Loading State, Empty State, Grid, or Table */}
+      {/* Main Content: Loading, Empty, Grid, or Table */}
       {isLoading ? (
-        <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
-          <PageLoader text="Loading..." minHeight="min-h-[380px]" />
+        <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
+          <PageLoader text="Loading series..." minHeight="min-h-[280px]" />
         </div>
       ) : filteredDramas.length === 0 ? (
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-12 text-center border border-slate-200/80 dark:border-white/10 shadow-nodus">
-          <div className="w-12 h-12 rounded-xl bg-amber-400/15 dark:bg-amber-400/10 flex items-center justify-center text-amber-600 dark:text-amber-400 mx-auto mb-3">
-            <Search className="w-6 h-6 stroke-[2.2]" />
+        <div className="bg-white dark:bg-[#121216] rounded-xl p-10 text-center border border-slate-200/80 dark:border-white/10 shadow-xs">
+          <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 text-slate-950 dark:text-amber-300 flex items-center justify-center mx-auto mb-2.5">
+            <Film className="w-5 h-5 stroke-[2]" />
           </div>
-          <h3 className="text-base font-extrabold text-slate-950 dark:text-white">
+          <h3 className="text-xs sm:text-sm font-bold text-slate-950 dark:text-white">
             No series found
           </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-            Try adjusting your search terms or genre filter.
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto mb-3">
+            Try adjusting your search terms, status, or genre filter.
           </p>
           <button
             onClick={() => {
               setSearchTerm('');
               setSelectedGenre('ALL');
               setSelectedStatus('ALL');
+              setSelectedAccess('ALL');
             }}
-            className="mt-4 px-4 py-2 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-xl transition-all"
+            className="px-3.5 py-1.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-xl transition-all cursor-pointer"
           >
             Reset Filters
           </button>
         </div>
       ) : viewMode === 'grid' ? (
 
-        /* ========================================================
-           GRID VIEW: ULTRA CLEAN & MINIMAL CARDS
-           ======================================================== */
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        /* GRID VIEW: Clean, Compact Widescreen Poster Tiles */
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3">
           {filteredDramas.map((drama) => (
             <div
               key={drama.id}
-              className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus card-subtle-hover overflow-hidden flex flex-col group transition-all duration-300"
+              className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs overflow-hidden flex flex-col group transition-all hover:border-slate-300 dark:hover:border-white/20"
             >
-              {/* Clean Poster: Just 1 subtle status badge, uncluttered */}
+              {/* Poster Image */}
               <div
-                className="relative aspect-[3/4] sm:aspect-[9/13] bg-slate-950 overflow-hidden cursor-pointer"
+                className="relative aspect-[3/4] bg-slate-950 overflow-hidden cursor-pointer"
                 onClick={() => setManagingDrama(drama)}
               >
                 <img
                   src={drama.poster}
                   alt={drama.title}
-                  className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300 ease-out"
+                  className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300 ease-out"
                 />
 
-                {/* Priority Badge on Top Left */}
-                <div className="absolute top-2.5 left-2.5 z-10 flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
-                  <span
-                    className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs bg-black/75 backdrop-blur-xs text-white border border-white/20"
-                  >
-                    Priority {drama.priority}
+                {/* Priority Badge Top-Left */}
+                <div className="absolute top-2 left-2 z-10 flex items-center space-x-1" onClick={(e) => e.stopPropagation()}>
+                  <span className="inline-flex items-center text-[9.5px] font-bold px-1.5 py-0.5 rounded-md shadow-2xs bg-black/75 backdrop-blur-xs text-white border border-white/20">
+                    #{drama.priority}
                   </span>
-                  <div className="flex items-center bg-black/75 backdrop-blur-xs rounded-full p-0.5 border border-white/20">
+                  <div className="flex items-center bg-black/75 backdrop-blur-xs rounded-md p-0.5 border border-white/20">
                     <button
                       onClick={() => handleMovePriority(drama.id, 'up')}
                       disabled={drama.priority <= 1}
                       title="Move Priority Up"
-                      className="p-0.5 text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                      className="p-0.5 text-white/70 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
                     >
-                      <ChevronUp className="w-3 h-3" />
+                      <ChevronUp className="w-2.5 h-2.5" />
                     </button>
                     <button
                       onClick={() => handleMovePriority(drama.id, 'down')}
                       disabled={drama.priority >= dramas.length}
                       title="Move Priority Down"
-                      className="p-0.5 text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                      className="p-0.5 text-white/70 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
                     >
-                      <ChevronDown className="w-3 h-3" />
+                      <ChevronDown className="w-2.5 h-2.5" />
                     </button>
                   </div>
                 </div>
 
-                {/* Badge on Top Right: Status (Active / Inactive) */}
-                <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                  <Badge
-                    variant={drama.isActive ? 'active' : 'inactive'}
-                    size="xs"
+                {/* Status Badge Top-Right */}
+                <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
                     onClick={() => handleToggleActive(drama.id)}
-                    title="Click to toggle Active/Inactive"
+                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold backdrop-blur-xs shadow-2xs transition-all cursor-pointer ${
+                      drama.isActive
+                        ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'
+                        : 'bg-black/75 text-slate-300 border border-white/20'
+                    }`}
                   >
-                    {drama.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        drama.isActive ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'
+                      }`}
+                    />
+                    {drama.isActive ? 'Live' : 'Draft'}
+                  </button>
                 </div>
+
+                {/* Paid Tag Bottom-Left */}
+                {drama.isPaid && (
+                  <div className="absolute bottom-2 left-2 z-10">
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-[#FEF08A] text-slate-950 shadow-2xs">
+                      PAID
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Clean Content Below Poster */}
-              <div className="p-4 flex-1 flex flex-col justify-between space-y-3 bg-white dark:bg-[#121612]">
+              {/* Card Meta Content */}
+              <div className="p-2.5 flex-1 flex flex-col justify-between space-y-2 bg-white dark:bg-[#121216]">
                 <div>
-                  <div className="flex items-center justify-between gap-1.5">
-                    <h4
-                      onClick={() => setManagingDrama(drama)}
-                      className="font-bold text-slate-900 dark:text-white text-sm truncate group-hover:text-amber-500 transition-colors cursor-pointer"
-                    >
-                      {drama.title}
-                    </h4>
-                    {drama.isTrending && (
-                      <span className="text-[11px] font-bold text-amber-500 shrink-0 flex items-center gap-0.5">
-                        <Flame className="w-3 h-3 fill-current" /> Trending
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-[11px] text-slate-400 font-medium mt-1 truncate">
+                  <h4
+                    onClick={() => setManagingDrama(drama)}
+                    className="font-bold text-slate-900 dark:text-white text-xs truncate group-hover:text-amber-500 transition-colors cursor-pointer"
+                  >
+                    {drama.title}
+                  </h4>
+                  <p className="text-[10.5px] text-slate-400 font-normal mt-0.5 truncate">
                     {drama.genres.join(', ')}
                   </p>
                 </div>
 
-                {/* Footer: Clean stats and Action */}
-                <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-xs">
+                {/* Card Footer */}
+                <div className="pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-xs">
                   <div>
-                    <p className="font-extrabold text-slate-900 dark:text-white">
-                      {drama.totalEpisodes} Episodes
-                    </p>
-                    <p className="text-[11px] text-slate-400 font-medium">
+                    <span className="font-bold text-slate-900 dark:text-white text-[11px] block">
+                      {drama.totalEpisodes} Eps
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-normal block">
                       {drama.views} views
-                    </p>
+                    </span>
                   </div>
 
                   <button
                     onClick={() => setManagingDrama(drama)}
-                    className="inline-flex items-center text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-[#1A201A] hover:bg-[#FEF08A] hover:text-slate-950 dark:hover:bg-[#FEF08A] dark:hover:text-slate-950 border border-slate-200/60 dark:border-white/10 px-3 py-1.5 rounded-xl transition-all gap-1 group/btn cursor-pointer"
+                    className="inline-flex items-center text-[11px] font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-[#1E1E26] hover:bg-[#FACC15] hover:text-slate-950 dark:hover:bg-[#FACC15] dark:hover:text-slate-950 border border-slate-200/60 dark:border-white/10 px-2 py-1 rounded-lg transition-all gap-0.5 cursor-pointer"
                   >
                     <span>Manage</span>
-                    <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                    <ChevronRight className="w-3 h-3" />
                   </button>
                 </div>
               </div>
@@ -581,124 +594,138 @@ export default function DramasPage({
 
       ) : (
 
-        /* ========================================================
-           TABLE VIEW: CLEAN & MINIMAL STUDIO CATALOG TABLE
-           ======================================================== */
-        <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
+        /* TABLE VIEW: Compact, Clean Studio Catalog Table */
+        <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-slate-50/80 dark:bg-[#161B16] border-b border-slate-200/80 dark:border-white/10 text-slate-400 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px]">
+              <thead className="bg-slate-50/70 dark:bg-[#18181E] border-b border-slate-200/80 dark:border-white/10 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
-                  <th className="py-3 px-4 sm:px-6 w-20 text-center">Priority</th>
-                  <th className="py-3 px-4 min-w-[220px]">Series Title</th>
-                  <th className="py-3 px-4 min-w-[160px]">Genres</th>
-                  <th className="py-3 px-4 w-24">Episodes</th>
-                  <th className="py-3 px-4 w-24">Views</th>
-                  <th className="py-3 px-4 w-28">Release Date</th>
-                  <th className="py-3 px-4 w-28 text-center">Status</th>
-                  <th className="py-3 px-4 sm:px-6 w-28 text-right">Action</th>
+                  <th className="py-2.5 px-3 w-16 text-center">Rank</th>
+                  <th className="py-2.5 px-3 min-w-[200px]">Series Title</th>
+                  <th className="py-2.5 px-3 min-w-[140px]">Genres</th>
+                  <th className="py-2.5 px-3 w-20">Episodes</th>
+                  <th className="py-2.5 px-3 w-20">Views</th>
+                  <th className="py-2.5 px-3 w-20">Access</th>
+                  <th className="py-2.5 px-3 w-24 text-center">Status</th>
+                  <th className="py-2.5 px-3 w-20 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
                 {filteredDramas.map((drama) => (
                   <tr
                     key={drama.id}
-                    className="hover:bg-slate-50/70 dark:hover:bg-white/[0.04] transition-colors duration-150"
+                    className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
                   >
-                    {/* Priority Rank & Up/Down Shifters */}
-                    <td className="py-2.5 px-4 sm:px-6 align-middle text-center">
-                      <div className="inline-flex items-center space-x-1.5">
-                        <span
-                          className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 bg-slate-100 dark:bg-[#1A201A] text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/10"
-                          title={`Display Priority ${drama.priority}`}
-                        >
+                    {/* Priority Rank */}
+                    <td className="py-2 px-3 align-middle text-center">
+                      <div className="inline-flex items-center space-x-1">
+                        <span className="w-5.5 h-5.5 rounded-md flex items-center justify-center font-bold text-[11px] bg-slate-100 dark:bg-[#1E1E26] text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/10">
                           {drama.priority}
                         </span>
-
                         <div className="flex flex-col space-y-0.5">
                           <button
                             onClick={() => handleMovePriority(drama.id, 'up')}
                             disabled={drama.priority <= 1}
-                            title="Move Priority Up"
-                            className="p-0.5 text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-white/[0.08] rounded transition-colors cursor-pointer"
+                            className="p-0.5 text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-20 cursor-pointer"
                           >
-                            <ChevronUp className="w-3 h-3" />
+                            <ChevronUp className="w-2.5 h-2.5" />
                           </button>
                           <button
                             onClick={() => handleMovePriority(drama.id, 'down')}
                             disabled={drama.priority >= dramas.length}
-                            title="Move Priority Down"
-                            className="p-0.5 text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-20 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-white/[0.08] rounded transition-colors cursor-pointer"
+                            className="p-0.5 text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-20 cursor-pointer"
                           >
-                            <ChevronDown className="w-3 h-3" />
+                            <ChevronDown className="w-2.5 h-2.5" />
                           </button>
                         </div>
                       </div>
                     </td>
 
-                    {/* Series Title & Compact Thumbnail (reduced height) */}
-                    <td className="py-2.5 px-4 align-middle">
-                      <div className="flex items-center space-x-3">
-                        <div className="relative shrink-0">
-                          <img
-                            src={drama.poster}
-                            alt={drama.title}
-                            onClick={() => setManagingDrama(drama)}
-                            className="w-9 h-10 rounded-lg object-cover bg-slate-900 border border-slate-200/80 dark:border-white/10 cursor-pointer hover:opacity-90 transition-opacity shadow-2xs"
-                          />
-                        </div>
+                    {/* Series Title & Compact Thumbnail */}
+                    <td className="py-2 px-3 align-middle">
+                      <div className="flex items-center space-x-2.5">
+                        <img
+                          src={drama.poster}
+                          alt={drama.title}
+                          onClick={() => setManagingDrama(drama)}
+                          className="w-8 h-10 rounded-md object-cover bg-slate-900 border border-slate-200/80 dark:border-white/10 cursor-pointer hover:opacity-90 transition-opacity shadow-2xs shrink-0"
+                        />
                         <div className="min-w-0">
                           <button
                             type="button"
                             onClick={() => setManagingDrama(drama)}
-                            className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm hover:text-amber-500 dark:hover:text-amber-400 transition-colors cursor-pointer truncate text-left block"
+                            className="font-bold text-slate-900 dark:text-white text-xs sm:text-[13px] hover:text-amber-500 dark:hover:text-amber-400 transition-colors cursor-pointer truncate text-left block"
                           >
                             {drama.title}
                           </button>
+                          {drama.isTrending && (
+                            <span className="text-[10px] font-bold text-amber-500 inline-flex items-center gap-0.5 mt-0.5">
+                              <Flame className="w-2.5 h-2.5 fill-current" /> Trending
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
 
                     {/* Genres */}
-                    <td className="py-2.5 px-4 align-middle text-xs text-slate-600 dark:text-slate-400 font-medium">
+                    <td className="py-2 px-3 align-middle text-[11px] text-slate-500 dark:text-slate-400 font-normal">
                       {drama.genres.join(', ')}
                     </td>
 
-                    {/* Episodes (Only number, non-bold) */}
-                    <td className="py-2.5 px-4 align-middle text-xs font-normal text-slate-700 dark:text-slate-300 sm:text-sm">
+                    {/* Episodes */}
+                    <td className="py-2 px-3 align-middle text-xs font-bold text-slate-900 dark:text-white">
                       {drama.totalEpisodes}
                     </td>
 
-                    {/* Views (Non-bold) */}
-                    <td className="py-2.5 px-4 align-middle text-xs font-normal text-slate-700 dark:text-slate-300 sm:text-sm">
+                    {/* Views */}
+                    <td className="py-2 px-3 align-middle text-xs font-medium text-slate-600 dark:text-slate-300">
                       {drama.views}
                     </td>
 
-                    {/* Separate Release / Joining Date */}
-                    <td className="py-2.5 px-4 align-middle text-xs font-normal text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                      {drama.releaseDate || '—'}
-                    </td>
-
-                    {/* Status Badge: ACTIVE OR INACTIVE */}
-                    <td className="py-2 px-4 align-middle text-center">
-                      <Badge
-                        variant={drama.isActive ? 'active' : 'inactive'}
-                        size="xs"
-                        onClick={() => handleToggleActive(drama.id)}
-                        title={`Status: ${drama.isActive ? 'Active' : 'Inactive'} (Click to toggle)`}
+                    {/* Access (Paid / Free) */}
+                    <td className="py-2 px-3 align-middle">
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePaid(drama.id)}
+                        className={`px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                          drama.isPaid
+                            ? 'bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-950 dark:text-amber-300 border border-amber-300/50'
+                            : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
+                        }`}
                       >
-                        {drama.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
+                        {drama.isPaid ? 'Paid' : 'Free'}
+                      </button>
                     </td>
 
-                    {/* Action */}
-                    <td className="py-2.5 px-4 sm:px-6 align-middle text-right">
-                      <div className="flex items-center justify-end space-x-1.5">
+                    {/* Status (Active / Draft) */}
+                    <td className="py-2 px-3 align-middle text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleActive(drama.id)}
+                        title="Click to toggle status"
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95 ${
+                          drama.isActive
+                            ? 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25'
+                            : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
+                        }`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                            drama.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+                          }`}
+                        />
+                        {drama.isActive ? 'Active' : 'Draft'}
+                      </button>
+                    </td>
+
+                    {/* Action buttons */}
+                    <td className="py-2 px-3 align-middle text-right">
+                      <div className="inline-flex items-center space-x-0.5">
                         <button
                           type="button"
                           onClick={() => setManagingDrama(drama)}
-                          title="Edit Series"
-                          className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-[#1A201A] hover:bg-[#FEF08A] hover:text-slate-950 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/10 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                          title="Manage Series"
+                          className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
@@ -706,7 +733,7 @@ export default function DramasPage({
                           type="button"
                           onClick={() => handleDeleteDrama(drama.id)}
                           title="Delete Series"
-                          className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-[#1A201A] hover:bg-rose-50 dark:hover:bg-rose-950/30 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200/60 dark:border-white/10 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                          className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -719,25 +746,23 @@ export default function DramasPage({
           </div>
 
           {/* Table Summary Footer */}
-          <div className="px-4 sm:px-6 py-3 bg-slate-50/50 dark:bg-[#161B16]/80 border-t border-slate-100 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
-            <span className="font-semibold text-slate-600 dark:text-slate-300">
-              Showing {filteredDramas.length} of {dramas.length} series
+          <div className="px-3 sm:px-4 py-2 bg-slate-50/60 dark:bg-[#18181E]/80 border-t border-slate-100 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+            <span className="font-medium text-[11px] text-slate-500 dark:text-slate-400">
+              Showing <strong className="text-slate-900 dark:text-white">{filteredDramas.length}</strong> of {dramas.length} series
             </span>
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[11px] font-medium text-slate-400">
-              <span className="inline-flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-3 text-[10.5px] font-medium">
+              <span className="inline-flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                Active: <strong className="text-slate-700 dark:text-slate-200">{dramas.filter(d => d.isActive).length}</strong>
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                Inactive: <strong className="text-slate-700 dark:text-slate-200">{dramas.filter(d => !d.isActive).length}</strong>
+                Active: <strong className="text-slate-700 dark:text-slate-200">{stats.published}</strong>
               </span>
               <span className="inline-flex items-center gap-1">
-                <Lock className="w-3 h-3 text-amber-500" />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                Draft: <strong className="text-slate-700 dark:text-slate-200">{Math.max(0, dramas.length - stats.published)}</strong>
+              </span>
+              <span className="inline-flex items-center gap-1">
                 Paid: <strong className="text-slate-700 dark:text-slate-200">{dramas.filter(d => d.isPaid).length}</strong>
               </span>
               <span className="inline-flex items-center gap-1">
-                <Unlock className="w-3 h-3 text-emerald-500" />
                 Free: <strong className="text-slate-700 dark:text-slate-200">{dramas.filter(d => !d.isPaid).length}</strong>
               </span>
             </div>

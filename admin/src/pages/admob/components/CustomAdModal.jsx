@@ -17,6 +17,7 @@ import {
   Eye
 } from 'lucide-react';
 import { uploadService } from '../../../services/uploadService';
+import ModalPortal from '../../../components/common/ModalPortal';
 
 const FORMAT_OPTIONS = [
   { id: 'VIDEO_PREROLL', label: 'Video Pre-Roll', desc: '10-15s video before episode stream', icon: Video },
@@ -143,13 +144,14 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-sm overflow-y-auto font-urbanist animate-fade-in">
-      <div className="relative w-full max-w-5xl bg-white dark:bg-[#282E28] rounded-2xl shadow-2xl border border-slate-200 dark:border-white/15 overflow-hidden my-auto flex flex-col max-h-[92vh]">
+    <ModalPortal isOpen={true}>
+      <div className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm overflow-y-auto font-urbanist animate-fade-in">
+      <div className="relative w-full max-w-5xl bg-white dark:bg-[#30303D] rounded-2xl shadow-2xl border border-slate-200 dark:border-white/15 overflow-hidden my-auto flex flex-col max-h-[92vh]">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200/80 dark:border-white/10 shrink-0 bg-slate-50/60 dark:bg-[#202620]/60">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200/80 dark:border-white/10 shrink-0 bg-slate-50/60 dark:bg-[#24242E]/60">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
               <Sparkles className="w-4.5 h-4.5 stroke-[2.2]" />
             </div>
             <div>
@@ -193,7 +195,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                   placeholder="e.g., Monster Energy — Unleash the Beast"
                   value={form.title}
                   onChange={(e) => handleChange('title', e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
                 />
               </div>
 
@@ -207,7 +209,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                   placeholder="e.g., Monster Beverage / E² Store"
                   value={form.advertiser}
                   onChange={(e) => handleChange('advertiser', e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
                 />
               </div>
             </div>
@@ -229,7 +231,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                       className={`p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between ${
                         isSelected
                           ? 'bg-[#FEF08A]/20 dark:bg-[#FEF08A]/10 border-amber-300 dark:border-amber-400 text-slate-950 dark:text-white ring-1 ring-amber-300'
-                          : 'bg-slate-50/70 dark:bg-[#161B16] border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/20'
+                          : 'bg-slate-50/70 dark:bg-[#18181E] border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/20'
                       }`}
                     >
                       <div className="flex items-center justify-between w-full mb-1">
@@ -253,7 +255,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                 <select
                   value={form.placement}
                   onChange={(e) => handleChange('placement', e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
                 >
                   {PLACEMENT_OPTIONS.map((p) => (
                     <option key={p.id} value={p.id}>{p.label}</option>
@@ -275,7 +277,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                     onChange={(e) => handleChange('priority', e.target.value)}
                     className="flex-1 accent-[#FEF08A] cursor-pointer"
                   />
-                  <span className="text-xs font-black text-slate-900 dark:text-white px-2 py-0.5 rounded bg-slate-100 dark:bg-[#161B16] border border-slate-200 dark:border-white/10">
+                  <span className="text-xs font-black text-slate-900 dark:text-white px-2 py-0.5 rounded bg-slate-100 dark:bg-[#18181E] border border-slate-200 dark:border-white/10">
                     {form.priority}
                   </span>
                 </div>
@@ -283,7 +285,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
             </div>
 
             {/* Media Creative (URL + Upload Button) */}
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 space-y-2.5">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 space-y-2.5">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                   {form.mediaType === 'VIDEO' ? <Video className="w-3.5 h-3.5" /> : <ImageIcon className="w-3.5 h-3.5" />}
@@ -292,7 +294,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                 </label>
                 
                 {/* Upload Button */}
-                <label className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white dark:bg-[#202620] border border-slate-200 dark:border-white/15 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.08] cursor-pointer shadow-xs transition-colors">
+                <label className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-lg bg-white dark:bg-[#24242E] border border-slate-200 dark:border-white/15 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.08] cursor-pointer shadow-xs transition-colors">
                   {isUploading ? (
                     <>
                       <Loader2 className="w-3 h-3 animate-spin text-amber-500" />
@@ -320,7 +322,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                 placeholder={form.mediaType === 'VIDEO' ? 'https://.../video.mp4' : 'https://.../poster.jpg'}
                 value={form.mediaUrl}
                 onChange={(e) => handleChange('mediaUrl', e.target.value)}
-                className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-white dark:bg-[#121612] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
+                className="w-full px-3 py-2 text-xs font-mono rounded-lg bg-white dark:bg-[#121216] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
               />
 
               {uploadError && (
@@ -340,7 +342,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                       max="60"
                       value={form.videoDuration}
                       onChange={(e) => handleChange('videoDuration', e.target.value)}
-                      className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-[#121612] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                      className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-[#121216] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
                     />
                   </div>
 
@@ -354,7 +356,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                       max="30"
                       value={form.skipAfterSeconds}
                       onChange={(e) => handleChange('skipAfterSeconds', e.target.value)}
-                      className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-[#121612] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                      className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-[#121216] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
                     />
                   </div>
                 </div>
@@ -372,7 +374,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                   placeholder="e.g., Learn More / Shop Now"
                   value={form.ctaText}
                   onChange={(e) => handleChange('ctaText', e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
                 />
               </div>
 
@@ -383,7 +385,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                 <select
                   value={form.ctaAction}
                   onChange={(e) => handleChange('ctaAction', e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
                 >
                   {CTA_ACTION_OPTIONS.map((opt) => (
                     <option key={opt.id} value={opt.id}>{opt.label}</option>
@@ -401,7 +403,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                 placeholder="https://sponsor.com or /subscriptions or dramaId"
                 value={form.targetUrl}
                 onChange={(e) => handleChange('targetUrl', e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
+                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
               />
             </div>
 
@@ -415,7 +417,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                   type="date"
                   value={form.startDate}
                   onChange={(e) => handleChange('startDate', e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
                 />
               </div>
 
@@ -427,7 +429,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                   type="date"
                   value={form.endDate}
                   onChange={(e) => handleChange('endDate', e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
                 />
               </div>
 
@@ -438,7 +440,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                 <select
                   value={form.status}
                   onChange={(e) => handleChange('status', e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60"
                 >
                   <option value="ACTIVE">ACTIVE (Live)</option>
                   <option value="PAUSED">PAUSED</option>
@@ -459,7 +461,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-5 py-2 rounded-xl text-xs font-black bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2 rounded-xl text-xs font-black bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>{isEdit ? 'Save Changes' : 'Create Custom Ad'}</span>
@@ -468,13 +470,13 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
           </form>
 
           {/* Right Live Device Mockup Preview (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center bg-slate-50 dark:bg-[#161B16] p-4 rounded-2xl border border-slate-200/80 dark:border-white/10">
+          <div className="lg:col-span-5 flex flex-col items-center justify-center bg-slate-50 dark:bg-[#18181E] p-4 rounded-2xl border border-slate-200/80 dark:border-white/10">
             <div className="w-full flex items-center justify-between mb-3 text-xs">
               <span className="font-extrabold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <Eye className="w-3.5 h-3.5 text-amber-500" />
                 Live In-App Mobile Preview
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-700/40">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-400/30">
                 {form.type}
               </span>
             </div>
@@ -557,7 +559,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                 {/* 2. Interstitial Mockup */}
                 {form.type === 'INTERSTITIAL' && (
                   <div className="w-full h-full flex flex-col justify-center items-center p-3 relative">
-                    <div className="w-full max-h-[380px] bg-[#161B16] rounded-2xl border border-white/20 p-3 shadow-2xl flex flex-col justify-between relative overflow-hidden">
+                    <div className="w-full max-h-[380px] bg-[#18181E] rounded-2xl border border-white/20 p-3 shadow-2xl flex flex-col justify-between relative overflow-hidden">
                       <div className="w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center absolute top-2 right-2 text-[10px]">
                         ✕
                       </div>
@@ -590,7 +592,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                 {/* 3. Banner Mockup */}
                 {form.type === 'BANNER' && (
                   <div className="w-full h-full flex flex-col justify-end p-1">
-                    <div className="w-full h-16 rounded-xl overflow-hidden bg-[#161B16] border border-amber-300/40 p-1.5 flex items-center justify-between shadow-xl">
+                    <div className="w-full h-16 rounded-xl overflow-hidden bg-[#18181E] border border-amber-300/40 p-1.5 flex items-center justify-between shadow-xl">
                       <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-800 shrink-0">
                         {form.mediaUrl ? (
                           <img src={form.mediaUrl} alt="banner" className="w-full h-full object-cover" />
@@ -612,7 +614,7 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
                 {/* 4. Native In-Feed Card */}
                 {form.type === 'NATIVE_CARD' && (
                   <div className="w-full h-full flex flex-col justify-center p-2">
-                    <div className="w-full bg-[#121612] rounded-xl border border-white/15 p-2.5 space-y-2">
+                    <div className="w-full bg-[#121216] rounded-xl border border-white/15 p-2.5 space-y-2">
                       <div className="flex items-center justify-between text-[9px]">
                         <span className="px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-extrabold">Sponsored</span>
                         <span className="text-slate-500">{form.advertiser || 'Direct Sponsor'}</span>
@@ -639,10 +641,9 @@ export default function CustomAdModal({ initialData, onClose, onSave }) {
               Real-time interactive mobile preview of your creative asset.
             </p>
           </div>
-
         </div>
-
       </div>
     </div>
-  );
+  </ModalPortal>
+);
 }

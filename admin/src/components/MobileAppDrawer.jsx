@@ -92,7 +92,7 @@ export default function MobileAppDrawer({ isOpen, onClose }) {
         <div class="p-4 border-t border-slate-800 bg-slate-950 text-center">
           <button
             onClick={onClose}
-            class="w-full py-2.5 bg-[#FEF08A] hover:bg-[#FDE047] text-black font-bold rounded-xl text-xs transition-colors"
+            class="w-full py-2.5 bg-[#FACC15] hover:bg-[#EAB308] text-black font-bold rounded-xl text-xs transition-colors"
           >
             Close Reference Drawer
           </button>

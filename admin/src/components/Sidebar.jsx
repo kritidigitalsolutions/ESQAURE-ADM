@@ -10,6 +10,7 @@ import {
   CreditCard,
   Receipt,
   TicketPercent,
+  Gift,
   BadgePercent,
   SendHorizontal,
   Bell,
@@ -92,7 +93,8 @@ export default function Sidebar({
       items: [
         { id: 'subscriptions', label: 'Subscription Plans', icon: CreditCard },
         { id: 'transactions', label: 'Transactions', icon: Receipt },
-        { id: 'promos', label: 'Promos & Vouchers', icon: TicketPercent },
+        { id: 'promos', label: 'Promo Codes', icon: TicketPercent },
+        { id: 'vouchers', label: 'Plan Vouchers', icon: Gift },
         { id: 'admob', label: 'Google AdMob', icon: BadgePercent },
         { id: 'custom_ads', label: 'Custom Ads', icon: Sparkles },
         { id: 'ad_control', label: 'Ad Control & Sync', icon: SlidersHorizontal },
@@ -117,10 +119,10 @@ export default function Sidebar({
   return (
     <aside
       className={`${isCollapsed ? 'w-[64px]' : 'w-56'
-        } bg-white dark:bg-[#141914] text-slate-900 dark:text-slate-100 flex flex-col h-screen sticky top-0 shrink-0 border-r border-slate-200/80 dark:border-white/10 shadow-[1px_0_12px_-4px_rgba(15,23,42,0.04)] dark:shadow-[1px_0_16px_-4px_rgba(0,0,0,0.5)] z-40 font-urbanist selection:bg-[#FEF08A] selection:text-black transition-[width] duration-250 ease-[cubic-bezier(0.2,0,0,1)] will-change-[width]`}
+        } bg-white dark:bg-[#141419] text-slate-900 dark:text-slate-100 flex flex-col h-screen sticky top-0 shrink-0 border-r border-slate-200/80 dark:border-white/10 shadow-[1px_0_12px_-4px_rgba(15,23,42,0.04)] dark:shadow-[1px_0_16px_-4px_rgba(0,0,0,0.5)] z-40 font-urbanist selection:bg-[#FEF08A] selection:text-black transition-[width] duration-250 ease-[cubic-bezier(0.2,0,0,1)] will-change-[width]`}
     >
       {/* 1. Clean, Unified Header */}
-      <div className={`h-14 px-3 border-b border-slate-100 dark:border-white/10 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} bg-white dark:bg-[#141914] shrink-0 overflow-hidden`}>
+      <div className={`h-14 px-3 border-b border-slate-100 dark:border-white/10 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} bg-white dark:bg-[#141419] shrink-0 overflow-hidden`}>
         {isCollapsed ? (
           /* Collapsed View: Single intuitive trigger icon button with logo and expand indicator */
           <button
@@ -205,7 +207,7 @@ export default function Sidebar({
                       ? 'w-9 h-9 mx-auto justify-center rounded-xl'
                       : 'w-full h-9 px-2.5 rounded-xl text-[12.5px]'
                     } ${isActive
-                      ? `bg-[#FEF08A] text-slate-950 font-bold border border-amber-300/80 shadow-xs ${isCollapsed ? 'ring-2 ring-[#FEF08A]/80 ring-offset-2 ring-offset-white dark:ring-offset-[#141914]' : ''
+                      ? `bg-[#FEF08A] text-slate-950 font-bold border border-amber-300/80 shadow-xs ${isCollapsed ? 'ring-2 ring-[#FEF08A]/80 ring-offset-2 ring-offset-white dark:ring-offset-[#141419]' : ''
                       }`
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/[0.06] font-medium'
                     }`}
@@ -230,7 +232,7 @@ export default function Sidebar({
 
                   {/* Clean Floating Tooltip in Collapsed Mode */}
                   {isCollapsed && (
-                    <div className="absolute left-[calc(100%+8px)] top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900/95 dark:bg-[#1A201A]/95 text-white text-[11px] font-semibold rounded-lg shadow-xl border border-slate-700/60 dark:border-white/10 opacity-0 -translate-x-1 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150 z-50 whitespace-nowrap backdrop-blur-xs">
+                    <div className="absolute left-[calc(100%+8px)] top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900/95 dark:bg-[#1E1E26]/95 text-white text-[11px] font-semibold rounded-lg shadow-xl border border-slate-700/60 dark:border-white/10 opacity-0 -translate-x-1 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150 z-50 whitespace-nowrap backdrop-blur-xs">
                       {item.label}
                     </div>
                   )}

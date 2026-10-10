@@ -13,7 +13,8 @@
     "test:legal": "node tests/testLegalDocs.js",
     "test:subscriptions": "node tests/testSubscriptionFlow.js",
     "test:player": "node tests/testPlayerFlow.js",
-    "test:saved-series": "node tests/testSavedSeriesFlow.js"
+    "test:saved-series": "node tests/testSavedSeriesFlow.js",
+    "reset:admin": "node utils/resetAdminPassword.js"
   },
   "keywords": [
     "esquare",

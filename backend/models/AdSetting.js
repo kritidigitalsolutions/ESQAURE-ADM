@@ -149,6 +149,23 @@ const AdSettingSchema = new mongoose.Schema(
     globalAdFrequencyCap: {
       type: Number,
       default: 6 // max interstitial/popup ads per hour per user
+    },
+    // Website Platform Controls
+    websiteControls: {
+      websiteAdsEnabled: { type: Boolean, default: true },
+      adsenseEnabled: { type: Boolean, default: true },
+      customAdsEnabled: { type: Boolean, default: true },
+      mediationMode: {
+        type: String,
+        default: 'CUSTOM_FIRST'
+      },
+      adsenseClientId: { type: String, default: 'ca-pub-6490055741105644' },
+      placementControls: {
+        playerPreroll: { enabled: { type: Boolean, default: true } },
+        headerLeaderboard: { enabled: { type: Boolean, default: true } },
+        episodeSidebar: { enabled: { type: Boolean, default: true } },
+        footerBanner: { enabled: { type: Boolean, default: true } }
+      }
     }
   },
   {

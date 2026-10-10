@@ -203,13 +203,13 @@ export default function ActivityChart({ onNavigate }) {
       </div>
 
       {/* Right Column: Google AdMob Monetization Side Card */}
-      <div className="lg:col-span-4 bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 dark:border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover flex flex-col justify-between group">
+      <div className="lg:col-span-4 bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 dark:border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover flex flex-col justify-between group">
         <div>
           {/* Header */}
           <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shadow-xs shrink-0">
-                <Coins className="w-4 h-4 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shadow-xs shrink-0">
+                <Coins className="w-4 h-4 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
               </div>
               <div>
                 <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base font-urbanist tracking-tight">
@@ -221,7 +221,7 @@ export default function ActivityChart({ onNavigate }) {
 
           {/* AdMob Monthly Revenue Box */}
           <div className="mt-3 space-y-2.5">
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-100/90 dark:border-white/10">
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-100/90 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <span className="text-[10.5px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider font-urbanist">
                   Monthly Ad Revenue (March 2026)
@@ -244,7 +244,7 @@ export default function ActivityChart({ onNavigate }) {
               </span>
 
               {/* Format 1: Rewarded Video */}
-              <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
+              <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
                 <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist">Rewarded Video (Ep Unlock)</span>
                 <div className="text-right flex items-baseline space-x-1">
                   <span className="text-slate-950 dark:text-white font-black text-lg sm:text-xl font-urbanist tracking-tight">
@@ -255,7 +255,7 @@ export default function ActivityChart({ onNavigate }) {
               </div>
 
               {/* Format 2: Interstitial Ads */}
-              <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
+              <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
                 <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist">Interstitial (Nav & End)</span>
                 <div className="text-right flex items-baseline space-x-1">
                   <span className="text-slate-950 dark:text-white font-black text-lg sm:text-xl font-urbanist tracking-tight">
@@ -266,7 +266,7 @@ export default function ActivityChart({ onNavigate }) {
               </div>
 
               {/* Format 3: Native & Banner */}
-              <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#161B16] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
+              <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
                 <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist">Native Feed & Banner</span>
                 <div className="text-right flex items-baseline space-x-1">
                   <span className="text-slate-950 dark:text-white font-black text-lg sm:text-xl font-urbanist tracking-tight">

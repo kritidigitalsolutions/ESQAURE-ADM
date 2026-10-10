@@ -87,7 +87,7 @@ export default function Topbar({
   }, []);
 
   return (
-    <header className="bg-white/95 dark:bg-[#141914]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10 sticky top-0 z-30 px-6 py-3 shadow-xs dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)] font-urbanist shrink-0">
+    <header className="bg-white/95 dark:bg-[#141419]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10 sticky top-0 z-30 px-6 py-3 shadow-xs dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)] font-urbanist shrink-0">
       <div className="flex items-center justify-between gap-4">
 
         {/* Left: Page Title & Subtitle */}
@@ -136,15 +136,15 @@ export default function Topbar({
               title="Admin Profile"
               className="relative flex items-center justify-center cursor-pointer hover:opacity-95 transition-all group"
             >
-              <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-[#1A201A] text-slate-700 dark:text-slate-200 flex items-center justify-center border border-slate-200/90 dark:border-white/10 shadow-xs group-hover:bg-slate-200/80 dark:group-hover:bg-[#202620] group-hover:border-slate-300 dark:group-hover:border-white/20 transition-all duration-200">
+              <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-[#1E1E26] text-slate-700 dark:text-slate-200 flex items-center justify-center border border-slate-200/90 dark:border-white/10 shadow-xs group-hover:bg-slate-200/80 dark:group-hover:bg-[#24242E] group-hover:border-slate-300 dark:group-hover:border-white/20 transition-all duration-200">
                 <User className="w-4 h-4 text-slate-700 dark:text-slate-300" strokeWidth={2} />
               </div>
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-[#141914] rounded-full shadow-xs"></span>
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-[#141419] rounded-full shadow-xs"></span>
             </button>
 
             {/* Dropdown Menu */}
             {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1C221C] border border-slate-200 dark:border-white/12 rounded-2xl shadow-xl py-2 z-50 animate-fadeIn">
+              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1E1E26] border border-slate-200 dark:border-white/12 rounded-2xl shadow-xl py-2 z-50 animate-fadeIn">
                 <div className="px-4 py-2.5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-slate-900 dark:text-white truncate">

@@ -51,7 +51,7 @@ export default function ProgressMetricCard({
   const isCompact = size === 'sm';
   const gridId = `grid-${useId().replace(/:/g, '')}`;
   const minHeightClass = isCompact ? 'min-h-[190px] sm:min-h-[210px]' : 'min-h-[290px] sm:min-h-[310px]';
-  const shell = `relative flex ${minHeightClass} w-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#121612] shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover ${className}`;
+  const shell = `relative flex ${minHeightClass} w-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white dark:bg-[#121216] shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover ${className}`;
 
   const periods = periodOptions ?? DEFAULT_PERIODS;
   const [selectedLabel, setSelectedLabel] = useState(period);
@@ -221,7 +221,7 @@ export default function ProgressMetricCard({
 
           {/* Unified Signature Dashboard Pill Tabs (Users vs Subscribers) */}
           {tabs.length > 0 && (
-            <div className="pointer-events-auto inline-flex items-center gap-0.5 rounded-lg bg-slate-100/90 dark:bg-[#161B16] p-0.5 border border-slate-200/70 dark:border-white/10 shadow-2xs self-start sm:self-auto">
+            <div className="pointer-events-auto inline-flex items-center gap-0.5 rounded-lg bg-slate-100/90 dark:bg-[#18181E] p-0.5 border border-slate-200/70 dark:border-white/10 shadow-2xs self-start sm:self-auto">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
@@ -290,7 +290,7 @@ export default function ProgressMetricCard({
 
       {/* Footer Area: Timeline Date Labels */}
       <div
-        className={`relative z-10 flex items-center justify-between border-t border-slate-100 dark:border-white/10 bg-white/95 dark:bg-[#141914]/95 backdrop-blur-xs ${isCompact ? 'px-2 sm:px-3 py-1' : 'px-2.5 sm:px-3.5 py-1.5'}`}
+        className={`relative z-10 flex items-center justify-between border-t border-slate-100 dark:border-white/10 bg-white/95 dark:bg-[#141419]/95 backdrop-blur-xs ${isCompact ? 'px-2 sm:px-3 py-1' : 'px-2.5 sm:px-3.5 py-1.5'}`}
       >
         {/* Dynamic Compact Auto-Fitting Date Labels Under Graph */}
         <div className="flex items-center justify-between w-full gap-0.5 sm:gap-1 overflow-x-auto sm:overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

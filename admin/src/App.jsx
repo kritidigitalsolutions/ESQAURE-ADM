@@ -21,6 +21,7 @@ import SettingsPage from './pages/settings/SettingsPage';
 import UploadContentPage from './pages/upload/UploadContentPage';
 import SubscribersPage from './pages/subscribers/SubscribersPage';
 import PromosPage from './pages/promos/PromosPage';
+import VouchersPage from './pages/vouchers/VouchersPage';
 import LegalPage from './pages/legal/LegalPage';
 import AppNotificationsPage from './pages/notifications/AppNotificationsPage';
 import BannersPage from './pages/banners/BannersPage';
@@ -188,8 +189,13 @@ export default function App() {
         };
       case 'promos':
         return {
-          title: "Promos & Vouchers",
-          subtitle: "Create coupon discount codes, referral vouchers, and subscription trial promotions."
+          title: "Promo Codes & Discounts",
+          subtitle: "Create promotional percentage and flat discount codes applied at subscription checkout."
+        };
+      case 'vouchers':
+        return {
+          title: "Plan Vouchers",
+          subtitle: "Distribute vouchers granting complete subscription passes (100% complimentary VIP access)."
         };
       case 'transactions':
         return {
@@ -240,7 +246,7 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-[#F3F4F7] dark:bg-[#080B08] flex font-urbanist selection:bg-[#FEF08A] selection:text-black">
+    <div className="h-screen overflow-hidden bg-[#F3F4F7] dark:bg-[#0A0A0C] flex font-urbanist selection:bg-[#FEF08A] selection:text-black">
       
       {/* Fixed Left Sidebar Navigation */}
       <Sidebar
@@ -326,6 +332,10 @@ export default function App() {
 
               {activeTab === 'promos' && (
                 <PromosPage />
+              )}
+
+              {activeTab === 'vouchers' && (
+                <VouchersPage />
               )}
 
               {activeTab === 'transactions' && (

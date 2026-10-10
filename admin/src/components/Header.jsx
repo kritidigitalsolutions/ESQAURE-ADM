@@ -56,7 +56,7 @@ export default function Header({ activeTab, setActiveTab, onOpenIngestModal }) {
           <div class="flex items-center space-x-3">
             <button
               onClick={onOpenIngestModal}
-              class="hidden sm:inline-flex items-center space-x-1.5 px-3.5 py-1.5 text-xs font-bold text-black bg-[#FEF08A] hover:bg-[#FDE047] rounded-full transition-all"
+              class="hidden sm:inline-flex items-center space-x-1.5 px-3.5 py-1.5 text-xs font-bold text-black bg-[#FACC15] hover:bg-[#EAB308] rounded-full transition-all"
             >
               <Plus class="w-3.5 h-3.5 text-black" />
               <span>Upload Content</span>

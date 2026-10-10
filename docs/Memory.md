@@ -43,10 +43,10 @@
 5. **Admin Panel Aesthetics**:
    - Modern SaaS dark/clean aesthetic inspired by Nodus reference (`ui SS/76acc4e04f1465ab59eb0e7c889e3300.webp`).
    - Primary Font: **Urbanist**.
-   - Primary Accent: Pastel Yellow (`#FEF08A`, hover `#FDE047`), Neon Lime (`#8FFE01`), Deep Slate/Charcoal Canvas (`#080B08`).
+   - Primary Accent: Pastel Yellow (`#FEF08A`, hover `#FDE047`), Neon Lime (`#8FFE01`), Deep Slate/Charcoal Canvas (`#0A0A0C`).
    - Clean, flat pastel tone matching soft emerald badges, with no harsh glows or colored halos.
    - **Material Design 2 Dark Theme Architecture**:
-     - Surface elevation communicated via lightness overlays (00dp `#080B08`, 01dp `#121612`, 02dp `#161B16`, 04dp `#1A1F1A`, 08dp `#202620`, 16dp `#242A24`, 24dp `#282E28`).
+     - Surface elevation communicated via lightness overlays (00dp `#0A0A0C`, 01dp `#121216`, 02dp `#18181E`, 04dp `#1E1E26`, 08dp `#24242E`, 16dp `#2A2A35`, 24dp `#30303D`).
      - Never use pure `#000000` for surface fills.
      - Natural z-axis drop shadows preserved; no light or colored glows.
      - WCAG AA text contrast: High emphasis 87-90% white (`text-white/90`), Medium emphasis 60% white (`text-white/60`), Disabled 38% white (`text-white/38`), Dividers 10-12% white (`border-white/10`).

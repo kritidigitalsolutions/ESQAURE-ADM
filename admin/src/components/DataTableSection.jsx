@@ -262,7 +262,7 @@ export default function DataTableSection({ onOpenIngestModal }) {
                       <p className="text-[11px] text-slate-400">Try checking title spelling or clearing the search filter.</p>
                       <button
                         onClick={() => setSearchTerm('')}
-                        className="mt-1 px-3 py-1 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-lg transition-colors"
+                        className="mt-1 px-3 py-1 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-lg transition-colors"
                       >
                         Clear Search
                       </button>
@@ -389,7 +389,7 @@ export default function DataTableSection({ onOpenIngestModal }) {
                       <p className="text-[11px] text-slate-400">Try searching by payment ID, customer name, or phone number.</p>
                       <button
                         onClick={() => setSearchTerm('')}
-                        className="mt-1 px-3 py-1 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-lg transition-colors"
+                        className="mt-1 px-3 py-1 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-lg transition-colors"
                       >
                         Clear Search
                       </button>

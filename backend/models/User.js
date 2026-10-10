@@ -68,7 +68,8 @@ const UserSchema = new mongoose.Schema(
         newEpisodes: { type: Boolean, default: true },
         newReleases: { type: Boolean, default: true },
         recommendations: { type: Boolean, default: false }
-      }
+      },
+      notificationsCleared: { type: Boolean, default: false }
     },
 
     // Subscription Status

@@ -12,6 +12,7 @@ import homeRoutes         from './home.routes.js';
 import genreRoutes        from './genre.routes.js';
 import savedSeriesRoutes  from './savedSeries.routes.js';
 import promoRoutes        from './promo.routes.js';
+import voucherRoutes      from './voucher.routes.js';
 import adRoutes           from './ad.routes.js';
 
 const router = Router();
@@ -69,8 +70,11 @@ router.use('/users', userRoutes);
 /** Genre and category management (CRUD, active toggle, stats) */
 router.use('/genres', genreRoutes);
 
-/** Promos & Vouchers (Admin CRUD + mobile validate) */
+/** Promo Codes (Discount Coupons - Admin CRUD + validate) */
 router.use('/promos', promoRoutes);
+
+/** Plan Vouchers (Complete Subscription Plans - Admin CRUD + validate + redeem) */
+router.use('/vouchers', voucherRoutes);
 
 /** Ads & Monetization (AdMob Config, Custom Ads CRUD, Mediation & Serving) */
 router.use('/ads', adRoutes);

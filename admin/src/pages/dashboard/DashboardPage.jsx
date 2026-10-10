@@ -40,13 +40,13 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
         
         {/* Left: Top Trending Micro-Dramas */}
-        <div className="lg:col-span-7 bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-nodus">
+        <div className="lg:col-span-7 bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-nodus">
           <div>
             {/* Enhanced Header */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10 gap-3">
               <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
-                  <Flame className="w-4 h-4 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+                <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center shrink-0 shadow-xs">
+                  <Flame className="w-4 h-4 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
                 </div>
                 <div>
                   <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base font-urbanist tracking-tight leading-snug">
@@ -113,13 +113,13 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
         </div>
 
         {/* Right: Recent Subscriptions Ledger */}
-        <div className="lg:col-span-5 bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-nodus">
+        <div className="lg:col-span-5 bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-4.5 border border-slate-200/80 dark:border-white/10 shadow-nodus">
           <div>
             {/* Enhanced Header */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10 gap-3">
               <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center shrink-0 shadow-xs">
-                  <CreditCard className="w-4 h-4 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+                <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center shrink-0 shadow-xs">
+                  <CreditCard className="w-4 h-4 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
                 </div>
                 <div>
                   <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base font-urbanist tracking-tight leading-snug">
@@ -169,7 +169,7 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
                     >
                       {/* Col 1: Subscriber (col-span-5) */}
                       <div className="col-span-5 flex items-center space-x-2.5 min-w-0 pr-1">
-                        <div className="w-8 h-8 rounded-full bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 text-slate-950 dark:text-amber-400 font-extrabold flex items-center justify-center text-xs shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 text-slate-950 dark:text-amber-300 font-extrabold flex items-center justify-center text-xs shrink-0">
                           {initials}
                         </div>
 

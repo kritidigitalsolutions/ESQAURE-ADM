@@ -3,8 +3,10 @@ import { bannerService } from '../../services/bannerService';
 import { dramaService } from '../../services/dramaService';
 import { uploadService } from '../../services/uploadService';
 import Badge from '../../components/common/Badge';
+import KpiStatCard from '../../components/common/KpiStatCard';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
 import PageLoader from '../../components/common/PageLoader';
+import ModalPortal from '../../components/common/ModalPortal';
 import {
   Image as ImageIcon,
   Plus,
@@ -375,166 +377,237 @@ export default function BannersPage({ onNavigate }) {
   };
 
   return (
-    <div className="space-y-3.5 font-urbanist selection:bg-[#FEF08A] selection:text-black pb-6">
+    <div className="space-y-3 font-urbanist selection:bg-[#FEF08A] selection:text-black pb-8">
 
-      {/* 3. Control & Filter Bar */}
-      <div className="bg-white dark:bg-[#121612] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-2.5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
-          
+      {/* 4 Clean Minimal KPI Metric Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+        <KpiStatCard
+          icon={ImageIcon}
+          title="Total Banners"
+          value={stats.totalBanners || banners.length}
+          footerLeft="Showcase Registry"
+          footerRight="Widescreen"
+        />
+
+        <KpiStatCard
+          icon={Sparkles}
+          title="Active in Carousel"
+          value={stats.activeBanners}
+          footerLeft="Mobile Home"
+          footerRight="Live"
+          footerRightColor="text-emerald-600 dark:text-emerald-400 font-bold"
+        />
+
+        <KpiStatCard
+          icon={Clapperboard}
+          title="Linked to Drama"
+          value={stats.dramaLinkedBanners}
+          footerLeft="Direct Playback"
+          footerRight={`${stats.dramaLinkedBanners} Series`}
+        />
+
+        <KpiStatCard
+          icon={Link2}
+          title="External / Promo"
+          value={stats.externalBanners}
+          footerLeft="Web Redirect"
+          footerRight={`${stats.externalBanners} Links`}
+        />
+      </div>
+
+      {/* Page Title & Main Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-0.5">
+        <div>
+          <div className="flex items-center space-x-2">
+            <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
+              Banners & Hero Carousel
+            </h1>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-900 dark:text-amber-300 border border-amber-300/50">
+              {banners.length} Banners
+            </span>
+          </div>
+          <p className="text-[11.5px] text-slate-500 dark:text-slate-400 mt-0.5">
+            Manage 16:9 widescreen showcase slides, badges, trailer previews, and episode links.
+          </p>
+        </div>
+
+        <div className="flex items-center space-x-2 shrink-0">
+          <button
+            type="button"
+            onClick={fetchData}
+            disabled={isLoading}
+            className="p-1.5 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-xl transition-all cursor-pointer active:scale-95 shrink-0"
+            title="Refresh Banners"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-amber-500' : ''}`} />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleOpenCreate}
+            className="py-1.5 px-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Upload Banner</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Unified Filter, Search & View Toolbar */}
+      <div className="bg-white dark:bg-[#121216] rounded-xl p-2 sm:px-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+        
+        {/* Left: Status Filter Tabs & Link Type */}
+        <div className="flex items-center flex-wrap gap-2">
+          {/* Status Segmented Control */}
+          <div className="flex items-center space-x-1 p-0.5 bg-slate-100 dark:bg-[#18181E] rounded-lg border border-slate-200/60 dark:border-white/10 shrink-0">
+            <button
+              onClick={() => setFilterStatus('ALL')}
+              className={`px-2.5 py-1 rounded-md font-bold text-xs transition-all cursor-pointer ${
+                filterStatus === 'ALL'
+                  ? 'bg-white dark:bg-[#24242E] text-slate-950 dark:text-white shadow-2xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              All ({banners.length})
+            </button>
+            <button
+              onClick={() => setFilterStatus('ACTIVE')}
+              className={`px-2.5 py-1 rounded-md font-bold text-xs transition-all cursor-pointer ${
+                filterStatus === 'ACTIVE'
+                  ? 'bg-white dark:bg-[#24242E] text-emerald-600 dark:text-emerald-400 shadow-2xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              Active ({stats.activeBanners})
+            </button>
+            <button
+              onClick={() => setFilterStatus('INACTIVE')}
+              className={`px-2.5 py-1 rounded-md font-bold text-xs transition-all cursor-pointer ${
+                filterStatus === 'INACTIVE'
+                  ? 'bg-white dark:bg-[#24242E] text-amber-600 dark:text-amber-400 shadow-2xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              Hidden ({Math.max(0, banners.length - stats.activeBanners)})
+            </button>
+          </div>
+
+          {/* Link Type Select */}
+          <div className="flex items-center space-x-1.5 bg-slate-50 dark:bg-[#18181E] px-2 py-1 rounded-lg border border-slate-200 dark:border-white/10 text-xs">
+            <Link2 className="w-3 h-3 text-slate-400" />
+            <select
+              value={filterLinkType}
+              onChange={(e) => setFilterLinkType(e.target.value)}
+              className="bg-transparent text-slate-900 dark:text-white font-bold focus:outline-none cursor-pointer text-xs"
+            >
+              <option value="ALL" className="dark:bg-[#1E1E26]">All Targets</option>
+              <option value="DRAMA" className="dark:bg-[#1E1E26]">Drama Series</option>
+              <option value="EXTERNAL_URL" className="dark:bg-[#1E1E26]">External URL</option>
+            </select>
+          </div>
+
+          {(searchTerm || filterStatus !== 'ALL' || filterLinkType !== 'ALL') && (
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setFilterStatus('ALL');
+                setFilterLinkType('ALL');
+              }}
+              className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline font-bold px-1.5 py-0.5 cursor-pointer"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+
+        {/* Right: Search Box + View Switcher + Counter */}
+        <div className="flex items-center flex-wrap sm:flex-nowrap gap-2 w-full md:w-auto">
           {/* Search Box */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="relative flex-1 sm:w-52">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search banners by title, badge, drama..."
-              className="w-full pl-9 pr-8 py-1.5 rounded-lg text-xs bg-slate-100 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-[#FEF08A] focus:outline-none transition-all font-medium"
+              placeholder="Search banners..."
+              className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg focus:border-[#FEF08A] focus:outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-colors"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-3 h-3" />
               </button>
             )}
           </div>
 
-          {/* Action Buttons: View Switcher + Upload New Banner */}
-          <div className="flex items-center space-x-2 shrink-0 self-end md:self-auto">
-            {/* View Switcher: Cards vs Table */}
-            <div className="bg-slate-100 dark:bg-[#161B16] p-0.5 rounded-lg flex items-center border border-slate-200/70 dark:border-white/10">
-              <button
-                onClick={() => setViewMode('cards')}
-                className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === 'cards'
-                    ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Cards View
-              </button>
-              <button
-                onClick={() => setViewMode('table')}
-                className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === 'table'
-                    ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Table View
-              </button>
-            </div>
-
-            {/* Reload Button */}
+          {/* View Mode Switcher: Cards vs Table */}
+          <div className="bg-slate-100 dark:bg-[#18181E] p-0.5 rounded-lg flex items-center border border-slate-200/60 dark:border-white/10 shrink-0">
             <button
-              onClick={fetchData}
-              disabled={isLoading}
-              className="p-1.5 rounded-lg bg-slate-100 dark:bg-[#161B16] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200/70 dark:border-white/10 transition-all cursor-pointer"
-              title="Refresh Banners"
+              onClick={() => setViewMode('cards')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                viewMode === 'cards'
+                  ? 'bg-white dark:bg-[#24242E] text-slate-950 dark:text-white shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+              }`}
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+              Cards
             </button>
-
-            {/* Upload / Create Banner CTA */}
             <button
-              onClick={handleOpenCreate}
-              className="px-3.5 py-1.5 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs rounded-lg flex items-center justify-center space-x-1.5 shadow-xs transition-all shrink-0 cursor-pointer"
+              onClick={() => setViewMode('table')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                viewMode === 'table'
+                  ? 'bg-white dark:bg-[#24242E] text-slate-950 dark:text-white shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+              }`}
             >
-              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Upload Banner</span>
+              Table
             </button>
           </div>
+
+          {/* Showing Count */}
+          <span className="text-[11px] text-slate-400 font-medium shrink-0 hidden lg:inline">
+            <strong className="text-slate-900 dark:text-white font-bold">{filteredBanners.length}</strong> banners
+          </span>
         </div>
 
-        {/* Secondary Filter Dropdowns & Stats */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-slate-100 dark:border-white/5">
-          <div className="flex items-center flex-wrap gap-2">
-            {/* Status Filter */}
-            <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#161B16] px-2.5 py-1 rounded-lg border border-slate-200/70 dark:border-white/10 text-xs">
-              <span className="text-slate-400 font-medium text-[11px]">Status:</span>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="bg-transparent text-slate-900 dark:text-white font-bold focus:outline-none cursor-pointer text-xs"
-              >
-                <option value="ALL" className="dark:bg-[#1C221C]">All Statuses</option>
-                <option value="ACTIVE" className="dark:bg-[#1C221C]">Active (In Carousel)</option>
-                <option value="INACTIVE" className="dark:bg-[#1C221C]">Inactive (Hidden)</option>
-              </select>
-            </div>
-
-            {/* Link Type Filter */}
-            <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#161B16] px-2.5 py-1 rounded-lg border border-slate-200/70 dark:border-white/10 text-xs">
-              <Link2 className="w-3 h-3 text-slate-400" />
-              <select
-                value={filterLinkType}
-                onChange={(e) => setFilterLinkType(e.target.value)}
-                className="bg-transparent text-slate-900 dark:text-white font-bold focus:outline-none cursor-pointer text-xs"
-              >
-                <option value="ALL" className="dark:bg-[#1C221C]">All Link Targets</option>
-                <option value="DRAMA" className="dark:bg-[#1C221C]">Drama Series</option>
-                <option value="EXTERNAL_URL" className="dark:bg-[#1C221C]">External URL</option>
-              </select>
-            </div>
-
-            {(searchTerm || filterStatus !== 'ALL' || filterLinkType !== 'ALL') && (
-              <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setFilterStatus('ALL');
-                  setFilterLinkType('ALL');
-                }}
-                className="text-xs text-amber-600 dark:text-amber-400 hover:underline font-bold px-2 py-1 cursor-pointer"
-              >
-                Reset filters
-              </button>
-            )}
-          </div>
-
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">
-            Showing <span className="font-extrabold text-slate-950 dark:text-white">{filteredBanners.length}</span> of {banners.length} banners
-          </div>
-        </div>
       </div>
 
-      {/* 4. Main Banners Content */}
+      {/* Main Banners Content */}
       {isLoading ? (
-        <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
-          <PageLoader text="Loading..." minHeight="min-h-[360px]" />
+        <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-nodus overflow-hidden">
+          <PageLoader text="Loading banners..." minHeight="min-h-[280px]" />
         </div>
       ) : filteredBanners.length === 0 ? (
-        <div className="bg-white dark:bg-[#121612] rounded-2xl p-12 text-center border border-slate-200/80 dark:border-white/10 shadow-nodus">
-          <div className="w-14 h-14 rounded-2xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 mx-auto mb-3 shadow-xs">
-            <ImageIcon className="w-7 h-7 stroke-[2.2]" />
+        <div className="bg-white dark:bg-[#121216] rounded-xl p-10 text-center border border-slate-200/80 dark:border-white/10 shadow-xs">
+          <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 text-slate-950 dark:text-amber-300 flex items-center justify-center mx-auto mb-2.5">
+            <ImageIcon className="w-5 h-5 stroke-[2]" />
           </div>
-          <h3 className="text-base font-extrabold text-slate-950 dark:text-white">
+          <h3 className="text-xs sm:text-sm font-bold text-slate-950 dark:text-white">
             {searchTerm || filterStatus !== 'ALL' || filterLinkType !== 'ALL' ? 'No matching banners found' : 'No hero banners uploaded yet'}
           </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto mb-3">
             {searchTerm || filterStatus !== 'ALL' || filterLinkType !== 'ALL'
               ? 'Try adjusting your search query or status filter.'
               : 'Upload 16:9 widescreen banners to feature top drama series, new releases, and promotional offers on the mobile app home screen.'}
           </p>
           <button
             onClick={handleOpenCreate}
-            className="mt-5 px-5 py-2.5 bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer inline-flex items-center space-x-2"
+            className="px-3.5 py-1.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer inline-flex items-center space-x-1.5"
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>Upload First Banner</span>
           </button>
         </div>
       ) : viewMode === 'cards' ? (
 
-        /* ========================================================
-           CARDS VIEW: 16:9 WIDESCREEN HERO BANNER TILES
-           ======================================================== */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+        /* CARDS VIEW: Clean 16:9 Widescreen Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filteredBanners.map((banner, index) => (
             <div
               key={banner.id}
-              className="bg-white dark:bg-[#121612] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden flex flex-col group transition-all duration-300 hover:border-amber-300/40 dark:hover:border-amber-400/20"
+              className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs overflow-hidden flex flex-col group transition-all hover:border-slate-300 dark:hover:border-white/20"
             >
               {/* 16:9 Banner Image Container */}
               <div className="relative aspect-[16/9] bg-slate-950 overflow-hidden">
@@ -545,43 +618,51 @@ export default function BannersPage({ onNavigate }) {
                 />
 
                 {/* Priority Shifter & Order Badge Top-Left */}
-                <div className="absolute top-2.5 left-2.5 z-10 flex items-center space-x-1">
-                  <span className="inline-flex items-center text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-xs bg-black/80 backdrop-blur-xs text-white border border-white/20">
+                <div className="absolute top-2 left-2 z-10 flex items-center space-x-1">
+                  <span className="inline-flex items-center text-[9.5px] font-bold px-1.5 py-0.5 rounded-md shadow-2xs bg-black/75 backdrop-blur-xs text-white border border-white/20">
                     #{banner.displayOrder || index + 1}
                   </span>
-                  <div className="flex items-center bg-black/80 backdrop-blur-xs rounded-full p-0.5 border border-white/20">
+                  <div className="flex items-center bg-black/75 backdrop-blur-xs rounded-md p-0.5 border border-white/20">
                     <button
                       onClick={() => handleMoveOrder(banner.id, 'up')}
                       disabled={index === 0}
                       title="Move Priority Up"
-                      className="p-0.5 text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                      className="p-0.5 text-white/70 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
                     >
-                      <ChevronUp className="w-3 h-3" />
+                      <ChevronUp className="w-2.5 h-2.5" />
                     </button>
                     <button
                       onClick={() => handleMoveOrder(banner.id, 'down')}
                       disabled={index === filteredBanners.length - 1}
                       title="Move Priority Down"
-                      className="p-0.5 text-white/70 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                      className="p-0.5 text-white/70 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer"
                     >
-                      <ChevronDown className="w-3 h-3" />
+                      <ChevronDown className="w-2.5 h-2.5" />
                     </button>
                   </div>
                 </div>
 
-                {/* Badge Tag & Status Pill Top-Right */}
-                <div className="absolute top-2.5 right-2.5 z-10 flex items-center space-x-1.5">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#FEF08A] text-slate-950 shadow-xs border border-amber-300/60">
+                {/* Theme Badge Tag & Status Pill Top-Right */}
+                <div className="absolute top-2 right-2 z-10 flex items-center space-x-1">
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#FEF08A]/90 backdrop-blur-xs text-slate-950 shadow-2xs border border-amber-300/60">
                     {banner.badge || 'FEATURED'}
                   </span>
-                  <Badge
-                    variant={banner.isActive ? 'active' : 'inactive'}
-                    size="xs"
+                  <button
+                    type="button"
                     onClick={() => handleToggleActive(banner.id)}
-                    title="Click to toggle Active / Inactive"
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold backdrop-blur-xs shadow-2xs transition-all cursor-pointer ${
+                      banner.isActive
+                        ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'
+                        : 'bg-black/75 text-slate-300 border border-white/20'
+                    }`}
                   >
-                    {banner.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        banner.isActive ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'
+                      }`}
+                    />
+                    {banner.isActive ? 'Live' : 'Hidden'}
+                  </button>
                 </div>
 
                 {/* Trailer Play Trigger Overlay */}
@@ -589,40 +670,40 @@ export default function BannersPage({ onNavigate }) {
                   <button
                     type="button"
                     onClick={() => setPreviewVideo({ title: banner.title, url: banner.trailerUrl })}
-                    className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                     title="Preview Trailer Video"
                   >
-                    <div className="w-10 h-10 rounded-full bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-                      <Play className="w-4 h-4 fill-current ml-0.5" />
+                    <div className="w-8 h-8 rounded-full bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                      <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
                     </div>
                   </button>
                 )}
               </div>
 
               {/* Banner Details Body */}
-              <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between space-y-2 bg-white dark:bg-[#121612]">
+              <div className="p-3 flex-1 flex flex-col justify-between space-y-2 bg-white dark:bg-[#121216]">
                 <div>
-                  <h4 className="font-bold text-slate-950 dark:text-white text-xs sm:text-[13px] truncate">
+                  <h4 className="font-bold text-slate-950 dark:text-white text-xs sm:text-sm truncate">
                     {banner.title}
                   </h4>
                   {banner.subtitle && (
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 font-medium">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1 font-normal">
                       {banner.subtitle}
                     </p>
                   )}
                 </div>
 
-                {/* Target Link Info */}
-                <div className="pt-2 border-t border-slate-100 dark:border-white/5 space-y-1.5 text-xs">
+                {/* Target Link Info & Actions */}
+                <div className="pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-xs">
                   {banner.linkType === 'DRAMA' ? (
-                    <div className="flex items-center space-x-2 text-slate-600 dark:text-slate-300">
+                    <div className="flex items-center space-x-1.5 text-slate-700 dark:text-slate-300 min-w-0 pr-2">
                       <Clapperboard className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                       <span className="truncate font-semibold text-[11px]">
                         {banner.drama ? banner.drama.title : 'Linked Drama'} (Ep {banner.episodeNumber || 1})
                       </span>
                     </div>
                   ) : (
-                    <div className="flex items-center space-x-2 text-blue-600 dark:text-blue-400 truncate">
+                    <div className="flex items-center space-x-1.5 text-slate-500 dark:text-slate-400 min-w-0 pr-2">
                       <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                       <span className="truncate font-mono text-[10.5px]">
                         {banner.externalUrl || 'External Link'}
@@ -630,38 +711,23 @@ export default function BannersPage({ onNavigate }) {
                     </div>
                   )}
 
-                  {/* Actions Footer */}
-                  <div className="flex items-center justify-between pt-1.5">
+                  <div className="flex items-center space-x-0.5 shrink-0">
                     <button
                       type="button"
-                      onClick={() => handleToggleActive(banner.id)}
-                      className={`text-[10.5px] font-bold px-2 py-0.5 rounded-md transition-colors cursor-pointer ${
-                        banner.isActive
-                          ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400'
-                          : 'text-slate-500 bg-slate-100 dark:bg-[#1A201A] dark:text-slate-400'
-                      }`}
+                      onClick={() => handleOpenEdit(banner)}
+                      className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                      title="Edit Banner"
                     >
-                      {banner.isActive ? '● Live' : '○ Hidden'}
+                      <Pencil className="w-3.5 h-3.5" />
                     </button>
-
-                    <div className="flex items-center space-x-1">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEdit(banner)}
-                        className="p-1 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
-                        title="Edit Banner"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteBanner(banner.id)}
-                        className="p-1 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
-                        title="Delete Banner"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteBanner(banner.id)}
+                      className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                      title="Delete Banner"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -671,33 +737,31 @@ export default function BannersPage({ onNavigate }) {
 
       ) : (
 
-        /* ========================================================
-           TABLE VIEW: CLEAN & MINIMAL STUDIO CATALOG TABLE
-           ======================================================== */
-        <div className="bg-white dark:bg-[#121612] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
+        /* TABLE VIEW: Compact, Minimalistic Studio Catalog Table */
+        <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-slate-50/80 dark:bg-[#161B16] border-b border-slate-200/80 dark:border-white/10 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+              <thead className="bg-slate-50/70 dark:bg-[#18181E] border-b border-slate-200/80 dark:border-white/10 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
-                  <th className="py-3 px-4 w-20 text-center">Order</th>
-                  <th className="py-3 px-4 w-32">Preview</th>
-                  <th className="py-3 px-4 min-w-[200px]">Banner Title</th>
-                  <th className="py-3 px-4 w-28">Badge</th>
-                  <th className="py-3 px-4 min-w-[180px]">Link Target</th>
-                  <th className="py-3 px-4 w-24 text-center">Status</th>
-                  <th className="py-3 px-4 w-28 text-right">Action</th>
+                  <th className="py-2.5 px-3 w-16 text-center">Order</th>
+                  <th className="py-2.5 px-3 w-28">Preview</th>
+                  <th className="py-2.5 px-3 min-w-[180px]">Banner Title</th>
+                  <th className="py-2.5 px-3 w-28">Badge</th>
+                  <th className="py-2.5 px-3 min-w-[160px]">Link Target</th>
+                  <th className="py-2.5 px-3 w-24 text-center">Status</th>
+                  <th className="py-2.5 px-3 w-20 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
                 {filteredBanners.map((banner, index) => (
                   <tr
                     key={banner.id}
-                    className="hover:bg-slate-50/70 dark:hover:bg-white/[0.04] transition-colors"
+                    className="hover:bg-slate-50/60 dark:hover:bg-white/[0.03] transition-colors"
                   >
                     {/* Order & Priority shifter */}
-                    <td className="py-2.5 px-4 text-center align-middle">
-                      <div className="inline-flex items-center space-x-1.5">
-                        <span className="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs bg-slate-100 dark:bg-[#1A201A] text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/10">
+                    <td className="py-2 px-3 text-center align-middle">
+                      <div className="inline-flex items-center space-x-1">
+                        <span className="w-5.5 h-5.5 rounded-md flex items-center justify-center font-bold text-[11px] bg-slate-100 dark:bg-[#1E1E26] text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/10">
                           {banner.displayOrder || index + 1}
                         </span>
                         <div className="flex flex-col space-y-0.5">
@@ -706,95 +770,110 @@ export default function BannersPage({ onNavigate }) {
                             disabled={index === 0}
                             className="p-0.5 text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-20 cursor-pointer"
                           >
-                            <ChevronUp className="w-3 h-3" />
+                            <ChevronUp className="w-2.5 h-2.5" />
                           </button>
                           <button
                             onClick={() => handleMoveOrder(banner.id, 'down')}
                             disabled={index === filteredBanners.length - 1}
                             className="p-0.5 text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-20 cursor-pointer"
                           >
-                            <ChevronDown className="w-3 h-3" />
+                            <ChevronDown className="w-2.5 h-2.5" />
                           </button>
                         </div>
                       </div>
                     </td>
 
                     {/* Thumbnail */}
-                    <td className="py-2.5 px-4 align-middle">
-                      <div className="relative aspect-[16/9] w-24 rounded-lg overflow-hidden bg-slate-950 border border-slate-200/80 dark:border-white/10 shadow-2xs">
+                    <td className="py-2 px-3 align-middle">
+                      <div className="relative aspect-[16/9] w-20 rounded-md overflow-hidden bg-slate-950 border border-slate-200/80 dark:border-white/10 shadow-2xs group">
                         <img
                           src={banner.bannerUrl}
                           alt={banner.title}
                           className="w-full h-full object-cover"
                         />
+                        {banner.trailerUrl && (
+                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Play className="w-3 h-3 text-white fill-current" />
+                          </div>
+                        )}
                       </div>
                     </td>
 
                     {/* Title & Subtitle */}
-                    <td className="py-2.5 px-4 align-middle">
-                      <div className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
+                    <td className="py-2 px-3 align-middle">
+                      <div className="font-bold text-slate-900 dark:text-white text-xs sm:text-[13px]">
                         {banner.title}
                       </div>
                       {banner.subtitle && (
-                        <div className="text-[11px] text-slate-400 truncate max-w-sm">
+                        <div className="text-[10.5px] text-slate-400 truncate max-w-xs font-normal mt-0.5">
                           {banner.subtitle}
                         </div>
                       )}
                     </td>
 
-                    {/* Badge */}
-                    <td className="py-2.5 px-4 align-middle">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#FEF08A] text-slate-950 shadow-xs border border-amber-300/60 inline-block">
+                    {/* Theme Badge */}
+                    <td className="py-2 px-3 align-middle">
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#FEF08A]/40 dark:bg-[#FEF08A]/15 text-amber-950 dark:text-amber-300 border border-amber-300/50 dark:border-amber-400/25 inline-block">
                         {banner.badge || 'FEATURED'}
                       </span>
                     </td>
 
                     {/* Link Target */}
-                    <td className="py-2.5 px-4 align-middle">
+                    <td className="py-2 px-3 align-middle">
                       {banner.linkType === 'DRAMA' ? (
                         <div className="flex items-center space-x-1.5 text-slate-700 dark:text-slate-300">
                           <Clapperboard className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                          <span className="truncate font-semibold">
-                            {banner.drama ? banner.drama.title : 'Linked Drama'} (Ep {banner.episodeNumber || 1})
+                          <span className="truncate font-semibold text-xs">
+                            {banner.drama ? banner.drama.title : 'Linked Drama'} <span className="text-slate-400 font-normal text-[11px]">(Ep {banner.episodeNumber || 1})</span>
                           </span>
                         </div>
                       ) : (
-                        <div className="flex items-center space-x-1.5 text-blue-600 dark:text-blue-400 truncate">
+                        <div className="flex items-center space-x-1.5 text-slate-500 dark:text-slate-400 truncate">
                           <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-                          <span className="truncate font-mono text-[11px]">
+                          <span className="truncate font-mono text-[10.5px]">
                             {banner.externalUrl}
                           </span>
                         </div>
                       )}
                     </td>
 
-                    {/* Status */}
-                    <td className="py-2.5 px-4 align-middle text-center">
-                      <Badge
-                        variant={banner.isActive ? 'active' : 'inactive'}
-                        size="xs"
+                    {/* Status Pill Toggle */}
+                    <td className="py-2 px-3 align-middle text-center">
+                      <button
+                        type="button"
                         onClick={() => handleToggleActive(banner.id)}
+                        title="Click to toggle status"
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95 ${
+                          banner.isActive
+                            ? 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25'
+                            : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
+                        }`}
                       >
-                        {banner.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                            banner.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+                          }`}
+                        />
+                        {banner.isActive ? 'Active' : 'Hidden'}
+                      </button>
                     </td>
 
                     {/* Action buttons */}
-                    <td className="py-2.5 px-4 align-middle text-right">
-                      <div className="inline-flex items-center space-x-1.5">
+                    <td className="py-2 px-3 align-middle text-right">
+                      <div className="inline-flex items-center space-x-0.5">
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(banner)}
-                          className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
-                          title="Edit"
+                          className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                          title="Edit Banner"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDeleteBanner(banner.id)}
-                          className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
-                          title="Delete"
+                          className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                          title="Delete Banner"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -812,20 +891,21 @@ export default function BannersPage({ onNavigate }) {
           UPLOAD / CREATE / EDIT BANNER MODAL
          ======================================================== */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white dark:bg-[#161B16] rounded-2xl border border-slate-200 dark:border-white/10 w-full max-w-2xl overflow-hidden shadow-2xl my-8 flex flex-col max-h-[90vh]">
+        <ModalPortal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm overflow-y-auto">
+            <div className="bg-white dark:bg-[#18181E] rounded-2xl border border-slate-200 dark:border-white/10 w-full max-w-xl overflow-hidden shadow-2xl my-6 flex flex-col max-h-[90vh]">
             
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50 dark:bg-[#121612]">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
-                  <ImageIcon className="w-4 h-4 stroke-[2.2]" />
+            <div className="px-5 py-3.5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50 dark:bg-[#121216]">
+              <div className="flex items-center space-x-2">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                  <ImageIcon className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-950 dark:text-white text-sm">
+                  <h3 className="font-bold text-slate-950 dark:text-white text-xs sm:text-sm">
                     {editingBanner ? 'Edit Hero Banner' : 'Upload New Hero Banner'}
                   </h3>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  <p className="text-[10.5px] text-slate-500 dark:text-slate-400">
                     Configure 16:9 banner artwork, badge, and playback destination
                   </p>
                 </div>
@@ -834,34 +914,34 @@ export default function BannersPage({ onNavigate }) {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
+                className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Modal Form Body */}
-            <form onSubmit={handleSubmitModal} className="p-6 overflow-y-auto space-y-5 text-xs flex-1">
+            <form onSubmit={handleSubmitModal} className="p-4 sm:p-5 overflow-y-auto space-y-3.5 text-xs flex-1">
               {formError && (
-                <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-400 flex items-center space-x-2">
+                <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-400 flex items-center space-x-2 text-xs">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{formError}</span>
                 </div>
               )}
 
               {/* 1. Banner Image Source Selection */}
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="font-bold text-slate-700 dark:text-slate-300 text-[11px] uppercase tracking-wider">
+                  <label className="font-bold text-slate-700 dark:text-slate-300 text-[10.5px] uppercase tracking-wider">
                     Banner Artwork (16:9 Landscape) *
                   </label>
-                  <div className="flex items-center bg-slate-100 dark:bg-[#121612] p-0.5 rounded-lg border border-slate-200 dark:border-white/10 text-[11px] font-bold">
+                  <div className="flex items-center bg-slate-100 dark:bg-[#121216] p-0.5 rounded-lg border border-slate-200 dark:border-white/10 text-[10.5px] font-bold">
                     <button
                       type="button"
                       onClick={() => setImageSourceMode('upload')}
-                      className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                      className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
                         imageSourceMode === 'upload'
-                          ? 'bg-[#FEF08A] text-slate-950 font-black shadow-xs'
+                          ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs'
                           : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
@@ -874,9 +954,9 @@ export default function BannersPage({ onNavigate }) {
                           setImageSourceMode('drama');
                           if (formDramaId) handleSelectDrama(formDramaId);
                         }}
-                        className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                        className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
                           imageSourceMode === 'drama'
-                            ? 'bg-[#FEF08A] text-slate-950 font-black shadow-xs'
+                            ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs'
                             : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
@@ -886,9 +966,9 @@ export default function BannersPage({ onNavigate }) {
                     <button
                       type="button"
                       onClick={() => setImageSourceMode('url')}
-                      className={`px-2.5 py-1 rounded transition-all cursor-pointer ${
+                      className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
                         imageSourceMode === 'url'
-                          ? 'bg-[#FEF08A] text-slate-950 font-black shadow-xs'
+                          ? 'bg-[#FEF08A] text-slate-950 font-black shadow-2xs'
                           : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
@@ -909,17 +989,17 @@ export default function BannersPage({ onNavigate }) {
                     />
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-slate-300 dark:border-white/20 hover:border-[#FEF08A] dark:hover:border-[#FEF08A] rounded-xl p-5 text-center cursor-pointer transition-all bg-slate-50/50 dark:bg-[#121612]/50"
+                      className="border-2 border-dashed border-slate-300 dark:border-white/20 hover:border-[#FEF08A] dark:hover:border-[#FEF08A] rounded-xl p-3.5 text-center cursor-pointer transition-all bg-slate-50/50 dark:bg-[#121216]/50"
                     >
                       {isUploadingImage ? (
-                        <div className="flex flex-col items-center justify-center space-y-2 py-2">
-                          <Loader2 className="w-6 h-6 animate-spin text-[#FEF08A]" />
-                          <span className="font-bold text-slate-600 dark:text-slate-400">Uploading banner image...</span>
+                        <div className="flex flex-col items-center justify-center space-y-1.5 py-1">
+                          <Loader2 className="w-5 h-5 animate-spin text-[#FEF08A]" />
+                          <span className="font-bold text-slate-600 dark:text-slate-400 text-xs">Uploading banner image...</span>
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center space-y-1.5">
-                          <FolderUp className="w-7 h-7 text-slate-400" />
-                          <p className="font-bold text-slate-800 dark:text-slate-200">
+                        <div className="flex flex-col items-center justify-center space-y-1">
+                          <FolderUp className="w-5 h-5 text-slate-400" />
+                          <p className="font-bold text-slate-800 dark:text-slate-200 text-xs">
                             Click to browse or drop 16:9 banner image
                           </p>
                           <p className="text-[10px] text-slate-400">
@@ -933,14 +1013,14 @@ export default function BannersPage({ onNavigate }) {
 
                 {/* Mode 2: From Series */}
                 {imageSourceMode === 'drama' && (
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#121612] border border-slate-200 dark:border-white/10 space-y-2">
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-white/10 space-y-1.5">
+                    <span className="text-[10.5px] font-bold text-slate-600 dark:text-slate-400">
                       Select Drama to pull banner from:
                     </span>
                     <select
                       value={formDramaId}
                       onChange={(e) => handleSelectDrama(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#161B16] border border-slate-200 dark:border-white/10 font-bold text-slate-900 dark:text-white cursor-pointer"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#18181E] border border-slate-200 dark:border-white/10 font-bold text-slate-900 dark:text-white cursor-pointer text-xs"
                     >
                       {dramas.map((d) => (
                         <option key={d.id} value={d.id}>
@@ -958,23 +1038,23 @@ export default function BannersPage({ onNavigate }) {
                     value={formBannerUrl}
                     onChange={(e) => setFormBannerUrl(e.target.value)}
                     placeholder="https://.../banner_16x9.jpg"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 font-mono text-xs bg-white dark:bg-[#121612] text-slate-900 dark:text-white focus:border-[#FEF08A] focus:outline-none"
+                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 font-mono text-xs bg-white dark:bg-[#121216] text-slate-900 dark:text-white focus:border-[#FEF08A] focus:outline-none"
                   />
                 )}
 
                 {/* Live Preview Box */}
                 {formBannerUrl && (
-                  <div className="relative aspect-[21/9] rounded-xl overflow-hidden bg-slate-950 border border-slate-200 dark:border-white/10 mt-2 shadow-xs group">
+                  <div className="relative aspect-[21/9] rounded-xl overflow-hidden bg-slate-950 border border-slate-200 dark:border-white/10 mt-1.5 shadow-2xs group">
                     <img
                       src={formBannerUrl}
                       alt="Banner Preview"
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#FEF08A] text-slate-950 shadow-xs">
+                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#FEF08A] text-slate-950 shadow-2xs">
                       {formBadge === 'CUSTOM' ? formCustomBadge || 'BADGE' : formBadge}
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-3">
-                      <span className="font-extrabold text-white text-xs truncate">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2.5">
+                      <span className="font-bold text-white text-xs truncate">
                         {formTitle || 'Banner Title'}
                       </span>
                       {formSubtitle && (
@@ -988,9 +1068,9 @@ export default function BannersPage({ onNavigate }) {
               </div>
 
               {/* 2. Title & Subtitle */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-[11px] uppercase tracking-wider">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[10.5px] uppercase tracking-wider">
                     Banner Title *
                   </label>
                   <input
@@ -999,12 +1079,12 @@ export default function BannersPage({ onNavigate }) {
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
                     placeholder="e.g. Forbidden Romance"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 font-bold bg-white dark:bg-[#121612] text-slate-900 dark:text-white focus:border-[#FEF08A] focus:outline-none transition-all shadow-xs"
+                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 font-bold bg-white dark:bg-[#121216] text-slate-900 dark:text-white focus:border-[#FEF08A] focus:outline-none transition-all text-xs"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-[11px] uppercase tracking-wider">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[10.5px] uppercase tracking-wider">
                     Subtitle / Tagline
                   </label>
                   <textarea
@@ -1012,22 +1092,22 @@ export default function BannersPage({ onNavigate }) {
                     value={formSubtitle}
                     onChange={(e) => setFormSubtitle(e.target.value)}
                     placeholder="Brief engaging storyline description shown on mobile banner..."
-                    className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-white/10 font-medium bg-white dark:bg-[#121612] text-slate-900 dark:text-white focus:border-[#FEF08A] focus:outline-none transition-all shadow-xs resize-none"
+                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 font-medium bg-white dark:bg-[#121216] text-slate-900 dark:text-white focus:border-[#FEF08A] focus:outline-none transition-all resize-none text-xs"
                   />
                 </div>
               </div>
 
               {/* 3. Badge & Priority Order */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-[11px] uppercase tracking-wider">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[10.5px] uppercase tracking-wider">
                     Promotional Badge
                   </label>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1.5">
                     <select
                       value={formBadge}
                       onChange={(e) => setFormBadge(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 font-bold bg-white dark:bg-[#121612] text-slate-900 dark:text-white focus:border-[#FEF08A] focus:outline-none cursor-pointer"
+                      className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 font-bold bg-white dark:bg-[#121216] text-slate-900 dark:text-white focus:border-[#FEF08A] focus:outline-none cursor-pointer text-xs"
                     >
                       {BADGE_OPTIONS.map((badge) => (
                         <option key={badge} value={badge}>
@@ -1043,14 +1123,14 @@ export default function BannersPage({ onNavigate }) {
                         value={formCustomBadge}
                         onChange={(e) => setFormCustomBadge(e.target.value)}
                         placeholder="e.g. VIP ONLY"
-                        className="w-36 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 font-bold uppercase bg-white dark:bg-[#121612] text-slate-900 dark:text-white focus:border-[#FEF08A] focus:outline-none"
+                        className="w-32 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 font-bold uppercase bg-white dark:bg-[#121216] text-slate-900 dark:text-white focus:border-[#FEF08A] focus:outline-none text-xs"
                       />
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5 text-[11px] uppercase tracking-wider">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1 text-[10.5px] uppercase tracking-wider">
                     Display Order
                   </label>
                   <input
@@ -1058,15 +1138,15 @@ export default function BannersPage({ onNavigate }) {
                     min={1}
                     value={formDisplayOrder}
                     onChange={(e) => setFormDisplayOrder(Math.max(1, Number(e.target.value)))}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 font-bold bg-white dark:bg-[#121612] text-slate-900 dark:text-white focus:border-[#FEF08A] focus:outline-none"
+                    className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 font-bold bg-white dark:bg-[#121216] text-slate-900 dark:text-white focus:border-[#FEF08A] focus:outline-none text-xs"
                   />
                 </div>
               </div>
 
               {/* 4. Link Target (Drama or External URL) */}
-              <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-[#121612] border border-slate-200/80 dark:border-white/10 space-y-3">
+              <div className="p-3 rounded-xl bg-slate-50/70 dark:bg-[#121216] border border-slate-200/80 dark:border-white/10 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-extrabold text-slate-900 dark:text-white text-xs">
+                  <span className="font-bold text-slate-900 dark:text-white text-xs">
                     Click Action & Destination
                   </span>
                   <div className="flex items-center space-x-3 text-xs font-bold">
@@ -1096,15 +1176,15 @@ export default function BannersPage({ onNavigate }) {
                 </div>
 
                 {formLinkType === 'DRAMA' ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-0.5">
                     <div className="sm:col-span-2">
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">
                         Select Series
                       </label>
                       <select
                         value={formDramaId}
                         onChange={(e) => handleSelectDrama(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#161B16] border border-slate-200 dark:border-white/10 font-bold text-slate-900 dark:text-white cursor-pointer"
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#18181E] border border-slate-200 dark:border-white/10 font-bold text-slate-900 dark:text-white cursor-pointer text-xs"
                       >
                         <option value="">-- Choose Series --</option>
                         {dramas.map((d) => (
@@ -1116,21 +1196,21 @@ export default function BannersPage({ onNavigate }) {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                        Target Episode #
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">
+                        Target Ep #
                       </label>
                       <input
                         type="number"
                         min={1}
                         value={formEpisodeNumber}
                         onChange={(e) => setFormEpisodeNumber(Math.max(1, Number(e.target.value)))}
-                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#161B16] border border-slate-200 dark:border-white/10 font-bold text-slate-900 dark:text-white"
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#18181E] border border-slate-200 dark:border-white/10 font-bold text-slate-900 dark:text-white text-xs"
                       />
                     </div>
                   </div>
                 ) : (
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">
                       Target URL
                     </label>
                     <input
@@ -1138,25 +1218,25 @@ export default function BannersPage({ onNavigate }) {
                       value={formExternalUrl}
                       onChange={(e) => setFormExternalUrl(e.target.value)}
                       placeholder="https://example.com/promo"
-                      className="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#161B16] border border-slate-200 dark:border-white/10 font-mono text-slate-900 dark:text-white"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#18181E] border border-slate-200 dark:border-white/10 font-mono text-slate-900 dark:text-white text-xs"
                     />
                   </div>
                 )}
               </div>
 
               {/* 5. Optional Video Teaser / Trailer */}
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="font-bold text-slate-700 dark:text-slate-300 text-[11px] uppercase tracking-wider">
+                  <label className="font-bold text-slate-700 dark:text-slate-300 text-[10.5px] uppercase tracking-wider">
                     Teaser Video / Trailer (Optional MP4)
                   </label>
                   <button
                     type="button"
                     onClick={() => trailerInputRef.current?.click()}
                     disabled={isUploadingTrailer}
-                    className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer flex items-center space-x-1"
+                    className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer flex items-center space-x-1"
                   >
-                    <FolderUp className="w-3.5 h-3.5" />
+                    <FolderUp className="w-3 h-3" />
                     <span>Upload MP4</span>
                   </button>
                   <input
@@ -1173,18 +1253,18 @@ export default function BannersPage({ onNavigate }) {
                   value={formTrailerUrl}
                   onChange={(e) => setFormTrailerUrl(e.target.value)}
                   placeholder="https://.../teaser.mp4"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 font-mono text-xs bg-white dark:bg-[#121612] text-slate-900 dark:text-white"
+                  className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 font-mono text-xs bg-white dark:bg-[#121216] text-slate-900 dark:text-white"
                 />
               </div>
 
               {/* 6. Active / Inactive Switch */}
-              <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-white/5">
+              <div className="pt-1.5 flex items-center justify-between border-t border-slate-100 dark:border-white/5">
                 <div>
-                  <span className="font-extrabold text-slate-900 dark:text-white text-xs block">
+                  <span className="font-bold text-slate-900 dark:text-white text-xs block">
                     Banner Visibility Status
                   </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                    When active, banner appears on the mobile OTT app home screen hero carousel
+                  <span className="text-[10.5px] text-slate-500 dark:text-slate-400">
+                    When active, banner appears on mobile OTT app hero carousel
                   </span>
                 </div>
 
@@ -1196,22 +1276,22 @@ export default function BannersPage({ onNavigate }) {
               </div>
 
               {/* Modal Footer Buttons */}
-              <div className="pt-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-end space-x-3">
+              <div className="pt-3 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-[#202620] hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold transition-all cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-[#24242E] hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold transition-all cursor-pointer text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || isUploadingImage || isUploadingTrailer}
-                  className="px-6 py-2 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-black flex items-center space-x-2 shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] active:bg-[#CA8A04] text-slate-950 font-bold inline-flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer leading-none disabled:opacity-50 text-xs"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       <span>Saving Banner...</span>
                     </>
                   ) : (
@@ -1222,35 +1302,38 @@ export default function BannersPage({ onNavigate }) {
             </form>
           </div>
         </div>
-      )}
+      </ModalPortal>
+    )}
 
       {/* ========================================================
           VIDEO TRAILER PREVIEW MODAL
          ======================================================== */}
       {previewVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="bg-slate-950 rounded-2xl border border-white/20 w-full max-w-3xl overflow-hidden shadow-2xl relative">
-            <div className="p-4 border-b border-white/10 flex items-center justify-between">
-              <span className="font-extrabold text-white text-sm">
-                Preview: {previewVideo.title}
-              </span>
-              <button
-                onClick={() => setPreviewVideo(null)}
-                className="p-1 text-white/70 hover:text-white rounded-lg hover:bg-white/10 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="aspect-[16/9] bg-black">
-              <video
-                src={previewVideo.url}
-                controls
-                autoPlay
-                className="w-full h-full object-contain"
-              />
+        <ModalPortal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm">
+            <div className="bg-slate-950 rounded-2xl border border-white/20 w-full max-w-3xl overflow-hidden shadow-2xl relative">
+              <div className="p-4 border-b border-white/10 flex items-center justify-between">
+                <span className="font-extrabold text-white text-sm">
+                  Preview: {previewVideo?.title}
+                </span>
+                <button
+                  onClick={() => setPreviewVideo(null)}
+                  className="p-1 text-white/70 hover:text-white rounded-lg hover:bg-white/10 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="aspect-[16/9] bg-black">
+                <video
+                  src={previewVideo?.url}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
     </div>

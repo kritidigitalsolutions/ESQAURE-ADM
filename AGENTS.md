@@ -3,7 +3,7 @@
 ## Website Theme & Visual Identity
 
 - **Theme Accent Color**: `#FEF08A` (Light Pastel Yellow / Amber)
-- **Dark Mode Background**: `#080B08` / `#111111` (Deep dark slate/charcoal, avoiding pure `#000000` to prevent eye strain and preserve depth)
+- **Dark Mode Background**: `#0A0A0C` (Deep Obsidian / Pure Dark Onyx, avoiding pure `#000000` to prevent eye strain and preserve depth)
 - **Font**: Urbanist (`font-urbanist`, `font-sans`)
 
 ---
@@ -15,13 +15,13 @@ Following the [Material Design Dark Theme Guidelines](https://m2.material.io/des
 ### 1. Dark Surfaces & Depth Hierarchy
 - **No Pure Black for Surfaces**: Never use `#000000` as the surface fill of UI containers, cards, tables, or modals. Pure black eliminates drop shadows and causes severe contrast vibration/glare.
 - **Elevation via Surface Lightness**: In dark theme, higher elevation is communicated by **lighter surface tones** (simulating proximity to an ambient light source) rather than relying solely on shadows:
-  - **Level 0 (Canvas / Base Background)**: `#080B08` / `#0C0F0C` (0% overlay)
-  - **Level 1 (Cards, Metric Containers, Table Rows)**: 5% overlay (`bg-[#121612]` or `bg-slate-900/60`, border `border-white/10`)
-  - **Level 2 (Hovered Cards, Secondary Containers)**: 7% overlay (`bg-[#161B16]`)
-  - **Level 4 (App Bar, Top Navigation, Sticky Headers)**: 9% overlay (`bg-[#1A1F1A]/95 backdrop-blur-md`, `border-b border-white/10`)
-  - **Level 8 (Dropdown Menus, Popovers, Filter Menus)**: 12% overlay (`bg-[#202620]`, shadow-lg, border `border-white/12`)
-  - **Level 16 (Slide-over Drawers, Side Panels)**: 15% overlay (`bg-[#242A24]`, shadow-xl)
-  - **Level 24 (Modal Dialogs, Alert Prompts)**: 16% overlay (`bg-[#282E28]`, shadow-2xl, border `border-white/15`)
+  - **Level 0 (Canvas / Base Background)**: `#0A0A0C` (0% overlay)
+  - **Level 1 (Cards, Metric Containers, Table Rows)**: 5% overlay (`bg-[#121216]` or `bg-slate-900/60`, border `border-white/10`)
+  - **Level 2 (Hovered Cards, Secondary Containers)**: 7% overlay (`bg-[#18181E]`)
+  - **Level 4 (App Bar, Top Navigation, Sticky Headers)**: 9% overlay (`bg-[#1E1E26]/95 backdrop-blur-md`, `border-b border-white/10`)
+  - **Level 8 (Dropdown Menus, Popovers, Filter Menus)**: 12% overlay (`bg-[#24242E]`, shadow-lg, border `border-white/12`)
+  - **Level 16 (Slide-over Drawers, Side Panels)**: 15% overlay (`bg-[#2A2A35]`, shadow-xl)
+  - **Level 24 (Modal Dialogs, Alert Prompts)**: 16% overlay (`bg-[#30303D]`, shadow-2xl, border `border-white/15`)
 - **Preserve Depth Shadows**: Always retain natural cast shadows (`shadow-md`, `shadow-xl`, `shadow-2xl`) along the z-axis. Never replace shadows with colored glowing outlines.
 
 ### 2. Typography & "On-Surface" Color Hierarchy
@@ -34,7 +34,7 @@ Ensure full compliance with WCAG AA (≥ 4.5:1 body text, ≥ 15.8:1 white-on-da
 ### 3. Limited & Desaturated Accent Colors
 - **Restraint**: Saturated colors vibrate and tire the eyes against dark backgrounds. Dark surfaces must dominate 90%+ of the screen.
 - **Brand Accent (#FEF08A)**: Use light pastel yellow strictly for focal points:
-  - Primary CTA buttons (`bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold`)
+  - Primary CTA buttons (`bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold`)
   - Active navigation pill or tab indicator
   - Selected table rows / active filters
   - KPI metric icon badges
@@ -42,7 +42,7 @@ Ensure full compliance with WCAG AA (≥ 4.5:1 body text, ≥ 15.8:1 white-on-da
 
 ### 4. Interactive States in Dark Mode
 - **Hover**: Subtle white overlay increase (+5% to +8% lightness, e.g., `hover:bg-white/[0.05]`)
-- **Focus**: Distinct focus ring (`focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/60`)
+- **Focus**: Distinct focus ring (`focus:outline-hidden focus:ring-2 focus:ring-[#FACC15]/60`)
 - **Active / Pressed**: +12% lightness overlay or solid theme accent.
 
 ---
@@ -57,20 +57,20 @@ Whenever creating or modifying KPI cards, stat cards, metric overviews, or featu
 
 2. **Standard KPI Metric Icon Badge**:
    ```jsx
-   <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 group-hover:scale-105 transition-transform shadow-xs">
-     <Icon className="w-5 h-5 text-slate-950 dark:text-amber-400 stroke-[2.2]" />
+   <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs">
+     <Icon className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
    </div>
    ```
 
 3. **Standard Modal / Header Icon Badge (compact)**:
    ```jsx
-   <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 shrink-0">
+   <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
      <Icon className="w-4 h-4 stroke-[2.2]" />
    </div>
    ```
 
 4. **Action Buttons / Active Indicators**:
-   - Primary action buttons, active tab indicators, and search highlights should use `bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold`.
+   - Primary action buttons, active tab indicators, and search highlights should use `bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold`.
 
 ---
 

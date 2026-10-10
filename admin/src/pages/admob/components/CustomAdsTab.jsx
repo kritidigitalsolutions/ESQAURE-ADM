@@ -92,7 +92,7 @@ export default function CustomAdsTab({
         );
       default:
         return (
-          <span className="px-2 py-0.5 rounded text-[10.5px] font-bold bg-slate-100 dark:bg-[#161B16] text-slate-700 dark:text-slate-300">
+          <span className="px-2 py-0.5 rounded text-[10.5px] font-bold bg-slate-100 dark:bg-[#18181E] text-slate-700 dark:text-slate-300">
             {type}
           </span>
         );
@@ -115,7 +115,7 @@ export default function CustomAdsTab({
         );
       case 'EXPIRED':
         return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 dark:bg-[#161B16] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-100 dark:bg-[#18181E] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10">
             EXPIRED
           </span>
         );
@@ -128,14 +128,14 @@ export default function CustomAdsTab({
     <div className="space-y-4 font-urbanist">
       
       {/* Top Banner & Quick Metrics */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus">
+      <div className="bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-nodus">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center space-x-2">
               <h3 className="text-base font-black text-slate-950 dark:text-white">
                 Direct Advertisers & In-House Custom Ads
               </h3>
-              <span className="px-2 py-0.5 rounded-full bg-[#FEF08A]/30 text-amber-900 dark:text-[#FEF08A] border border-amber-300/50 dark:border-amber-700/40 text-[10.5px] font-extrabold">
+              <span className="px-2 py-0.5 rounded-full bg-[#FEF08A]/30 text-amber-900 dark:text-[#FEF08A] border border-amber-300/50 dark:border-amber-400/30 text-[10.5px] font-extrabold">
                 {ads.length} Campaigns Total
               </span>
             </div>
@@ -147,7 +147,7 @@ export default function CustomAdsTab({
           {/* Quick CTA */}
           <button
             onClick={onOpenCreateModal}
-            className="inline-flex items-center justify-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-black bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 shadow-xs transition-all cursor-pointer self-start md:self-auto shrink-0"
+            className="inline-flex items-center justify-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-black bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 shadow-xs transition-all cursor-pointer self-start md:self-auto shrink-0"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Create Custom Ad</span>
@@ -156,28 +156,28 @@ export default function CustomAdsTab({
 
         {/* 4 Mini Stat Pills */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-white/10">
-          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/60 dark:border-white/5">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200/60 dark:border-white/5">
             <span className="text-[11px] font-bold text-slate-400 block">Active Campaigns</span>
             <span className="text-base font-black text-slate-950 dark:text-white">
               {stats?.activeCount ?? ads.filter(a => a.status === 'ACTIVE').length} Live
             </span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/60 dark:border-white/5">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200/60 dark:border-white/5">
             <span className="text-[11px] font-bold text-slate-400 block">Total Impressions</span>
             <span className="text-base font-black text-slate-950 dark:text-white">
               {(stats?.totalImpressions ?? ads.reduce((s, a) => s + (a.impressionsCount || 0), 0)).toLocaleString()}
             </span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/60 dark:border-white/5">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200/60 dark:border-white/5">
             <span className="text-[11px] font-bold text-slate-400 block">Total Taps / Clicks</span>
             <span className="text-base font-black text-slate-950 dark:text-white">
               {(stats?.totalClicks ?? ads.reduce((s, a) => s + (a.clicksCount || 0), 0)).toLocaleString()}
             </span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#161B16] border border-slate-200/60 dark:border-white/5">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-200/60 dark:border-white/5">
             <span className="text-[11px] font-bold text-slate-400 block">Average CTR</span>
             <span className="text-base font-black text-amber-600 dark:text-[#FEF08A]">
               {stats?.overallCtr ?? '6.34%'}
@@ -187,7 +187,7 @@ export default function CustomAdsTab({
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white dark:bg-[#121612] p-3 rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-nodus">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white dark:bg-[#121216] p-3 rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-nodus">
         
         {/* Format Selector */}
         <div className="flex items-center space-x-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
@@ -218,14 +218,14 @@ export default function CustomAdsTab({
               placeholder="Search sponsor or title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60 w-44 sm:w-56"
+              className="pl-8 pr-3 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/60 w-44 sm:w-56"
             />
           </div>
 
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-2.5 py-1.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-[#161B16] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white cursor-pointer"
+            className="px-2.5 py-1.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white cursor-pointer"
           >
             {STATUS_TABS.map((s) => (
               <option key={s.id} value={s.id}>{s.label}</option>
@@ -236,10 +236,10 @@ export default function CustomAdsTab({
       </div>
 
       {/* Custom Ads Inventory Table */}
-      <div className="bg-white dark:bg-[#121612] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-nodus overflow-hidden">
+      <div className="bg-white dark:bg-[#121216] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-nodus overflow-hidden">
         {filteredAds.length === 0 ? (
           <div className="p-12 text-center flex flex-col items-center justify-center">
-            <div className="w-12 h-12 rounded-2xl bg-[#FEF08A]/30 border border-amber-200/60 dark:border-amber-700/40 flex items-center justify-center text-slate-950 dark:text-amber-400 mb-3">
+            <div className="w-12 h-12 rounded-2xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 mb-3">
               <Sparkles className="w-6 h-6 stroke-[2]" />
             </div>
             <h4 className="text-base font-black text-slate-900 dark:text-white">
@@ -250,7 +250,7 @@ export default function CustomAdsTab({
             </p>
             <button
               onClick={onOpenCreateModal}
-              className="px-4 py-2 rounded-xl text-xs font-black bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 transition-all cursor-pointer shadow-xs"
+              className="px-4 py-2 rounded-xl text-xs font-black bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 transition-all cursor-pointer shadow-xs"
             >
               + Create First Custom Ad
             </button>
@@ -259,7 +259,7 @@ export default function CustomAdsTab({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse font-urbanist">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-white/10 text-[11px] font-extrabold uppercase text-slate-400 dark:text-slate-500 tracking-wider bg-slate-50/70 dark:bg-[#161B16]/50">
+                <tr className="border-b border-slate-200 dark:border-white/10 text-[11px] font-extrabold uppercase text-slate-400 dark:text-slate-500 tracking-wider bg-slate-50/70 dark:bg-[#18181E]/50">
                   <th className="py-3 px-3.5">Campaign & Creative</th>
                   <th className="py-3 px-3">Format & Slot</th>
                   <th className="py-3 px-3">Priority</th>
@@ -338,7 +338,7 @@ export default function CustomAdsTab({
 
                       {/* Priority Rank */}
                       <td className="py-3 px-3">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-[#161B16] text-slate-900 dark:text-white font-black text-[11px] border border-slate-200/60 dark:border-white/10">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-[#18181E] text-slate-900 dark:text-white font-black text-[11px] border border-slate-200/60 dark:border-white/10">
                           ★ {ad.priority || 5}/10
                         </span>
                       </td>
@@ -406,7 +406,7 @@ export default function CustomAdsTab({
                               }
                             }}
                             title="Reset Analytics"
-                            className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-[#FEF08A]/10 transition-colors cursor-pointer"
+                            className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-[#FACC15]/10 transition-colors cursor-pointer"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                           </button>
