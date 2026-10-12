@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useRef, useId } from 'react';
-import { IndianRupee, ArrowUp } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef, useId } from 'react';
+import { IndianRupee, ArrowUp, Loader2 } from 'lucide-react';
 import AnimatedNumber from './common/AnimatedNumber';
+import { subscriptionService } from '../services/subscriptionService';
 
 // Format currency in Indian Rupee (₹)
 export function formatINR(val) {
@@ -27,61 +28,87 @@ export default function IncomeChart({ className = '' }) {
   // Only 3 clean periods requested by user: 'today', 'monthly', 'yearly'
   const [period, setPeriod] = useState('monthly');
   const [hoveredIdx, setHoveredIdx] = useState(null);
+  const [realAnalytics, setRealAnalytics] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const containerRef = useRef(null);
   const gridId = `income-grid-${useId().replace(/:/g, '')}`;
 
-  // Period data sets: Today (hourly), Monthly (weeks of current month), Yearly (6-month progression)
+  useEffect(() => {
+    let isMounted = true;
+    subscriptionService.getRevenueAnalytics()
+      .then((data) => {
+        if (!isMounted) return;
+        if (data && (data.today || data.monthly || data.yearly)) {
+          setRealAnalytics(data);
+        }
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.warn('Revenue analytics load fallback:', err);
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Period data sets: Today (hourly), Monthly (intervals of month), Yearly (6-month progression)
   const dataMap = useMemo(() => {
+    if (realAnalytics) return realAnalytics;
+
+    const now = new Date();
+    const monthName = now.toLocaleString('en-US', { month: 'short' });
     return {
       today: {
         label: "TODAY'S REVENUE",
-        total: '₹18,450',
-        totalNum: 18450,
-        trend: '+18.4%',
-        subtext: 'vs yesterday (₹15,580)',
+        total: '₹0',
+        totalNum: 0,
+        trend: '+0.0%',
+        subtext: 'vs yesterday (₹0)',
         points: [
-          { label: '00:00', value: 1450, time: '12:00 AM' },
-          { label: '04:00', value: 920, time: '04:00 AM' },
-          { label: '08:00', value: 3850, time: '08:00 AM' },
-          { label: '12:00', value: 7920, time: '12:00 PM' },
-          { label: '16:00', value: 6400, time: '04:00 PM' },
-          { label: '20:00', value: 11800, time: '08:00 PM' },
-          { label: '23:00', value: 14650, time: '11:00 PM' },
+          { label: '00:00', value: 0, time: '12:00 AM' },
+          { label: '04:00', value: 0, time: '04:00 AM' },
+          { label: '08:00', value: 0, time: '08:00 AM' },
+          { label: '12:00', value: 0, time: '12:00 PM' },
+          { label: '16:00', value: 0, time: '04:00 PM' },
+          { label: '20:00', value: 0, time: '08:00 PM' },
+          { label: '23:00', value: 0, time: '11:00 PM' },
         ],
       },
       monthly: {
-        label: 'MARCH 2026 REVENUE',
-        total: '₹4,85,200',
-        totalNum: 485200,
-        trend: '+24.8%',
-        subtext: 'vs Feb 2026 (₹4,20,000)',
+        label: `${monthName.toUpperCase()} ${now.getFullYear()} REVENUE`,
+        total: '₹0',
+        totalNum: 0,
+        trend: '+0.0%',
+        subtext: 'vs previous month (₹0)',
         points: [
-          { label: '1-5 Mar', value: 68000, time: '1-5 Mar' },
-          { label: '6-10 Mar', value: 145000, time: '6-10 Mar' },
-          { label: '11-15 Mar', value: 235000, time: '11-15 Mar' },
-          { label: '16-20 Mar', value: 342000, time: '16-20 Mar' },
-          { label: '21-25 Mar', value: 418000, time: '21-25 Mar' },
-          { label: '26-31 Mar', value: 485200, time: '26-31 Mar' },
+          { label: `1-5 ${monthName}`, value: 0, time: `1-5 ${monthName}` },
+          { label: `6-10 ${monthName}`, value: 0, time: `6-10 ${monthName}` },
+          { label: `11-15 ${monthName}`, value: 0, time: `11-15 ${monthName}` },
+          { label: `16-20 ${monthName}`, value: 0, time: `16-20 ${monthName}` },
+          { label: `21-25 ${monthName}`, value: 0, time: `21-25 ${monthName}` },
+          { label: `26-31 ${monthName}`, value: 0, time: `26-31 ${monthName}` },
         ],
       },
       yearly: {
         label: 'PAST 6 MONTHS REVENUE',
-        total: '₹21.25 Lakh',
-        totalNum: 2125200,
-        trend: '+38.2%',
+        total: '₹0',
+        totalNum: 0,
+        trend: '+0.0%',
         subtext: 'vs previous 6 mo',
         points: [
-          { label: 'Oct 25', value: 210000, time: 'Oct 2025' },
-          { label: 'Nov 25', value: 275000, time: 'Nov 2025' },
-          { label: 'Dec 25', value: 340000, time: 'Dec 2025' },
-          { label: 'Jan 26', value: 395000, time: 'Jan 2026' },
-          { label: 'Feb 26', value: 420000, time: 'Feb 2026' },
-          { label: 'Mar 26', value: 485200, time: 'Mar 2026' },
+          { label: 'May', value: 0, time: 'May' },
+          { label: 'Jun', value: 0, time: 'Jun' },
+          { label: 'Jul', value: 0, time: 'Jul' },
+          { label: 'Aug', value: 0, time: 'Aug' },
+          { label: 'Sep', value: 0, time: 'Sep' },
+          { label: 'Oct', value: 0, time: 'Oct' },
         ],
       },
     };
-  }, []);
+  }, [realAnalytics]);
 
   const currentData = dataMap[period];
   const points = currentData.points;
@@ -179,7 +206,7 @@ export default function IncomeChart({ className = '' }) {
       <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
         {/* Left: Title & Subtle Icon */}
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shadow-2xs shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shadow-2xs shrink-0">
             <IndianRupee className="w-4 h-4 stroke-[2.5]" />
           </div>
           <div>
@@ -246,55 +273,62 @@ export default function IncomeChart({ className = '' }) {
           ref={containerRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          className="relative flex-1 w-full h-[100px] sm:h-[110px] rounded-xl bg-gradient-to-l from-amber-50/40 dark:from-amber-900/10 via-amber-50/15 dark:via-amber-900/5 to-transparent border border-slate-100/90 dark:border-white/10 overflow-hidden cursor-crosshair select-none"
+          className="relative flex-1 w-full h-[100px] sm:h-[110px] rounded-xl bg-gradient-to-l from-amber-50/25 dark:from-amber-900/10 via-amber-50/10 dark:via-amber-900/5 to-transparent border border-slate-100/90 dark:border-white/10 overflow-hidden cursor-crosshair select-none"
         >
-          {/* Subtle Dotted Pattern Overlay */}
-          <div
-            className="absolute inset-0 text-slate-300/35 pointer-events-none"
-            style={{
-              WebkitMaskImage: 'linear-gradient(to right, transparent, black 20%)',
-              maskImage: 'linear-gradient(to right, transparent, black 20%)',
-            }}
-          >
-            <svg className="h-full w-full" aria-hidden="true">
-              <defs>
-                <pattern id={gridId} width="16" height="16" patternUnits="userSpaceOnUse">
-                  <circle cx="1.5" cy="1.5" r="1.2" fill="currentColor" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill={`url(#${gridId})`} />
-            </svg>
-          </div>
-
           {/* SVG Spline Curve & Area */}
           <svg
             viewBox={`0 0 ${chartBounds.width} ${chartBounds.height}`}
             preserveAspectRatio="none"
+            shapeRendering="geometricPrecision"
             className="w-full h-full overflow-visible"
           >
             <defs>
               <linearGradient id="income-grad-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#EAB308" stopOpacity="0.25" />
-                <stop offset="60%" stopColor="#EAB308" stopOpacity="0.06" />
+                <stop offset="0%" stopColor="#EAB308" stopOpacity="0.32" />
+                <stop offset="65%" stopColor="#EAB308" stopOpacity="0.07" />
                 <stop offset="100%" stopColor="#EAB308" stopOpacity="0.0" />
               </linearGradient>
             </defs>
+
+            {/* Crisp Horizontal Guidelines */}
+            <g className="opacity-30 dark:opacity-15 pointer-events-none">
+              {[0.2, 0.55, 0.9].map((ratio, gIdx) => {
+                const yPos = chartBounds.padTop + (chartBounds.height - chartBounds.padTop - chartBounds.padBottom) * (1 - ratio);
+                return (
+                  <line
+                    key={`inc-grid-${gIdx}`}
+                    x1={0}
+                    y1={yPos}
+                    x2={chartBounds.width}
+                    y2={yPos}
+                    stroke="#64748B"
+                    strokeWidth={1}
+                    strokeDasharray="4 4"
+                    vectorEffect="non-scaling-stroke"
+                    shapeRendering="crispEdges"
+                  />
+                );
+              })}
+            </g>
 
             {/* Filled Area */}
             <path
               d={chartBounds.areaPath}
               fill="url(#income-grad-fill)"
+              shapeRendering="geometricPrecision"
               className="transition-all duration-300 ease-out"
             />
 
-            {/* Spline Line */}
+            {/* Spline Line (Pin-sharp non-scaling stroke) */}
             <path
               d={chartBounds.splinePath}
               fill="none"
               stroke="#EAB308"
-              strokeWidth={3}
+              strokeWidth={2.8}
               strokeLinecap="round"
               strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+              shapeRendering="geometricPrecision"
               className="transition-all duration-300 ease-out"
             />
 
@@ -308,7 +342,9 @@ export default function IncomeChart({ className = '' }) {
                 stroke="#EAB308"
                 strokeWidth={1.5}
                 strokeDasharray="3 3"
-                strokeOpacity={0.7}
+                strokeOpacity={0.8}
+                vectorEffect="non-scaling-stroke"
+                shapeRendering="crispEdges"
                 className="pointer-events-none transition-all duration-100"
               />
             )}

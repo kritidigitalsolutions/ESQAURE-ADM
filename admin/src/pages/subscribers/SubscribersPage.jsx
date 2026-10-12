@@ -15,10 +15,12 @@ import {
   Calendar,
   Clock,
   Sparkles,
-  ArrowUpDown
+  ArrowUpDown,
+  ChevronDown
 } from 'lucide-react';
 import AnimatedNumber from '../../components/common/AnimatedNumber';
 import PageLoader from '../../components/common/PageLoader';
+import Badge from '../../components/common/Badge';
 
 /**
  * Clean & Minimalist Subscribers & Access Management Page for ESQUARE Admin.
@@ -214,34 +216,32 @@ export default function SubscribersPage() {
         {/* Metric 1: Active Subscribers */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center space-x-2.5 min-w-0">
-                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                  <Crown className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                    Active Subscribers
-                  </span>
-                  <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                    Paid Base
-                  </span>
-                </div>
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Crown className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                  Active Subscribers
+                </span>
+                <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                  Paid Base
+                </span>
               </div>
             </div>
 
-            <div className="mt-2.5">
-              <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+            <div className="mt-2">
+              <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
                 <AnimatedNumber value={overviewKpis?.activeSubscribers ?? subscribers.length} />
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+          <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
             <span className="truncate text-slate-500 dark:text-slate-400">
               {plans.length} plan tiers configured
             </span>
-            <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-emerald-600 dark:text-emerald-400 font-bold">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               Live in DB
             </span>
           </div>
@@ -250,34 +250,32 @@ export default function SubscribersPage() {
         {/* Metric 2: 1 Month Pass */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center space-x-2.5 min-w-0">
-                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                  <CreditCard className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                    1 Month Pass
-                  </span>
-                  <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                    30 Days Cadence
-                  </span>
-                </div>
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <CreditCard className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                  1 Month Pass
+                </span>
+                <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                  30 Days Cadence
+                </span>
               </div>
             </div>
 
-            <div className="mt-2.5">
-              <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+            <div className="mt-2">
+              <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
                 <AnimatedNumber value={count1M} />
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+          <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
             <span className="truncate text-slate-500 dark:text-slate-400">
               Monthly subscribers
             </span>
-            <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-emerald-600 dark:text-emerald-400 font-bold">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               AutoPay
             </span>
           </div>
@@ -286,34 +284,32 @@ export default function SubscribersPage() {
         {/* Metric 3: 12 Months Pass */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center space-x-2.5 min-w-0">
-                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                  <Crown className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                    12 Months Pass
-                  </span>
-                  <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                    Annual Cohort
-                  </span>
-                </div>
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Crown className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                  12 Months Pass
+                </span>
+                <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                  Annual Cohort
+                </span>
               </div>
             </div>
 
-            <div className="mt-2.5">
-              <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+            <div className="mt-2">
+              <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
                 <AnimatedNumber value={count12M} />
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+          <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
             <span className="truncate text-slate-500 dark:text-slate-400">
               Highest LTV cohort
             </span>
-            <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-emerald-600 dark:text-emerald-400 font-bold">
+            <span className="text-amber-600 dark:text-amber-400 font-bold">
               365 Days
             </span>
           </div>
@@ -322,34 +318,32 @@ export default function SubscribersPage() {
         {/* Metric 4: Monthly Run-Rate (MRR) */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center space-x-2.5 min-w-0">
-                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                  <Sparkles className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                    Monthly Run-Rate
-                  </span>
-                  <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                    Recurring AutoPay
-                  </span>
-                </div>
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Sparkles className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                  Monthly Run-Rate
+                </span>
+                <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                  Recurring AutoPay
+                </span>
               </div>
             </div>
 
-            <div className="mt-2.5">
-              <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+            <div className="mt-2">
+              <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
                 ₹{overviewKpis?.totalMrr || '0.00'}
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+          <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
             <span className="truncate text-slate-500 dark:text-slate-400">
               Razorpay e-Mandate
             </span>
-            <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-emerald-600 dark:text-emerald-400 font-bold">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               Active MRR
             </span>
           </div>
@@ -363,7 +357,7 @@ export default function SubscribersPage() {
             <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
               Subscribers & Memberships
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-900 dark:text-amber-300 border border-amber-300/50">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs text-slate-950 border border-amber-300/50">
               {filteredSubscribers.length} Members
             </span>
           </div>
@@ -447,16 +441,17 @@ export default function SubscribersPage() {
           </div>
 
           {/* Sort By Dropdown */}
-          <div className="flex items-center space-x-1.5 shrink-0">
+          <div className="relative flex items-center shrink-0">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+              className="appearance-none pl-3 pr-8 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer transition-colors"
             >
-              <option value="newest">Recent First</option>
-              <option value="expiry">Expiry (Soonest)</option>
-              <option value="name">Name (A - Z)</option>
+              <option value="newest" className="dark:bg-[#1E1E26]">Recent First</option>
+              <option value="expiry" className="dark:bg-[#1E1E26]">Expiry (Soonest)</option>
+              <option value="name" className="dark:bg-[#1E1E26]">Name (A - Z)</option>
             </select>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
           </div>
 
           <span className="text-[11px] text-slate-400 font-medium shrink-0 hidden lg:inline">
@@ -468,28 +463,27 @@ export default function SubscribersPage() {
       {/* Subscribers Table Container */}
       <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden transition-colors">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 dark:bg-[#18181E] border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10.5px] font-bold">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead className="bg-slate-50 dark:bg-[#18181E] border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold">
               <tr>
-                <th className="py-2.5 px-3">Subscriber</th>
-                <th className="py-2.5 px-3">Contact Phone</th>
-                <th className="py-2.5 px-3">Subscription Plan</th>
-                <th className="py-2.5 px-3">AutoPay Mandate</th>
-                <th className="py-2.5 px-3">Expiry Date</th>
-                <th className="py-2.5 px-3">Status</th>
-                <th className="py-2.5 px-3 text-right">Actions</th>
+                <th className="py-2.5 px-3 min-w-[170px]">Subscriber</th>
+                <th className="py-2.5 px-3 w-40">Contact Phone</th>
+                <th className="py-2.5 px-3 min-w-[190px]">Email</th>
+                <th className="py-2.5 px-3 w-36">Subscription Plan</th>
+                <th className="py-2.5 px-3 w-40">Expiry Date</th>
+                <th className="py-2.5 px-3 w-28 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium text-slate-900 dark:text-slate-100">
               {isLoading && subscribers.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="py-10">
+                  <td colSpan="6" className="py-10">
                     <PageLoader size="sm" text="Loading subscriber directory..." minHeight="min-h-[200px]" />
                   </td>
                 </tr>
               ) : filteredSubscribers.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="py-10 text-center">
+                  <td colSpan="6" className="py-10 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400">
                         <Users className="w-4 h-4" />
@@ -515,8 +509,8 @@ export default function SubscribersPage() {
               ) : (
                 filteredSubscribers.map((sub) => {
                   const userName = sub.user || sub.name || 'Viewer';
-                  const userPhone = sub.phone || 'N/A';
-                  const userEmail = sub.email || '';
+                  const userPhone = sub.phone && sub.phone !== 'N/A' && sub.phone !== '—' ? sub.phone : '—';
+                  const userEmail = sub.email && sub.email !== 'N/A' && sub.email !== '—' ? sub.email : '—';
                   const planTitle = sub.planName || sub.plan || 'VIP';
                   const expiryText = sub.currentPeriodEnd
                     ? new Date(sub.currentPeriodEnd).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -531,68 +525,69 @@ export default function SubscribersPage() {
                       className="hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors"
                     >
                       {/* Subscriber Identity */}
-                      <td className="py-2 px-3">
+                      <td className="py-2 px-3 whitespace-nowrap">
                         <div className="flex items-center space-x-2.5">
-                          <div className="w-7 h-7 rounded-full bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-300 dark:border-amber-400/30 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
-                            {userName.charAt(0).toUpperCase()}
+                          <div
+                            className="w-7 h-7 rounded-full bg-[#FEF08A] text-slate-950 shadow-xs border border-amber-300 dark:border-amber-400/30 flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden shadow-2xs"
+                            style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, maxWidth: 28, maxHeight: 28 }}
+                          >
+                            {sub.avatarUrl ? (
+                              <img
+                                src={sub.avatarUrl}
+                                alt={userName}
+                                className="w-full h-full object-cover rounded-full block"
+                                style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, maxWidth: 28, maxHeight: 28 }}
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                              />
+                            ) : (
+                              userName.charAt(0).toUpperCase()
+                            )}
                           </div>
-                          <div className="min-w-0">
-                            <span className="font-bold text-xs text-slate-900 dark:text-white block truncate">
-                              {userName}
-                            </span>
-                            {userEmail ? (
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 block truncate max-w-[160px]">
-                                {userEmail}
-                              </span>
-                            ) : null}
-                          </div>
+                          <span className="font-bold text-xs text-slate-900 dark:text-white truncate max-w-[170px]">
+                            {userName}
+                          </span>
                         </div>
                       </td>
 
-                      {/* Phone */}
-                      <td className="py-2 px-3 font-mono text-xs text-slate-800 dark:text-slate-300 font-medium">
+                      {/* Contact Phone */}
+                      <td className="py-2 px-3 whitespace-nowrap font-mono text-xs font-medium text-slate-800 dark:text-slate-300">
                         {userPhone}
                       </td>
 
-                      {/* Subscription Plan Badge */}
-                      <td className="py-2 px-3">
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-[#FEF08A]/35 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] border border-amber-300/40 dark:border-amber-400/25">
-                          <Crown className="w-3 h-3 text-amber-700 dark:text-amber-400 shrink-0" />
-                          <span>{cleanPlanName(planTitle)}</span>
-                        </span>
-                      </td>
-
-                      {/* AutoPay Mandate */}
-                      <td className="py-2 px-3">
-                        {sub.autoRenew ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/40">
-                            <CreditCard className="w-3 h-3 text-sky-600 dark:text-sky-400 shrink-0" />
-                            <span>AutoPay</span>
+                      {/* Email */}
+                      <td className="py-2 px-3 whitespace-nowrap text-xs text-slate-600 dark:text-slate-400">
+                        {userEmail !== '—' ? (
+                          <span className="truncate max-w-[200px] block" title={userEmail}>
+                            {userEmail}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10">
-                            <ShieldCheck className="w-3 h-3 text-slate-500 shrink-0" />
-                            <span>Manual</span>
+                          <span className="text-slate-300 dark:text-slate-600 font-mono text-xs select-none">
+                            —
                           </span>
                         )}
                       </td>
 
+                      {/* Subscription Plan Badge */}
+                      <td className="py-2 px-3 whitespace-nowrap">
+                        <Badge plan={cleanPlanName(planTitle)} size="xs" />
+                      </td>
+
                       {/* Expiry Date & Days Left */}
-                      <td className="py-2 px-3 text-slate-700 dark:text-slate-300">
+                      <td className="py-2 px-3 whitespace-nowrap text-slate-700 dark:text-slate-300">
                         <div className="flex items-center space-x-1.5">
                           <span className="text-xs font-semibold">{expiryText}</span>
                           {!isExpired && daysLeft > 0 ? (
                             <span
-                              className={`px-1.5 py-0.2 rounded text-[9.5px] font-bold ${
+                              className={`px-2 py-0.5 rounded-full text-[9.5px] font-bold ${
                                 daysLeft <= 7
-                                  ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40'
-                                  : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40'
+                                  ? 'bg-amber-200 dark:bg-amber-400/20 text-amber-950 dark:text-amber-300 border border-amber-300/40 dark:border-amber-400/30'
+                                  : 'bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30'
                               }`}
                             >
                               {daysLeft}d left
                             </span>
                           ) : (
-                            <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10">
+                            <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-slate-200 dark:bg-white/[0.08] text-slate-900 dark:text-slate-300 border border-slate-300/40 dark:border-white/10">
                               Expired
                             </span>
                           )}
@@ -600,49 +595,12 @@ export default function SubscribersPage() {
                       </td>
 
                       {/* Status */}
-                      <td className="py-2 px-3">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            isExpired
-                              ? 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
-                              : isTrial
-                              ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40'
-                              : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40'
-                          }`}
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              isExpired
-                                ? 'bg-slate-400'
-                                : isTrial
-                                ? 'bg-amber-500'
-                                : 'bg-emerald-500 animate-pulse'
-                            }`}
-                          />
-                          <span>{isExpired ? 'Expired' : isTrial ? 'Trial' : 'Active'}</span>
-                        </span>
-                      </td>
-
-                      {/* Quick Actions (Extend / Revoke) */}
-                      <td className="py-2 px-3 text-right">
-                        <div className="flex items-center justify-end space-x-1">
-                          <button
-                            type="button"
-                            title="Add 30 Days Access"
-                            onClick={() => handleExtendVip(sub.id, userName)}
-                            className="p-1 rounded-md text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors cursor-pointer"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            title="Revoke Membership"
-                            onClick={() => handleRevokeVip(sub.id, userName)}
-                            className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                      <td className="py-2 px-3 whitespace-nowrap text-center">
+                        <Badge
+                          variant={isExpired ? 'inactive' : isTrial ? 'pending' : 'active'}
+                          label={isExpired ? 'Expired' : isTrial ? 'Trial' : 'Active'}
+                          size="xs"
+                        />
                       </td>
                     </tr>
                   );
@@ -659,16 +617,12 @@ export default function SubscribersPage() {
           </span>
           <div className="flex flex-wrap items-center gap-3 text-[10.5px] font-medium">
             <span className="inline-flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-              AutoPay Mandates: <strong className="text-slate-700 dark:text-slate-200">{counts.autoPay}</strong>
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-              Manual Admin Grants: <strong className="text-slate-700 dark:text-slate-200">{counts.manual}</strong>
-            </span>
-            <span className="inline-flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               Active Subscriptions: <strong className="text-slate-700 dark:text-slate-200">{counts.total - counts.expired}</strong>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              Trial Accounts: <strong className="text-slate-700 dark:text-slate-200">{counts.trial}</strong>
             </span>
             {counts.expired > 0 && (
               <span className="inline-flex items-center gap-1">

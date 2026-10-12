@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import ToggleSwitch from './common/ToggleSwitch';
 import {
   X,
   Film,
@@ -708,7 +709,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
               {/* Section 1: Core Details Card */}
               <div className="bg-slate-50/70 dark:bg-[#18181E] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 space-y-4">
                 <div className="flex items-center space-x-2.5 pb-2 border-b border-slate-200/60 dark:border-white/10">
-                  <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+                  <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                     <FileText className="w-4 h-4 stroke-[2.2]" />
                   </div>
                   <div>
@@ -805,7 +806,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
               <div className="bg-slate-50/70 dark:bg-[#18181E] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+                    <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                       <Tag className="w-4 h-4 stroke-[2.2]" />
                     </div>
                     <div>
@@ -855,7 +856,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                 <div className="bg-slate-50/70 dark:bg-[#18181E] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+                      <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                         <Tv className="w-4 h-4 stroke-[2.2]" />
                       </div>
                       <div>
@@ -900,7 +901,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                 <div className="bg-slate-50/70 dark:bg-[#18181E] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 flex flex-col justify-between space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+                      <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                         {isPaid ? <Lock className="w-4 h-4 stroke-[2.2]" /> : <Unlock className="w-4 h-4 stroke-[2.2]" />}
                       </div>
                       <div>
@@ -963,7 +964,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                 {/* Editorial Highlights */}
                 <div className="sm:col-span-2 bg-slate-50/70 dark:bg-[#18181E] rounded-2xl p-5 border border-slate-200/80 dark:border-white/10 space-y-3">
                   <div className="flex items-center space-x-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+                    <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                       <Crown className="w-4 h-4 stroke-[2.2]" />
                     </div>
                     <div>
@@ -1028,7 +1029,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
           {activeTab === 'media' && (
             <div className="space-y-6">
               
-              <div className="p-4 bg-amber-400/10 dark:bg-amber-400/5 border border-amber-400/30 rounded-2xl flex items-center space-x-3 text-amber-900 dark:text-amber-300">
+              <div className="p-4 bg-amber-400/10 dark:bg-amber-400/5 border border-amber-400/30 rounded-2xl flex items-center space-x-3 text-slate-950">
                 <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shrink-0 font-bold shadow-xs">
                   <Upload className="w-4 h-4" />
                 </div>
@@ -1343,7 +1344,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
               <div className="bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-slate-50/50 dark:from-amber-950/20 dark:via-[#18181E] dark:to-[#121216] rounded-2xl p-5 border border-amber-400/30 dark:border-amber-400/25 space-y-4 shadow-xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center space-x-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+                    <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                       <Lock className="w-4 h-4" />
                     </div>
                     <div>
@@ -1459,7 +1460,7 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
               {/* Empty State when no episodes exist */}
               {!isLoadingEpisodes && episodesList.length === 0 && (
                 <div className="py-12 px-6 rounded-2xl bg-white dark:bg-[#18181E] border border-dashed border-slate-200 dark:border-white/10 flex flex-col items-center justify-center text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 text-slate-950 dark:text-amber-300 flex items-center justify-center mb-3">
+                  <div className="w-12 h-12 rounded-2xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs mb-3">
                     <FileVideo className="w-6 h-6" />
                   </div>
                   <h4 className="font-extrabold text-slate-900 dark:text-white text-sm mb-1">
@@ -1574,29 +1575,17 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
                               <span>URL</span>
                             </button>
 
-                            {/* Paywall Toggle Badge */}
-                            <button
-                              type="button"
-                              onClick={() => handleTogglePaywall(ep.id)}
-                              className={`px-2.5 py-1 rounded-xl text-[10px] font-extrabold flex items-center space-x-1.5 transition-all cursor-pointer shadow-2xs ${
-                                ep.isFree
-                                  ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-700/60 hover:bg-emerald-100'
-                                  : 'bg-amber-100/80 text-amber-950 dark:bg-amber-400/10 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 hover:bg-amber-200/60'
-                              }`}
-                              title="Click to toggle Free Preview vs Subscriber Locked"
-                            >
-                              {ep.isFree ? (
-                                <>
-                                  <Unlock className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                                  <span>FREE</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Lock className="w-3 h-3 text-amber-700 dark:text-amber-400" />
-                                  <span>LOCKED</span>
-                                </>
-                              )}
-                            </button>
+                            {/* Paywall Toggle */}
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-[#1E1E26] border border-slate-200 dark:border-white/10" title="Toggle Free Preview vs Subscriber Locked">
+                              <ToggleSwitch
+                                checked={!ep.isFree}
+                                onChange={() => handleTogglePaywall(ep.id)}
+                                size="sm"
+                              />
+                              <span className={`text-[10px] font-extrabold ${!ep.isFree ? 'text-amber-500 dark:text-amber-400' : 'text-emerald-500 dark:text-emerald-400'}`}>
+                                {ep.isFree ? 'FREE' : 'LOCKED'}
+                              </span>
+                            </div>
 
                             {/* Delete Episode Button */}
                             <button

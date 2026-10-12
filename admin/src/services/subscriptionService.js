@@ -38,6 +38,13 @@ export const subscriptionService = {
   },
 
   /**
+   * Fetch time-series revenue analytics (today, monthly, yearly)
+   */
+  async getRevenueAnalytics() {
+    return await request('/revenue-analytics', { method: 'GET' });
+  },
+
+  /**
    * Fetch all subscription plans with active subscriber counts
    */
   async getPlans() {

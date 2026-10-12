@@ -91,33 +91,26 @@
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45), 0 2px 6px -1px rgba(0, 0, 0, 0.3);
 }
 
-/* Card Pop-Up & Subtle Zoom Lift Effect (only for interactive items) */
+/* Card Pop-Up & Subtle Lift Effect (Direct native rendering without GPU raster blur) */
 .card-subtle-hover {
   position: relative;
   z-index: 1;
-  transform: translateY(0) scale(1);
-  transform-origin: center center;
-  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-              border-color 0.25s ease !important;
-  will-change: transform, box-shadow;
-  backface-visibility: hidden;
-  -webkit-font-smoothing: subpixel-antialiased;
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.2s ease !important;
 }
 
 .card-subtle-hover:hover {
-  transform: translateY(-3px) scale(1.004);
+  transform: translateY(-2px);
   z-index: 20;
-  box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.08),
-              0 6px 12px -3px rgba(15, 23, 42, 0.04),
-              0 0 0 1px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.08),
+              0 4px 10px -2px rgba(15, 23, 42, 0.04);
   border-color: rgba(203, 213, 225, 0.95);
 }
 
 .dark .card-subtle-hover:hover {
-  box-shadow: 0 16px 30px -6px rgba(0, 0, 0, 0.6),
-              0 8px 16px -3px rgba(0, 0, 0, 0.4),
-              0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 28px -4px rgba(0, 0, 0, 0.6),
+              0 6px 12px -2px rgba(0, 0, 0, 0.4);
   border-color: rgba(255, 255, 255, 0.18);
 }
 
@@ -411,4 +404,62 @@ html.view-transitioning *::after {
   box-shadow: 0 0 0 3px rgba(254, 240, 138, 0.12), 0 0 14px rgba(254, 240, 138, 0.07);
   border-color: rgba(254, 240, 138, 0.35) !important;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Web Awesome <wa-switch> Soft Color System
+   - ON (Active): Soft, elegant sage / emerald green
+   - OFF (Inactive): Soft, muted rose / crimson red
+   - Avoids bright neon & harsh contrast for visual comfort
+   ───────────────────────────────────────────────────────────── */
+
+/* OFF State: Soft Muted Red */
+wa-switch::part(control),
+.admin-wa-switch::part(control),
+.admin-wa-switch.is-off::part(control),
+wa-switch[data-state="unchecked"]::part(control) {
+  background-color: #5a252f !important;
+  border: 1px solid rgba(244, 114, 182, 0.25) !important;
+  transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+html:not(.dark) wa-switch::part(control),
+html:not(.dark) .admin-wa-switch::part(control),
+html:not(.dark) .admin-wa-switch.is-off::part(control),
+html:not(.dark) wa-switch[data-state="unchecked"]::part(control) {
+  background-color: #fca5a5 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+/* ON State: Soft Muted Green */
+wa-switch[checked]::part(control),
+.admin-wa-switch[checked]::part(control),
+.admin-wa-switch.is-on::part(control),
+wa-switch[data-state="checked"]::part(control) {
+  background-color: #1e5a38 !important;
+  border: 1px solid rgba(74, 222, 128, 0.3) !important;
+  transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+html:not(.dark) wa-switch[checked]::part(control),
+html:not(.dark) .admin-wa-switch[checked]::part(control),
+html:not(.dark) .admin-wa-switch.is-on::part(control),
+html:not(.dark) wa-switch[data-state="checked"]::part(control) {
+  background-color: #86efac !important;
+  border: 1px solid rgba(34, 197, 94, 0.35) !important;
+}
+
+/* Thumb knob: Clean crisp white with subtle natural shadow */
+wa-switch::part(thumb),
+.admin-wa-switch::part(thumb) {
+  background-color: #ffffff !important;
+  box-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.32) !important;
+}
+
+/* Smooth focus rings */
+wa-switch:focus-visible::part(control),
+.admin-wa-switch:focus-visible::part(control) {
+  outline: 2px solid rgba(254, 240, 138, 0.5) !important;
+  outline-offset: 1px !important;
+}
+
 

@@ -1,13 +1,19 @@
-import React, { useState, useMemo } from 'react';
-import { Coins, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Crown, ChevronRight, Users, CreditCard, Sparkles, CheckCircle2 } from 'lucide-react';
 import ProgressMetricCard from './ui/progress-metric-card';
 import AnimatedNumber from './common/AnimatedNumber';
+import { userService } from '../services/userService';
+import { subscriptionService } from '../services/subscriptionService';
 
 export default function ActivityChart({ onNavigate }) {
   const [timeRange, setTimeRange] = useState('7D'); // '1D', '7D', '1M', '1Y', 'MAX'
   const [chartType, setChartType] = useState('users'); // 'users' or 'subscribers'
+  const [realActivity, setRealActivity] = useState(null);
+  const [subOverview, setSubOverview] = useState(null);
+  const [subPlans, setSubPlans] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Time ranges definition with rich data points
+  // Time ranges definition
   const periodOptions = [
     { label: '1D', points: 12 },
     { label: '7D', points: 14 },
@@ -19,146 +25,94 @@ export default function ActivityChart({ onNavigate }) {
   // Base anchor date
   const baseDate = useMemo(() => new Date(), []);
 
-  // Smart dynamic dataset generator with 12-15 data bars
+  useEffect(() => {
+    let isMounted = true;
+    Promise.allSettled([
+      userService.getActivityAnalytics(),
+      subscriptionService.getOverview(),
+      subscriptionService.getPlans()
+    ]).then(([actRes, overRes, plansRes]) => {
+      if (!isMounted) return;
+      if (actRes.status === 'fulfilled' && actRes.value?.users) {
+        setRealActivity(actRes.value);
+      }
+      if (overRes.status === 'fulfilled' && overRes.value?.kpis) {
+        setSubOverview(overRes.value.kpis);
+      }
+      if (plansRes.status === 'fulfilled' && Array.isArray(plansRes.value?.plans)) {
+        setSubPlans(plansRes.value.plans);
+      }
+      setIsLoading(false);
+    }).catch((err) => {
+      console.warn('ActivityChart fetch fallback:', err);
+      if (isMounted) setIsLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Construct chart datasets: uses 100% genuine database metrics when available
   const chartDatasets = useMemo(() => {
-    const isHoliday = baseDate.getMonth() === 11;
-    const boost = isHoliday ? 1.35 : 1.0;
+    const monthYearStr = baseDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-    // 1D: 12 bi-hourly checkpoints (00:00 to 22:00)
-    const hours = ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
-    const d1Users = hours.map((h, i) => {
-      const val = Math.round((400 + Math.sin(i / 1.8) * 1800 + i * 150) * boost);
-      return { time: h, date: h, raw: Math.max(300, val), badge: `+${(12 + i * 2).toFixed(0)}%`, note: `${h} user traffic` };
-    });
-    const d1Subs = hours.map((h, i) => {
-      const val = Math.round((20 + Math.sin(i / 1.8) * 120 + i * 12) * boost);
-      return { time: h, date: h, raw: Math.max(15, val), badge: `+${(10 + i * 2).toFixed(0)}%`, note: `${h} unlocks` };
-    });
-
-    // 7D: 14 dense rolling day points
-    const d7Users = [];
-    const d7Subs = [];
-    for (let i = 13; i >= 0; i--) {
-      const d = new Date(baseDate);
-      d.setDate(baseDate.getDate() - i);
-      const weekday = d.toLocaleDateString('en-US', { weekday: 'short' });
-      const dayNum = d.getDate();
-      const timeLabel = `${weekday} ${dayNum}`;
-      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-
-      const rawUsers = Math.round((3400 + (13 - i) * 320 + (isWeekend ? 850 : 0) + (i % 3) * 200) * boost);
-      d7Users.push({
-        time: timeLabel,
-        date: timeLabel,
-        raw: rawUsers,
-        badge: '+20%',
-        note: isWeekend ? 'Weekend engagement peak' : 'Daily active users',
-      });
-
-      const rawVal = Math.round((240 + (13 - i) * 26 + (isWeekend ? 70 : 0) + (i % 3) * 18) * boost);
-      d7Subs.push({
-        time: timeLabel,
-        date: timeLabel,
-        raw: rawVal,
-        badge: '+18%',
-        note: isWeekend ? 'Weekend paid volume' : 'Daily paid unlocks',
-      });
+    if (realActivity?.users && realActivity?.subscribers) {
+      return {
+        users: {
+          unit: 'Users',
+          title: 'Active Platform Users',
+          subtitle: `Registered user accounts & engagement (${monthYearStr})`,
+          data: realActivity.users,
+        },
+        subscribers: {
+          unit: 'Subscribers',
+          title: 'Subscriptions & Activations',
+          subtitle: `Active paid subscriptions & trials (${monthYearStr})`,
+          data: realActivity.subscribers,
+        },
+      };
     }
 
-    // 1M: 15 evenly-spaced checkpoints
-    const d1MUsers = [];
-    const d1MSubs = [];
-    for (let idx = 14; idx >= 0; idx--) {
-      const d = new Date(baseDate);
-      d.setDate(baseDate.getDate() - idx * 2);
-      const dayNum = d.getDate();
-      const monthName = d.toLocaleDateString('en-US', { month: 'short' });
-      const timeLabel = `${dayNum} ${monthName}`;
-
-      const rawUsers = Math.round((2900 + (14 - idx) * 380 + (idx % 2 === 0 ? 400 : 0)) * boost);
-      d1MUsers.push({ time: timeLabel, date: timeLabel, raw: rawUsers, badge: '+24%', note: `${monthName} active retention` });
-
-      const rawVal = Math.round((190 + (14 - idx) * 28 + (idx % 2 === 0 ? 30 : 0)) * boost);
-      d1MSubs.push({ time: timeLabel, date: timeLabel, raw: rawVal, badge: '+22%', note: `${monthName} renewals` });
-    }
-
-    // 1Y: 12 monthly points
-    const d1YUsers = [];
-    const d1YSubs = [];
-    for (let k = 11; k >= 0; k--) {
-      const d = new Date(baseDate.getFullYear(), baseDate.getMonth() - k, 1);
-      const monthName = d.toLocaleDateString('en-US', { month: 'short' });
-      const yearShort = String(d.getFullYear()).slice(-2);
-      const timeLabel = `${monthName} '${yearShort}`;
-
-      const rawUsers = Math.round(2600 + (11 - k) * 540 + (k % 3) * 300);
-      d1YUsers.push({ time: timeLabel, date: timeLabel, raw: rawUsers, badge: '+35%', note: 'Annual growth trend' });
-
-      const rawVal = Math.round(180 + (11 - k) * 42 + (k % 3) * 25);
-      d1YSubs.push({ time: timeLabel, date: timeLabel, raw: rawVal, badge: '+30%', note: 'Subscription growth trend' });
-    }
-
-    // MAX: 12 multi-quarter milestones
-    const maxUsers = [
-      { time: 'Q1 2024', date: 'Q1 2024', raw: 1200, badge: 'Launch', note: 'Platform beta' },
-      { time: 'Q2 2024', date: 'Q2 2024', raw: 2100, badge: '+75%', note: 'First 10 dramas' },
-      { time: 'Q3 2024', date: 'Q3 2024', raw: 3200, badge: '+52%', note: 'Catalog expansion' },
-      { time: 'Q4 2024', date: 'Q4 2024', raw: 4100, badge: '+28%', note: 'Holiday campaign' },
-      { time: 'Q1 2025', date: 'Q1 2025', raw: 5100, badge: '+24%', note: 'Viral release' },
-      { time: 'Q2 2025', date: 'Q2 2025', raw: 6000, badge: '+17%', note: 'App store feature' },
-      { time: 'Q3 2025', date: 'Q3 2025', raw: 6900, badge: '+15%', note: 'AdMob integration' },
-      { time: 'Q4 2025', date: 'Q4 2025', raw: 7800, badge: '+13%', note: 'Regional marketing' },
-      { time: 'Q1 2026', date: 'Q1 2026', raw: 8600, badge: '+10%', note: 'Global launch' },
-      { time: 'Q2 2026', date: 'Q2 2026', raw: 9200, badge: '+7%', note: 'Subscription tier 2' },
-      { time: 'Q3 2026', date: 'Q3 2026', raw: 9800, badge: '+6%', note: 'Current quarter peak' },
-      { time: 'Current', date: 'Current', raw: 10400, badge: '+6%', note: 'All-time active user record' },
-    ];
-
-    const maxSubs = [
-      { time: 'Q1 2024', date: 'Q1 2024', raw: 90, badge: 'Launch', note: 'Beta launch' },
-      { time: 'Q2 2024', date: 'Q2 2024', raw: 180, badge: '+100%', note: 'First series' },
-      { time: 'Q3 2024', date: 'Q3 2024', raw: 280, badge: '+55%', note: 'Catalog rollout' },
-      { time: 'Q4 2024', date: 'Q4 2024', raw: 360, badge: '+28%', note: 'Pass unlock' },
-      { time: 'Q1 2025', date: 'Q1 2025', raw: 450, badge: '+25%', note: 'Subscribers rollout' },
-      { time: 'Q2 2025', date: 'Q2 2025', raw: 530, badge: '+17%', note: 'Retention uplift' },
-      { time: 'Q3 2025', date: 'Q3 2025', raw: 620, badge: '+17%', note: 'Episode passes' },
-      { time: 'Q4 2025', date: 'Q4 2025', raw: 700, badge: '+12%', note: 'Holiday rush' },
-      { time: 'Q1 2026', date: 'Q1 2026', raw: 780, badge: '+11%', note: 'Micro-dramas surge' },
-      { time: 'Q2 2026', date: 'Q2 2026', raw: 850, badge: '+9%', note: 'Auto renewals' },
-      { time: 'Q3 2026', date: 'Q3 2026', raw: 920, badge: '+8%', note: 'Current quarter' },
-      { time: 'Current', date: 'Current', raw: 990, badge: '+7%', note: 'All-time subscriber peak' },
-    ];
+    // Default baseline if loading
+    const emptyList = Array(12).fill(null).map((_, i) => ({
+      time: `${i * 2}:00`,
+      date: `${i * 2}:00`,
+      raw: 0,
+      badge: '0',
+      note: 'No events'
+    }));
 
     return {
       users: {
         unit: 'Users',
         title: 'Active Platform Users',
-        subtitle: `Total active users & engagement (${baseDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })})`,
+        subtitle: `Registered user accounts & engagement (${monthYearStr})`,
         data: {
-          '1D': d1Users,
-          '7D': d7Users,
-          '1M': d1MUsers,
-          '1Y': d1YUsers,
-          'MAX': maxUsers,
+          '1D': emptyList,
+          '7D': emptyList,
+          '1M': emptyList,
+          '1Y': emptyList,
+          'MAX': emptyList,
         },
       },
       subscribers: {
         unit: 'Subscribers',
-        title: 'Daily Subscriptions & Activations',
-        subtitle: `New paid subscriptions & renewals (${baseDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })})`,
+        title: 'Subscriptions & Activations',
+        subtitle: `Active paid subscriptions & trials (${monthYearStr})`,
         data: {
-          '1D': d1Subs,
-          '7D': d7Subs,
-          '1M': d1MSubs,
-          '1Y': d1YSubs,
-          'MAX': maxSubs,
+          '1D': emptyList,
+          '7D': emptyList,
+          '1M': emptyList,
+          '1Y': emptyList,
+          'MAX': emptyList,
         },
       },
     };
-  }, [baseDate]);
+  }, [baseDate, realActivity]);
 
   const currentMeta = chartDatasets[chartType];
-  const rawList = currentMeta.data[timeRange] || currentMeta.data['7D'];
+  const rawList = currentMeta.data[timeRange] || currentMeta.data['7D'] || [];
 
   const chartSeriesData = useMemo(() => {
     return rawList.map((item) => ({
@@ -168,11 +122,11 @@ export default function ActivityChart({ onNavigate }) {
   }, [rawList]);
 
   // Compute peak value & current total display
-  const peakVal = Math.max(...rawList.map((d) => d.raw), 0);
+  const sumVal = rawList.reduce((sum, d) => sum + (d.raw || 0), 0);
   const totalFormatted =
     chartType === 'users'
-      ? `${(peakVal / 1000).toFixed(2)}k Users`
-      : `${peakVal.toLocaleString()} Subscribers`;
+      ? `${sumVal >= 1000 ? (sumVal / 1000).toFixed(1) + 'k' : sumVal} Users`
+      : `${sumVal} Subscribers`;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 mb-3.5 font-sans">
@@ -183,7 +137,7 @@ export default function ActivityChart({ onNavigate }) {
           subtitle={currentMeta.subtitle}
           defaultView="bars"
           total={totalFormatted}
-          percent="+20%"
+          percent={sumVal > 0 ? '+100%' : '0%'}
           trend="up"
           accent="amber"
           period={timeRange}
@@ -202,77 +156,82 @@ export default function ActivityChart({ onNavigate }) {
         />
       </div>
 
-      {/* Right Column: Google AdMob Monetization Side Card */}
+      {/* Right Column: Live Subscription Monetization Overview Card */}
       <div className="lg:col-span-4 bg-white dark:bg-[#121216] rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 dark:border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.03)] card-subtle-hover flex flex-col justify-between group">
         <div>
           {/* Header */}
           <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shadow-xs shrink-0">
-                <Coins className="w-4 h-4 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+              <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
+                <Crown className="w-4 h-4 text-slate-950 stroke-[2.2]" />
               </div>
               <div>
                 <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base font-urbanist tracking-tight">
-                  Google AdMob Monetization
+                  Subscription Monetization
                 </h3>
               </div>
             </div>
+            <span className="text-[10px] font-bold text-emerald-950 dark:text-emerald-300 bg-emerald-200 dark:bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-300/40 dark:border-emerald-500/30">
+              Live DB
+            </span>
           </div>
 
-          {/* AdMob Monthly Revenue Box */}
+          {/* Monthly Recurring Revenue (MRR) Box */}
           <div className="mt-3 space-y-2.5">
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#18181E] border border-slate-100/90 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <span className="text-[10.5px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider font-urbanist">
-                  Monthly Ad Revenue (March 2026)
+                  Monthly Run Rate (MRR)
                 </span>
-                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-500/20">
-                  Live Sync
+                <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                  Recurring Revenue
                 </span>
               </div>
-              <div className="mt-1">
+              <div className="mt-1 flex items-baseline justify-between">
                 <span className="text-2xl sm:text-[26px] font-black text-slate-950 dark:text-white font-urbanist tracking-tight block">
-                  <AnimatedNumber value="₹4,85,200" />
+                  ₹{subOverview?.totalMrr || '0'}
+                </span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                  {subOverview?.activeSubscribers ?? 0} active
                 </span>
               </div>
             </div>
 
-            {/* Ad Format Share Breakdown (Stacked Pill Shape with Curved BG) */}
+            {/* Live Plan Breakdown from DB */}
             <div className="space-y-2">
               <span className="text-[10.5px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block font-urbanist">
-                AD FORMAT REVENUE SHARE
+                ACTIVE PLAN TIERS
               </span>
 
-              {/* Format 1: Rewarded Video */}
-              <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
-                <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist">Rewarded Video (Ep Unlock)</span>
-                <div className="text-right flex items-baseline space-x-1">
-                  <span className="text-slate-950 dark:text-white font-black text-lg sm:text-xl font-urbanist tracking-tight">
-                    <AnimatedNumber value="62.4%" />
+              {/* Tier 1: Paid Plans */}
+              {subPlans.slice(0, 2).map((plan) => (
+                <div key={plan._id || plan.id || plan.name} className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
+                  <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist truncate max-w-[150px]">
+                    {plan.name}
                   </span>
-                  <span className="text-slate-400 dark:text-slate-500 font-bold text-[11px]">(₹3.02L)</span>
+                  <div className="text-right flex items-baseline space-x-1">
+                    <span className="text-slate-950 dark:text-white font-black text-sm font-urbanist tracking-tight">
+                      ₹{plan.price}
+                    </span>
+                    <span className="text-slate-400 dark:text-slate-500 font-bold text-[10.5px]">
+                      ({plan.durationMonths || Math.max(1, Math.round((plan.durationDays || 30) / 30))} mo)
+                    </span>
+                  </div>
                 </div>
-              </div>
+              ))}
 
-              {/* Format 2: Interstitial Ads */}
+              {/* Tier 2: 7-Day Free Trial AutoPay */}
               <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
-                <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist">Interstitial (Nav & End)</span>
+                <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist">
+                  7-Day Trial Mandates
+                </span>
                 <div className="text-right flex items-baseline space-x-1">
-                  <span className="text-slate-950 dark:text-white font-black text-lg sm:text-xl font-urbanist tracking-tight">
-                    <AnimatedNumber value="24.8%" />
+                  <span className="text-slate-950 dark:text-white font-black text-sm font-urbanist tracking-tight">
+                    {subOverview?.activeTrialUsers ?? 0}
                   </span>
-                  <span className="text-slate-400 dark:text-slate-500 font-bold text-[11px]">(₹1.20L)</span>
-                </div>
-              </div>
-
-              {/* Format 3: Native & Banner */}
-              <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
-                <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist">Native Feed & Banner</span>
-                <div className="text-right flex items-baseline space-x-1">
-                  <span className="text-slate-950 dark:text-white font-black text-lg sm:text-xl font-urbanist tracking-tight">
-                    <AnimatedNumber value="12.8%" />
+                  <span className="text-slate-400 dark:text-slate-500 font-bold text-[10.5px]">
+                    active trials
                   </span>
-                  <span className="text-slate-400 dark:text-slate-500 font-bold text-[11px]">(₹62k)</span>
                 </div>
               </div>
             </div>
@@ -280,13 +239,16 @@ export default function ActivityChart({ onNavigate }) {
         </div>
 
         {/* Footer Link */}
-        <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-end text-xs text-slate-500 dark:text-slate-400">
+        <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+          <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+            Churn Rate: {subOverview?.churnRate || '0.0%'}
+          </span>
           <button
             type="button"
-            onClick={() => onNavigate && onNavigate('admob')}
+            onClick={() => onNavigate && onNavigate('subscriptions')}
             className="font-bold text-slate-950 dark:text-white hover:text-amber-400 flex items-center gap-0.5 transition-colors cursor-pointer"
           >
-            <span>View Full AdMob Analytics</span>
+            <span>Manage Plans</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>

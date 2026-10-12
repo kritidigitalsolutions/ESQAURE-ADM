@@ -27,6 +27,12 @@ router.get('/admin', DramaController.getAdminDramas);
 router.post('/', DramaController.createDrama);
 
 /**
+ * 2.1 Admin: Batch Reorder All Drama Catalog Priorities
+ * PATCH /api/v1/dramas/reorder
+ */
+router.patch('/reorder', DramaController.reorderDramas);
+
+/**
  * 3. Admin: Update Drama Details
  * PATCH /api/v1/dramas/:id
  */

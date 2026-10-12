@@ -65,14 +65,14 @@ Whenever creating or modifying KPI cards, stat cards, metric overviews, or featu
 
 2. **Standard KPI Metric Icon Badge**:
    ```jsx
-   <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs">
-     <Icon className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+   <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
+     <Icon className="w-5 h-5 stroke-[2.2]" />
    </div>
    ```
 
 3. **Standard Modal / Header Icon Badge (compact)**:
    ```jsx
-   <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+   <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shrink-0 shadow-xs">
      <Icon className="w-4 h-4 stroke-[2.2]" />
    </div>
    ```

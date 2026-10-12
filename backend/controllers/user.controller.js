@@ -324,4 +324,217 @@ export class UserController {
       return next(error);
     }
   }
+
+  /**
+   * GET /api/v1/users/admin/activity-analytics
+   * Dynamic activity telemetry derived from real database users and subscriptions
+   */
+  static async getActivityAnalytics(req, res, next) {
+    try {
+      const now = new Date();
+
+      // --- 1. 1D (Today's Bi-Hourly checkpoints from 00:00 to 22:00) ---
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+      const hours = ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
+
+      const todayUsers = await User.find({
+        status: { $ne: 'DELETED' },
+        createdAt: { $gte: startOfToday, $lte: now }
+      }).select('createdAt');
+
+      const todaySubs = await Subscription.find({
+        createdAt: { $gte: startOfToday, $lte: now }
+      }).select('createdAt');
+
+      const d1Users = hours.map((h, i) => {
+        const startH = i * 2;
+        const endH = startH + 2;
+        const count = todayUsers.filter((u) => {
+          const uh = new Date(u.createdAt).getHours();
+          return uh >= startH && uh < endH;
+        }).length;
+        return {
+          time: h,
+          date: h,
+          raw: count,
+          badge: count > 0 ? `+${count}` : '0',
+          note: `${h} user signups`
+        };
+      });
+
+      const d1Subs = hours.map((h, i) => {
+        const startH = i * 2;
+        const endH = startH + 2;
+        const count = todaySubs.filter((s) => {
+          const sh = new Date(s.createdAt).getHours();
+          return sh >= startH && sh < endH;
+        }).length;
+        return {
+          time: h,
+          date: h,
+          raw: count,
+          badge: count > 0 ? `+${count}` : '0',
+          note: `${h} paid passes`
+        };
+      });
+
+      // --- 2. 7D (14 Rolling Days) ---
+      const d7Users = [];
+      const d7Subs = [];
+      const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
+      const recentUsers = await User.find({
+        status: { $ne: 'DELETED' },
+        createdAt: { $gte: fourteenDaysAgo, $lte: now }
+      }).select('createdAt');
+
+      const recentSubs = await Subscription.find({
+        createdAt: { $gte: fourteenDaysAgo, $lte: now }
+      }).select('createdAt');
+
+      for (let i = 13; i >= 0; i--) {
+        const dayDate = new Date(now);
+        dayDate.setDate(now.getDate() - i);
+        const dayStart = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 0, 0, 0);
+        const dayEnd = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 23, 59, 59);
+
+        const weekday = dayDate.toLocaleDateString('en-US', { weekday: 'short' });
+        const dayNum = dayDate.getDate();
+        const timeLabel = `${weekday} ${dayNum}`;
+
+        const uCount = recentUsers.filter((u) => {
+          const ut = new Date(u.createdAt);
+          return ut >= dayStart && ut <= dayEnd;
+        }).length;
+
+        const sCount = recentSubs.filter((s) => {
+          const st = new Date(s.createdAt);
+          return st >= dayStart && st <= dayEnd;
+        }).length;
+
+        d7Users.push({
+          time: timeLabel,
+          date: timeLabel,
+          raw: uCount,
+          badge: uCount > 0 ? `+${uCount}` : '0',
+          note: `${weekday} registered users`
+        });
+
+        d7Subs.push({
+          time: timeLabel,
+          date: timeLabel,
+          raw: sCount,
+          badge: sCount > 0 ? `+${sCount}` : '0',
+          note: `${weekday} subscriptions`
+        });
+      }
+
+      // --- 3. 1M (15 intervals over 30 days) ---
+      const d1MUsers = [];
+      const d1MSubs = [];
+      for (let idx = 14; idx >= 0; idx--) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - idx * 2);
+        const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1, 0, 0, 0);
+        const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
+        const dayNum = d.getDate();
+        const monthName = d.toLocaleDateString('en-US', { month: 'short' });
+        const timeLabel = `${dayNum} ${monthName}`;
+
+        const uCount = recentUsers.filter((u) => {
+          const ut = new Date(u.createdAt);
+          return ut >= dayStart && ut <= dayEnd;
+        }).length;
+
+        const sCount = recentSubs.filter((s) => {
+          const st = new Date(s.createdAt);
+          return st >= dayStart && st <= dayEnd;
+        }).length;
+
+        d1MUsers.push({
+          time: timeLabel,
+          date: timeLabel,
+          raw: uCount,
+          badge: uCount > 0 ? `+${uCount}` : '0',
+          note: `${monthName} registrations`
+        });
+
+        d1MSubs.push({
+          time: timeLabel,
+          date: timeLabel,
+          raw: sCount,
+          badge: sCount > 0 ? `+${sCount}` : '0',
+          note: `${monthName} conversions`
+        });
+      }
+
+      // --- 4. 1Y (12 Monthly Checkpoints) ---
+      const d1YUsers = [];
+      const d1YSubs = [];
+      const oneYearAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1, 0, 0, 0);
+
+      const yearUsers = await User.find({
+        status: { $ne: 'DELETED' },
+        createdAt: { $gte: oneYearAgo, $lte: now }
+      }).select('createdAt');
+
+      const yearSubs = await Subscription.find({
+        createdAt: { $gte: oneYearAgo, $lte: now }
+      }).select('createdAt');
+
+      for (let k = 11; k >= 0; k--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - k, 1);
+        const monthStart = new Date(d.getFullYear(), d.getMonth(), 1, 0, 0, 0);
+        const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+        const monthName = d.toLocaleDateString('en-US', { month: 'short' });
+        const yearShort = String(d.getFullYear()).slice(-2);
+        const timeLabel = `${monthName} '${yearShort}`;
+
+        const uCount = yearUsers.filter((u) => {
+          const ut = new Date(u.createdAt);
+          return ut >= monthStart && ut <= monthEnd;
+        }).length;
+
+        const sCount = yearSubs.filter((s) => {
+          const st = new Date(s.createdAt);
+          return st >= monthStart && st <= monthEnd;
+        }).length;
+
+        d1YUsers.push({
+          time: timeLabel,
+          date: timeLabel,
+          raw: uCount,
+          badge: uCount > 0 ? `+${uCount}` : '0',
+          note: `${monthName} total active`
+        });
+
+        d1YSubs.push({
+          time: timeLabel,
+          date: timeLabel,
+          raw: sCount,
+          badge: sCount > 0 ? `+${sCount}` : '0',
+          note: `${monthName} subscribers`
+        });
+      }
+
+      return ApiResponse.success(res, 'Activity analytics retrieved successfully.', {
+        users: {
+          '1D': d1Users,
+          '7D': d7Users,
+          '1M': d1MUsers,
+          '1Y': d1YUsers,
+          'MAX': d1YUsers
+        },
+        subscribers: {
+          '1D': d1Subs,
+          '7D': d7Subs,
+          '1M': d1MSubs,
+          '1Y': d1YSubs,
+          'MAX': d1YSubs
+        }
+      });
+    } catch (err) {
+      return next(err);
+    }
+  }
 }

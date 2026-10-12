@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { notificationService } from '../../services/notificationService';
 import PageLoader from '../../components/common/PageLoader';
 import ModalPortal from '../../components/common/ModalPortal';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
+import Badge from '../../components/common/Badge';
 import {
   Plus,
   Sparkles,
@@ -169,8 +171,8 @@ export default function AppNotificationsPage() {
       {/* 1. Header Banner */}
       <div className="bg-white dark:bg-[#121216] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all">
         <div className="flex items-center space-x-3">
-          <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
-            <Megaphone className="w-4.5 h-4.5 stroke-[2.2]" />
+          <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
+            <Megaphone className="w-4 h-4 stroke-[2.2]" />
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-extrabold text-slate-950 dark:text-white tracking-tight">
@@ -299,7 +301,7 @@ export default function AppNotificationsPage() {
               >
                 <div className="flex items-start space-x-3 min-w-0">
                   {/* Uniform #FEF08A Icon Badge */}
-                  <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+                  <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                     {notice.category === 'SYSTEM' ? (
                       <Info className="w-4 h-4 stroke-[2.2]" />
                     ) : notice.category === 'OFFER' ? (
@@ -314,13 +316,19 @@ export default function AppNotificationsPage() {
                       <span className="font-bold text-xs sm:text-[13px] text-slate-950 dark:text-white">
                         {notice.title}
                       </span>
-                      <span className="px-1.5 py-0.5 rounded text-[9.5px] font-extrabold bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/10">
-                        {notice.category}
-                      </span>
+                      <Badge
+                        variant={notice.category === 'SYSTEM' ? 'video' : notice.category === 'OFFER' ? 'news' : 'entertainment'}
+                        label={notice.category}
+                        size="xs"
+                        hideIcon
+                      />
                       {notice.priority === 'High' && (
-                        <span className="px-1.5 py-0.5 rounded text-[9.5px] font-extrabold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                          HIGH
-                        </span>
+                        <Badge
+                          variant="offline"
+                          label="HIGH"
+                          size="xs"
+                          hideIcon
+                        />
                       )}
                     </div>
 
@@ -333,16 +341,16 @@ export default function AppNotificationsPage() {
                       <span>•</span>
                       <span>{formatTimeAgo(notice.createdAt)}</span>
                       <span>•</span>
-                      <button
-                        onClick={() => handleToggle(id)}
-                        className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
-                          notice.isActive
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                            : 'bg-slate-200/80 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400'
-                        }`}
-                      >
-                        {notice.isActive ? 'Active' : 'Inactive'}
-                      </button>
+                      <div className="inline-flex items-center gap-1.5" title={notice.isActive ? 'Active (Click to disable)' : 'Inactive (Click to enable)'}>
+                        <ToggleSwitch
+                          checked={Boolean(notice.isActive)}
+                          onChange={() => handleToggle(id)}
+                          size="sm"
+                        />
+                        <span className={`text-[9.5px] font-bold ${notice.isActive ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                          {notice.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -367,7 +375,7 @@ export default function AppNotificationsPage() {
           <div className="bg-white dark:bg-[#30303D] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-200 dark:border-white/15 transition-all">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center space-x-2.5">
-                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs">
                   <Megaphone className="w-4 h-4" />
                 </div>
                 <h3 className="text-base font-extrabold text-slate-950 dark:text-white">

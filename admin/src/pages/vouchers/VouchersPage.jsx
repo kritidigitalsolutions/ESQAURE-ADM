@@ -20,12 +20,15 @@ import {
   Sparkles,
   Layers,
   Eye,
-  CheckCheck
+  CheckCheck,
+  ChevronDown
 } from 'lucide-react';
 import voucherService from '../../services/voucherService';
 import { subscriptionService } from '../../services/subscriptionService';
 import PageLoader from '../../components/common/PageLoader';
 import ModalPortal from '../../components/common/ModalPortal';
+import Badge from '../../components/common/Badge';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const formatDate = (d) => {
@@ -58,36 +61,17 @@ const EMPTY_VOUCHER_FORM = {
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 function VoucherStatusBadge({ status }) {
-  const isActive = status === 'ACTIVE';
-  const isPaused = status === 'PAUSED';
-  const isExhausted = status === 'EXHAUSTED';
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold ${
-        isActive
-          ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40'
-          : isPaused
-          ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40'
-          : isExhausted
-          ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/40'
-          : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
-      }`}
-    >
-      <span
-        className={`w-1.5 h-1.5 rounded-full ${
-          isActive
-            ? 'bg-emerald-500'
-            : isPaused
-            ? 'bg-amber-500'
-            : isExhausted
-            ? 'bg-indigo-500'
-            : 'bg-slate-400'
-        }`}
-      />
-      <span>{status || 'EXPIRED'}</span>
-    </span>
-  );
+  const norm = String(status || '').toUpperCase();
+  if (norm === 'ACTIVE') {
+    return <Badge variant="active" label="ACTIVE" size="xs" />;
+  }
+  if (norm === 'PAUSED') {
+    return <Badge variant="paused" label="PAUSED" size="xs" />;
+  }
+  if (norm === 'EXHAUSTED') {
+    return <Badge variant="offline" label="EXHAUSTED" size="xs" />;
+  }
+  return <Badge variant="inactive" label={status || 'EXPIRED'} size="xs" />;
 }
 
 // ─── Create/Edit Voucher Modal ────────────────────────────────────────────────
@@ -176,7 +160,7 @@ function VoucherModal({ initial, planOptions = DEFAULT_PLAN_OPTIONS, onClose, on
           {/* Header */}
           <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <Gift className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
@@ -438,7 +422,7 @@ function BulkVoucherModal({ planOptions = DEFAULT_PLAN_OPTIONS, onClose, onSaved
         <div className="bg-white dark:bg-[#24242E] rounded-xl max-w-md w-full p-4 sm:p-5 shadow-2xl space-y-3.5 border border-slate-200 dark:border-white/15 font-urbanist animate-in fade-in zoom-in-95 duration-150">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <Sparkles className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
@@ -623,7 +607,7 @@ function RedemptionsModal({ voucher, onClose }) {
         <div className="bg-white dark:bg-[#24242E] rounded-xl max-w-lg w-full p-4 sm:p-5 shadow-2xl space-y-3.5 border border-slate-200 dark:border-white/15 font-urbanist animate-in fade-in zoom-in-95 duration-150">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <Users className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
@@ -722,7 +706,7 @@ function QuickRedeemModal({ voucher, onClose, onRedeemed }) {
         <div className="bg-white dark:bg-[#24242E] rounded-xl max-w-sm w-full p-4 sm:p-5 shadow-2xl space-y-3.5 border border-slate-200 dark:border-white/15 font-urbanist animate-in fade-in zoom-in-95 duration-150">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <Sparkles className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
@@ -995,8 +979,8 @@ export default function VouchersPage() {
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                <Gift className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Gift className="w-5 h-5 text-slate-950 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
@@ -1023,8 +1007,8 @@ export default function VouchersPage() {
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                <Sparkles className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Sparkles className="w-5 h-5 text-slate-950 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
@@ -1051,8 +1035,8 @@ export default function VouchersPage() {
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                <Layers className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Layers className="w-5 h-5 text-slate-950 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
@@ -1081,8 +1065,8 @@ export default function VouchersPage() {
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                <Calendar className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Calendar className="w-5 h-5 text-slate-950 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
@@ -1117,7 +1101,7 @@ export default function VouchersPage() {
             <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
               Subscription Plan Vouchers
             </h1>
-            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-900 dark:text-amber-300 border border-amber-300/50">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs text-slate-950 border border-amber-300/50">
               {filteredVouchers.length} Vouchers
             </span>
           </div>
@@ -1215,16 +1199,19 @@ export default function VouchersPage() {
             )}
           </div>
 
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer"
-          >
-            <option value="newest">Recent First</option>
-            <option value="uses">Most Redemptions</option>
-            <option value="expiry">Expiry (Soonest)</option>
-            <option value="code">Code (A - Z)</option>
-          </select>
+          <div className="relative flex items-center shrink-0">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="appearance-none pl-3 pr-8 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer transition-colors"
+            >
+              <option value="newest" className="dark:bg-[#1E1E26]">Recent First</option>
+              <option value="uses" className="dark:bg-[#1E1E26]">Most Redemptions</option>
+              <option value="expiry" className="dark:bg-[#1E1E26]">Expiry (Soonest)</option>
+              <option value="code" className="dark:bg-[#1E1E26]">Code (A - Z)</option>
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
+          </div>
         </div>
       </div>
 
@@ -1309,7 +1296,7 @@ export default function VouchersPage() {
                           <span className="font-bold text-slate-950 dark:text-white text-xs">
                             {v.planName}
                           </span>
-                          <span className="px-1.5 py-0.2 rounded-md bg-[#FEF08A]/30 dark:bg-[#FEF08A]/10 text-[9.5px] font-bold text-amber-900 dark:text-amber-300 border border-amber-300/40 dark:border-amber-400/25">
+                          <span className="px-1.5 py-0.2 rounded-md bg-[#FEF08A]/30 dark:bg-[#FEF08A]/10 text-[9.5px] font-bold text-slate-950 border border-amber-300/40 dark:border-amber-400/25">
                             {v.durationDays}d Full VIP
                           </span>
                         </div>
@@ -1387,23 +1374,14 @@ export default function VouchersPage() {
 
                           {/* Toggle Active / Paused */}
                           {v.status !== 'EXPIRED' && v.status !== 'EXHAUSTED' && (
-                            <button
-                              type="button"
-                              onClick={() => handleToggle(v.id)}
-                              disabled={isBusy}
-                              className={`p-1 rounded-md transition-colors cursor-pointer ${
-                                v.status === 'ACTIVE'
-                                  ? 'text-emerald-600 hover:text-emerald-700 dark:text-emerald-400'
-                                  : 'text-amber-600 hover:text-amber-700 dark:text-amber-400'
-                              }`}
-                              title={v.status === 'ACTIVE' ? 'Pause voucher' : 'Activate voucher'}
-                            >
-                              {v.status === 'ACTIVE' ? (
-                                <ToggleRight className="w-4 h-4 stroke-[2.2]" />
-                              ) : (
-                                <ToggleLeft className="w-4 h-4 stroke-[2.2]" />
-                              )}
-                            </button>
+                            <div className="inline-flex items-center px-1" title={v.status === 'ACTIVE' ? 'Pause voucher' : 'Activate voucher'}>
+                              <ToggleSwitch
+                                checked={v.status === 'ACTIVE'}
+                                onChange={() => handleToggle(v.id)}
+                                disabled={isBusy}
+                                size="sm"
+                              />
+                            </div>
                           )}
 
                           {/* Edit */}

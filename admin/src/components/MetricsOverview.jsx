@@ -150,7 +150,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2.5">
               <div className="flex items-center space-x-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
                   <Users className="w-4.5 h-4.5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -222,8 +222,8 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   </span>
                 )}
               </div>
-              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-xs">
-                <ArrowUpRight className="w-3 h-3" /> <AnimatedNumber value={userMetrics[userTab].badge} />
+              <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
+                <ArrowUpRight className="w-3 h-3 stroke-[2.5]" /> <AnimatedNumber value={userMetrics[userTab].badge} />
               </span>
             </div>
           </div>
@@ -234,7 +234,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2.5">
               <div className="flex items-center space-x-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
                   <ShieldCheck className="w-4.5 h-4.5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -306,8 +306,8 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   </span>
                 )}
               </div>
-              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-xs">
-                <ArrowUpRight className="w-3 h-3" /> <AnimatedNumber value={subscriptionMetrics[subTab].badge} />
+              <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
+                <ArrowUpRight className="w-3 h-3 stroke-[2.5]" /> <AnimatedNumber value={subscriptionMetrics[subTab].badge} />
               </span>
             </div>
           </div>
@@ -331,7 +331,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   <span className="text-lg sm:text-xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
                     <AnimatedNumber value={current.stat1Value} />
                   </span>
-                  <span className="inline-flex items-center text-[10.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                  <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
                     <AnimatedNumber value={current.stat1Badge} />
                   </span>
                 </div>
@@ -349,7 +349,7 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   <span className="text-lg sm:text-xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
                     <AnimatedNumber value={current.stat2Value} />
                   </span>
-                  <span className="inline-flex items-center text-[10.5px] font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                  <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
                     <AnimatedNumber value={current.stat2Badge} />
                   </span>
                 </div>

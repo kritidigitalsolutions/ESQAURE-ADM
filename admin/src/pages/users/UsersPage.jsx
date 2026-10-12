@@ -731,7 +731,7 @@ export default function UsersPage({ onNavigate }) {
             <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
               User Directory & Access Control
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-900 dark:text-amber-300 border border-amber-300/50">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 dark:bg-amber-400/20 text-amber-950 dark:text-amber-300 border border-amber-300/40 dark:border-amber-400/30">
               {counts.all} Users
             </span>
           </div>
@@ -844,19 +844,19 @@ export default function UsersPage({ onNavigate }) {
 
       </div>
 
-      {/* Users Registry Table */}
+      {/* Users Registry Table - Clean, Small & Minimal */}
       <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50/70 dark:bg-[#18181E] border-b border-slate-200/80 dark:border-white/10 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+            <thead className="bg-slate-50/70 dark:bg-[#18181E] border-b border-slate-200/80 dark:border-white/10 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="py-2.5 px-3 text-center w-10">#</th>
                 <th className="py-2.5 px-3 min-w-[180px]">User Account</th>
-                <th className="py-2.5 px-3 min-w-[170px]">Phone & Email</th>
+                <th className="py-2.5 px-3 min-w-[200px]">Phone & Email</th>
                 <th className="py-2.5 px-3 w-36">Subscription Plan</th>
-                <th className="py-2.5 px-3 w-24">Joined</th>
-                <th className="py-2.5 px-3 w-24">Voucher</th>
-                <th className="py-2.5 px-3 w-24 text-center">Status</th>
+                <th className="py-2.5 px-3 w-28">Joined</th>
+                <th className="py-2.5 px-3 w-24 text-center">Voucher</th>
+                <th className="py-2.5 px-3 w-32 text-center">Status</th>
                 <th className="py-2.5 px-3 w-28 text-right">Actions</th>
               </tr>
             </thead>
@@ -895,7 +895,7 @@ export default function UsersPage({ onNavigate }) {
                 <tr>
                   <td colSpan="8" className="py-12 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 text-slate-950 dark:text-amber-300 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs">
                         <Search className="w-5 h-5" />
                       </div>
                       <p className="text-xs font-bold text-slate-900 dark:text-white">
@@ -928,27 +928,30 @@ export default function UsersPage({ onNavigate }) {
                   return (
                     <tr
                       key={user.id}
-                      className="hover:bg-slate-50/80 dark:hover:bg-white/[0.03] transition-colors group"
+                      className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors group"
                     >
                       {/* Index Serial No. */}
-                      <td className="py-2 px-3 text-center font-mono font-medium text-[11px] text-slate-400 select-none">
+                      <td className="py-2 px-3 text-center align-middle font-mono font-medium text-[11px] text-slate-400 select-none">
                         {idx + 1}
                       </td>
 
                       {/* User Account */}
-                      <td className="py-2 px-3">
+                      <td className="py-2 px-3 align-middle whitespace-nowrap">
                         <button
                           type="button"
                           onClick={() => setViewUser(user)}
                           className="flex items-center space-x-2 text-left group/user cursor-pointer"
                         >
-                          {/* Profile Picture in Circle */}
-                          <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 shadow-2xs border border-slate-200/80 dark:border-white/10 bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover/user:border-amber-300 transition-colors relative">
+                          <div
+                            className="w-7 h-7 min-w-7 min-h-7 max-w-7 max-h-7 rounded-full overflow-hidden shrink-0 shadow-2xs border border-slate-200/80 dark:border-white/10 bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover/user:border-amber-300 transition-colors"
+                            style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, maxWidth: 28, maxHeight: 28 }}
+                          >
                             {user.avatarUrl ? (
                               <img
                                 src={user.avatarUrl}
                                 alt={displayName}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover rounded-full block"
+                                style={{ width: 28, height: 28, minWidth: 28, minHeight: 28, maxWidth: 28, maxHeight: 28 }}
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
                                   if (e.currentTarget.nextElementSibling) {
@@ -961,7 +964,7 @@ export default function UsersPage({ onNavigate }) {
                               className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500"
                               style={{ display: user.avatarUrl ? 'none' : 'flex' }}
                             >
-                              <UserIcon className="w-3 h-3 stroke-[2.2]" />
+                              <UserIcon className="w-3.5 h-3.5 stroke-[2.2]" />
                             </div>
                           </div>
 
@@ -971,16 +974,16 @@ export default function UsersPage({ onNavigate }) {
                         </button>
                       </td>
 
-                      {/* Phone & Email */}
-                      <td className="py-2 px-3 whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
+                      {/* Phone & Email (Clean single line) */}
+                      <td className="py-2 px-3 align-middle whitespace-nowrap">
+                        <div className="flex items-center space-x-1.5">
                           <span className="font-mono font-medium text-xs text-slate-700 dark:text-slate-300">
                             {user.phone || '—'}
                           </span>
                           {user.email && user.email !== '—' && (
                             <>
                               <span className="text-slate-300 dark:text-slate-600 text-[10px] select-none">•</span>
-                              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">
                                 {user.email}
                               </span>
                             </>
@@ -989,57 +992,49 @@ export default function UsersPage({ onNavigate }) {
                       </td>
 
                       {/* Subscription Plan */}
-                      <td className="py-2 px-3">
+                      <td className="py-2 px-3 align-middle whitespace-nowrap">
                         <Badge plan={user.plan || (isVip ? '1 Month Pass' : 'Free Tier')} size="xs">
                           {cleanPlanName(user.plan || (isVip ? '1 Month Pass' : 'Free Tier'))}
                         </Badge>
                       </td>
 
                       {/* Joined Date */}
-                      <td className="py-2 px-3">
+                      <td className="py-2 px-3 align-middle whitespace-nowrap">
                         <span className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">
                           {user.joinedAt || '25 Sept 2026'}
                         </span>
                       </td>
 
                       {/* Voucher / Promo Code */}
-                      <td className="py-2 px-3">
+                      <td className="py-2 px-3 align-middle text-center whitespace-nowrap">
                         {user.promoCode ? (
-                          <div className="flex flex-col items-start gap-0.5">
-                            <Badge variant="given-by-admin" size="xs">
-                              {user.promoCode}
-                            </Badge>
-                          </div>
+                          <Badge variant="given-by-admin" size="xs">
+                            {user.promoCode}
+                          </Badge>
                         ) : (
-                          <span className="text-slate-400 dark:text-slate-500 font-mono text-xs select-none">
+                          <span className="text-slate-300 dark:text-slate-600 font-mono text-xs select-none">
                             —
                           </span>
                         )}
                       </td>
 
-                      {/* Status */}
-                      <td className="py-2 px-3 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleToggleUserStatus(user.id)}
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9.5px] font-bold transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95 ${
-                            isActive
-                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25'
-                              : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/25'
-                          }`}
-                          title="Click to toggle account status"
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                              isActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
-                            }`}
+                      {/* Status - Fixed-width label for perfect vertical switch alignment */}
+                      <td className="py-2 px-3 align-middle text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <div className="inline-flex items-center justify-center gap-2">
+                          <ToggleSwitch
+                            checked={isActive}
+                            onChange={() => handleToggleUserStatus(user.id)}
+                            size="sm"
+                            title={isActive ? 'Active (Click to suspend)' : 'Suspended (Click to activate)'}
                           />
-                          {isActive ? 'Active' : 'Suspended'}
-                        </button>
+                          <span className={`text-[10px] font-bold w-16 text-left ${isActive ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
+                            {isActive ? 'Active' : 'Suspended'}
+                          </span>
+                        </div>
                       </td>
 
                       {/* Actions */}
-                      <td className="py-2 px-3 text-right">
+                      <td className="py-2 px-3 align-middle text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-0.5">
                           <button
                             type="button"
@@ -1126,7 +1121,7 @@ export default function UsersPage({ onNavigate }) {
             {/* Top Bar Header */}
             <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-white/90 dark:bg-[#18181E]/95 backdrop-blur-md shrink-0">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                   <Pencil className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1185,18 +1180,11 @@ export default function UsersPage({ onNavigate }) {
                       </span>
                     </div>
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold shrink-0 ${overrideUser.status === 'ACTIVE'
-                        ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/40'
-                        : 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/40'
-                      }`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${overrideUser.status === 'ACTIVE' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
-                        }`}
-                    />
-                    {overrideUser.status}
-                  </span>
+                  <Badge
+                    variant={overrideUser.status === 'ACTIVE' ? 'active' : 'suspended'}
+                    label={overrideUser.status}
+                    size="xs"
+                  />
                 </div>
 
                 {/* Profile Picture URL */}
@@ -1448,7 +1436,7 @@ export default function UsersPage({ onNavigate }) {
             {/* Top Bar Header */}
             <div className="px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-white/90 dark:bg-[#18181E]/95 backdrop-blur-md shrink-0">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                   <Eye className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1521,8 +1509,8 @@ export default function UsersPage({ onNavigate }) {
               {/* Polished Activity Status Card */}
               <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3 group">
                 <div className="flex items-center space-x-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                    <Clock className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+                  <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                    <Clock className="w-5 h-5 text-slate-950 stroke-[2.2]" />
                   </div>
                   <div className="min-w-0">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
@@ -1644,7 +1632,7 @@ export default function UsersPage({ onNavigate }) {
                   <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
                     <span>Acquisition Channel</span>
                     {viewUser.promoCode ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-300/80 dark:border-amber-400/35 shadow-2xs">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-[#FEF08A] text-slate-950 shadow-xs border border-amber-300/80 dark:border-amber-400/35 shadow-2xs">
                         <Ticket className="w-3 h-3 text-amber-700 dark:text-amber-400 stroke-[2.2]" />
                         <span>{viewUser.promoCode}</span>
                       </span>
@@ -1714,7 +1702,7 @@ export default function UsersPage({ onNavigate }) {
               {/* Header: Icon Badge + Title + Close Button */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3.5">
-                  <div className="w-11 h-11 rounded-2xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shadow-xs">
+                  <div className="w-11 h-11 rounded-2xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs">
                     <Trash2 className="w-5 h-5 stroke-[2.2]" />
                   </div>
                   <div>
@@ -1783,7 +1771,7 @@ export default function UsersPage({ onNavigate }) {
               </div>
 
               {/* Warning Notice Banner */}
-              <div className="flex items-start space-x-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-950 dark:text-amber-300">
+              <div className="flex items-start space-x-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-slate-950">
                 <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <p className="text-[11px] font-semibold leading-relaxed">
                   Removing this account immediately terminates all active streaming sessions and invalidates entitlement access.

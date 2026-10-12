@@ -361,37 +361,35 @@ export default function AdmobPage({ onNavigate }) {
     <div className="space-y-3 font-urbanist pb-14 selection:bg-[#FEF08A] selection:text-black">
       {/* 4 Compact Uniform KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-        {/* Metric 1: Impressions */}
+        {/* Metric 1: AdMob Impressions */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center space-x-2.5 min-w-0">
-                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                  <Film className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                    AdMob Impressions
-                  </span>
-                  <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                    Last 28 Days
-                  </span>
-                </div>
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Film className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                  AdMob Impressions
+                </span>
+                <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                  Last 28 Days
+                </span>
               </div>
             </div>
 
-            <div className="mt-2.5">
-              <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+            <div className="mt-2">
+              <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
                 {metricImpressions}
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+          <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
             <span className="truncate text-slate-500 dark:text-slate-400">
               Reporting synced
             </span>
-            <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-amber-900 dark:text-amber-300 font-bold">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               Live API
             </span>
           </div>
@@ -400,34 +398,32 @@ export default function AdmobPage({ onNavigate }) {
         {/* Metric 2: Ad Requests */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center space-x-2.5 min-w-0">
-                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                  <Zap className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                    Ad Requests
-                  </span>
-                  <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                    Pipeline Queries
-                  </span>
-                </div>
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Zap className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                  Ad Requests
+                </span>
+                <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                  Pipeline Queries
+                </span>
               </div>
             </div>
 
-            <div className="mt-2.5">
-              <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+            <div className="mt-2">
+              <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
                 {metricRequests}
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+          <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
             <span className="truncate text-slate-500 dark:text-slate-400">
               Match Rate: {metricMatchRate}
             </span>
-            <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-amber-900 dark:text-amber-300 font-bold">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               Active
             </span>
           </div>
@@ -436,34 +432,32 @@ export default function AdmobPage({ onNavigate }) {
         {/* Metric 3: Estimated Earnings */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center space-x-2.5 min-w-0">
-                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                  <Coins className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                    Estimated Earnings
-                  </span>
-                  <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                    Settled Revenue
-                  </span>
-                </div>
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Coins className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                  Estimated Earnings
+                </span>
+                <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                  Settled Revenue
+                </span>
               </div>
             </div>
 
-            <div className="mt-2.5">
-              <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+            <div className="mt-2">
+              <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
                 {metricEarnings}
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+          <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
             <span className="truncate text-slate-500 dark:text-slate-400">
               eCPM: {metricEcpm}
             </span>
-            <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-amber-900 dark:text-amber-300 font-bold">
+            <span className="text-amber-600 dark:text-amber-400 font-bold">
               Optimal
             </span>
           </div>
@@ -472,34 +466,32 @@ export default function AdmobPage({ onNavigate }) {
         {/* Metric 4: Formats Enabled */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center space-x-2.5 min-w-0">
-                <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                  <Layers className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                    Active Formats
-                  </span>
-                  <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                    Ad Unit Matrix
-                  </span>
-                </div>
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Layers className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                  Active Formats
+                </span>
+                <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                  Ad Unit Matrix
+                </span>
               </div>
             </div>
 
-            <div className="mt-2.5">
-              <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+            <div className="mt-2">
+              <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
                 {activeUnitsCount} / 5
               </div>
             </div>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+          <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
             <span className="truncate text-slate-500 dark:text-slate-400">
               Android & iOS units
             </span>
-            <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-amber-900 dark:text-amber-300 font-bold">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               {form.admobEnabled ? 'Serving' : 'Paused'}
             </span>
           </div>
@@ -707,7 +699,7 @@ export default function AdmobPage({ onNavigate }) {
                 <span className="text-xs font-extrabold text-slate-900 dark:text-white">
                   Ad Unit Formats
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-300/50">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs border border-amber-300/50">
                   {activeUnitsCount}/5 Active
                 </span>
               </div>
@@ -779,7 +771,7 @@ export default function AdmobPage({ onNavigate }) {
                     <div className="hidden lg:grid grid-cols-12 gap-3 items-center">
                       {/* Format Name + Mini Badge */}
                       <div className="col-span-3 flex items-center space-x-2 min-w-0">
-                        <div className="w-6.5 h-6.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                        <div className="w-6.5 h-6.5 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                           <Tag className="w-3 h-3 stroke-[2.2]" />
                         </div>
                         <div className="min-w-0">
@@ -863,7 +855,7 @@ export default function AdmobPage({ onNavigate }) {
                     <div className="lg:hidden space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2 min-w-0">
-                          <div className="w-6 h-6 rounded-md bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                          <div className="w-6 h-6 rounded-md bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                             <Tag className="w-3 h-3 stroke-[2.2]" />
                           </div>
                           <span className="font-bold text-xs text-slate-900 dark:text-white truncate">
@@ -938,7 +930,7 @@ export default function AdmobPage({ onNavigate }) {
         <div className="space-y-3 animate-in fade-in duration-200">
           <div className="bg-white dark:bg-[#121216] rounded-xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3.5">
             <div className="flex items-center space-x-2 pb-2.5 border-b border-slate-100 dark:border-white/10">
-              <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <Radio className="w-3.5 h-3.5 stroke-[2.2]" />
               </div>
               <div>
@@ -1127,7 +1119,7 @@ export default function AdmobPage({ onNavigate }) {
             {/* Chart Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                   <TrendingUp className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1187,20 +1179,20 @@ export default function AdmobPage({ onNavigate }) {
                 <AreaChart data={TREND_DATA} margin={{ top: 8, right: 10, left: -25, bottom: 0 }}>
                   <defs>
                     <linearGradient id="admobEarningsGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#FEF08A" stopOpacity={0.5} />
-                      <stop offset="95%" stopColor="#FEF08A" stopOpacity={0.0} />
+                      <stop offset="5%" stopColor="#FACC15" stopOpacity={0.45} />
+                      <stop offset="95%" stopColor="#FACC15" stopOpacity={0.02} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.15)" />
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="rgba(148, 163, 184, 0.28)" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fill: '#64748B', fontSize: 10, fontFamily: 'Urbanist' }}
-                    axisLine={{ stroke: 'rgba(148, 163, 184, 0.2)' }}
+                    tick={{ fill: '#64748B', fontSize: 11, fontWeight: 600, fontFamily: 'Urbanist' }}
+                    axisLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
                     tickLine={false}
                   />
                   <YAxis
-                    tick={{ fill: '#64748B', fontSize: 10, fontFamily: 'Urbanist' }}
-                    axisLine={{ stroke: 'rgba(148, 163, 184, 0.2)' }}
+                    tick={{ fill: '#64748B', fontSize: 11, fontWeight: 600, fontFamily: 'Urbanist' }}
+                    axisLine={{ stroke: 'rgba(148, 163, 184, 0.3)' }}
                     tickLine={false}
                     domain={[0, 4]}
                     ticks={[0, 1, 2, 3, 4]}
@@ -1227,7 +1219,7 @@ export default function AdmobPage({ onNavigate }) {
                     type="monotone"
                     dataKey="earnings"
                     stroke="#EAB308"
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     fillOpacity={1}
                     fill="url(#admobEarningsGrad)"
                   />

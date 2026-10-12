@@ -99,8 +99,8 @@ export const homeValidation = {
 
   // Admin: Set drama priority
   setDramaPriority: Joi.object({
-    priority: Joi.number().integer().min(0).required().messages({
-      'any.required': 'Priority number is required.'
-    })
-  })
+    priority: Joi.number().integer().min(0).optional(),
+    direction: Joi.string().valid('up', 'down').optional(),
+    moveTo: Joi.string().valid('top', 'bottom').optional()
+  }).or('priority', 'direction', 'moveTo')
 };

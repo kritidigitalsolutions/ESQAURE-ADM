@@ -159,7 +159,7 @@ export default function SettingsPage() {
          ───────────────────────────────────────────────────────────── */}
       <div className="bg-white dark:bg-[#121216] rounded-xl p-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div className="flex items-center space-x-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
             <ShieldCheck className="w-4 h-4 stroke-[2.2]" />
           </div>
           <div className="min-w-0">
@@ -210,7 +210,7 @@ export default function SettingsPage() {
             {/* Card Header */}
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                   <User className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -231,7 +231,7 @@ export default function SettingsPage() {
             {/* Profile Avatar Badge */}
             <div className="p-2.5 bg-slate-50 dark:bg-[#18181E] rounded-xl border border-slate-200/90 dark:border-white/10 flex items-center justify-between gap-2.5">
               <div className="flex items-center space-x-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 font-black text-sm shrink-0 shadow-2xs">
+                <div className="w-9 h-9 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs font-black text-sm shrink-0 shadow-2xs">
                   {(adminName || 'A').charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0">
@@ -382,7 +382,7 @@ export default function SettingsPage() {
             {/* Card Header */}
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                   <KeyRound className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>

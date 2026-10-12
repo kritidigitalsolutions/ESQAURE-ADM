@@ -17,6 +17,12 @@ const router = Router();
 router.get('/', UserController.getUsers);
 
 /**
+ * GET /api/v1/users/admin/activity-analytics
+ * Get dynamic activity telemetry derived from real database users and subscriptions
+ */
+router.get('/admin/activity-analytics', UserController.getActivityAnalytics);
+
+/**
  * GET /api/v1/users/:id
  * Get a single user's full profile and details
  */

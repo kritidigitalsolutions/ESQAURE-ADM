@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 /**
- * Standard Admin ToggleSwitch
- * Consistent sizing, animations, and color styling across the entire admin panel:
- * - Active: Vibrant Mint / Emerald Green (#10B981)
- * - Inactive: Slate-300 / Slate-700
- * - Knob: Pure White circular thumb with shadow
- * - Dimensions: h-5 w-9 with h-4 w-4 knob (translate-x-4)
+ * Standard Admin ToggleSwitch powered by Web Awesome <wa-switch>
+ * Provides full drop-in compatibility across the whole admin panel:
+ * - checked / enabled
+ * - onChange(nextValue)
+ * - disabled
+ * - size ('sm' | 'md' | 'lg' | 'small' | 'medium' | 'large')
+ * - children (optional label)
+ * - id, name, ariaLabel, title, className
  */
 export default function ToggleSwitch({
   checked,
@@ -18,64 +20,77 @@ export default function ToggleSwitch({
   ariaLabel,
   title,
   className = '',
-  activeColor = 'emerald',
-  size = 'sm'
+  activeColor,
+  size = 'small',
+  children,
+  ...rest
 }) {
+  const switchRef = useRef(null);
   const isChecked = Boolean(checked ?? enabled);
 
-  const handleClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!disabled && onChange) {
-      onChange(!isChecked);
-    }
-  };
+  // Normalize size for Web Awesome (small, medium, large)
+  const waSize =
+    size === 'sm' || size === 'small'
+      ? 'small'
+      : size === 'lg' || size === 'large'
+      ? 'large'
+      : 'medium';
 
-  const handleKeyDown = (e) => {
-    if ((e.key === ' ' || e.key === 'Enter') && !disabled && onChange) {
-      e.preventDefault();
+  // Synchronize DOM properties with React state
+  useEffect(() => {
+    const el = switchRef.current;
+    if (!el) return;
+
+    if (el.checked !== isChecked) {
+      el.checked = isChecked;
+    }
+    if (el.disabled !== Boolean(disabled)) {
+      el.disabled = Boolean(disabled);
+    }
+  }, [isChecked, disabled]);
+
+  // Listen to Web Awesome custom events (wa-change) and native change events
+  useEffect(() => {
+    const el = switchRef.current;
+    if (!el) return;
+
+    const handleChange = (e) => {
+      if (disabled) return;
       e.stopPropagation();
-      onChange(!isChecked);
-    }
-  };
+      const nextChecked = Boolean(el.checked);
+      if (onChange) {
+        onChange(nextChecked);
+      }
+    };
 
-  const isMd = size === 'md';
-  const trackSize = isMd ? 'h-6 w-11' : 'h-5 w-9';
-  const knobSize = isMd ? 'h-5 w-5' : 'h-4 w-4';
-  const knobTranslate = isMd ? 'translate-x-5' : 'translate-x-4';
+    el.addEventListener('wa-change', handleChange);
+    el.addEventListener('change', handleChange);
 
-  const activeBgClass =
-    activeColor === 'red'
-      ? 'bg-[#E50914] focus:ring-red-500/40'
-      : activeColor === 'amber'
-      ? 'bg-amber-400 focus:ring-amber-400/40'
-      : 'bg-[#10B981] focus:ring-emerald-500/40';
+    return () => {
+      el.removeEventListener('wa-change', handleChange);
+      el.removeEventListener('change', handleChange);
+    };
+  }, [onChange, disabled]);
 
   return (
-    <button
+    <wa-switch
+      ref={switchRef}
       id={id}
       name={name}
-      type="button"
-      role="switch"
+      size={waSize}
       title={title}
-      aria-label={ariaLabel}
-      aria-checked={isChecked}
-      disabled={disabled}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      className={`relative inline-flex ${trackSize} shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden focus:ring-2 select-none ${
-        disabled ? 'opacity-50 cursor-not-allowed' : ''
+      aria-label={ariaLabel || (typeof children === 'string' ? children : undefined)}
+      checked={isChecked ? true : undefined}
+      disabled={disabled ? true : undefined}
+      data-state={isChecked ? 'checked' : 'unchecked'}
+      className={`admin-wa-switch inline-flex items-center select-none cursor-pointer ${
+        isChecked ? 'is-on' : 'is-off'
       } ${
-        isChecked
-          ? activeBgClass
-          : 'bg-slate-300 dark:bg-slate-700'
+        disabled ? 'opacity-50 cursor-not-allowed' : ''
       } ${className}`}
+      {...rest}
     >
-      <span
-        className={`pointer-events-none inline-block ${knobSize} rounded-full bg-white shadow-md transform ring-0 transition duration-200 ease-in-out ${
-          isChecked ? knobTranslate : 'translate-x-0'
-        }`}
-      />
-    </button>
+      {children}
+    </wa-switch>
   );
 }

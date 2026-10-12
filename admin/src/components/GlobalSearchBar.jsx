@@ -5,7 +5,6 @@ import {
   Film,
   Users,
   Receipt,
-  Shield,
   LayoutDashboard,
   UploadCloud,
   Sliders,
@@ -21,27 +20,23 @@ import {
   ChevronRight,
   TrendingUp,
   CornerDownLeft,
-  ArrowRight,
-  ExternalLink,
   Crown,
-  CheckCircle2,
-  Clock,
-  Play
+  Loader2
 } from 'lucide-react';
-import {
-  mockDramas,
-  mockUsers,
-  mockTransactions,
-  mockAuditLogs
-} from '../data/mockOttData';
+import { searchService } from '../services/searchService';
+import { dramaService } from '../services/dramaService';
+import { userService } from '../services/userService';
+import { subscriptionService } from '../services/subscriptionService';
+import promoService from '../services/promoService';
 
 // System navigation routes for quick spotlight jump
 const SYSTEM_PAGES = [
   { id: 'page-summary', tab: 'summary', title: 'Dashboard Overview', category: 'Navigation', icon: LayoutDashboard, desc: 'Real-time viewers, subscriber stats, and daily revenue metrics' },
   { id: 'page-dramas', tab: 'dramas', title: 'Content Library (Series)', category: 'Navigation', icon: Film, desc: 'Manage vertical short-drama catalog and status' },
   { id: 'page-upload', tab: 'upload', title: 'Upload Content Studio', category: 'Navigation', icon: UploadCloud, desc: 'Publish new micro-dramas, trailers & episodes' },
-  { id: 'page-episodes', tab: 'dramas', title: 'Content & Episodes Management', category: 'Navigation', icon: Play, desc: 'Manage series, paywalls, episodes and media files' },
+  { id: 'page-banners', tab: 'banners', title: 'Banners & Hero Carousel', category: 'Navigation', icon: Film, desc: 'Manage landscape hero slides & promo banners' },
   { id: 'page-genres', tab: 'genres', title: 'Genres & Categories', category: 'Navigation', icon: Tag, desc: 'OTT genre tags and viewer interest categories' },
+  { id: 'page-category_priority', tab: 'category_priority', title: 'Homepage Category Priority', category: 'Navigation', icon: Sliders, desc: 'Rank order (1, 2, 3...) for mobile app home sections' },
   { id: 'page-users', tab: 'users', title: 'User Management', category: 'Navigation', icon: Users, desc: 'Registered mobile accounts, watch times & subscription tiers' },
   { id: 'page-subscribers', tab: 'subscribers', title: 'Subscribers Ledger', category: 'Navigation', icon: Crown, desc: 'Active paid members and subscription terms' },
   { id: 'page-subscriptions', tab: 'subscriptions', title: 'Subscription Plans', category: 'Navigation', icon: CreditCard, desc: '1 Month (₹99), 6 Months (₹499), 12 Months (₹899) & 7-Day Trial (₹2)' },
@@ -60,12 +55,66 @@ const SYSTEM_PAGES = [
 export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenIngestModal }) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('ALL'); // 'ALL' | 'dramas' | 'users' | 'transactions' | 'logs' | 'pages'
+  const [activeCategory, setActiveCategory] = useState('ALL'); // 'ALL' | 'dramas' | 'users' | 'transactions' | 'promos' | 'pages'
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  // Live Server Data
+  const [liveDramas, setLiveDramas] = useState([]);
+  const [liveUsers, setLiveUsers] = useState([]);
+  const [liveTransactions, setLiveTransactions] = useState([]);
+  const [livePromos, setLivePromos] = useState([]);
+  const [isLoadingLive, setIsLoadingLive] = useState(false);
+  const hasLoadedRef = useRef(false);
 
   const containerRef = useRef(null);
   const inputRef = useRef(null);
   const listRef = useRef(null);
+
+  // Fetch real data from backend APIs
+  const fetchLiveSearchData = async () => {
+    if (isLoadingLive) return;
+    setIsLoadingLive(true);
+    try {
+      const [dramasRes, usersRes, txRes, promosRes] = await Promise.allSettled([
+        dramaService.getAdminDramas(),
+        userService.getUsers({ limit: 100 }),
+        subscriptionService.getTransactions({ limit: 100 }),
+        promoService.getPromos()
+      ]);
+
+      if (dramasRes.status === 'fulfilled' && dramasRes.value) {
+        const dList = dramasRes.value.dramas || (Array.isArray(dramasRes.value) ? dramasRes.value : []);
+        setLiveDramas(dList);
+      }
+      if (usersRes.status === 'fulfilled' && usersRes.value) {
+        const uList = usersRes.value.users || (Array.isArray(usersRes.value) ? usersRes.value : []);
+        setLiveUsers(uList);
+      }
+      if (txRes.status === 'fulfilled' && txRes.value) {
+        const tList = txRes.value.transactions || (Array.isArray(txRes.value) ? txRes.value : []);
+        setLiveTransactions(tList);
+      }
+      if (promosRes.status === 'fulfilled' && promosRes.value) {
+        const pList = promosRes.value.promos || (Array.isArray(promosRes.value) ? promosRes.value : []);
+        setLivePromos(pList);
+      }
+      hasLoadedRef.current = true;
+    } catch (err) {
+      console.warn('Live search data load error:', err);
+    } finally {
+      setIsLoadingLive(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLiveSearchData();
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && !hasLoadedRef.current) {
+      fetchLiveSearchData();
+    }
+  }, [isOpen]);
 
   // Global Keyboard Shortcut: Cmd+K / Ctrl+K or '/' to focus search
   useEffect(() => {
@@ -99,13 +148,95 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Filter & Search Results across all platform entities
+  // Remote search state
+  const [remoteSearchResults, setRemoteSearchResults] = useState(null);
+  const [isSearchingRemote, setIsSearchingRemote] = useState(false);
+  const searchDebounceRef = useRef(null);
+
+  // Trigger live search hitting GET /api/v1/search, /api/v1/users, /api/v1/subscriptions/admin/transactions
+  useEffect(() => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setRemoteSearchResults(null);
+      setIsSearchingRemote(false);
+      return;
+    }
+
+    setIsSearchingRemote(true);
+    searchDebounceRef.current = setTimeout(async () => {
+      try {
+        const [searchApiRes, usersRes, txRes] = await Promise.allSettled([
+          searchService.search(trimmed),
+          userService.getUsers({ search: trimmed, limit: 15 }),
+          subscriptionService.getTransactions({ search: trimmed, limit: 15 })
+        ]);
+
+        let dramas = [];
+        if (searchApiRes.status === 'fulfilled' && searchApiRes.value) {
+          const raw = searchApiRes.value.results || searchApiRes.value.dramas || (Array.isArray(searchApiRes.value) ? searchApiRes.value : []);
+          dramas = raw.map((d) => ({
+            ...d,
+            id: d.id || d._id,
+            poster: d.poster || d.posterUrl || d.bannerUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=400&q=80',
+            type: 'drama',
+            key: `drama-${d.id || d._id}`
+          }));
+        }
+
+        let users = [];
+        if (usersRes.status === 'fulfilled' && usersRes.value) {
+          const raw = usersRes.value.users || (Array.isArray(usersRes.value) ? usersRes.value : []);
+          users = raw.map((u) => ({
+            ...u,
+            id: u.id || u._id,
+            name: u.name || `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Viewer',
+            phone: u.phone || u.phoneNumber || 'N/A',
+            email: u.email || 'N/A',
+            plan: u.plan || (u.isVip ? 'VIP Subscriber' : 'Free Tier'),
+            type: 'user',
+            key: `user-${u.id || u._id}`
+          }));
+        }
+
+        let transactions = [];
+        if (txRes.status === 'fulfilled' && txRes.value) {
+          const raw = txRes.value.transactions || (Array.isArray(txRes.value) ? txRes.value : []);
+          transactions = raw.map((t) => ({
+            ...t,
+            id: t.id || t._id || t.gatewayPaymentId,
+            type: 'transaction',
+            key: `tx-${t.id || t._id}`
+          }));
+        }
+
+        setRemoteSearchResults({ dramas, users, transactions });
+      } catch (e) {
+        console.warn('Live search API request failed, falling back:', e);
+      } finally {
+        setIsSearchingRemote(false);
+      }
+    }, 200);
+
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, [query]);
+
+  // Filter & Search Results across all real database entities
   const searchResults = useMemo(() => {
     const trimmed = query.trim().toLowerCase();
+    if (!trimmed) {
+      return { pages: [], dramas: [], users: [], transactions: [], promos: [], totalCount: 0 };
+    }
 
     // 1. Pages matching
     const matchedPages = SYSTEM_PAGES.filter(p => {
-      if (!trimmed) return false;
       return p.title.toLowerCase().includes(trimmed) ||
              p.desc.toLowerCase().includes(trimmed) ||
              p.tab.toLowerCase().includes(trimmed);
@@ -115,61 +246,102 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
       key: `page-${p.tab}`
     }));
 
-    // 2. Dramas matching
-    const matchedDramas = mockDramas.filter(d => {
-      if (!trimmed) return false;
-      return d.title.toLowerCase().includes(trimmed) ||
-             d.id.toLowerCase().includes(trimmed) ||
-             d.synopsis.toLowerCase().includes(trimmed) ||
-             d.genres.some(g => g.toLowerCase().includes(trimmed)) ||
-             d.status.toLowerCase().includes(trimmed);
-    }).map(d => ({
-      ...d,
-      type: 'drama',
-      key: `drama-${d.id}`
-    }));
+    // 2. Real Dramas matching (from live /api/v1/search API, fallback to local catalog)
+    let matchedDramas = [];
+    if (remoteSearchResults?.dramas && remoteSearchResults.dramas.length > 0) {
+      matchedDramas = remoteSearchResults.dramas;
+    } else {
+      matchedDramas = liveDramas.filter(d => {
+        const title = (d.title || '').toLowerCase();
+        const id = String(d.id || d._id || '').toLowerCase();
+        const synopsis = (d.synopsis || '').toLowerCase();
+        const genres = Array.isArray(d.genres) ? d.genres.map(g => String(g).toLowerCase()) : [];
+        const status = String(d.status || '').toLowerCase();
 
-    // 3. Users matching
-    const matchedUsers = mockUsers.filter(u => {
-      if (!trimmed) return false;
-      return u.name.toLowerCase().includes(trimmed) ||
-             u.id.toLowerCase().includes(trimmed) ||
-             u.phone.toLowerCase().includes(trimmed) ||
-             u.email.toLowerCase().includes(trimmed) ||
-             u.plan.toLowerCase().includes(trimmed);
-    }).map(u => ({
-      ...u,
-      type: 'user',
-      key: `user-${u.id}`
-    }));
+        return title.includes(trimmed) ||
+               id.includes(trimmed) ||
+               synopsis.includes(trimmed) ||
+               genres.some(g => g.includes(trimmed)) ||
+               status.includes(trimmed);
+      }).map(d => ({
+        ...d,
+        id: d.id || d._id,
+        poster: d.poster || d.posterUrl || d.bannerUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=400&q=80',
+        type: 'drama',
+        key: `drama-${d.id || d._id}`
+      }));
+    }
 
-    // 4. Transactions matching
-    const matchedTransactions = mockTransactions.filter(t => {
-      if (!trimmed) return false;
-      return t.id.toLowerCase().includes(trimmed) ||
-             t.orderId.toLowerCase().includes(trimmed) ||
-             t.user.toLowerCase().includes(trimmed) ||
-             t.phone.toLowerCase().includes(trimmed) ||
-             t.amount.toLowerCase().includes(trimmed) ||
-             t.plan.toLowerCase().includes(trimmed) ||
-             t.method.toLowerCase().includes(trimmed);
-    }).map(t => ({
-      ...t,
-      type: 'transaction',
-      key: `tx-${t.id}`
-    }));
+    // 3. Real Users matching (from live /api/v1/users?search=... API, fallback to local users)
+    let matchedUsers = [];
+    if (remoteSearchResults?.users && remoteSearchResults.users.length > 0) {
+      matchedUsers = remoteSearchResults.users;
+    } else {
+      matchedUsers = liveUsers.filter(u => {
+        const name = (u.name || `${u.firstName || ''} ${u.lastName || ''}`).toLowerCase();
+        const id = String(u.id || u._id || '').toLowerCase();
+        const phone = String(u.phone || u.phoneNumber || '').toLowerCase();
+        const email = String(u.email || '').toLowerCase();
+        const plan = String(u.plan || (u.isVip ? 'VIP Subscriber' : 'Free Tier')).toLowerCase();
 
-    // 5. Audit Logs matching
-    const matchedLogs = mockAuditLogs.filter(l => {
-      if (!trimmed) return false;
-      return l.action.toLowerCase().includes(trimmed) ||
-             l.admin.toLowerCase().includes(trimmed) ||
-             l.targetId.toLowerCase().includes(trimmed) ||
-             l.id.toLowerCase().includes(trimmed);
-    }).map(l => ({
-      ...l,
-      type: 'log',
-      key: `log-${l.id}`
+        return name.includes(trimmed) ||
+               id.includes(trimmed) ||
+               phone.includes(trimmed) ||
+               email.includes(trimmed) ||
+               plan.includes(trimmed);
+      }).map(u => ({
+        ...u,
+        id: u.id || u._id,
+        name: u.name || `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Viewer',
+        phone: u.phone || u.phoneNumber || 'N/A',
+        email: u.email || 'N/A',
+        plan: u.plan || (u.isVip ? 'VIP Subscriber' : 'Free Tier'),
+        type: 'user',
+        key: `user-${u.id || u._id}`
+      }));
+    }
+
+    // 4. Real Transactions matching (from live /api/v1/subscriptions/admin/transactions?search=... API, fallback to local tx)
+    let matchedTransactions = [];
+    if (remoteSearchResults?.transactions && remoteSearchResults.transactions.length > 0) {
+      matchedTransactions = remoteSearchResults.transactions;
+    } else {
+      matchedTransactions = liveTransactions.filter(t => {
+        const id = String(t.id || t._id || t.gatewayPaymentId || '').toLowerCase();
+        const orderId = String(t.orderId || t.gatewayOrderId || '').toLowerCase();
+        const user = String(t.user || '').toLowerCase();
+        const phone = String(t.phone || '').toLowerCase();
+        const amount = String(t.amount || '').toLowerCase();
+        const plan = String(t.plan || '').toLowerCase();
+        const method = String(t.method || '').toLowerCase();
+
+        return id.includes(trimmed) ||
+               orderId.includes(trimmed) ||
+               user.includes(trimmed) ||
+               phone.includes(trimmed) ||
+               amount.includes(trimmed) ||
+               plan.includes(trimmed) ||
+               method.includes(trimmed);
+      }).map(t => ({
+        ...t,
+        id: t.id || t._id || t.gatewayPaymentId,
+        type: 'transaction',
+        key: `tx-${t.id || t._id}`
+      }));
+    }
+
+    // 5. Real Promo Codes matching
+    const matchedPromos = livePromos.filter(p => {
+      const code = String(p.code || '').toLowerCase();
+      const desc = String(p.description || '').toLowerCase();
+      const discount = String(p.discountValue || '').toLowerCase();
+
+      return code.includes(trimmed) || desc.includes(trimmed) || discount.includes(trimmed);
+    }).map(p => ({
+      ...p,
+      id: p.id || p._id,
+      type: 'promo',
+      key: `promo-${p.id || p._id}`
     }));
 
     return {
@@ -177,10 +349,10 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
       dramas: matchedDramas,
       users: matchedUsers,
       transactions: matchedTransactions,
-      logs: matchedLogs,
-      totalCount: matchedPages.length + matchedDramas.length + matchedUsers.length + matchedTransactions.length + matchedLogs.length
+      promos: matchedPromos,
+      totalCount: matchedPages.length + matchedDramas.length + matchedUsers.length + matchedTransactions.length + matchedPromos.length
     };
-  }, [query]);
+  }, [query, remoteSearchResults, liveDramas, liveUsers, liveTransactions, livePromos]);
 
   // Filtered flat list based on active category
   const displayItems = useMemo(() => {
@@ -199,8 +371,8 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
     if (activeCategory === 'ALL' || activeCategory === 'transactions') {
       items = [...items, ...searchResults.transactions];
     }
-    if (activeCategory === 'ALL' || activeCategory === 'logs') {
-      items = [...items, ...searchResults.logs];
+    if (activeCategory === 'ALL' || activeCategory === 'promos') {
+      items = [...items, ...searchResults.promos];
     }
     return items;
   }, [searchResults, activeCategory, query]);
@@ -221,10 +393,10 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex(prev => (prev < displayItems.length - 1 ? prev + 1 : 0));
+      setSelectedIndex((prev) => (prev + 1) % Math.max(1, displayItems.length));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setSelectedIndex(prev => (prev > 0 ? prev - 1 : Math.max(0, displayItems.length - 1)));
+      setSelectedIndex((prev) => (prev - 1 + displayItems.length) % Math.max(1, displayItems.length));
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (displayItems.length > 0 && displayItems[selectedIndex]) {
@@ -233,7 +405,6 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
     }
   };
 
-  // Action execution when user clicks or presses Enter on a result
   const handleSelectItem = (item) => {
     setIsOpen(false);
     setQuery('');
@@ -241,14 +412,14 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
     if (item.type === 'page') {
       onNavigate?.(item.tab);
     } else if (item.type === 'drama') {
-      onSelectDrama?.(item.id);
+      onSelectDrama?.(item.id || item._id);
       onNavigate?.('dramas');
     } else if (item.type === 'user') {
       onNavigate?.(item.isVip ? 'subscribers' : 'users');
     } else if (item.type === 'transaction') {
       onNavigate?.('transactions');
-    } else if (item.type === 'log') {
-      onNavigate?.('auditlog');
+    } else if (item.type === 'promo') {
+      onNavigate?.('promos');
     }
   };
 
@@ -268,12 +439,16 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
           }}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleInputKeyDown}
-          placeholder="Search dramas, users, logs..."
+          placeholder="Search dramas, users, billing..."
           className="w-full pl-9 pr-8 py-2 text-xs font-medium bg-slate-100/90 dark:bg-[#141419] focus:bg-white dark:focus:bg-[#1E1E26] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-400 rounded-full border border-slate-200/90 dark:border-white/10 focus:border-[#FEF08A] dark:focus:border-white/25 focus:outline-none focus:ring-2 focus:ring-[#FEF08A]/20 dark:focus:ring-0 transition-all shadow-2xs"
         />
 
-        {/* Clear Button */}
-        {query && (
+        {/* Loading Spinner or Clear Button */}
+        {isSearchingRemote ? (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-500" />
+          </div>
+        ) : query ? (
           <button
             onClick={() => {
               setQuery('');
@@ -284,7 +459,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
           >
             <X className="w-3.5 h-3.5" />
           </button>
-        )}
+        ) : null}
       </div>
 
       {/* Interactive Dropdown Results Panel */}
@@ -299,7 +474,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                 { id: 'dramas', label: 'Series', count: searchResults.dramas.length },
                 { id: 'users', label: 'Users', count: searchResults.users.length },
                 { id: 'transactions', label: 'Billing', count: searchResults.transactions.length },
-                { id: 'logs', label: 'Audit Logs', count: searchResults.logs.length },
+                { id: 'promos', label: 'Promos', count: searchResults.promos.length },
                 { id: 'pages', label: 'Pages', count: searchResults.pages.length },
               ].map((cat) => (
                 <button
@@ -346,7 +521,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       }`}
                     >
                       <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-200/60 dark:border-amber-400/30">
+                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shrink-0 shadow-xs">
                           <Icon className="w-4 h-4 stroke-[2.2]" />
                         </div>
                         <div className="min-w-0">
@@ -394,11 +569,9 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                             </span>
                           </div>
                           <div className="flex items-center space-x-2 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                            <span>{item.genres?.slice(0, 2).join(', ')}</span>
+                            <span>{Array.isArray(item.genres) ? item.genres.slice(0, 2).join(', ') : 'Drama'}</span>
                             <span>•</span>
-                            <span>{item.views} Views</span>
-                            <span>•</span>
-                            <span className="font-semibold">{item.totalEpisodes} Eps</span>
+                            <span className="font-semibold">{item.totalEpisodes || (Array.isArray(item.episodes) ? item.episodes.length : 0)} Eps</span>
                           </div>
                         </div>
                       </div>
@@ -406,11 +579,9 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                           item.status === 'PUBLISHED'
                             ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-300/40 dark:border-emerald-700/40'
-                            : item.status === 'ENCODING'
-                            ? 'bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400 border border-blue-300/40 dark:border-blue-700/40'
                             : 'bg-amber-100 dark:bg-amber-400/10 text-amber-700 dark:text-amber-400 border border-amber-300/40 dark:border-amber-400/30'
                         }`}>
-                          {item.status}
+                          {item.status || 'DRAFT'}
                         </span>
                         <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                       </div>
@@ -431,7 +602,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       }`}
                     >
                       <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-200/60 dark:border-amber-400/30">
+                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shrink-0 shadow-xs">
                           {item.isVip ? <Crown className="w-4 h-4 stroke-[2.2]" /> : <Users className="w-4 h-4 stroke-[2.2]" />}
                         </div>
                         <div className="min-w-0">
@@ -439,7 +610,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                             <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
                               {item.name}
                             </p>
-                            <span className="text-[10px] text-slate-400 font-mono">({item.id})</span>
+                            <span className="text-[10px] text-slate-400 font-mono">({String(item.id).slice(-6)})</span>
                           </div>
                           <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                             {item.phone} • {item.email}
@@ -473,7 +644,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       }`}
                     >
                       <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-200/60 dark:border-amber-400/30">
+                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shrink-0 shadow-xs">
                           <Receipt className="w-4 h-4 stroke-[2.2]" />
                         </div>
                         <div className="min-w-0">
@@ -504,7 +675,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                   );
                 }
 
-                if (item.type === 'log') {
+                if (item.type === 'promo') {
                   return (
                     <div
                       key={item.key}
@@ -517,20 +688,27 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                       }`}
                     >
                       <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-200/60 dark:border-amber-400/30">
-                          <Shield className="w-4 h-4 stroke-[2.2]" />
+                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shrink-0 shadow-xs">
+                          <Ticket className="w-4 h-4 stroke-[2.2]" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs font-mono font-bold text-slate-900 dark:text-white truncate">
-                            {item.action}
-                          </p>
+                          <div className="flex items-center space-x-2">
+                            <p className="text-xs font-mono font-bold text-slate-900 dark:text-white truncate">
+                              {item.code}
+                            </p>
+                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                              {item.discountType === 'PERCENTAGE' ? `${item.discountValue}% OFF` : `₹${item.discountValue} OFF`}
+                            </span>
+                          </div>
                           <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                            {item.admin} → {item.targetId}
+                            {item.description || 'Promotional Discount Coupon'}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2 shrink-0 ml-2 text-[10px] text-slate-400">
-                        <span>{item.time}</span>
+                      <div className="flex items-center space-x-2 shrink-0 ml-2">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-300/40">
+                          {item.status || 'ACTIVE'}
+                        </span>
                         <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                       </div>
                     </div>
@@ -543,7 +721,13 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
 
             {/* If Query has text but NO results found */}
             {query.trim() && displayItems.length === 0 && (
-              <div className="py-8 px-4 text-center">
+              isSearchingRemote ? (
+                <div className="py-12 px-4 text-center space-y-2">
+                  <Loader2 className="w-5 h-5 animate-spin mx-auto text-amber-500" />
+                  <p className="text-xs font-semibold text-slate-400">Searching live series, users &amp; payments...</p>
+                </div>
+              ) : (
+                <div className="py-8 px-4 text-center">
                 <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-400 flex items-center justify-center mx-auto mb-3">
                   <Search className="w-6 h-6" />
                 </div>
@@ -551,7 +735,7 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                   No matching results for "{query}"
                 </h4>
                 <p className="text-[11px] text-slate-400 dark:text-slate-400 mt-1 max-w-xs mx-auto">
-                  Try searching by drama title (e.g. "Security Guard"), user name, phone (+91), or payment ID.
+                  Try searching by drama title, user name, phone (+91), or payment ID.
                 </p>
                 <div className="mt-3 flex items-center justify-center gap-2">
                   <button
@@ -574,9 +758,10 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                   </button>
                 </div>
               </div>
-            )}
+            )
+          )}
 
-            {/* When Query is EMPTY: Show Quick Suggestions & Recent Links */}
+            {/* When Query is EMPTY: Show Quick Suggestions & Live Series Links */}
             {!query.trim() && (
               <div className="p-2 space-y-4">
                 {/* Quick Navigation Pages */}
@@ -586,11 +771,12 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                   </div>
                   <div className="grid grid-cols-2 gap-1.5 mt-1">
                     {[
-                      { tab: 'dramas', title: 'Content Library', icon: Film, count: `${mockDramas.length} series` },
-                      { tab: 'upload', title: 'Upload Content', icon: UploadCloud, highlight: true },
-                      { tab: 'subscribers', title: 'Subscribers', icon: Crown, count: '₹24.8L MRR' },
-                      { tab: 'admob', title: 'AdMob Revenue', icon: TrendingUp, count: '+22.4%' },
-                      { tab: 'transactions', title: 'Transactions', icon: Receipt, count: '6 recent' },
+                      { tab: 'dramas', title: 'Content Library', icon: Film, count: `${liveDramas.length} series` },
+                      { tab: 'upload', title: 'Upload Content', icon: UploadCloud, count: 'Studio' },
+                      { tab: 'users', title: 'User Accounts', icon: Users, count: `${liveUsers.length} users` },
+                      { tab: 'subscribers', title: 'Subscribers', icon: Crown, count: 'Paid Members' },
+                      { tab: 'transactions', title: 'Transactions', icon: Receipt, count: `${liveTransactions.length} logs` },
+                      { tab: 'promos', title: 'Promo Codes', icon: Ticket, count: `${livePromos.length} codes` },
                     ].map((item) => {
                       const Icon = item.icon;
                       return (
@@ -600,17 +786,9 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                             setIsOpen(false);
                             onNavigate?.(item.tab);
                           }}
-                          className={`group flex items-center space-x-2.5 p-2 rounded-xl text-left transition-all cursor-pointer ${
-                            item.highlight
-                              ? 'bg-amber-50/70 dark:bg-[#1A1A22] hover:bg-amber-100/80 dark:hover:bg-[#1E1E26] text-slate-900 dark:text-slate-100 border border-amber-300/80 dark:border-white/10 hover:border-amber-400 dark:hover:border-white/20 shadow-xs'
-                              : 'bg-slate-50 dark:bg-[#141419] hover:bg-slate-100 dark:hover:bg-[#1E1E26] text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
-                          }`}
+                          className="group flex items-center space-x-2.5 p-2 rounded-xl text-left transition-all cursor-pointer bg-slate-50 dark:bg-[#141419] hover:bg-slate-100 dark:hover:bg-[#1E1E26] text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-white/10 hover:border-amber-300/60 dark:hover:border-[#FEF08A]/30 shadow-2xs"
                         >
-                          <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 ${
-                            item.highlight
-                              ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-                              : 'bg-[#FEF08A]/20 dark:bg-[#FEF08A]/15 text-amber-700 dark:text-[#FEF08A] border border-amber-300/40 dark:border-amber-400/25'
-                          }`}>
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 bg-[#FEF08A] text-slate-950 shadow-xs">
                             <Icon className="w-3.5 h-3.5 stroke-[2.2]" />
                           </div>
                           <div className="min-w-0 flex-1">
@@ -625,53 +803,53 @@ export default function GlobalSearchBar({ onNavigate, onSelectDrama, onOpenInges
                   </div>
                 </div>
 
-                {/* Trending Micro-Dramas */}
-                <div>
-                  <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400/80 flex items-center justify-between">
-                    <span>Trending Vertical Series</span>
-                    <span className="text-amber-600 dark:text-[#FEF08A] font-extrabold flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" /> Top Viewed
-                    </span>
-                  </div>
-                  <div className="space-y-1 mt-1">
-                    {mockDramas.slice(0, 3).map((drama, idx) => (
-                      <div
-                        key={drama.id}
-                        onClick={() => {
-                          setIsOpen(false);
-                          onSelectDrama?.(drama.id);
-                          onNavigate?.('dramas');
-                        }}
-                        className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.05] cursor-pointer transition-colors group border border-transparent dark:hover:border-white/10"
-                      >
-                        <div className="flex items-center space-x-3 min-w-0">
-                          <img
-                            src={drama.poster}
-                            alt={drama.title}
-                            className="w-7 h-10 object-cover rounded-md border border-slate-200 dark:border-white/10 shrink-0 shadow-xs"
-                          />
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-amber-600 dark:group-hover:text-[#FEF08A] transition-colors">
-                              {drama.title}
-                            </p>
-                            <p className="text-[10px] text-slate-400 dark:text-slate-400">
-                              {drama.genres.join(', ')} • {drama.views} views
-                            </p>
+                {/* Live Series from Database */}
+                {liveDramas.length > 0 && (
+                  <div>
+                    <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400/80 flex items-center justify-between">
+                      <span>Featured Live Series</span>
+                      <span className="text-amber-600 dark:text-[#FEF08A] font-extrabold flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" /> Live Catalog
+                      </span>
+                    </div>
+                    <div className="space-y-1 mt-1">
+                      {liveDramas.slice(0, 3).map((drama, idx) => (
+                        <div
+                          key={drama.id || drama._id}
+                          onClick={() => {
+                            setIsOpen(false);
+                            onSelectDrama?.(drama.id || drama._id);
+                            onNavigate?.('dramas');
+                          }}
+                          className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/[0.05] cursor-pointer transition-colors group border border-transparent dark:hover:border-white/10"
+                        >
+                          <div className="flex items-center space-x-3 min-w-0">
+                            <img
+                              src={drama.poster || drama.posterUrl || drama.bannerUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=400&q=80'}
+                              alt={drama.title}
+                              className="w-7 h-10 object-cover rounded-md border border-slate-200 dark:border-white/10 shrink-0 shadow-xs"
+                            />
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-amber-600 dark:group-hover:text-[#FEF08A] transition-colors">
+                                {drama.title}
+                              </p>
+                              <p className="text-[10px] text-slate-400 dark:text-slate-400">
+                                {Array.isArray(drama.genres) ? drama.genres.join(', ') : 'Drama'} • {drama.totalEpisodes || (drama.episodes ? drama.episodes.length : 0)} eps
+                              </p>
+                            </div>
                           </div>
+                          <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                            idx === 0
+                              ? 'bg-[#FEF08A]/15 text-amber-700 dark:text-[#FEF08A] border-amber-300/40 dark:border-[#FEF08A]/40'
+                              : 'bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-white/10'
+                          }`}>
+                            Priority #{drama.priority || (idx + 1)}
+                          </span>
                         </div>
-                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
-                          idx === 0
-                            ? 'bg-[#FEF08A]/15 text-amber-700 dark:text-[#FEF08A] border-amber-300/40 dark:border-[#FEF08A]/40'
-                            : idx === 1
-                            ? 'bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-white/10'
-                            : 'bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10'
-                        }`}>
-                          Rank #{drama.trendingRank || (idx + 1)}
-                        </span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 

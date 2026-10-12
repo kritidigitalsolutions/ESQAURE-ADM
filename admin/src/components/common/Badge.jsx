@@ -9,22 +9,19 @@ import {
   CreditCard,
   ArrowUpRight,
   Users,
+  Clock,
+  Video,
+  FileText,
+  Lock,
+  Unlock,
 } from 'lucide-react';
 
 /**
- * Universal Pill Badge — Single consistent size across the entire admin.
- *
- * DEFAULT: size="sm"  →  used everywhere (KPI cards, tables, modals, drawers).
- * Only deviate with size="xs" for very dense table cells, or size="lg" for
- * prominent hero labels. Never mix sizes within the same card/row context.
- *
- * Variant families:
- *   Role       → admin | content-manager | content-partner
- *   Status     → active | inactive | published | given-by-admin
- *   Payment    → razorpay
- *   Plans      → flix9-basic | flix9-premium | no-plan
- *   KPI tags   → kpi-amber | kpi-neutral
- *   Live pills → live | live-mrr | live-base | live-users
+ * Universal Pastel Pill Badge — Matches the requested design standard:
+ * - Full rounded capsule shape (rounded-full)
+ * - Soft pastel solid background fill
+ * - Deep, dark matching hue text & icon for optimal readability and contrast
+ * - Matching icon embedded in the badge (Check for active, X for offline/inactive, Clock for unread/pending, Video, FileText, etc.)
  */
 
 // ─── Variant Config Map ───────────────────────────────────────────────────────
@@ -34,152 +31,256 @@ export const BADGE_CONFIGS = {
   admin: {
     label: 'Admin',
     icon: Shield,
-    bg: 'bg-amber-100 dark:bg-amber-400/10',
-    text: 'text-amber-800 dark:text-amber-300',
-    border: 'border border-amber-300/50 dark:border-amber-400/30',
+    bg: 'bg-amber-200 dark:bg-amber-400/20',
+    text: 'text-amber-950 dark:text-amber-300',
+    border: 'border border-amber-300/40 dark:border-amber-400/30',
   },
   'content-manager': {
     label: 'Content Manager',
     icon: Film,
-    bg: 'bg-blue-100 dark:bg-blue-950/50',
-    text: 'text-blue-800 dark:text-blue-300',
-    border: 'border border-blue-300/50 dark:border-blue-700/40',
+    bg: 'bg-blue-200 dark:bg-blue-500/20',
+    text: 'text-blue-950 dark:text-blue-300',
+    border: 'border border-blue-300/40 dark:border-blue-500/30',
   },
   'content-partner': {
     label: 'Content Partner',
     icon: Sparkles,
-    bg: 'bg-pink-100 dark:bg-pink-950/50',
-    text: 'text-pink-800 dark:text-pink-300',
-    border: 'border border-pink-300/50 dark:border-pink-700/40',
+    bg: 'bg-purple-200 dark:bg-purple-500/20',
+    text: 'text-purple-950 dark:text-purple-300',
+    border: 'border border-purple-300/40 dark:border-purple-500/30',
   },
 
-  // ── Status ────────────────────────────────────────────────────────────────
-  'no-plan': {
-    label: 'No Plan',
-    icon: null,
-    bg: 'bg-slate-100 dark:bg-slate-800/60',
-    text: 'text-slate-600 dark:text-slate-400',
-    border: 'border border-slate-200/70 dark:border-slate-600/30',
-  },
-  inactive: {
-    label: 'Inactive',
-    icon: X,
-    bg: 'bg-red-100 dark:bg-red-950/50',
-    text: 'text-red-700 dark:text-red-400',
-    border: 'border border-red-200/60 dark:border-red-700/30',
-  },
+  // ── Status (Matching user pictures 2, 4, 5) ──────────────────────────────
   active: {
     label: 'Active',
     icon: Check,
-    bg: 'bg-emerald-100 dark:bg-emerald-950/50',
-    text: 'text-emerald-700 dark:text-emerald-400',
-    border: 'border border-emerald-200/60 dark:border-emerald-700/30',
+    bg: 'bg-emerald-200 dark:bg-emerald-500/20',
+    text: 'text-emerald-950 dark:text-emerald-300',
+    border: 'border border-emerald-300/40 dark:border-emerald-500/30',
+  },
+  offline: {
+    label: 'Offline',
+    icon: X,
+    bg: 'bg-rose-200 dark:bg-rose-500/20',
+    text: 'text-rose-950 dark:text-rose-300',
+    border: 'border border-rose-300/40 dark:border-rose-500/30',
+  },
+  inactive: {
+    label: 'Offline',
+    icon: X,
+    bg: 'bg-rose-200 dark:bg-rose-500/20',
+    text: 'text-rose-950 dark:text-rose-300',
+    border: 'border border-rose-300/40 dark:border-rose-500/30',
+  },
+  suspended: {
+    label: 'Suspended',
+    icon: X,
+    bg: 'bg-rose-200 dark:bg-rose-500/20',
+    text: 'text-rose-950 dark:text-rose-300',
+    border: 'border border-rose-300/40 dark:border-rose-500/30',
+  },
+  failed: {
+    label: 'Failed',
+    icon: X,
+    bg: 'bg-rose-200 dark:bg-rose-500/20',
+    text: 'text-rose-950 dark:text-rose-300',
+    border: 'border border-rose-300/40 dark:border-rose-500/30',
+  },
+  expired: {
+    label: 'Expired',
+    icon: X,
+    bg: 'bg-rose-200 dark:bg-rose-500/20',
+    text: 'text-rose-950 dark:text-rose-300',
+    border: 'border border-rose-300/40 dark:border-rose-500/30',
   },
   published: {
     label: 'Published',
     icon: Check,
-    bg: 'bg-emerald-100 dark:bg-emerald-950/50',
-    text: 'text-emerald-700 dark:text-emerald-400',
-    border: 'border border-emerald-200/60 dark:border-emerald-700/30',
+    bg: 'bg-emerald-200 dark:bg-emerald-500/20',
+    text: 'text-emerald-950 dark:text-emerald-300',
+    border: 'border border-emerald-300/40 dark:border-emerald-500/30',
   },
   'given-by-admin': {
     label: 'Given by Admin',
     icon: ShieldCheck,
-    bg: 'bg-emerald-50 dark:bg-emerald-950/40',
-    text: 'text-emerald-700 dark:text-emerald-400',
-    border: 'border border-emerald-200/50 dark:border-emerald-700/30',
+    bg: 'bg-emerald-200 dark:bg-emerald-500/20',
+    text: 'text-emerald-950 dark:text-emerald-300',
+    border: 'border border-emerald-300/40 dark:border-emerald-500/30',
+  },
+  unread: {
+    label: 'Unread',
+    icon: Clock,
+    bg: 'bg-amber-200 dark:bg-amber-400/20',
+    text: 'text-amber-950 dark:text-amber-300',
+    border: 'border border-amber-300/40 dark:border-amber-400/30',
+  },
+  pending: {
+    label: 'Pending',
+    icon: Clock,
+    bg: 'bg-amber-200 dark:bg-amber-400/20',
+    text: 'text-amber-950 dark:text-amber-300',
+    border: 'border border-amber-300/40 dark:border-amber-400/30',
+  },
+  paused: {
+    label: 'Paused',
+    icon: Clock,
+    bg: 'bg-amber-200 dark:bg-amber-400/20',
+    text: 'text-amber-950 dark:text-amber-300',
+    border: 'border border-amber-300/40 dark:border-amber-400/30',
+  },
+  draft: {
+    label: 'Draft',
+    icon: null,
+    bg: 'bg-slate-200 dark:bg-white/[0.08]',
+    text: 'text-slate-900 dark:text-slate-300',
+    border: 'border border-slate-300/40 dark:border-white/10',
+  },
+  'no-plan': {
+    label: 'No Plan',
+    icon: null,
+    bg: 'bg-slate-200 dark:bg-white/[0.08]',
+    text: 'text-slate-900 dark:text-slate-300',
+    border: 'border border-slate-300/40 dark:border-white/10',
+  },
+
+  // ── Media / Format (Matching user picture 1) ───────────────────────────────
+  video: {
+    label: 'Video',
+    icon: Video,
+    bg: 'bg-blue-200 dark:bg-blue-500/20',
+    text: 'text-blue-950 dark:text-blue-300',
+    border: 'border border-blue-300/40 dark:border-blue-500/30',
+  },
+  text: {
+    label: 'Text',
+    icon: FileText,
+    bg: 'bg-blue-200 dark:bg-blue-500/20',
+    text: 'text-blue-950 dark:text-blue-300',
+    border: 'border border-blue-300/40 dark:border-blue-500/30',
+  },
+
+  // ── Categories / Genres (Matching user picture 3) ─────────────────────────
+  sports: {
+    label: 'sports',
+    icon: null,
+    bg: 'bg-emerald-200 dark:bg-emerald-500/20',
+    text: 'text-emerald-950 dark:text-emerald-300',
+    border: 'border border-emerald-300/40 dark:border-emerald-500/30',
+  },
+  news: {
+    label: 'news',
+    icon: null,
+    bg: 'bg-amber-200 dark:bg-amber-400/20',
+    text: 'text-amber-950 dark:text-amber-300',
+    border: 'border border-amber-300/40 dark:border-amber-400/30',
+  },
+  entertainment: {
+    label: 'entertainment',
+    icon: null,
+    bg: 'bg-purple-200 dark:bg-purple-500/20',
+    text: 'text-purple-950 dark:text-purple-300',
+    border: 'border border-purple-300/40 dark:border-purple-500/30',
   },
 
   // ── Payment / Source ──────────────────────────────────────────────────────
   razorpay: {
     label: 'Razorpay',
     icon: CreditCard,
-    bg: 'bg-sky-100 dark:bg-sky-950/50',
-    text: 'text-sky-700 dark:text-sky-400',
-    border: 'border border-sky-200/60 dark:border-sky-700/30',
+    bg: 'bg-sky-200 dark:bg-sky-500/20',
+    text: 'text-sky-950 dark:text-sky-300',
+    border: 'border border-sky-300/40 dark:border-sky-500/30',
   },
 
-  // ── Plan Tiers (Subscriber Page Badges Architecture) ──────────────────────
+  // ── Plan Tiers ────────────────────────────────────────────────────────────
   'flix9-basic': {
     label: '1 Month Pass',
     icon: null,
-    bg: 'bg-[#FEF08A]/40 dark:bg-amber-950/40',
-    text: 'text-[#854d0e] dark:text-amber-400 font-bold',
-    border: 'border border-amber-300/80 dark:border-amber-400/30',
+    bg: 'bg-amber-200 dark:bg-amber-400/20',
+    text: 'text-amber-950 dark:text-amber-300',
+    border: 'border border-amber-300/40 dark:border-amber-400/30',
   },
   'flix9-medium': {
     label: '6 Months Pass',
     icon: null,
-    bg: 'bg-sky-100/90 dark:bg-sky-950/50',
-    text: 'text-sky-800 dark:text-sky-300 font-bold',
-    border: 'border border-sky-300/70 dark:border-sky-700/40',
+    bg: 'bg-sky-200 dark:bg-sky-500/20',
+    text: 'text-sky-950 dark:text-sky-300',
+    border: 'border border-sky-300/40 dark:border-sky-500/30',
   },
   'flix9-premium': {
     label: '12 Months All-Access',
     icon: null,
-    bg: 'bg-violet-100/90 dark:bg-violet-950/50',
-    text: 'text-violet-800 dark:text-violet-300 font-bold',
-    border: 'border border-violet-300/70 dark:border-violet-700/40',
+    bg: 'bg-purple-200 dark:bg-purple-500/20',
+    text: 'text-purple-950 dark:text-purple-300',
+    border: 'border border-purple-300/40 dark:border-purple-500/30',
   },
   'flix9-trial': {
     label: '7-Day Free Trial',
-    icon: null,
-    bg: 'bg-emerald-100/90 dark:bg-emerald-950/50',
-    text: 'text-emerald-800 dark:text-emerald-300 font-bold',
-    border: 'border border-emerald-300/70 dark:border-emerald-700/40',
+    icon: Clock,
+    bg: 'bg-emerald-200 dark:bg-emerald-500/20',
+    text: 'text-emerald-950 dark:text-emerald-300',
+    border: 'border border-emerald-300/40 dark:border-emerald-500/30',
+  },
+
+  // ── Access Tiers ──────────────────────────────────────────────────────────
+  paid: {
+    label: 'Paid',
+    icon: Lock,
+    bg: 'bg-amber-200 dark:bg-amber-400/20',
+    text: 'text-amber-950 dark:text-amber-300',
+    border: 'border border-amber-300/40 dark:border-amber-400/30',
+  },
+  free: {
+    label: 'Free',
+    icon: Unlock,
+    bg: 'bg-slate-200 dark:bg-white/[0.08]',
+    text: 'text-slate-900 dark:text-slate-300',
+    border: 'border border-slate-300/40 dark:border-white/10',
   },
 
   // ── KPI Accent Tags ───────────────────────────────────────────────────────
-  // Pastel yellow (#FEF08A) — "Annual", "Avg", "₹2 Token", theme accent labels
   'kpi-amber': {
     label: '',
     icon: null,
-    bg: 'bg-[#FEF08A] dark:bg-[#FEF08A]/10',
-    text: 'text-slate-900 dark:text-amber-300',
-    border: 'border border-amber-300/60 dark:border-amber-500/25',
+    bg: 'bg-amber-200 dark:bg-amber-400/20',
+    text: 'text-amber-950 dark:text-amber-300',
+    border: 'border border-amber-300/40 dark:border-amber-400/30',
   },
-  // Neutral grey — "Total", "Catalog", "Cohort Rate", plain labels
   'kpi-neutral': {
     label: '',
     icon: null,
-    bg: 'bg-slate-100 dark:bg-slate-800/70',
-    text: 'text-slate-600 dark:text-slate-400',
-    border: 'border border-slate-200/60 dark:border-slate-600/30',
+    bg: 'bg-slate-200 dark:bg-white/[0.08]',
+    text: 'text-slate-900 dark:text-slate-300',
+    border: 'border border-slate-300/40 dark:border-white/10',
   },
 
   // ── Live / Real-time Pills ────────────────────────────────────────────────
-  // Solid emerald with animated pulse dot — "Live"
   live: {
     label: 'Live',
-    icon: null,
-    bg: 'bg-emerald-500',
-    text: 'text-white',
-    border: '',
-    pulse: true,
+    icon: Check,
+    bg: 'bg-emerald-200 dark:bg-emerald-500/20',
+    text: 'text-emerald-950 dark:text-emerald-300',
+    border: 'border border-emerald-300/40 dark:border-emerald-500/30',
   },
-  // Emerald with ArrowUpRight — "Live MRR", "+12.5%", growth metrics
   'live-mrr': {
     label: 'Live MRR',
     icon: ArrowUpRight,
-    bg: 'bg-emerald-500',
-    text: 'text-white',
-    border: '',
+    bg: 'bg-emerald-200 dark:bg-emerald-500/20',
+    text: 'text-emerald-950 dark:text-emerald-300',
+    border: 'border border-emerald-300/40 dark:border-emerald-500/30',
   },
-  // Emerald with ArrowUpRight — "Active Base"
   'live-base': {
     label: 'Active Base',
     icon: ArrowUpRight,
-    bg: 'bg-emerald-500',
-    text: 'text-white',
-    border: '',
+    bg: 'bg-emerald-200 dark:bg-emerald-500/20',
+    text: 'text-emerald-950 dark:text-emerald-300',
+    border: 'border border-emerald-300/40 dark:border-emerald-500/30',
   },
-  // Emerald with Users icon — "Subscriber Base"
   'live-users': {
     label: 'Subscriber Base',
     icon: Users,
-    bg: 'bg-emerald-500',
-    text: 'text-white',
-    border: '',
+    bg: 'bg-emerald-200 dark:bg-emerald-500/20',
+    text: 'text-emerald-950 dark:text-emerald-300',
+    border: 'border border-emerald-300/40 dark:border-emerald-500/30',
   },
 };
 
@@ -200,11 +301,21 @@ export function resolveBadgeVariant(input) {
   if (val.includes('subscriber base')) return 'live-users';
 
   // Statuses
-  if (val === 'active' || val === 'success') return 'active';
+  if (val === 'active' || val === 'success' || val === 'enabled') return 'active';
   if (val === 'published') return 'published';
+  if (val === 'unread') return 'unread';
+  if (val === 'pending' || val === 'processing') return 'pending';
+  if (val === 'paused') return 'paused';
+  if (val === 'offline') return 'offline';
+  if (val === 'video') return 'video';
+  if (val === 'text') return 'text';
+  if (val === 'sports') return 'sports';
+  if (val === 'news') return 'news';
+  if (val === 'entertainment') return 'entertainment';
+  if (val === 'paid') return 'paid';
   if (
     val === 'inactive' || val === 'suspended' || val === 'revoked' ||
-    val === 'expired' || val === 'failed' || val === 'blocked'
+    val === 'expired' || val === 'failed' || val === 'blocked' || val === 'disabled'
   ) return 'inactive';
 
   // Payment / Source
@@ -290,19 +401,19 @@ export function cleanPlanName(input) {
 
 // ─── Single Canonical Size ────────────────────────────────────────────────────
 // ONE size to rule them all — consistent across KPI cards, tables, modals, drawers.
-// xs = only for ultra-dense table cells. lg = hero/featured contexts only.
+// xs = compact table cells. sm = standard universal. lg = hero contexts.
 const SIZE_CLASSES = {
-  xs: 'px-2.5 py-1 text-[11px] font-semibold gap-1.5 leading-none',
-  sm: 'px-3 py-1 text-xs font-semibold gap-1.5 leading-none',
-  md: 'px-3.5 py-1.5 text-xs font-semibold gap-1.5 leading-none',
-  lg: 'px-4 py-2 text-sm font-bold gap-2 leading-none',
+  xs: 'px-2 py-0.5 text-[10px] font-bold gap-1 leading-none',
+  sm: 'px-2.5 py-1 text-xs font-bold gap-1.5 leading-none',
+  md: 'px-3 py-1.5 text-xs font-bold gap-1.5 leading-none',
+  lg: 'px-3.5 py-2 text-sm font-bold gap-2 leading-none',
 };
 
 const ICON_SIZES = {
-  xs: 'w-3 h-3 stroke-[2.2]',
-  sm: 'w-3.5 h-3.5 stroke-[2.2]',
-  md: 'w-3.5 h-3.5 stroke-[2.2]',
-  lg: 'w-4 h-4 stroke-[2.2]',
+  xs: 'w-2.5 h-2.5 stroke-[2.5]',
+  sm: 'w-3 h-3 stroke-[2.5]',
+  md: 'w-3.5 h-3.5 stroke-[2.5]',
+  lg: 'w-4 h-4 stroke-[2.5]',
 };
 
 // ─── Badge Component ──────────────────────────────────────────────────────────
