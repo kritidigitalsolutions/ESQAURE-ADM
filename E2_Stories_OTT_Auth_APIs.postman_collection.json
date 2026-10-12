@@ -3778,6 +3778,32 @@
                 "description": "Permanently delete a user from the database. This is irreversible.\n\nFor a recoverable removal, use user's own **2.6 Delete Account** which soft-deletes the account."
               },
               "response": []
+            },
+            {
+              "name": "2.13 Get User & Activity Analytics (Time-Series)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/admin/activity-analytics",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "admin",
+                    "activity-analytics"
+                  ]
+                },
+                "description": "Fetch dynamic user signups and subscription telemetry grouped across 1D, 7D, 1M, 1Y, and MAX."
+              },
+              "response": []
             }
           ]
         },
@@ -4413,6 +4439,32 @@
                 "description": "Manual admin override action: EXTEND subscription access by N days, or REVOKE access immediately."
               },
               "response": []
+            },
+            {
+              "name": "4.11 Get Revenue Analytics (Time-Series Aggregation)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/subscriptions/admin/revenue-analytics",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "subscriptions",
+                    "admin",
+                    "revenue-analytics"
+                  ]
+                },
+                "description": "Fetch real transaction revenue aggregation from MongoDB for today, current month, and past 6 months."
+              },
+              "response": []
             }
           ]
         },
@@ -4546,7 +4598,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"priority\": 1\n}"
+                  "raw": "{\n  \"priority\": 1,\n  \"direction\": \"up\",\n  \"moveTo\": \"top\"\n}"
                 },
                 "url": {
                   "raw": "{{baseUrl}}/dramas/{{dramaId}}/priority",
@@ -4559,7 +4611,35 @@
                     "priority"
                   ]
                 },
-                "description": "Set priority rank for drama. Automatically normalizes remaining catalog priorities."
+                "description": "Set priority rank for drama. Supports explicit priority number, direction ('up' | 'down'), or moveTo ('top' | 'bottom'). Automatically normalizes catalog sequentially."
+              },
+              "response": []
+            },
+            {
+              "name": "5.6.1 Batch Reorder Drama Catalog Priorities",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    {\n      \"id\": \"{{dramaId}}\",\n      \"priority\": 1\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/dramas/reorder",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dramas",
+                    "reorder"
+                  ]
+                },
+                "description": "Batch reorders all dramas in catalog according to drag-and-drop or custom sequence."
               },
               "response": []
             },

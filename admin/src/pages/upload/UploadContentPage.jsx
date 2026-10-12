@@ -54,7 +54,7 @@ function SlideSwitch({ checked, onChange, label, sublabel, icon: Icon, badge }) 
         {Icon && (
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
             checked
-              ? 'bg-[#FEF08A]/40 dark:bg-[#FEF08A]/20 text-slate-950 dark:text-amber-300 border border-amber-300/60 dark:border-amber-400/30'
+              ? 'bg-[#FEF08A]/40 dark:bg-[#FEF08A]/20 text-slate-950 border border-amber-300/60 dark:border-amber-400/30'
               : 'bg-slate-200/70 dark:bg-[#121216] text-slate-400 dark:text-slate-500 border border-transparent dark:border-white/5'
           }`}>
             <Icon className="w-4 h-4 stroke-[2.2]" />
@@ -66,7 +66,7 @@ function SlideSwitch({ checked, onChange, label, sublabel, icon: Icon, badge }) 
               {label}
             </label>
             {badge && (
-              <span className="text-[9.5px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-950 dark:text-amber-300 border border-amber-300/60">
+              <span className="text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-400/20 text-amber-950 dark:text-amber-300 border border-amber-300/40 dark:border-amber-400/30 leading-none">
                 {badge}
               </span>
             )}
@@ -186,40 +186,40 @@ export default function UploadContentPage({ onNavigate }) {
       value: 'U (All Ages)',
       label: 'U',
       desc: 'Universal — All Ages',
-      badgeActive: 'bg-emerald-500 text-white',
-      badgeInactive: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30',
+      badgeActive: 'bg-emerald-200 dark:bg-emerald-300 text-emerald-950',
+      badgeInactive: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400',
       activeBorder: 'border-emerald-500/80 bg-emerald-500/10 dark:bg-emerald-500/15 ring-1 ring-emerald-500/50'
     },
     {
       value: 'U/A 7+',
       label: '7+',
       desc: 'Mild fantasy / comedy',
-      badgeActive: 'bg-sky-500 text-white',
-      badgeInactive: 'bg-sky-500/15 text-sky-700 dark:text-sky-400 border border-sky-500/30',
+      badgeActive: 'bg-blue-200 dark:bg-blue-300 text-blue-950',
+      badgeInactive: 'bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-400',
       activeBorder: 'border-sky-500/80 bg-sky-500/10 dark:bg-sky-500/15 ring-1 ring-sky-500/50'
     },
     {
       value: 'U/A 13+',
       label: '13+',
       desc: 'Teen Romance / Thriller',
-      badgeActive: 'bg-amber-400 text-slate-950',
-      badgeInactive: 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30',
+      badgeActive: 'bg-amber-200 dark:bg-amber-300 text-amber-950',
+      badgeInactive: 'bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400',
       activeBorder: 'border-amber-400/80 bg-amber-400/10 dark:bg-amber-400/15 ring-1 ring-amber-400/50'
     },
     {
       value: 'U/A 16+',
       label: '16+',
       desc: 'Mature Themes / Intense',
-      badgeActive: 'bg-orange-500 text-white',
-      badgeInactive: 'bg-orange-500/15 text-orange-700 dark:text-orange-400 border border-orange-500/30',
+      badgeActive: 'bg-orange-200 dark:bg-orange-300 text-orange-950',
+      badgeInactive: 'bg-orange-100 dark:bg-orange-950/40 text-orange-800 dark:text-orange-400',
       activeBorder: 'border-orange-500/80 bg-orange-500/10 dark:bg-orange-500/15 ring-1 ring-orange-500/50'
     },
     {
       value: 'A 18+',
       label: '18+',
       desc: 'Adults Only Content',
-      badgeActive: 'bg-rose-500 text-white',
-      badgeInactive: 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30',
+      badgeActive: 'bg-rose-200 dark:bg-rose-300 text-rose-950',
+      badgeInactive: 'bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-400',
       activeBorder: 'border-rose-500/80 bg-rose-500/10 dark:bg-rose-500/15 ring-1 ring-rose-500/50'
     },
   ];
@@ -533,8 +533,8 @@ export default function UploadContentPage({ onNavigate }) {
       <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs relative overflow-hidden transition-all">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center shrink-0 shadow-xs">
-              <Upload className="w-4 h-4 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+            <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 shadow-xs flex items-center justify-center shrink-0 shadow-xs">
+              <Upload className="w-4 h-4 text-slate-950 stroke-[2.2]" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
@@ -638,8 +638,8 @@ export default function UploadContentPage({ onNavigate }) {
         <ModalPortal>
           <div className="fixed inset-0 z-[99999] bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#24242E] rounded-2xl p-6 max-w-sm w-full border border-slate-200 dark:border-white/15 shadow-2xl space-y-4 text-center animate-in zoom-in-95 duration-200">
-            <div className="w-12 h-12 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 text-slate-950 dark:text-amber-300 flex items-center justify-center mx-auto shadow-xs">
-              <RotateCcw className="w-6 h-6 text-slate-950 dark:text-[#FEF08A] animate-spin" />
+            <div className="w-12 h-12 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs mx-auto">
+              <RotateCcw className="w-6 h-6 text-slate-950 animate-spin" />
             </div>
             
             <div>
@@ -682,7 +682,7 @@ export default function UploadContentPage({ onNavigate }) {
             
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center font-extrabold shadow-xs">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs font-extrabold shadow-xs">
                   <Film className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -874,7 +874,7 @@ export default function UploadContentPage({ onNavigate }) {
 
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center font-extrabold shadow-xs shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs font-extrabold shadow-xs shrink-0">
                   <Video className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1386,7 +1386,7 @@ export default function UploadContentPage({ onNavigate }) {
                   ) : newEpVideoUrl ? (
                     <div className="p-2.5 rounded-lg bg-white dark:bg-[#121216] border border-slate-200 dark:border-white/10 flex items-center justify-between shadow-2xs">
                       <div className="flex items-center space-x-2.5 min-w-0">
-                        <div className="w-7 h-7 rounded-md bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-300/40">
+                        <div className="w-7 h-7 rounded-md bg-[#FEF08A] text-slate-950 shadow-xs flex items-center justify-center shrink-0 border border-amber-300/40">
                           <CheckCircle2 className="w-3.5 h-3.5" />
                         </div>
                         <div className="min-w-0">
@@ -1447,7 +1447,7 @@ export default function UploadContentPage({ onNavigate }) {
                         }}
                       />
                       <div className="flex items-center space-x-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-300/40">
+                        <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 shadow-xs flex items-center justify-center shrink-0 border border-amber-300/40">
                           {singleEpFileUploading ? (
                             <RotateCcw className="w-4 h-4 animate-spin" />
                           ) : (
@@ -1648,29 +1648,18 @@ export default function UploadContentPage({ onNavigate }) {
                               <td className="py-1.5 px-3 text-[10.5px] font-semibold text-slate-600 dark:text-slate-400">
                                 {ep.duration}
                               </td>
-                              <td className="py-1.5 px-3 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleToggleEpisodeFree(ep.id)}
-                                  className={`inline-flex items-center space-x-1 px-2 py-0.5 text-[9.5px] font-black rounded-full transition-all cursor-pointer ${
-                                    ep.isFree
-                                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25'
-                                      : 'bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-950 dark:text-amber-300 border border-amber-300/50'
-                                  }`}
-                                  title="Click to toggle Free vs Subscribers"
-                                >
-                                  {ep.isFree ? (
-                                    <>
-                                      <Unlock className="w-2.5 h-2.5" />
-                                      <span>Free</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Lock className="w-2.5 h-2.5" />
-                                      <span>Subscriber</span>
-                                    </>
-                                  )}
-                                </button>
+                              <td className="py-1.5 px-3 text-center" onClick={(e) => e.stopPropagation()}>
+                                <div className="inline-flex items-center gap-1.5 justify-center">
+                                  <ToggleSwitch
+                                    checked={!ep.isFree}
+                                    onChange={() => handleToggleEpisodeFree(ep.id)}
+                                    size="sm"
+                                    title={ep.isFree ? 'Free episode (Click to lock for subscribers)' : 'Subscriber locked (Click to make free)'}
+                                  />
+                                  <span className={`text-[10px] font-bold ${!ep.isFree ? 'text-amber-500 dark:text-amber-400' : 'text-emerald-500 dark:text-emerald-400'}`}>
+                                    {ep.isFree ? 'Free' : 'VIP Locked'}
+                                  </span>
+                                </div>
                               </td>
                               <td className="py-1.5 px-3 text-right">
                                 <button
@@ -1706,7 +1695,7 @@ export default function UploadContentPage({ onNavigate }) {
             {/* Step 3 Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10 gap-2">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center font-extrabold shadow-xs shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs font-extrabold shadow-xs shrink-0">
                   <Lock className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1727,7 +1716,7 @@ export default function UploadContentPage({ onNavigate }) {
             {/* Quick Metrics Bar (Theme Aligned) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                   <Film className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1739,7 +1728,7 @@ export default function UploadContentPage({ onNavigate }) {
               </div>
 
               <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                   <Unlock className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1751,7 +1740,7 @@ export default function UploadContentPage({ onNavigate }) {
               </div>
 
               <div className="p-2.5 sm:p-3 rounded-xl bg-slate-50/70 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                   <Lock className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1852,7 +1841,7 @@ export default function UploadContentPage({ onNavigate }) {
                           className={`px-2.5 py-0.5 rounded-full text-[9.5px] font-black flex items-center gap-1 cursor-pointer transition-all active:scale-95 ${
                             ep.isFree
                               ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25'
-                              : 'bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-950 dark:text-amber-300 border border-amber-300/50'
+                              : 'bg-[#FEF08A] text-slate-950 shadow-xs text-slate-950 border border-amber-300/50'
                           }`}
                         >
                           {ep.isFree ? (
@@ -1932,7 +1921,7 @@ export default function UploadContentPage({ onNavigate }) {
             <div className="bg-white dark:bg-[#24242E] border border-slate-200/80 dark:border-white/12 rounded-2xl p-4 sm:p-5 max-w-sm w-full shadow-2xl relative animate-in zoom-in-95 duration-150 space-y-3.5">
               <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
                 <div className="flex items-center space-x-2 min-w-0 pr-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center shrink-0">
+                  <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                     <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
                   </div>
                   <div className="min-w-0">

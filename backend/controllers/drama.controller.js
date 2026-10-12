@@ -43,18 +43,105 @@ const slugify = (text = '') =>
     .replace(/^-+|-+$/g, '');
 
 /**
- * Normalizes priorities sequentially (1, 2, 3...)
+ * Normalizes priorities sequentially (1, 2, 3...) across entire Drama collection
  */
-const normalizePrioritiesInDb = async () => {
-  const allDramas = await Drama.find().sort({ priority: 1, createdAt: -1 });
-  for (let index = 0; index < allDramas.length; index++) {
-    const d = allDramas[index];
-    const newPriority = index + 1;
-    if (d.priority !== newPriority) {
-      d.priority = newPriority;
-      await d.save();
+export const normalizePrioritiesInDb = async () => {
+  const allDramas = await Drama.find().sort({ priority: 1, createdAt: -1, _id: 1 });
+  const bulkOps = [];
+  allDramas.forEach((d, index) => {
+    const seq = index + 1;
+    if (d.priority !== seq) {
+      bulkOps.push({
+        updateOne: {
+          filter: { _id: d._id },
+          update: { $set: { priority: seq } }
+        }
+      });
+      d.priority = seq;
     }
+  });
+  if (bulkOps.length > 0) {
+    await Drama.bulkWrite(bulkOps);
   }
+};
+
+/**
+ * Reorders a drama's priority deterministically and re-normalizes all catalog ranks
+ */
+export const reassignDramaPriority = async (dramaId, { priority, direction, moveTo }) => {
+  const targetDoc = await Drama.findById(dramaId);
+  if (!targetDoc) return null;
+
+  // Retrieve all dramas sorted currently by priority
+  const allDramas = await Drama.find().sort({ priority: 1, createdAt: -1, _id: 1 });
+  const currentIndex = allDramas.findIndex((d) => d._id.toString() === dramaId.toString());
+  if (currentIndex === -1) return null;
+
+  let targetIndex = currentIndex;
+
+  if (moveTo === 'top') {
+    targetIndex = 0;
+  } else if (moveTo === 'bottom') {
+    targetIndex = allDramas.length - 1;
+  } else if (direction === 'up') {
+    targetIndex = Math.max(0, currentIndex - 1);
+  } else if (direction === 'down') {
+    targetIndex = Math.min(allDramas.length - 1, currentIndex + 1);
+  } else if (priority !== undefined && priority !== null) {
+    const pNum = Math.max(1, Number(priority));
+    targetIndex = Math.max(0, Math.min(allDramas.length - 1, pNum - 1));
+  }
+
+  // Splice and re-insert target item into new index
+  if (targetIndex !== currentIndex) {
+    const [moved] = allDramas.splice(currentIndex, 1);
+    allDramas.splice(targetIndex, 0, moved);
+  }
+
+  // Bulk update all changed priorities
+  const bulkOps = [];
+  allDramas.forEach((d, idx) => {
+    const sequentialPriority = idx + 1;
+    if (d.priority !== sequentialPriority) {
+      bulkOps.push({
+        updateOne: {
+          filter: { _id: d._id },
+          update: { $set: { priority: sequentialPriority } }
+        }
+      });
+      d.priority = sequentialPriority;
+    }
+  });
+
+  if (bulkOps.length > 0) {
+    await Drama.bulkWrite(bulkOps);
+  }
+
+  return {
+    drama: targetDoc,
+    newPriority: targetIndex + 1
+  };
+};
+
+/**
+ * Batch reorders all drama priorities from an ordered list of items
+ */
+export const batchReorderDramas = async (items) => {
+  if (!Array.isArray(items) || items.length === 0) return;
+
+  const bulkOps = items.map((item, idx) => ({
+    updateOne: {
+      filter: { _id: item.id },
+      update: { $set: { priority: Number(item.priority || idx + 1) } }
+    }
+  }));
+
+  if (bulkOps.length > 0) {
+    await Drama.bulkWrite(bulkOps);
+  }
+
+  // Sequentially normalize remaining catalog
+  await normalizePrioritiesInDb();
 };
 
 export class DramaController {
@@ -331,16 +418,22 @@ export class DramaController {
         isPaid: Boolean(isPaid),
         plan: isPaid ? (plan || 'Premium Plan') : 'Free Tier',
         status: status === 'DRAFT' ? 'DRAFT' : 'PUBLISHED',
-        priority: nextPriority,
+        priority: 999999,
         isTrending: Boolean(isTrending),
         isFeatured: Boolean(isFeatured),
         trendingRank: trendingRank ? Number(trendingRank) : null
       });
 
-      await normalizePrioritiesInDb();
+      if (priority !== undefined && priority !== null) {
+        await reassignDramaPriority(drama._id, { priority: Number(priority) });
+      } else {
+        await normalizePrioritiesInDb();
+      }
+
+      const refreshedDrama = await Drama.findById(drama._id);
 
       return ApiResponse.success(res, 'Drama series created successfully', {
-        drama
+        drama: refreshedDrama || drama
       }, 201);
     } catch (error) {
       return next(error);
@@ -408,10 +501,16 @@ export class DramaController {
       }
 
       await drama.save();
-      await normalizePrioritiesInDb();
+      if (updates.priority !== undefined && updates.priority !== null) {
+        await reassignDramaPriority(drama._id, { priority: Number(updates.priority) });
+      } else {
+        await normalizePrioritiesInDb();
+      }
+
+      const refreshedDrama = await Drama.findById(drama._id).populate('genres', 'name slug');
 
       return ApiResponse.success(res, 'Drama series updated successfully', {
-        drama
+        drama: refreshedDrama || drama
       });
     } catch (error) {
       return next(error);
@@ -501,26 +600,42 @@ export class DramaController {
   /**
    * 8. Admin: Reassign / Shift Drama Priority
    * PATCH /api/v1/dramas/:id/priority
+   * Body: { priority?: number, direction?: 'up' | 'down', moveTo?: 'top' | 'bottom' }
    */
   static async setDramaPriority(req, res, next) {
     try {
       const { id } = req.params;
-      const newPriority = Number(req.body.priority || 1);
+      const { priority, direction, moveTo } = req.body;
 
-      const drama = await Drama.findById(id);
-      if (!drama) {
+      const result = await reassignDramaPriority(id, { priority, direction, moveTo });
+      if (!result) {
         throw new AppError('Drama series not found.', 404, 'DRAMA_NOT_FOUND');
       }
 
-      drama.priority = newPriority;
-      await drama.save();
-
-      await normalizePrioritiesInDb();
-
-      return ApiResponse.success(res, 'Drama priority updated successfully', {
-        id: drama._id.toString(),
-        priority: newPriority
+      return ApiResponse.success(res, `Drama priority updated to #${result.newPriority} successfully`, {
+        id,
+        priority: result.newPriority
       });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * 8.1 Admin: Batch Reorder All Drama Priorities
+   * PATCH /api/v1/dramas/reorder
+   * Body: { items: [{ id: "...", priority: 1 }] }
+   */
+  static async reorderDramas(req, res, next) {
+    try {
+      const { items } = req.body;
+      if (!Array.isArray(items)) {
+        throw new AppError('Items array is required for reordering.', 400, 'VALIDATION_ERROR');
+      }
+
+      await batchReorderDramas(items);
+
+      return ApiResponse.success(res, 'Drama catalog priority reordered successfully');
     } catch (error) {
       return next(error);
     }

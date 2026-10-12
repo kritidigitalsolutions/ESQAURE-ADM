@@ -8,6 +8,7 @@ import { Banner } from '../models/Banner.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { AppError } from '../utils/appError.js';
 import { formatDramaCard, formatDuration, getPaginationMeta, formatViewsCount, resolveMediaUrl } from '../utils/formatters.js';
+import { reassignDramaPriority } from './drama.controller.js';
 
 /**
  * Helper to slugify string
@@ -1397,24 +1398,22 @@ export class HomeController {
   /**
    * Admin: Set individual drama priority
    * PATCH /api/v1/dramas/:id/priority
+   * Body: { priority?: number, direction?: 'up' | 'down', moveTo?: 'top' | 'bottom' }
    */
   static async setDramaPriority(req, res, next) {
     try {
       const { id } = req.params;
-      const { priority } = req.body;
+      const { priority, direction, moveTo } = req.body;
 
-      const drama = await Drama.findByIdAndUpdate(
-        id,
-        { $set: { priority: Number(priority) } },
-        { new: true }
-      ).populate('genres', 'name slug');
-
-      if (!drama) {
+      const result = await reassignDramaPriority(id, { priority, direction, moveTo });
+      if (!result) {
         throw new AppError('Drama series not found.', 404, 'DRAMA_NOT_FOUND');
       }
 
-      return ApiResponse.success(res, `Drama "${drama.title}" priority set to ${priority}`, {
-        drama: formatDramaCard(drama)
+      const refreshed = await Drama.findById(id).populate('genres', 'name slug');
+
+      return ApiResponse.success(res, `Drama "${refreshed.title}" priority set to #${result.newPriority}`, {
+        drama: formatDramaCard(refreshed, req)
       });
     } catch (error) {
       return next(error);

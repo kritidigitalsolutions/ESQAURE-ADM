@@ -3,6 +3,7 @@ import { genreService } from '../../services/genreService';
 import KpiStatCard from '../../components/common/KpiStatCard';
 import PageLoader from '../../components/common/PageLoader';
 import ModalPortal from '../../components/common/ModalPortal';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
 import {
   Tags,
   Plus,
@@ -25,7 +26,8 @@ import {
   EyeOff,
   Film,
   CheckCircle2,
-  SlidersHorizontal
+  SlidersHorizontal,
+  ChevronDown
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -394,7 +396,7 @@ export default function GenresPage({ onNavigate }) {
             <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
               Genres & Categories
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-900 dark:text-amber-300 border border-amber-300/50">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 dark:bg-amber-400/20 text-amber-950 dark:text-amber-300 border border-amber-300/40 dark:border-amber-400/30">
               {genres.length} Categories
             </span>
           </div>
@@ -485,16 +487,17 @@ export default function GenresPage({ onNavigate }) {
           </div>
 
           {/* Sort By Dropdown */}
-          <div className="flex items-center space-x-1.5 shrink-0">
+          <div className="relative flex items-center shrink-0">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+              className="appearance-none pl-3 pr-8 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer transition-colors"
             >
-              <option value="order">Display Order (Asc)</option>
-              <option value="dramas">Tagged Series (High)</option>
-              <option value="name">Alphabetical (A - Z)</option>
+              <option value="order" className="dark:bg-[#1E1E26]">Display Order (Asc)</option>
+              <option value="dramas" className="dark:bg-[#1E1E26]">Tagged Series (High)</option>
+              <option value="name" className="dark:bg-[#1E1E26]">Alphabetical (A - Z)</option>
             </select>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
           </div>
 
           {/* Refresh Button */}
@@ -519,7 +522,7 @@ export default function GenresPage({ onNavigate }) {
       ) : filteredGenres.length === 0 ? (
         /* Empty State */
         <div className="bg-white dark:bg-[#121216] rounded-xl p-10 text-center border border-slate-200/80 dark:border-white/10 shadow-xs">
-          <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 text-slate-950 dark:text-amber-300 flex items-center justify-center mx-auto mb-2.5">
+          <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs mx-auto mb-2.5">
             <Tags className="w-5 h-5 stroke-[2]" />
           </div>
           <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white mb-1">
@@ -548,70 +551,64 @@ export default function GenresPage({ onNavigate }) {
         </div>
       ) : (
         /* Real Dynamic Genres Grid */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
           {filteredGenres.map((genre) => {
             const IconComponent = ICON_MAP[genre.icon] || Tags;
 
             return (
               <div
                 key={genre.id}
-                className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-2xs flex flex-col justify-between hover:border-slate-300 dark:hover:border-white/20 transition-all group"
+                className="bg-white dark:bg-[#121216] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-white/20 transition-all duration-200 flex flex-col justify-between group"
               >
                 {/* Top Section: Theme Icon, Name, Slug & Status */}
-                <div className="flex items-start justify-between gap-2.5 mb-2.5">
-                  <div className="flex items-center space-x-2.5 min-w-0">
+                <div className="flex items-start justify-between gap-2.5 mb-3">
+                  <div className="flex items-center space-x-3 min-w-0">
                     {/* Consistent Theme Icon Badge (No Rainbow Multi-Colors) */}
-                    <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
-                      <IconComponent className="w-4 h-4 stroke-[2.2]" />
+                    <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+                      <IconComponent className="w-5 h-5 text-slate-950 stroke-[2.2]" />
                     </div>
 
                     <div className="min-w-0">
-                      <h4 className="font-bold text-xs sm:text-sm text-slate-950 dark:text-white truncate">
+                      <h4 className="font-extrabold text-sm text-slate-950 dark:text-white truncate">
                         {genre.name}
                       </h4>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono truncate">
+                      <p className="text-[10.5px] text-slate-400 dark:text-slate-500 font-mono truncate">
                         /{genre.slug}
                       </p>
                     </div>
                   </div>
 
                   {/* Clean, Compact Status Toggle */}
-                  <button
-                    type="button"
-                    onClick={() => toggleStatus(genre)}
-                    title={genre.isActive ? 'Click to hide from catalog' : 'Click to activate in catalog'}
-                    className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold transition-all shrink-0 cursor-pointer shadow-2xs active:scale-95 ${
-                      genre.isActive
-                        ? 'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25'
-                        : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
-                    }`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                        genre.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400 dark:bg-slate-500'
-                      }`}
+                  <div className="inline-flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <ToggleSwitch
+                      checked={Boolean(genre.isActive)}
+                      onChange={() => toggleStatus(genre)}
+                      size="sm"
+                      title={genre.isActive ? 'Active (Click to hide from catalog)' : 'Hidden (Click to activate in catalog)'}
                     />
-                    {genre.isActive ? 'Active' : 'Hidden'}
-                  </button>
+                    <span className={`text-[10px] font-bold ${genre.isActive ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                      {genre.isActive ? 'Active' : 'Hidden'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Bottom Section: Order Tag, Catalog Series Count & Actions */}
-                <div className="pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-xs">
-                  <div className="flex items-center space-x-1.5">
-                    <span className="text-slate-400 dark:text-slate-400 font-medium text-[10.5px]">Catalog:</span>
-                    <span className="font-bold text-slate-900 dark:text-white text-xs">
-                      {genre.dramaCount || 0} Series
+                <div className="pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-xs">
+                  <div className="flex items-center space-x-2">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-white/[0.05] text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                      <Film className="w-3 h-3 text-slate-400" />
+                      <span>{genre.dramaCount || 0} Series</span>
                     </span>
-                    <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 dark:bg-[#18181E] text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/10">
+                    <span className="px-1.5 py-0.5 rounded-md text-[9.5px] font-extrabold bg-[#FEF08A]/25 text-amber-600 dark:text-[#FEF08A] border border-amber-300/40 dark:border-[#FEF08A]/20">
                       #{genre.displayOrder ?? 1}
                     </span>
                   </div>
 
-                  <div className="flex items-center space-x-0.5">
+                  <div className="flex items-center space-x-1">
                     <button
                       type="button"
                       onClick={() => handleOpenEdit(genre)}
-                      className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
                       title="Edit Category"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
@@ -619,7 +616,7 @@ export default function GenresPage({ onNavigate }) {
                     <button
                       type="button"
                       onClick={() => setGenreToDelete(genre)}
-                      className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                       title="Delete Category"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -637,16 +634,16 @@ export default function GenresPage({ onNavigate }) {
       {isModalOpen && (
         <ModalPortal>
           <div className="fixed inset-0 z-[99999] bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#24242E] rounded-2xl w-full max-w-md p-5 shadow-2xl border border-slate-200 dark:border-white/15 animate-in fade-in zoom-in-95 duration-150 font-urbanist">
+          <div className="bg-white dark:bg-[#24242E] rounded-2xl w-full max-w-md p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-white/15 animate-in fade-in zoom-in-95 duration-150 font-urbanist">
             
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
-                  <Tags className="w-3.5 h-3.5 stroke-[2.2]" />
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-white/10">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
+                  <Tags className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm text-slate-950 dark:text-white">
+                  <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">
                     {editingGenre ? 'Edit Genre Category' : 'Add New Genre Category'}
                   </h3>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -657,7 +654,7 @@ export default function GenresPage({ onNavigate }) {
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg cursor-pointer"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg cursor-pointer transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -665,18 +662,18 @@ export default function GenresPage({ onNavigate }) {
 
             {/* Error in Modal if any */}
             {modalError && (
-              <div className="mt-2.5 p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs font-bold flex items-center space-x-2">
+              <div className="mt-3 p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs font-bold flex items-center space-x-2">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{modalError}</span>
               </div>
             )}
 
             {/* Modal Form */}
-            <form onSubmit={handleSave} className="space-y-3 pt-3 text-xs">
+            <form onSubmit={handleSave} className="space-y-3.5 pt-3.5 text-xs">
               
               {/* Name Input */}
               <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   Genre Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -685,17 +682,17 @@ export default function GenresPage({ onNavigate }) {
                   onChange={(e) => handleNameChange(e.target.value)}
                   placeholder="e.g. Mystery & Suspense"
                   required
-                  className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white font-bold focus:border-[#FEF08A] focus:outline-none transition-colors"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white font-bold focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/40 focus:outline-none transition-all placeholder-slate-400"
                 />
               </div>
 
               {/* Slug Input */}
               <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   URL Slug
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-[11px]">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-xs font-bold pointer-events-none">
                     /
                   </span>
                   <input
@@ -703,17 +700,22 @@ export default function GenresPage({ onNavigate }) {
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
                     placeholder="mystery-suspense"
-                    className="w-full pl-6 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white font-mono text-xs focus:border-[#FEF08A] focus:outline-none"
+                    className="w-full pl-7 pr-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white font-mono text-xs focus:border-[#FEF08A] focus:ring-1 focus:ring-[#FEF08A]/40 focus:outline-none transition-all placeholder-slate-400"
                   />
                 </div>
               </div>
 
               {/* Icon Selector */}
               <div>
-                <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Category Icon
-                </label>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="font-bold text-slate-700 dark:text-slate-300">
+                    Category Icon
+                  </label>
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                    Selected: <strong className="text-amber-600 dark:text-[#FEF08A] font-extrabold capitalize">{icon}</strong>
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-50/80 dark:bg-[#18181E] rounded-xl border border-slate-200 dark:border-white/10">
                   {AVAILABLE_ICONS.map((iconName) => {
                     const Comp = ICON_MAP[iconName] || Tags;
                     const isSelected = icon === iconName;
@@ -722,10 +724,10 @@ export default function GenresPage({ onNavigate }) {
                         key={iconName}
                         type="button"
                         onClick={() => setIcon(iconName)}
-                        className={`w-7.5 h-7.5 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                           isSelected
-                            ? 'bg-[#FEF08A] text-slate-950 font-bold shadow-xs scale-105 ring-2 ring-amber-400/60'
-                            : 'bg-slate-50 dark:bg-[#18181E] text-slate-500 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/10'
+                            ? 'bg-[#FEF08A] text-slate-950 font-bold shadow-xs scale-105 ring-2 ring-[#FEF08A]'
+                            : 'bg-white dark:bg-[#121216] text-slate-500 hover:text-slate-950 dark:hover:text-white border border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
                         }`}
                         title={iconName}
                       >
@@ -739,55 +741,67 @@ export default function GenresPage({ onNavigate }) {
               {/* Display Order & Active Toggle */}
               <div className="grid grid-cols-2 gap-3 pt-0.5">
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Display Priority Order
                   </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={displayOrder}
-                    onChange={(e) => setDisplayOrder(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white font-bold focus:border-[#FEF08A] focus:outline-none"
-                  />
+                  <div className="flex items-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] p-1 focus-within:border-[#FEF08A] focus-within:ring-1 focus-within:ring-[#FEF08A]/40 transition-all">
+                    <button
+                      type="button"
+                      onClick={() => setDisplayOrder((prev) => Math.max(1, (Number(prev) || 1) - 1))}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-colors cursor-pointer shrink-0 font-bold text-sm"
+                      title="Decrease Order"
+                    >
+                      −
+                    </button>
+                    <input
+                      type="number"
+                      min="1"
+                      value={displayOrder}
+                      onChange={(e) => setDisplayOrder(e.target.value)}
+                      className="w-full text-center bg-transparent text-slate-900 dark:text-white font-extrabold text-xs focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setDisplayOrder((prev) => (Number(prev) || 0) + 1)}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-colors cursor-pointer shrink-0 font-bold text-sm"
+                      title="Increase Order"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Status
+                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Catalog Status
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setIsActive(!isActive)}
-                    className={`w-full py-1.5 px-2.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center space-x-2 cursor-pointer ${
-                      isActive
-                        ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-slate-100 dark:bg-[#18181E] border-slate-200 dark:border-white/10 text-slate-500'
-                    }`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
-                      }`}
+                  <div className="w-full h-[38px] px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
+                      {isActive ? 'Active (Live)' : 'Hidden (Draft)'}
+                    </span>
+                    <ToggleSwitch
+                      checked={Boolean(isActive)}
+                      onChange={setIsActive}
+                      size="sm"
                     />
-                    <span>{isActive ? 'Active (Live)' : 'Hidden (Draft)'}</span>
-                  </button>
+                  </div>
                 </div>
               </div>
 
               {/* Modal Buttons */}
-              <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-end space-x-2">
+              <div className="pt-3.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-end space-x-2">
                 <button
                   type="button"
                   disabled={isSaving}
                   onClick={() => setIsModalOpen(false)}
-                  className="px-3.5 py-1.5 text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-xl cursor-pointer text-xs"
+                  className="px-4 py-2 text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-xl cursor-pointer text-xs transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-4 py-1.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold rounded-xl transition-all shadow-xs flex items-center space-x-1.5 cursor-pointer disabled:opacity-50 text-xs"
+                  className="px-5 py-2 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold rounded-xl transition-all shadow-xs flex items-center space-x-1.5 cursor-pointer disabled:opacity-50 text-xs active:scale-95"
                 >
                   {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>{editingGenre ? 'Save Changes' : 'Create Genre'}</span>

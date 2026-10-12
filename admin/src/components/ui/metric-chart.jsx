@@ -228,15 +228,37 @@ export function MetricChart({
       <svg
         viewBox={`0 0 ${chartCalc.width} ${chartCalc.height}`}
         preserveAspectRatio="none"
+        shapeRendering="geometricPrecision"
         className="w-full h-full overflow-visible"
       >
         <defs>
           <linearGradient id={`grad-unified-${chartId}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={themeColor} stopOpacity="0.22" />
-            <stop offset="65%" stopColor={themeColor} stopOpacity="0.05" />
+            <stop offset="0%" stopColor={themeColor} stopOpacity={0.32} />
+            <stop offset="65%" stopColor={themeColor} stopOpacity={0.08} />
             <stop offset="100%" stopColor={themeColor} stopOpacity="0.0" />
           </linearGradient>
         </defs>
+
+        {/* Crisp Horizontal Benchmark Guidelines */}
+        <g className="opacity-35 dark:opacity-20 pointer-events-none">
+          {[0.25, 0.55, 0.85].map((ratio, gIdx) => {
+            const yPos = chartCalc.padTop + chartCalc.usableHeight * (1 - ratio);
+            return (
+              <line
+                key={`grid-${gIdx}`}
+                x1={chartCalc.padLeft}
+                y1={yPos}
+                x2={chartCalc.width - chartCalc.padRight}
+                y2={yPos}
+                stroke="#64748B"
+                strokeWidth={1}
+                strokeDasharray="4 4"
+                vectorEffect="non-scaling-stroke"
+                shapeRendering="crispEdges"
+              />
+            );
+          })}
+        </g>
 
         {/* View mode: Curve */}
         {view === 'curve' && (
@@ -247,20 +269,23 @@ export function MetricChart({
                 key={`area-${idx}`}
                 d={s.areaPath}
                 fill={`url(#grad-unified-${chartId})`}
+                shapeRendering="geometricPrecision"
                 className="transition-all duration-300 ease-out"
               />
             ))}
 
-            {/* Smooth Spline Vector Curve (Ultra-clean, zero distortion) */}
+            {/* Smooth Spline Vector Curve (Pin-sharp, non-scaling stroke) */}
             {chartCalc.series.map((s, idx) => (
               <path
                 key={`line-${idx}`}
                 d={s.splinePath}
                 fill="none"
                 stroke={s.color}
-                strokeWidth={3}
+                strokeWidth={2.8}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+                shapeRendering="geometricPrecision"
                 className="transition-all duration-300 ease-out"
               />
             ))}
@@ -302,7 +327,8 @@ export function MetricChart({
                       height={barH + 4}
                       rx={8}
                       fill={themeColor}
-                      fillOpacity={0.2}
+                      fillOpacity={0.25}
+                      shapeRendering="geometricPrecision"
                       className="transition-all duration-200 ease-out"
                     />
                   )}
@@ -315,7 +341,8 @@ export function MetricChart({
                     height={barH}
                     rx={6}
                     fill={themeColor}
-                    fillOpacity={isInteracting ? (isActive ? 1.0 : 0.45) : 0.85}
+                    fillOpacity={isInteracting ? (isActive ? 1.0 : 0.45) : 0.88}
+                    shapeRendering="geometricPrecision"
                     className="transition-all duration-200 ease-out"
                   />
                 </g>
@@ -334,7 +361,9 @@ export function MetricChart({
             stroke="#EAB308"
             strokeWidth={1.5}
             strokeDasharray="3 3"
-            strokeOpacity={0.6}
+            strokeOpacity={0.75}
+            vectorEffect="non-scaling-stroke"
+            shapeRendering="crispEdges"
             className="transition-all duration-150 ease-out pointer-events-none"
           />
         )}

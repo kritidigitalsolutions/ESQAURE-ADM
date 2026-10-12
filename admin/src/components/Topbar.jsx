@@ -6,7 +6,6 @@ import NotificationDropdown from './NotificationDropdown';
 import Badge from './common/Badge';
 
 export default function Topbar({
-  onOpenMobileDrawer,
   title,
   subtitle,
   isSidebarCollapsed,

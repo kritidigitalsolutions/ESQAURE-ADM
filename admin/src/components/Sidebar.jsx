@@ -118,21 +118,21 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`${isCollapsed ? 'w-[64px]' : 'w-56'
-        } bg-white dark:bg-[#141419] text-slate-900 dark:text-slate-100 flex flex-col h-screen sticky top-0 shrink-0 border-r border-slate-200/80 dark:border-white/10 shadow-[1px_0_12px_-4px_rgba(15,23,42,0.04)] dark:shadow-[1px_0_16px_-4px_rgba(0,0,0,0.5)] z-40 font-urbanist selection:bg-[#FEF08A] selection:text-black transition-[width] duration-250 ease-[cubic-bezier(0.2,0,0,1)] will-change-[width]`}
+      className={`${isCollapsed ? 'w-[68px]' : 'w-[240px]'
+        } bg-white dark:bg-[#0D0D11] text-slate-900 dark:text-slate-100 flex flex-col h-screen sticky top-0 shrink-0 border-r border-slate-200/80 dark:border-white/10 shadow-[1px_0_12px_-4px_rgba(15,23,42,0.04)] dark:shadow-[4px_0_24px_-4px_rgba(0,0,0,0.6)] z-40 font-urbanist selection:bg-[#FEF08A] selection:text-black transition-[width] duration-200 ease-in-out will-change-[width]`}
     >
-      {/* 1. Clean, Unified Header */}
-      <div className={`h-14 px-3 border-b border-slate-100 dark:border-white/10 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} bg-white dark:bg-[#141419] shrink-0 overflow-hidden`}>
+      {/* 1. Header (Logo & Collapse Toggle) */}
+      <div className={`h-16 px-3.5 border-b border-slate-100 dark:border-white/10 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} bg-white dark:bg-[#0D0D11] shrink-0 overflow-hidden`}>
         {isCollapsed ? (
-          /* Collapsed View: Single intuitive trigger icon button with logo and expand indicator */
+          /* Collapsed View: Logo trigger button with expand icon on hover */
           <button
             type="button"
             onClick={toggleCollapse}
             title="Expand sidebar (Ctrl+B)"
             aria-label="Expand sidebar"
-            className="relative w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] active:scale-95 transition-all duration-150 group cursor-pointer"
+            className="relative w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] active:scale-95 transition-all duration-150 group cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-slate-900 to-slate-950 p-1 shadow-xs border border-slate-800/80 flex items-center justify-center transition-all duration-200 group-hover:scale-90 group-hover:opacity-10">
+            <div className="w-8 h-8 rounded-lg bg-[#141419] p-1 shadow-xs border border-white/10 flex items-center justify-center transition-all duration-200 group-hover:scale-90 group-hover:opacity-15">
               <img
                 src="/logo-transparent.png"
                 alt="Logo"
@@ -144,14 +144,14 @@ export default function Sidebar({
             </div>
           </button>
         ) : (
-          /* Expanded View: Brand Identity + Minimal Single Toggle Button */
+          /* Expanded View: Full Brand Identity + Minimal Single Toggle Button */
           <>
             <div
-              className="flex items-center space-x-2.5 min-w-0 cursor-pointer group"
+              className="flex items-center space-x-3 min-w-0 cursor-pointer group"
               onClick={() => setActiveTab('summary')}
               title="E² Stories Admin Panel"
             >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-900 to-slate-950 p-1 shadow-xs border border-slate-800/80 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200">
+              <div className="w-8 h-8 rounded-lg bg-[#141419] p-1 shadow-xs border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-200">
                 <img
                   src="/logo-transparent.png"
                   alt="Admin Panel Logo"
@@ -159,10 +159,10 @@ export default function Sidebar({
                 />
               </div>
               <div className="min-w-0 flex flex-col justify-center">
-                <span className="font-bold text-[14.5px] text-slate-900 dark:text-white leading-tight truncate">
+                <span className="font-bold text-[14.5px] text-slate-900 dark:text-white leading-tight tracking-tight truncate">
                   E² Stories
                 </span>
-                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 leading-none mt-0.5">
+                <span className="text-[10.5px] font-semibold text-slate-400 dark:text-white/45 leading-none mt-0.5 tracking-wide uppercase">
                   Admin Panel
                 </span>
               </div>
@@ -173,75 +173,105 @@ export default function Sidebar({
               onClick={toggleCollapse}
               title="Collapse sidebar (Ctrl+B)"
               aria-label="Collapse sidebar"
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] active:scale-95 transition-all duration-150 cursor-pointer shrink-0"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 dark:text-white/45 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] active:scale-95 transition-all duration-150 cursor-pointer shrink-0"
             >
-              <PanelLeft className="w-4 h-4 stroke-[1.8]" />
+              <PanelLeft className="w-4 h-4 stroke-[1.9]" />
             </button>
           </>
         )}
       </div>
 
       {/* 2. Navigation Area */}
-      <nav className={`flex-1 py-2.5 px-2.5 space-y-1 ${isCollapsed ? 'no-scrollbar' : 'custom-scrollbar'} overflow-y-auto overflow-x-hidden`}>
+      <nav className={`flex-1 py-3 px-2.5 space-y-4 ${isCollapsed ? 'no-scrollbar' : 'custom-scrollbar'} overflow-y-auto overflow-x-hidden`}>
         {navSections.map((section, sIdx) => (
-          <div key={sIdx} className="space-y-0.5">
+          <div key={sIdx} className="space-y-1">
             {/* Section Header or Divider */}
             {isCollapsed ? (
-              sIdx > 0 && <div className="h-[1px] w-5 mx-auto bg-slate-200/70 dark:bg-white/10 my-1.5" title={section.title} />
+              sIdx > 0 && <div className="h-[1px] w-6 mx-auto bg-slate-200/80 dark:bg-white/10 my-2" title={section.title} />
             ) : (
-              <div className="px-2 pt-2 pb-1">
-                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block truncate">
+              <div className="px-3 pt-1 pb-0.5">
+                <span className="text-[10px] font-bold text-slate-400 dark:text-white/35 uppercase tracking-[0.08em] block truncate select-none">
                   {section.title}
                 </span>
               </div>
             )}
 
-            {section.items.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`relative flex items-center transition-all duration-150 group sidebar-item-wave cursor-pointer ${isCollapsed
-                      ? 'w-9 h-9 mx-auto justify-center rounded-xl'
-                      : 'w-full h-9 px-2.5 rounded-xl text-[12.5px]'
-                    } ${isActive
-                      ? `bg-[#FEF08A] text-slate-950 font-bold border border-amber-300/80 shadow-xs ${isCollapsed ? 'ring-2 ring-[#FEF08A]/80 ring-offset-2 ring-offset-white dark:ring-offset-[#141419]' : ''
-                      }`
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/[0.06] font-medium'
-                    }`}
-                  title={isCollapsed ? item.label : undefined}
-                >
-                  {/* Icon */}
-                  <div className="flex items-center justify-center shrink-0">
-                    <Icon
-                      className={`w-4 h-4 transition-colors duration-150 ${isActive
-                          ? 'text-slate-950 stroke-[2.3]'
-                          : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-950 dark:group-hover:text-white stroke-[1.8]'
-                        }`}
-                    />
-                  </div>
-
-                  {/* Label */}
-                  {!isCollapsed && (
-                    <span className="truncate tracking-tight ml-2.5 text-left leading-none font-semibold">
-                      {item.label}
-                    </span>
-                  )}
-
-                  {/* Clean Floating Tooltip in Collapsed Mode */}
-                  {isCollapsed && (
-                    <div className="absolute left-[calc(100%+8px)] top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-900/95 dark:bg-[#1E1E26]/95 text-white text-[11px] font-semibold rounded-lg shadow-xl border border-slate-700/60 dark:border-white/10 opacity-0 -translate-x-1 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150 z-50 whitespace-nowrap backdrop-blur-xs">
-                      {item.label}
+            <div className="space-y-0.5">
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`relative flex items-center overflow-hidden transition-all duration-150 group sidebar-item-wave cursor-pointer ${isCollapsed
+                        ? 'w-10 h-10 mx-auto justify-center rounded-xl'
+                        : 'w-full h-9.5 px-3 rounded-xl justify-start text-[13px]'
+                      } ${isActive
+                        ? `bg-[#FEF08A] text-slate-950 font-bold border border-amber-300/80 shadow-xs ${isCollapsed ? 'ring-2 ring-[#FEF08A]/80 ring-offset-2 ring-offset-white dark:ring-offset-[#0D0D11]' : ''
+                        }`
+                        : 'text-slate-600 dark:text-white/70 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100/90 dark:hover:bg-white/[0.06] font-medium'
+                      }`}
+                    title={isCollapsed ? item.label : undefined}
+                  >
+                    {/* Consistent Fixed-Width Icon Container */}
+                    <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                      <Icon
+                        className={`w-4 h-4 transition-colors duration-150 ${isActive
+                            ? 'text-slate-950 stroke-[2.3]'
+                            : 'text-slate-500 dark:text-white/45 group-hover:text-slate-950 dark:group-hover:text-white stroke-[1.8]'
+                          }`}
+                      />
                     </div>
-                  )}
-                </button>
-              );
-            })}
+
+                    {/* Label - Always Crisp and Left Aligned */}
+                    {!isCollapsed && (
+                      <span className="truncate tracking-tight ml-2.5 text-left leading-none font-semibold">
+                        {item.label}
+                      </span>
+                    )}
+
+                    {/* Clean Floating Tooltip in Collapsed Mode */}
+                    {isCollapsed && (
+                      <div className="absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-[#1E1E26] text-white text-[11.5px] font-semibold rounded-lg shadow-xl border border-white/12 opacity-0 -translate-x-1 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-150 z-50 whitespace-nowrap backdrop-blur-md">
+                        {item.label}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         ))}
       </nav>
+
+      {/* 3. Refined Sidebar Footer */}
+      <div className={`p-3 border-t border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-[#0A0A0E] shrink-0 ${isCollapsed ? 'flex justify-center' : ''}`}>
+        {isCollapsed ? (
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+            onClick={toggleCollapse}
+            title="Expand sidebar (Ctrl+B)"
+          >
+            <div className="w-2 h-2 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20" />
+          </div>
+        ) : (
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center space-x-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-[11.5px] font-semibold text-slate-500 dark:text-white/50 tracking-tight">
+                System Live
+              </span>
+            </div>
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-white/10 text-slate-600 dark:text-white/40 tracking-wider">
+              v2.4
+            </span>
+          </div>
+        )}
+      </div>
     </aside>
   );
 }

@@ -280,7 +280,7 @@ export default function AdControlPage({ onNavigate }) {
          ───────────────────────────────────────────────────────────── */}
       <div className="bg-white dark:bg-[#121216] rounded-xl p-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div className="flex items-center space-x-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
             <SlidersHorizontal className="w-4 h-4 stroke-[2.2]" />
           </div>
           <div className="min-w-0">
@@ -288,7 +288,7 @@ export default function AdControlPage({ onNavigate }) {
               <h2 className="text-sm sm:text-base font-extrabold text-slate-950 dark:text-white tracking-tight truncate">
                 Ads Control Center
               </h2>
-              <span className="hidden sm:inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/30 text-amber-900 dark:text-amber-300 border border-amber-200/70 dark:border-amber-400/30">
+              <span className="hidden sm:inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/30 text-slate-950 border border-amber-200/70 dark:border-amber-400/30">
                 <Radio className="w-2.5 h-2.5 animate-pulse text-amber-500" />
                 <span>Live Sync Active</span>
               </span>
@@ -339,7 +339,7 @@ export default function AdControlPage({ onNavigate }) {
         {/* Section Header */}
         <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
           <div className="flex items-center space-x-2">
-            <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
               <ShieldCheck className="w-3.5 h-3.5 stroke-[2.2]" />
             </div>
             <div>
@@ -358,7 +358,7 @@ export default function AdControlPage({ onNavigate }) {
           {/* AdMob Toggle Card */}
           <div className="p-3 rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] flex items-center justify-between gap-3">
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <Smartphone className="w-3.5 h-3.5 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
@@ -392,7 +392,7 @@ export default function AdControlPage({ onNavigate }) {
           {/* Custom Ads Toggle Card */}
           <div className="p-3 rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] flex items-center justify-between gap-3">
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <Sparkles className="w-3.5 h-3.5 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
@@ -486,7 +486,7 @@ export default function AdControlPage({ onNavigate }) {
             {/* Header */}
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                   <Film className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -521,7 +521,7 @@ export default function AdControlPage({ onNavigate }) {
                     }`}
                   >
                     <div className="flex items-center space-x-2.5 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                      <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                         <Icon className="w-3.5 h-3.5 stroke-[2.2]" />
                       </div>
                       <div className="min-w-0">
@@ -605,7 +605,7 @@ export default function AdControlPage({ onNavigate }) {
           <div className="bg-white dark:bg-[#121216] rounded-xl p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                   <Crown className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -673,7 +673,7 @@ export default function AdControlPage({ onNavigate }) {
           {/* Card 2: Developer Sandbox & Overrides */}
           <div className="bg-white dark:bg-[#121216] rounded-xl p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-2.5">
             <div className="flex items-center space-x-2 pb-2 border-b border-slate-100 dark:border-white/10">
-              <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <SlidersHorizontal className="w-3.5 h-3.5 stroke-[2.2]" />
               </div>
               <div>

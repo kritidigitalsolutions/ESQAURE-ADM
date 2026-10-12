@@ -20,13 +20,13 @@ export function ThemeProvider({ children }) {
   const [fallbackOverlay, setFallbackOverlay] = useState(null);
   const fallbackAnimRef = useRef(null);
 
-  // Synchronize 'dark' class on <html> root element initially and on direct state change
+  // Synchronize 'dark' and 'wa-dark' class on <html> root element initially and on direct state change
   useEffect(() => {
     const root = document.documentElement;
     if (isDark) {
-      root.classList.add('dark');
+      root.classList.add('dark', 'wa-dark');
     } else {
-      root.classList.remove('dark');
+      root.classList.remove('dark', 'wa-dark');
     }
     try {
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
@@ -76,9 +76,9 @@ export function ThemeProvider({ children }) {
       const transition = document.startViewTransition(() => {
         // Synchronously toggle class on <html> inside the view transition callback
         if (nextIsDark) {
-          document.documentElement.classList.add('dark');
+          document.documentElement.classList.add('dark', 'wa-dark');
         } else {
-          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.remove('dark', 'wa-dark');
         }
         try {
           localStorage.setItem('theme', nextIsDark ? 'dark' : 'light');
@@ -119,9 +119,9 @@ export function ThemeProvider({ children }) {
       }
 
       if (nextIsDark) {
-        document.documentElement.classList.add('dark');
+        document.documentElement.classList.add('dark', 'wa-dark');
       } else {
-        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.remove('dark', 'wa-dark');
       }
       try {
         localStorage.setItem('theme', nextIsDark ? 'dark' : 'light');

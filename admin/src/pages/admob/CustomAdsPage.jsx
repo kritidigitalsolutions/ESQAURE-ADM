@@ -466,34 +466,32 @@ export default function CustomAdsPage({ onNavigate }) {
             {/* Card 1: Campaign Impressions */}
             <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
               <div>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center space-x-2.5 min-w-0">
-                    <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                      <Eye className="w-4 h-4 stroke-[2.2]" />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                        Impressions
-                      </span>
-                      <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                        Total Views
-                      </span>
-                    </div>
+                <div className="flex items-center space-x-2.5 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                    <Eye className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                      Impressions
+                    </span>
+                    <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                      Total Views
+                    </span>
                   </div>
                 </div>
 
-                <div className="mt-2.5">
-                  <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+                <div className="mt-2">
+                  <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
                     {totalImpressions > 0 ? totalImpressions.toLocaleString('en-IN') : '0'}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+              <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
                 <span className="truncate text-slate-500 dark:text-slate-400">
                   Serving campaigns
                 </span>
-                <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-emerald-600 dark:text-emerald-400 font-bold">
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                   Live Feed
                 </span>
               </div>
@@ -502,34 +500,32 @@ export default function CustomAdsPage({ onNavigate }) {
             {/* Card 2: Campaign Clicks */}
             <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
               <div>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center space-x-2.5 min-w-0">
-                    <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                      <MousePointerClick className="w-4 h-4 stroke-[2.2]" />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                        Ad Clicks
-                      </span>
-                      <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                        Interactions
-                      </span>
-                    </div>
+                <div className="flex items-center space-x-2.5 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                    <MousePointerClick className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                      Ad Clicks
+                    </span>
+                    <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                      Interactions
+                    </span>
                   </div>
                 </div>
 
-                <div className="mt-2.5">
-                  <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+                <div className="mt-2">
+                  <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
                     {totalClicks > 0 ? totalClicks.toLocaleString('en-IN') : '0'}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+              <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
                 <span className="truncate text-slate-500 dark:text-slate-400">
                   CTR Ratio: {overallCtr}
                 </span>
-                <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-emerald-600 dark:text-emerald-400 font-bold">
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                   Interactions
                 </span>
               </div>
@@ -538,34 +534,32 @@ export default function CustomAdsPage({ onNavigate }) {
             {/* Card 3: Ad Skips / Rate */}
             <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
               <div>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center space-x-2.5 min-w-0">
-                    <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                      <Activity className="w-4 h-4 stroke-[2.2]" />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                        Video Skips
-                      </span>
-                      <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                        Skip Telemetry
-                      </span>
-                    </div>
+                <div className="flex items-center space-x-2.5 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                    <Activity className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                      Video Skips
+                    </span>
+                    <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                      Skip Telemetry
+                    </span>
                   </div>
                 </div>
 
-                <div className="mt-2.5">
-                  <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+                <div className="mt-2">
+                  <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
                     {totalSkips > 0 ? totalSkips.toLocaleString('en-IN') : '0'}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+              <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
                 <span className="truncate text-slate-500 dark:text-slate-400">
                   Skipped before completion
                 </span>
-                <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-slate-700 dark:text-slate-300 font-bold">
+                <span className="text-slate-600 dark:text-slate-300 font-bold">
                   Monitored
                 </span>
               </div>
@@ -574,34 +568,32 @@ export default function CustomAdsPage({ onNavigate }) {
             {/* Card 4: Active Campaigns */}
             <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
               <div>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center space-x-2.5 min-w-0">
-                    <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                      <Megaphone className="w-4 h-4 stroke-[2.2]" />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
-                        Active Campaigns
-                      </span>
-                      <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
-                        In Rotation
-                      </span>
-                    </div>
+                <div className="flex items-center space-x-2.5 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                    <Megaphone className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
+                      Active Campaigns
+                    </span>
+                    <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium block truncate">
+                      In Rotation
+                    </span>
                   </div>
                 </div>
 
-                <div className="mt-2.5">
-                  <div className="text-xl sm:text-2xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
+                <div className="mt-2">
+                  <div className="text-lg sm:text-xl font-black text-slate-950 dark:text-white tracking-tight leading-none group-hover:text-amber-950 dark:group-hover:text-amber-200 transition-colors">
                     {counts.active} / {counts.all}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
+              <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
                 <span className="truncate text-slate-500 dark:text-slate-400">
                   {counts.paused} paused in reserve
                 </span>
-                <span className="shrink-0 px-1.5 py-0.2 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-emerald-600 dark:text-emerald-400 font-bold">
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">
                   {rotationSettings.enabled ? 'Serving' : 'Disabled'}
                 </span>
               </div>
@@ -615,7 +607,7 @@ export default function CustomAdsPage({ onNavigate }) {
                 <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
                   Custom Ad Campaigns
                 </h1>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-900 dark:text-amber-300 border border-amber-300/50">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs text-slate-950 border border-amber-300/50">
                   {filteredAds.length} Campaigns
                 </span>
               </div>
@@ -675,7 +667,7 @@ export default function CustomAdsPage({ onNavigate }) {
             <div className="bg-white dark:bg-[#121216] rounded-xl p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3 animate-in fade-in duration-200">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
                 <div className="flex items-center space-x-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                  <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                     <SlidersHorizontal className="w-3.5 h-3.5 stroke-[2.2]" />
                   </div>
                   <div>
@@ -963,7 +955,7 @@ export default function CustomAdsPage({ onNavigate }) {
                               <span className="text-slate-500 dark:text-slate-400">
                                 {clicks} clicks
                               </span>
-                              <span className="px-1 py-0.2 rounded text-[9.5px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40">
+                              <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
                                 {ctr}
                               </span>
                             </div>
@@ -976,21 +968,18 @@ export default function CustomAdsPage({ onNavigate }) {
                           </td>
 
                           {/* 7. Status */}
-                          <td className="py-2 px-3">
-                            <span
-                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                isActive
-                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40'
-                                  : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
-                              }`}
-                            >
-                              <span
-                                className={`w-1.5 h-1.5 rounded-full ${
-                                  isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
-                                }`}
+                          <td className="py-2 px-3" onClick={(e) => e.stopPropagation()}>
+                            <div className="inline-flex items-center gap-1.5">
+                              <ToggleSwitch
+                                checked={isActive}
+                                onChange={() => handleToggleStatus(id)}
+                                size="sm"
+                                title={isActive ? 'Active (Click to pause)' : 'Paused (Click to activate)'}
                               />
-                              <span>{isActive ? 'Active' : 'Paused'}</span>
-                            </span>
+                              <span className={`text-[10px] font-bold ${isActive ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                                {isActive ? 'Active' : 'Paused'}
+                              </span>
+                            </div>
                           </td>
 
                           {/* 8. Actions */}
@@ -1119,7 +1108,7 @@ export default function CustomAdsPage({ onNavigate }) {
           {/* Section 1: Campaign Basics & Creative Asset */}
           <div className="bg-white dark:bg-[#121216] rounded-xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
             <div className="flex items-center space-x-2 pb-2 border-b border-slate-100 dark:border-white/10">
-              <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <Megaphone className="w-3.5 h-3.5 stroke-[2.2]" />
               </div>
               <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase">
@@ -1259,7 +1248,7 @@ export default function CustomAdsPage({ onNavigate }) {
           {/* Section 2: Destination & Audience Targeting */}
           <div className="bg-white dark:bg-[#121216] rounded-xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
             <div className="flex items-center space-x-2 pb-2 border-b border-slate-100 dark:border-white/10">
-              <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <LinkIcon className="w-3.5 h-3.5 stroke-[2.2]" />
               </div>
               <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase">
@@ -1316,7 +1305,7 @@ export default function CustomAdsPage({ onNavigate }) {
           {/* Section 3: Playback Duration & Advanced Controls */}
           <div className="bg-white dark:bg-[#121216] rounded-xl p-4 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
             <div className="flex items-center space-x-2 pb-2 border-b border-slate-100 dark:border-white/10">
-              <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <Clock className="w-3.5 h-3.5 stroke-[2.2]" />
               </div>
               <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase">

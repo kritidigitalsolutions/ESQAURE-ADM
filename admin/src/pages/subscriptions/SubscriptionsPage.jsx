@@ -467,7 +467,7 @@ export default function SubscriptionsPage() {
       {/* ======================================================== */}
       <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
             <CreditCard className="w-4 h-4 stroke-[2.2]" />
           </div>
           <div>
@@ -475,12 +475,12 @@ export default function SubscriptionsPage() {
               <h1 className="font-extrabold text-slate-950 dark:text-white text-base tracking-tight leading-tight">
                 Subscription Plans & Pricing
               </h1>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-300/50">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs border border-amber-300/50">
                 {plans.length} Active Plans
               </span>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-              Manage subscription tiers, pricing, AutoPay renewals, and 7-Day trial settings
+              Manage subscription tiers, pricing, and AutoPay renewals
             </p>
           </div>
         </div>
@@ -495,17 +495,6 @@ export default function SubscriptionsPage() {
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
             <span>{isRefreshing ? 'Syncing...' : 'Sync'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setTrialFormData({ ...trialConfig });
-              setIsTrialModalOpen(true);
-            }}
-            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs"
-          >
-            <Zap className="w-3.5 h-3.5 text-amber-500" />
-            <span>Trial Settings</span>
           </button>
           <button
             type="button"
@@ -530,7 +519,7 @@ export default function SubscriptionsPage() {
           value={`₹${totalMrrEstimated}`}
           footerLeft="Total collected"
           footerRight={`₹${(overviewKpis?.totalRevenueCollected || 0).toLocaleString()}`}
-          footerRightColor="text-amber-900 dark:text-amber-300 font-bold"
+          footerRightColor="text-slate-950 font-bold"
         />
 
         {/* Metric 2: Active Subscribers */}
@@ -542,7 +531,7 @@ export default function SubscriptionsPage() {
           animateNumber
           footerLeft={`${plans.filter((p) => p.status === 'ACTIVE').length} active plan tiers`}
           footerRight="Live in DB"
-          footerRightColor="text-amber-900 dark:text-amber-300 font-bold"
+          footerRightColor="text-slate-950 font-bold"
         />
 
         {/* Metric 3: 7-Day Free Trial AutoPay Activations */}
@@ -554,7 +543,7 @@ export default function SubscriptionsPage() {
           animateNumber
           footerLeft="Razorpay e-Mandate"
           footerRight={trialConfig.enabled ? 'Active' : 'Paused'}
-          footerRightColor="text-amber-900 dark:text-amber-300 font-bold"
+          footerRightColor="text-slate-950 font-bold"
         />
 
         {/* Metric 4: Monthly Churn Rate */}
@@ -612,20 +601,18 @@ export default function SubscriptionsPage() {
               {/* Top Badge & Code */}
               <div>
                 <div className="flex items-center justify-between mb-2.5">
-                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                     isAnnual || isPopular
-                      ? 'bg-[#FEF08A] text-slate-950 border border-amber-300/80 shadow-2xs'
-                      : 'bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10'
+                      ? 'bg-amber-200 dark:bg-amber-400/20 text-amber-950 dark:text-amber-300 border border-amber-300/40 dark:border-amber-400/30'
+                      : 'bg-slate-200 dark:bg-white/[0.08] text-slate-900 dark:text-slate-300 border border-slate-300/40 dark:border-white/10'
                   }`}>
                     {plan.badge || plan.name}
                   </span>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                    plan.status === 'DRAFT'
-                      ? 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
-                      : 'bg-[#FEF08A]/30 text-slate-900 dark:text-amber-300 border border-amber-300/50'
-                  }`}>
-                    {plan.status === 'DRAFT' ? 'Draft' : 'Active'}
-                  </span>
+                  <Badge
+                    variant={plan.status === 'DRAFT' ? 'draft' : 'active'}
+                    label={plan.status === 'DRAFT' ? 'Draft' : 'Active'}
+                    size="xs"
+                  />
                 </div>
 
                 {/* Plan Title & Pricing */}
@@ -685,7 +672,7 @@ export default function SubscriptionsPage() {
                   </p>
                   {plan.features?.map((feat, idx) => (
                     <div key={idx} className="flex items-start space-x-2 text-slate-700 dark:text-slate-300">
-                      <div className="w-3.5 h-3.5 rounded-md bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 mt-0.5">
+                      <div className="w-3.5 h-3.5 rounded-md bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0 mt-0.5">
                         <Check className="w-2.5 h-2.5 stroke-[3]" />
                       </div>
                       <span className="leading-snug text-[11.5px]">{feat}</span>
@@ -731,7 +718,7 @@ export default function SubscriptionsPage() {
       <div className="bg-white dark:bg-[#121216] rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100 dark:border-white/10">
           <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+            <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
               <Zap className="w-4 h-4 stroke-[2.2]" />
             </div>
             <div>
@@ -739,14 +726,11 @@ export default function SubscriptionsPage() {
                 <h3 className="font-extrabold text-slate-950 dark:text-white text-sm sm:text-base tracking-tight">
                   {trialConfig.trialDurationDays}-Day Free Trial (₹{trialConfig.trialFee} Token AutoPay Mandate)
                 </h3>
-                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                  trialConfig.enabled
-                    ? 'bg-[#FEF08A]/30 text-slate-900 dark:text-amber-300 border border-amber-300/50'
-                    : 'bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-400 border border-slate-200 dark:border-white/10'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${trialConfig.enabled ? 'bg-amber-400 animate-pulse' : 'bg-slate-400'}`} />
-                  {trialConfig.enabled ? 'Campaign Active' : 'Paused'}
-                </span>
+                <Badge
+                  variant={trialConfig.enabled ? 'active' : 'paused'}
+                  label={trialConfig.enabled ? 'Campaign Active' : 'Paused'}
+                  size="xs"
+                />
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                 High-conversion subscriber acquisition flow enabled by Razorpay &amp; UPI e-Mandate
@@ -804,7 +788,7 @@ export default function SubscriptionsPage() {
 
         {/* Trial Terms Callout Box */}
         <div className="p-2.5 rounded-lg bg-slate-50/70 dark:bg-[#18181E]/80 border border-slate-200/80 dark:border-white/10 flex items-start space-x-2.5 text-xs text-slate-600 dark:text-slate-300">
-          <div className="w-6 h-6 rounded-md bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 mt-0.5">
+          <div className="w-6 h-6 rounded-md bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0 mt-0.5">
             <Info className="w-3.5 h-3.5 stroke-[2.2]" />
           </div>
           <div className="space-y-0.5">
@@ -837,7 +821,7 @@ export default function SubscriptionsPage() {
               {/* Modal Header */}
               <div className="px-6 py-4 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between shrink-0 bg-white dark:bg-[#18181E]">
                 <div className="flex items-center space-x-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+                  <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                     <CreditCard className="w-5 h-5 stroke-[2.2]" />
                   </div>
                   <div>
@@ -878,31 +862,17 @@ export default function SubscriptionsPage() {
                     </button>
                   </div>
 
-                  {/* Plan Status Segmented Control */}
-                  <div className="flex items-center bg-slate-100 dark:bg-[#1E1E26] p-0.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs">
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, status: 'ACTIVE' })}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer ${
-                        formData.status === 'ACTIVE'
-                          ? 'bg-[#FEF08A] text-slate-950 font-bold shadow-xs'
-                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
-                      }`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${formData.status === 'ACTIVE' ? 'bg-amber-600 animate-pulse' : 'bg-slate-400'}`} />
-                      <span>Active</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, status: 'DRAFT' })}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        formData.status === 'DRAFT'
-                          ? 'bg-amber-400 text-slate-950 font-extrabold shadow-xs'
-                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
-                      }`}
-                    >
-                      <span>Draft</span>
-                    </button>
+                  {/* Plan Status Toggle */}
+                  <div className="flex items-center gap-2 bg-slate-100 dark:bg-[#1E1E26] px-2.5 py-1 rounded-xl border border-slate-200 dark:border-white/10 text-xs">
+                    <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                      {formData.status === 'ACTIVE' ? 'Active' : 'Draft'}
+                    </span>
+                    <ToggleSwitch
+                      checked={formData.status === 'ACTIVE'}
+                      onChange={(isActive) => setFormData({ ...formData, status: isActive ? 'ACTIVE' : 'DRAFT' })}
+                      size="sm"
+                      title="Toggle Plan Status"
+                    />
                   </div>
 
                   {/* Close Button */}
@@ -1433,7 +1403,7 @@ export default function SubscriptionsPage() {
             {/* Modal Header */}
             <div className="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between shrink-0 bg-white dark:bg-[#18181E]">
               <div className="flex items-center space-x-3">
-                <div className="w-9 h-9 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-2xs">
+                <div className="w-9 h-9 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0 shadow-2xs">
                   <Zap className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>

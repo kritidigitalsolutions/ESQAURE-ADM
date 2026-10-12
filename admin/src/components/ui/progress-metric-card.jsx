@@ -167,29 +167,12 @@ export default function ProgressMetricCard({
   return (
     <div className={shell}>
       {/* Background Graphic SVG Canvas Area */}
-      <div className="absolute inset-y-0 right-0 z-0 pointer-events-none w-[60%] sm:w-[55%]">
-        {/* Soft gradient wash */}
+      <div className="absolute inset-y-0 right-0 z-0 pointer-events-none w-[62%] sm:w-[58%]">
+        {/* Soft, crisp ambient gradient wash */}
         <div
-          className="absolute inset-0"
-          style={{ background: `linear-gradient(to left, ${color.stroke}18, transparent 85%)` }}
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: `linear-gradient(to left, ${color.stroke}10, transparent 80%)` }}
         />
-        {/* Subtle grid pattern overlay */}
-        <div
-          className="absolute inset-0 text-slate-300/40"
-          style={{
-            WebkitMaskImage: 'linear-gradient(to right, transparent, black 40%)',
-            maskImage: 'linear-gradient(to right, transparent, black 40%)',
-          }}
-        >
-          <svg className="h-full w-full" aria-hidden="true">
-            <defs>
-              <pattern id={gridId} width="16" height="16" patternUnits="userSpaceOnUse">
-                <circle cx="1.5" cy="1.5" r="1" fill="currentColor" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill={`url(#${gridId})`} />
-          </svg>
-        </div>
 
         {/* Embedded Interactive MetricChart SVG */}
         <div className={`absolute inset-0 ${isCompact ? 'pt-8 pb-4 pr-3' : 'pt-14 pb-8 pr-3'} pointer-events-auto`}>

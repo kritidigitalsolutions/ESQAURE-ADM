@@ -342,7 +342,7 @@ export default function CategoryPriorityPage({ onNavigate }) {
         
         {/* Title, Badge & Clean Inline Metadata */}
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
             <SlidersHorizontal className="w-4 h-4 stroke-[2.2]" />
           </div>
           <div className="min-w-0">
@@ -351,8 +351,8 @@ export default function CategoryPriorityPage({ onNavigate }) {
                 Section Priority Manager
               </h1>
               {isDirty && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-400/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 dark:bg-amber-400/20 text-amber-950 dark:text-amber-300 border border-amber-300/40 dark:border-amber-400/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-800 dark:bg-amber-400 animate-pulse" />
                   Unsaved Ranks
                 </span>
               )}
@@ -573,7 +573,7 @@ export default function CategoryPriorityPage({ onNavigate }) {
                           </div>
 
                           {/* Unified Theme Icon Badge (No rainbow colors) */}
-                          <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 text-slate-950 dark:text-amber-300 flex items-center justify-center shrink-0">
+                          <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                             <Icon className="w-3.5 h-3.5 stroke-[2.2]" />
                           </div>
 
@@ -593,7 +593,7 @@ export default function CategoryPriorityPage({ onNavigate }) {
 
                       {/* Clean Theme Type Badge */}
                       <td className="py-2 px-3 text-center">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10.5px] font-medium bg-slate-100 dark:bg-[#18181E] text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-white/10">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-200 dark:bg-purple-500/20 text-purple-950 dark:text-purple-300 border border-purple-300/40 dark:border-purple-500/30">
                           {typeLabel}
                         </span>
                       </td>

@@ -31,7 +31,7 @@ export default function DramaIngestModal({ isOpen, onClose }) {
         {/* Modal Header */}
         <div className="p-6 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/60 dark:bg-white/[0.03]">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#FEF08A]/40 dark:bg-amber-400/10 text-slate-950 dark:text-amber-300 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center font-extrabold shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs font-extrabold shadow-xs">
               <Film className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div>

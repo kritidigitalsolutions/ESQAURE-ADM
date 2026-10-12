@@ -1,103 +1,162 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   Bell,
-  Check,
-  CheckCheck,
-  Trash2,
-  Clapperboard,
-  Sparkles,
-  Server,
-  Send,
-  CreditCard,
-  ChevronRight,
-  ExternalLink,
-  RotateCcw,
-  Volume2,
+  RefreshCw,
+  Loader2,
   BellOff
 } from 'lucide-react';
+import { notificationService } from '../services/notificationService';
+import { subscriptionService } from '../services/subscriptionService';
+import { dramaService } from '../services/dramaService';
 
-const STORAGE_KEY = 'e2_admin_notifications_v2';
+const READ_STORAGE_KEY = 'e2_admin_read_notif_ids_v1';
+const CLEARED_STORAGE_KEY = 'e2_admin_cleared_notif_ids_v1';
 
-const DEFAULT_NOTIFICATIONS = [
-  {
-    id: 'notif-1',
-    category: 'content',
-    title: 'Transcoding Complete',
-    message: '10 new episodes for "Billionaire\'s Secret Heir" (Ep 21–30) have finished 1080p HLS processing and are ready to publish.',
-    time: '4m ago',
-    unread: true,
-    targetTab: 'dramas',
-    actionLabel: 'Review Episodes'
-  },
-  {
-    id: 'notif-2',
-    category: 'monetization',
-    title: 'Subscription Surge',
-    message: '34 viewers purchased the Annual Pass in the last hour (+142% vs daily average). Total revenue: ₹6,766.',
-    time: '28m ago',
-    unread: true,
-    targetTab: 'subscribers',
-    actionLabel: 'View Subscribers'
-  },
-  {
-    id: 'notif-3',
-    category: 'system',
-    title: 'Stream CDN Edge Latency Alert',
-    message: 'Mumbai AP-South edge cache hit ratio dipped to 91.2%. Routing auto-failover to Hyderabad secondary POP initiated.',
-    time: '1h ago',
-    unread: true,
-    targetTab: 'app_notifications',
-    actionLabel: 'System Status'
-  },
-  {
-    id: 'notif-4',
-    category: 'campaign',
-    title: 'Push Campaign Delivered',
-    message: '"Weekend Binge: Ep 1-5 Free Unlocked" broadcast completed to 58,400 active viewers with a 21.6% open rate.',
-    time: '3h ago',
-    unread: false,
-    targetTab: 'notifications',
-    actionLabel: 'Campaign Stats'
-  },
-  {
-    id: 'notif-5',
-    category: 'monetization',
-    title: 'Mega Coin Pack Recharge',
-    message: 'User @karan_v purchased "Mega 1,200 Coins Pack" via PhonePe UPI (TXN #ESQ-994821).',
-    time: '5h ago',
-    unread: false,
-    targetTab: 'subscriptions',
-    actionLabel: 'Transaction Log'
-  }
-];
+function formatTimeAgo(dateStr) {
+  if (!dateStr) return 'Recently';
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return 'Yesterday';
+  return `${diffDays}d ago`;
+}
 
 export default function NotificationDropdown({ onNavigate }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
-  const [notifications, setNotifications] = useState(() => {
+  const [rawItems, setRawItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Read IDs set from localStorage
+  const [readIds, setReadIds] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
+      const saved = localStorage.getItem(READ_STORAGE_KEY);
+      return saved ? new Set(JSON.parse(saved)) : new Set();
     } catch {
-      // fallback
+      return new Set();
     }
-    return DEFAULT_NOTIFICATIONS;
+  });
+
+  // Cleared IDs set from localStorage
+  const [clearedIds, setClearedIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem(CLEARED_STORAGE_KEY);
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
   });
 
   const dropdownRef = useRef(null);
   const panelRef = useRef(null);
   const listRef = useRef(null);
 
-  // Save to localStorage whenever notifications change
+  // Save readIds to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
+      localStorage.setItem(READ_STORAGE_KEY, JSON.stringify([...readIds]));
     } catch (e) {
-      console.warn('Could not save notifications to localStorage', e);
+      console.warn('Could not save readIds to localStorage', e);
     }
-  }, [notifications]);
+  }, [readIds]);
+
+  // Save clearedIds to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(CLEARED_STORAGE_KEY, JSON.stringify([...clearedIds]));
+    } catch (e) {
+      console.warn('Could not save clearedIds to localStorage', e);
+    }
+  }, [clearedIds]);
+
+  // Fetch real system alerts from backend (excluding push notifications)
+  const fetchLiveAlerts = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [announcementsRes, txRes, dramasRes] = await Promise.allSettled([
+        notificationService.getAnnouncements(),
+        subscriptionService.getTransactions({ limit: 6 }),
+        dramaService.getAdminDramas()
+      ]);
+
+      const items = [];
+
+      // 1. Live In-App Notices
+      if (announcementsRes.status === 'fulfilled' && announcementsRes.value?.announcements) {
+        announcementsRes.value.announcements.slice(0, 4).forEach((a) => {
+          const id = `ann-${a._id || a.id}`;
+          items.push({
+            id,
+            category: 'system',
+            title: a.title || 'System Announcement',
+            message: a.body || 'In-app notification sent to viewer inboxes.',
+            createdAt: a.createdAt,
+            targetTab: 'app_notifications',
+            actionLabel: 'View Notices'
+          });
+        });
+      }
+
+      // 3. Live Transactions
+      if (txRes.status === 'fulfilled' && txRes.value?.transactions) {
+        txRes.value.transactions.slice(0, 6).forEach((t) => {
+          const id = `tx-${t.id || t._id}`;
+          items.push({
+            id,
+            category: 'monetization',
+            title: t.status === 'SUCCESS' ? 'Subscription Payment Success' : `Payment Status: ${t.status || 'Pending'}`,
+            message: `${t.user || 'Viewer'} purchased ${t.plan || 'Plan'} (${t.amount}) via ${t.method || 'UPI'}.`,
+            createdAt: t.createdAt,
+            targetTab: 'transactions',
+            actionLabel: 'View Transaction'
+          });
+        });
+      }
+
+      // 4. Live Dramas Updated
+      if (dramasRes.status === 'fulfilled' && dramasRes.value?.dramas) {
+        dramasRes.value.dramas.slice(0, 3).forEach((d) => {
+          const id = `drm-${d._id || d.id}`;
+          items.push({
+            id,
+            category: 'content',
+            title: `Series: ${d.title}`,
+            message: `Catalog status: ${d.status || 'PUBLISHED'} with ${d.totalEpisodes || (d.episodes ? d.episodes.length : 0)} episodes.`,
+            createdAt: d.updatedAt || d.createdAt,
+            targetTab: 'dramas',
+            actionLabel: 'Open Library'
+          });
+        });
+      }
+
+      // Sort newest first
+      items.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      setRawItems(items);
+    } catch (err) {
+      console.warn('Failed to fetch live notifications:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLiveAlerts();
+  }, [fetchLiveAlerts]);
+
+  // Filter out cleared items and compute dynamic properties
+  const notifications = useMemo(() => {
+    return rawItems
+      .filter((item) => !clearedIds.has(item.id))
+      .map((item) => ({
+        ...item,
+        time: formatTimeAgo(item.createdAt),
+        unread: !readIds.has(item.id)
+      }));
+  }, [rawItems, clearedIds, readIds]);
 
   // Handle click outside and Escape key
   useEffect(() => {
@@ -124,7 +183,7 @@ export default function NotificationDropdown({ onNavigate }) {
     };
   }, [isOpen]);
 
-  // Prevent background page from scrolling when scrolling over or inside notification dropdown
+  // Prevent background page from scrolling when inside notification dropdown
   useEffect(() => {
     const panel = panelRef.current;
     if (!isOpen || !panel) return;
@@ -136,7 +195,6 @@ export default function NotificationDropdown({ onNavigate }) {
         return;
       }
 
-      // If wheel is over header, filter tabs, footer, or padding (outside the scrollable list)
       if (!list.contains(e.target)) {
         e.preventDefault();
         return;
@@ -171,294 +229,209 @@ export default function NotificationDropdown({ onNavigate }) {
     if (activeFilter === 'unread') return n.unread;
     if (activeFilter === 'content') return n.category === 'content';
     if (activeFilter === 'monetization') return n.category === 'monetization';
-    if (activeFilter === 'system') return n.category === 'system' || n.category === 'campaign';
+    if (activeFilter === 'system') return n.category === 'system';
     return true; // 'all'
   });
 
   const handleMarkAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+    setReadIds((prev) => {
+      const next = new Set(prev);
+      notifications.forEach((n) => next.add(n.id));
+      return next;
+    });
   };
 
-  const handleToggleRead = (id, e) => {
-    e.stopPropagation();
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, unread: !n.unread } : n))
-    );
+  const handleMarkSingleRead = (id, e) => {
+    e?.stopPropagation();
+    setReadIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
   };
 
-  const handleDeleteItem = (id, e) => {
-    e.stopPropagation();
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
 
   const handleClearAll = () => {
-    setNotifications([]);
+    setClearedIds((prev) => {
+      const next = new Set(prev);
+      notifications.forEach((n) => next.add(n.id));
+      return next;
+    });
   };
 
-  const handleResetDemo = () => {
-    setNotifications(DEFAULT_NOTIFICATIONS);
-    setActiveFilter('all');
-  };
-
-  const handleItemClick = (notification) => {
-    // Mark clicked item as read
-    if (notification.unread) {
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notification.id ? { ...n, unread: false } : n))
-      );
+  const handleItemClick = (n) => {
+    handleMarkSingleRead(n.id);
+    setIsOpen(false);
+    if (n.targetTab && onNavigate) {
+      onNavigate(n.targetTab);
     }
-    // Navigate if targetTab provided
-    if (notification.targetTab && onNavigate) {
-      onNavigate(notification.targetTab);
-      setIsOpen(false);
-    }
-  };
-
-  const getCategoryIcon = (category) => {
-    const renderIcon = () => {
-      switch (category) {
-        case 'content':
-          return <Clapperboard className="w-3.5 h-3.5 text-slate-900 dark:text-amber-300" strokeWidth={2.2} />;
-        case 'monetization':
-          return <Sparkles className="w-3.5 h-3.5 text-slate-900 dark:text-amber-300" strokeWidth={2.2} />;
-        case 'campaign':
-          return <Send className="w-3.5 h-3.5 text-slate-900 dark:text-amber-300" strokeWidth={2.2} />;
-        case 'system':
-        default:
-          return <Server className="w-3.5 h-3.5 text-slate-900 dark:text-amber-300" strokeWidth={2.2} />;
-      }
-    };
-
-    return (
-      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs">
-        {renderIcon()}
-      </div>
-    );
   };
 
   return (
     <div className="relative font-urbanist" ref={dropdownRef}>
-      {/* Trigger Bell Button */}
+      {/* Bell Trigger Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen) fetchLiveAlerts();
+        }}
         title="Notifications"
         aria-label="Notifications"
-        aria-expanded={isOpen}
-        className={`group relative p-1.5 rounded-lg transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 ${
+        className={`relative p-2 rounded-xl transition-all duration-200 cursor-pointer ${
           isOpen
-            ? 'bg-slate-100 dark:bg-white/[0.08] text-slate-900 dark:text-white shadow-xs'
+            ? 'bg-slate-200/80 dark:bg-white/[0.12] text-slate-950 dark:text-white'
             : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06]'
         }`}
       >
-        <Bell
-          className="w-4 h-4 bell-hover-ring transition-transform"
-          strokeWidth={2}
-        />
-
-        {/* Unread Indicator Dot */}
+        <Bell className="w-4 h-4 stroke-[2]" />
+        
+        {/* Sleek Minimalist Unread Dot */}
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500 ring-2 ring-white dark:ring-[#0A0A0C]" />
-          </span>
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#1E1E26] shadow-xs" />
         )}
       </button>
 
-      {/* Notification Dropdown Panel */}
+      {/* Floating Dropdown Panel (Compact 330px, Minimalist, Smooth Entrance) */}
       {isOpen && (
         <div
           ref={panelRef}
-          className="absolute right-0 mt-2 w-[330px] sm:w-[350px] max-w-[calc(100vw-1.5rem)] bg-white dark:bg-[#18181E] border border-slate-200/90 dark:border-white/10 rounded-xl shadow-xl z-50 overflow-hidden overscroll-contain animate-in fade-in zoom-in-95 duration-150 flex flex-col font-urbanist"
+          className="absolute right-0 top-full mt-2 w-[320px] sm:w-[340px] bg-white/95 dark:bg-[#1E1E26]/95 backdrop-blur-xl border border-slate-200/90 dark:border-white/10 rounded-2xl shadow-xl dark:shadow-[0_16px_40px_-8px_rgba(0,0,0,0.85)] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150 origin-top-right"
         >
           {/* Header */}
-          <div className="px-3.5 py-2.5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/70 dark:bg-[#1E1E26]">
+          <div className="px-3.5 py-2.5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/50 dark:bg-[#181820]/60">
             <div className="flex items-center space-x-2">
-              <span className="text-xs font-bold tracking-tight text-slate-900 dark:text-white">
+              <span className="font-extrabold text-xs text-slate-950 dark:text-white tracking-tight">
                 Notifications
               </span>
-              {unreadCount > 0 ? (
-                <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-md bg-red-500 text-white shadow-xs">
-                  {unreadCount} new
-                </span>
-              ) : (
-                <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-md bg-slate-100 text-slate-500 dark:bg-white/[0.05] dark:text-slate-400">
-                  Caught up
+              {unreadCount > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[#FEF08A]/60 dark:bg-amber-400/15 text-slate-950 border border-amber-300/40 dark:border-amber-400/25">
+                  {unreadCount}
                 </span>
               )}
             </div>
 
-            {/* Header Actions */}
             <div className="flex items-center space-x-1">
+              <button
+                type="button"
+                onClick={fetchLiveAlerts}
+                disabled={isLoading}
+                title="Refresh"
+                className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-white/[0.08] rounded-md transition-all cursor-pointer active:scale-95"
+              >
+                <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin text-amber-500' : ''}`} />
+              </button>
               {unreadCount > 0 && (
                 <button
+                  type="button"
                   onClick={handleMarkAllRead}
                   title="Mark all as read"
-                  className="flex items-center space-x-1 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-[#FEF08A] hover:bg-slate-200/60 dark:hover:bg-white/[0.06] rounded-md transition-colors cursor-pointer"
+                  className="px-1.5 py-0.5 text-[10px] font-bold text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/[0.08] rounded-md transition-colors cursor-pointer"
                 >
-                  <CheckCheck className="w-3 h-3 text-slate-600 dark:text-amber-400" />
-                  <span>Mark all read</span>
+                  Mark all read
                 </button>
               )}
             </div>
           </div>
 
-          {/* Filter Tabs */}
-          <div className="px-2.5 py-1.5 border-b border-slate-100 dark:border-white/10 flex items-center gap-1 overflow-x-auto scrollbar-none bg-slate-50/30 dark:bg-[#18181E]">
+          {/* Minimalist Filter Tabs (No bulky buttons) */}
+          <div className="px-2.5 py-1.5 bg-slate-50/30 dark:bg-[#1A1A22]/40 border-b border-slate-100 dark:border-white/5 flex items-center space-x-1 text-[10px]">
             {[
-              { key: 'all', label: 'All', count: notifications.length },
-              { key: 'unread', label: 'Unread', count: unreadCount },
-              { key: 'content', label: 'Content' },
-              { key: 'monetization', label: 'Revenue' },
-              { key: 'system', label: 'System' },
-            ].map((tab) => {
-              const isActive = activeFilter === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveFilter(tab.key)}
-                  className={`px-2 py-0.5 text-[10.5px] font-semibold rounded-md transition-all whitespace-nowrap cursor-pointer ${
-                    isActive
-                      ? 'bg-[#FEF08A] text-slate-950 font-bold shadow-xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.05] hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  {tab.label}
-                  {tab.count !== undefined && tab.count > 0 && (
-                    <span
-                      className={`ml-1 px-1 py-0.5 rounded-full text-[9px] font-bold ${
-                        isActive
-                          ? 'bg-black/15 text-slate-950'
-                          : 'bg-slate-200/70 dark:bg-white/10 text-slate-600 dark:text-slate-300'
-                      }`}
-                    >
-                      {tab.count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+              { id: 'all', label: 'All', count: notifications.length },
+              { id: 'unread', label: 'Unread', count: unreadCount },
+              { id: 'monetization', label: 'Billing', count: notifications.filter((n) => n.category === 'monetization').length },
+              { id: 'system', label: 'Notices', count: notifications.filter((n) => n.category === 'system').length },
+            ].map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setActiveFilter(f.id)}
+                className={`px-2 py-0.5 rounded-md font-bold transition-all cursor-pointer flex items-center space-x-1 ${
+                  activeFilter === f.id
+                    ? 'bg-slate-900 text-white dark:bg-[#FEF08A] dark:text-slate-950 shadow-2xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-white/[0.05]'
+                }`}
+              >
+                <span>{f.label}</span>
+                <span className="text-[9px] opacity-70">({f.count})</span>
+              </button>
+            ))}
           </div>
 
-          {/* Scrollable Notification List */}
-          <div
-            ref={listRef}
-            className="max-h-[320px] overflow-y-auto overscroll-contain divide-y divide-slate-100 dark:divide-white/[0.06]"
-          >
-            {filteredNotifications.length > 0 ? (
+          {/* List Area */}
+          <div ref={listRef} className="max-h-[300px] overflow-y-auto divide-y divide-slate-100 dark:divide-white/[0.05]">
+            {isLoading && notifications.length === 0 ? (
+              <div className="py-10 px-4 text-center space-y-2">
+                <Loader2 className="w-4 h-4 animate-spin mx-auto text-amber-500" />
+                <p className="text-[11px] font-semibold text-slate-400">Loading live alerts...</p>
+              </div>
+            ) : filteredNotifications.length === 0 ? (
+              <div className="py-10 px-4 text-center space-y-1.5">
+                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/[0.06] text-slate-400 flex items-center justify-center mx-auto">
+                  <BellOff className="w-3.5 h-3.5" />
+                </div>
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200">No notifications</p>
+                <p className="text-[10px] text-slate-400 max-w-[220px] mx-auto">
+                  Live payment transactions and system updates will appear here.
+                </p>
+              </div>
+            ) : (
               filteredNotifications.map((n) => (
                 <div
                   key={n.id}
                   onClick={() => handleItemClick(n)}
-                  className={`group relative p-2.5 px-3 flex items-start gap-2.5 transition-colors cursor-pointer hover:bg-slate-50/80 dark:hover:bg-white/[0.04] ${
+                  className={`px-3.5 py-2.5 transition-all duration-150 cursor-pointer group flex items-start justify-between gap-2.5 ${
                     n.unread
-                      ? 'bg-[#FEF08A]/[0.06] dark:bg-[#FEF08A]/[0.03]'
-                      : 'bg-transparent'
+                      ? 'bg-amber-500/[0.04] dark:bg-amber-400/[0.05] hover:bg-amber-500/[0.08] dark:hover:bg-amber-400/[0.09]'
+                      : 'hover:bg-slate-100/70 dark:hover:bg-white/[0.04]'
                   }`}
                 >
-                  {/* Category Icon */}
-                  {getCategoryIcon(n.category)}
-
-                  {/* Body Content */}
-                  <div className="flex-1 min-w-0 pr-4">
+                  {/* Clean Text Content */}
+                  <div className="min-w-0 flex-1 space-y-0.5">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        {n.unread && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                        )}
-                        <h4 className="text-[11.5px] font-bold text-slate-900 dark:text-white truncate">
-                          {n.title}
-                        </h4>
-                      </div>
-                      <span className="text-[9.5px] font-medium text-slate-400 dark:text-slate-500 shrink-0">
+                      <h4
+                        className={`text-xs truncate transition-colors ${
+                          n.unread
+                            ? 'font-extrabold text-slate-950 dark:text-white'
+                            : 'font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-950 dark:group-hover:text-white'
+                        }`}
+                      >
+                        {n.title}
+                      </h4>
+                      <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-medium shrink-0">
                         {n.time}
                       </span>
                     </div>
 
-                    <p className="text-[10.5px] text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2 mt-0.5">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug line-clamp-2">
                       {n.message}
                     </p>
-
-                    {/* Metadata & Quick Action Pill */}
-                    {n.actionLabel && (
-                      <div className="mt-1 flex items-center justify-between">
-                        <span className="inline-flex items-center text-[10px] font-bold text-slate-800 dark:text-amber-300 group-hover:text-amber-600 dark:group-hover:text-amber-200 transition-colors">
-                          {n.actionLabel}
-                          <ChevronRight className="w-2.5 h-2.5 ml-0.5 group-hover:translate-x-0.5 transition-transform" />
-                        </span>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Hover Quick Action Buttons */}
-                  <div className="opacity-0 group-hover:opacity-100 flex items-center space-x-0.5 transition-opacity absolute top-2 right-2.5 bg-white/90 dark:bg-[#18181E]/95 rounded p-0.5 shadow-xs">
-                    <button
-                      onClick={(e) => handleToggleRead(n.id, e)}
-                      title={n.unread ? 'Mark as read' : 'Mark as unread'}
-                      className="p-1 rounded text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/80 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
-                    >
-                      <Check className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={(e) => handleDeleteItem(n.id, e)}
-                      title="Dismiss notification"
-                      className="p-1 rounded text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-slate-200/80 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
+                  {/* Minimalist Unread Dot */}
+                  {n.unread && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-1.5 shadow-2xs" />
+                  )}
                 </div>
               ))
-            ) : (
-              /* Empty State */
-              <div className="py-8 px-4 text-center flex flex-col items-center justify-center">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/[0.04] text-slate-400 dark:text-slate-500 flex items-center justify-center mb-2">
-                  <BellOff className="w-4 h-4" />
-                </div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white">
-                  No notifications
-                </h4>
-                <p className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5 max-w-[200px]">
-                  {activeFilter === 'unread'
-                    ? "You've read all your notifications!"
-                    : 'No alerts in this category right now.'}
-                </p>
-                {notifications.length === 0 && (
-                  <button
-                    onClick={handleResetDemo}
-                    className="mt-2.5 inline-flex items-center space-x-1 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-white/[0.05] hover:bg-slate-200 dark:hover:bg-white/[0.1] rounded-md transition-colors cursor-pointer"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    <span>Restore Demo Alerts</span>
-                  </button>
-                )}
-              </div>
             )}
           </div>
 
-          {/* Footer */}
-          <div className="px-3 py-2 border-t border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-[#121216] flex items-center justify-between text-[10.5px]">
-            <button
-              onClick={() => {
-                if (onNavigate) {
-                  onNavigate('app_notifications');
-                  setIsOpen(false);
-                }
-              }}
-              className="inline-flex items-center space-x-1 font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-[#FEF08A] transition-colors cursor-pointer"
-            >
-              <span>Manage In-App Notices</span>
-              <ExternalLink className="w-2.5 h-2.5 text-slate-400" />
-            </button>
-
-            {notifications.length > 0 && (
+          {/* Footer (Minimalist) */}
+          {notifications.length > 0 && (
+            <div className="py-2 px-3 bg-slate-50/60 dark:bg-[#181820]/70 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px]">
+              <span className="text-slate-400 font-medium">
+                {notifications.length} notification{notifications.length === 1 ? '' : 's'}
+              </span>
               <button
+                type="button"
                 onClick={handleClearAll}
-                className="font-semibold text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 font-bold transition-colors cursor-pointer"
               >
                 Clear all
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </div>

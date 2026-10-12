@@ -93,11 +93,25 @@ export const dramaService = {
 
   /**
    * Update drama priority rank
+   * @param {string} id - Drama ID
+   * @param {number|object} payload - Either number (target rank) or { direction: 'up'|'down', moveTo: 'top'|'bottom', priority: number }
    */
-  async updatePriority(id, priority) {
+  async updatePriority(id, payload) {
+    const body = typeof payload === 'number' ? { priority: payload } : payload;
     return await request(`/${id}/priority`, {
       method: 'PATCH',
-      body: JSON.stringify({ priority })
+      body: JSON.stringify(body)
+    });
+  },
+
+  /**
+   * Batch reorder all drama priorities in the catalog
+   * @param {Array<{id: string, priority: number}>} items
+   */
+  async reorderDramas(items) {
+    return await request('/reorder', {
+      method: 'PATCH',
+      body: JSON.stringify({ items })
     });
   },
 

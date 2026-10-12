@@ -45,6 +45,13 @@ export const userService = {
   },
 
   /**
+   * Fetch dynamic user activity telemetry derived from real database users and subscriptions
+   */
+  async getActivityAnalytics() {
+    return await request('/admin/activity-analytics', { method: 'GET' });
+  },
+
+  /**
    * Fetch a single user by ID
    */
   async getUserById(id) {

@@ -11,6 +11,7 @@ const router = Router();
 
 // Overview & Monetization KPIs
 router.get('/overview', SubscriptionAdminController.getOverview);
+router.get('/revenue-analytics', SubscriptionAdminController.getRevenueAnalytics);
 
 // Plans Management (CRUD)
 router.get('/plans', SubscriptionAdminController.getPlans);

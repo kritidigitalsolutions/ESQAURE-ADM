@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { subscriptionService } from '../../services/subscriptionService';
 import PageLoader from '../../components/common/PageLoader';
+import Badge from '../../components/common/Badge';
 import {
   Receipt,
   Search,
@@ -11,7 +12,9 @@ import {
   FileText,
   CheckCircle2,
   RefreshCw,
-  CreditCard
+  Phone,
+  Mail,
+  ChevronDown
 } from 'lucide-react';
 
 /**
@@ -100,11 +103,11 @@ export default function TransactionsPage() {
         !term ||
         (t.id && t.id.toLowerCase().includes(term)) ||
         (t.user && t.user.toLowerCase().includes(term)) ||
-        (t.phone && t.phone.includes(term)) ||
+        (t.phone && t.phone.toLowerCase().includes(term)) ||
+        (t.email && t.email.toLowerCase().includes(term)) ||
         (t.orderId && t.orderId.toLowerCase().includes(term)) ||
         (t.amount && String(t.amount).toLowerCase().includes(term)) ||
-        (t.plan && t.plan.toLowerCase().includes(term)) ||
-        (t.method && t.method.toLowerCase().includes(term));
+        (t.plan && t.plan.toLowerCase().includes(term));
 
       const matchesStatus = statusFilter === 'ALL' || t.status === statusFilter;
       return matchesSearch && matchesStatus;
@@ -129,15 +132,15 @@ export default function TransactionsPage() {
       alert('No transactions to export.');
       return;
     }
-    const headers = ['Payment ID,Order ID,Customer Name,Phone,Plan,Gateway Method,Amount,Status,Timestamp'];
+    const headers = ['Payment ID,Order ID,Customer Name,Phone,Email,Plan,Amount,Status,Timestamp'];
     const rows = filteredTxns.map((t) =>
       [
         `"${t.id || ''}"`,
         `"${t.orderId || ''}"`,
         `"${t.user || 'Viewer'}"`,
         `"${t.phone || ''}"`,
+        `"${t.email || ''}"`,
         `"${t.plan || ''}"`,
-        `"${t.method || ''}"`,
         `"${t.amount || ''}"`,
         `"${t.status || ''}"`,
         `"${t.date || ''}"`,
@@ -199,8 +202,8 @@ export default function TransactionsPage() {
         { header: 'Order ID', dataKey: 'orderId' },
         { header: 'Customer', dataKey: 'user' },
         { header: 'Phone', dataKey: 'phone' },
+        { header: 'Email', dataKey: 'email' },
         { header: 'Plan', dataKey: 'plan' },
-        { header: 'Gateway / Method', dataKey: 'method' },
         { header: 'Amount', dataKey: 'amount' },
         { header: 'Status', dataKey: 'status' },
         { header: 'Date & Time', dataKey: 'date' },
@@ -211,9 +214,9 @@ export default function TransactionsPage() {
         id: t.id,
         orderId: t.orderId,
         user: t.user,
-        phone: t.phone,
+        phone: t.phone || '—',
+        email: t.email || '—',
         plan: t.plan,
-        method: t.method,
         amount: t.amount,
         status: t.status,
         date: t.date,
@@ -241,16 +244,16 @@ export default function TransactionsPage() {
           fillColor: [248, 250, 252],
         },
         columnStyles: {
-          index: { cellWidth: 25, halign: 'center' },
-          id: { cellWidth: 75, fontStyle: 'bold' },
-          orderId: { cellWidth: 75 },
-          user: { cellWidth: 95, fontStyle: 'bold' },
-          phone: { cellWidth: 85 },
-          plan: { cellWidth: 95 },
-          method: { cellWidth: 100 },
-          amount: { cellWidth: 60, halign: 'right', fontStyle: 'bold' },
-          status: { cellWidth: 65, halign: 'center' },
-          date: { cellWidth: 95, halign: 'right' },
+          index: { cellWidth: 20, halign: 'center' },
+          id: { cellWidth: 70, fontStyle: 'bold' },
+          orderId: { cellWidth: 70 },
+          user: { cellWidth: 85, fontStyle: 'bold' },
+          phone: { cellWidth: 80 },
+          email: { cellWidth: 90 },
+          plan: { cellWidth: 85 },
+          amount: { cellWidth: 55, halign: 'right', fontStyle: 'bold' },
+          status: { cellWidth: 55, halign: 'center' },
+          date: { cellWidth: 85, halign: 'right' },
         },
         didParseCell: (data) => {
           if (data.section === 'body' && data.column.dataKey === 'status') {
@@ -317,7 +320,7 @@ export default function TransactionsPage() {
             <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
               Transactions & Revenue Ledger
             </h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-900 dark:text-amber-300 border border-amber-300/50">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs text-slate-950 border border-amber-300/50">
               {filteredTxns.length} Records
             </span>
           </div>
@@ -393,7 +396,7 @@ export default function TransactionsPage() {
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search Payment ID, order, phone..."
+              placeholder="Search Payment ID, order, phone, email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-[#121216] focus:outline-none focus:border-[#FEF08A] placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
@@ -410,17 +413,18 @@ export default function TransactionsPage() {
           </div>
 
           {/* Sort By Dropdown */}
-          <div className="flex items-center space-x-1.5 shrink-0">
+          <div className="relative flex items-center shrink-0">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+              className="appearance-none pl-3 pr-8 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer transition-colors"
             >
-              <option value="newest">Recent First</option>
-              <option value="amount-high">Amount (High to Low)</option>
-              <option value="amount-low">Amount (Low to High)</option>
-              <option value="name">Customer (A - Z)</option>
+              <option value="newest" className="dark:bg-[#1E1E26]">Recent First</option>
+              <option value="amount-high" className="dark:bg-[#1E1E26]">Amount (High to Low)</option>
+              <option value="amount-low" className="dark:bg-[#1E1E26]">Amount (Low to High)</option>
+              <option value="name" className="dark:bg-[#1E1E26]">Customer (A - Z)</option>
             </select>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
           </div>
 
           <span className="text-[11px] text-slate-400 font-medium shrink-0 hidden lg:inline">
@@ -437,8 +441,8 @@ export default function TransactionsPage() {
               <tr>
                 <th className="py-2.5 px-3">Payment & Order ID</th>
                 <th className="py-2.5 px-3">Customer</th>
+                <th className="py-2.5 px-3">Contact Info</th>
                 <th className="py-2.5 px-3">Subscription Plan</th>
-                <th className="py-2.5 px-3">Gateway / Method</th>
                 <th className="py-2.5 px-3">Amount</th>
                 <th className="py-2.5 px-3">Status</th>
                 <th className="py-2.5 px-3 text-right">Timestamp</th>
@@ -455,8 +459,8 @@ export default function TransactionsPage() {
                 <tr>
                   <td colSpan="7" className="py-10 text-center">
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400">
-                        <Receipt className="w-4 h-4" />
+                      <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs">
+                        <Receipt className="w-5 h-5 stroke-[2.2]" />
                       </div>
                       <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
                         No transactions found
@@ -501,28 +505,51 @@ export default function TransactionsPage() {
 
                       {/* Customer */}
                       <td className="py-2 px-3">
-                        <span className="font-bold text-xs text-slate-900 dark:text-white block truncate max-w-[150px]">
-                          {txn.user || 'Viewer'}
-                        </span>
-                        {txn.phone && txn.phone !== 'N/A' && (
-                          <span className="text-[10.5px] font-mono text-slate-400 dark:text-slate-500 block">
-                            {txn.phone}
+                        <div className="flex items-center space-x-2">
+                          <div className="w-6 h-6 rounded-full bg-[#FEF08A] text-slate-950 font-bold text-[10px] flex items-center justify-center shrink-0 border border-amber-300/40 overflow-hidden shadow-2xs">
+                            {txn.avatarUrl ? (
+                              <img
+                                src={txn.avatarUrl}
+                                alt={txn.user || 'Viewer'}
+                                className="w-full h-full object-cover"
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                              />
+                            ) : (
+                              (txn.user || 'V').charAt(0).toUpperCase()
+                            )}
+                          </div>
+                          <span className="font-bold text-xs text-slate-900 dark:text-white truncate max-w-[130px]" title={txn.user || 'Viewer'}>
+                            {txn.user || 'Viewer'}
                           </span>
-                        )}
+                        </div>
+                      </td>
+
+                      {/* Contact Info */}
+                      <td className="py-2 px-3 whitespace-nowrap">
+                        <div className="flex flex-col space-y-0.5">
+                          {txn.phone && txn.phone !== 'N/A' ? (
+                            <div className="flex items-center space-x-1 font-mono text-xs font-semibold text-slate-800 dark:text-slate-200">
+                              <Phone className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                              <span>{txn.phone}</span>
+                            </div>
+                          ) : (
+                            <span className="text-slate-300 dark:text-slate-600 font-mono text-xs select-none">—</span>
+                          )}
+                          {txn.email && txn.email !== 'N/A' && txn.email !== '' && (
+                            <div className="flex items-center space-x-1 text-[11px] text-slate-500 dark:text-slate-400">
+                              <Mail className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
+                              <span className="truncate max-w-[160px]" title={txn.email}>
+                                {txn.email}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </td>
 
                       {/* Subscription Plan */}
                       <td className="py-2 px-3">
                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-[#FEF08A]/35 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] border border-amber-300/40 dark:border-amber-400/25">
                           {cleanPlanName(txn.plan)}
-                        </span>
-                      </td>
-
-                      {/* Gateway / Method */}
-                      <td className="py-2 px-3">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-semibold bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/40">
-                          <CreditCard className="w-3 h-3 text-sky-600 dark:text-sky-400 shrink-0" />
-                          <span>{txn.method || 'Razorpay UPI'}</span>
                         </span>
                       </td>
 
@@ -537,26 +564,7 @@ export default function TransactionsPage() {
 
                       {/* Status */}
                       <td className="py-2 px-3">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            isSuccess
-                              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40'
-                              : isPending
-                              ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40'
-                              : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200/60 dark:border-rose-800/40'
-                          }`}
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              isSuccess
-                                ? 'bg-emerald-500 animate-pulse'
-                                : isPending
-                                ? 'bg-amber-500'
-                                : 'bg-rose-500'
-                            }`}
-                          />
-                          <span>{txn.status || 'SUCCESS'}</span>
-                        </span>
+                        <Badge status={txn.status} size="xs" />
                       </td>
 
                       {/* Timestamp */}

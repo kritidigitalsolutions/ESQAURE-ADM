@@ -17,12 +17,14 @@ import {
   ToggleRight,
   Pencil,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  ChevronDown
 } from 'lucide-react';
 import promoService from '../../services/promoService';
 import { subscriptionService } from '../../services/subscriptionService';
 import PageLoader from '../../components/common/PageLoader';
 import ModalPortal from '../../components/common/ModalPortal';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const formatDiscount = (type, value) => {
@@ -141,7 +143,7 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
           {/* Header */}
           <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <TicketPercent className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
@@ -376,7 +378,7 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
         <div className="bg-white dark:bg-[#24242E] rounded-xl max-w-md w-full p-4 sm:p-5 shadow-2xl space-y-3.5 border border-slate-200 dark:border-white/15 font-urbanist animate-in fade-in zoom-in-95 duration-150">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <Sparkles className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
@@ -721,8 +723,8 @@ export default function PromosPage() {
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                <TicketPercent className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <TicketPercent className="w-5 h-5 text-slate-950 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
@@ -749,8 +751,8 @@ export default function PromosPage() {
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                <Tag className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Tag className="w-5 h-5 text-slate-950 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
@@ -777,8 +779,8 @@ export default function PromosPage() {
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                <Percent className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Percent className="w-5 h-5 text-slate-950 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
@@ -805,8 +807,8 @@ export default function PromosPage() {
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-transform shadow-xs shrink-0">
-                <Calendar className="w-5 h-5 text-slate-950 dark:text-amber-300 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Calendar className="w-5 h-5 text-slate-950 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
@@ -837,7 +839,7 @@ export default function PromosPage() {
             <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
               Promo Codes & Discounts
             </h1>
-            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF08A]/40 dark:bg-amber-400/10 text-amber-900 dark:text-amber-300 border border-amber-300/50">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs text-slate-950 border border-amber-300/50">
               {filteredPromos.length} Codes
             </span>
           </div>
@@ -934,16 +936,19 @@ export default function PromosPage() {
             )}
           </div>
 
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer"
-          >
-            <option value="newest">Recent First</option>
-            <option value="uses">Most Redemptions</option>
-            <option value="expiry">Expiry (Soonest)</option>
-            <option value="code">Code (A - Z)</option>
-          </select>
+          <div className="relative flex items-center shrink-0">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="appearance-none pl-3 pr-8 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer transition-colors"
+            >
+              <option value="newest" className="dark:bg-[#1E1E26]">Recent First</option>
+              <option value="uses" className="dark:bg-[#1E1E26]">Most Redemptions</option>
+              <option value="expiry" className="dark:bg-[#1E1E26]">Expiry (Soonest)</option>
+              <option value="code" className="dark:bg-[#1E1E26]">Code (A - Z)</option>
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
+          </div>
         </div>
       </div>
 
@@ -1077,23 +1082,14 @@ export default function PromosPage() {
                       <td className="py-2 px-3 text-right">
                         <div className="flex items-center justify-end space-x-1">
                           {p.status !== 'EXPIRED' && (
-                            <button
-                              type="button"
-                              onClick={() => handleToggle(p.id)}
-                              disabled={isBusy}
-                              className={`p-1 rounded-md transition-colors cursor-pointer ${
-                                p.status === 'ACTIVE'
-                                  ? 'text-emerald-600 hover:text-emerald-700 dark:text-emerald-400'
-                                  : 'text-amber-600 hover:text-amber-700 dark:text-amber-400'
-                              }`}
-                              title={p.status === 'ACTIVE' ? 'Pause promo' : 'Activate promo'}
-                            >
-                              {p.status === 'ACTIVE' ? (
-                                <ToggleRight className="w-4 h-4 stroke-[2.2]" />
-                              ) : (
-                                <ToggleLeft className="w-4 h-4 stroke-[2.2]" />
-                              )}
-                            </button>
+                            <div className="inline-flex items-center px-1" title={p.status === 'ACTIVE' ? 'Pause promo' : 'Activate promo'}>
+                              <ToggleSwitch
+                                checked={p.status === 'ACTIVE'}
+                                onChange={() => handleToggle(p.id)}
+                                disabled={isBusy}
+                                size="sm"
+                              />
+                            </div>
                           )}
 
                           <button

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import PageHeader from './components/PageHeader';
-import MobileAppDrawer from './components/MobileAppDrawer';
 import ErrorBoundary from './components/ErrorBoundary';
 
 // Dedicated OTT Pages
@@ -263,7 +262,6 @@ export default function App() {
         
         {/* Top Header Bar (Fixed / Pinned) */}
         <Topbar
-          onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
           title={meta.title}
           subtitle={meta.subtitle}
           onLogout={handleLogout}
@@ -376,13 +374,6 @@ export default function App() {
 
 
       </div>
-
-      {/* Mobile App UI Reference Drawer */}
-      <MobileAppDrawer
-        isOpen={isMobileDrawerOpen}
-        onClose={() => setIsMobileDrawerOpen(false)}
-      />
-
     </div>
   );
 }

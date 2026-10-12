@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { notificationService } from '../../services/notificationService';
 import { userService } from '../../services/userService';
-import { mockDramas } from '../../data/mockOttData';
+import { dramaService } from '../../services/dramaService';
 import PageLoader from '../../components/common/PageLoader';
 import PulsatingDots from '../../components/common/PulsatingDots';
 import {
@@ -107,17 +107,26 @@ export default function NotificationsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  // Load series list dynamically from localStorage or fallback
-  const availableDramas = useMemo(() => {
+  // Live drama catalog from backend API
+  const [availableDramas, setAvailableDramas] = useState([]);
+  const [isDramasLoading, setIsDramasLoading] = useState(false);
+
+  // Fetch real drama series list for deep-linking
+  const fetchDramas = async () => {
     try {
-      const saved = localStorage.getItem('esquare_dramas');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      setIsDramasLoading(true);
+      const res = await dramaService.getAdminDramas();
+      if (res && Array.isArray(res.dramas)) {
+        setAvailableDramas(res.dramas);
+      } else if (Array.isArray(res)) {
+        setAvailableDramas(res);
       }
-    } catch (e) {}
-    return mockDramas;
-  }, []);
+    } catch (err) {
+      console.warn('Failed to load dramas for push notifications:', err);
+    } finally {
+      setIsDramasLoading(false);
+    }
+  };
 
   // Fetch campaigns and audience statistics
   const fetchCampaigns = async () => {
@@ -138,6 +147,7 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     fetchCampaigns();
+    fetchDramas();
   }, []);
 
   // Fetch user list when Specific User mode is activated
@@ -207,8 +217,8 @@ export default function NotificationsPage() {
     setIsSending(true);
     setFeedback(null);
 
-    const dramaObj = availableDramas.find(d => d.id === selectedDrama);
-    const deepLink = dramaObj ? `/watch/${dramaObj.slug || dramaObj.id}` : '';
+    const dramaObj = availableDramas.find(d => (d.id === selectedDrama || d._id === selectedDrama));
+    const deepLink = dramaObj ? `/watch/${dramaObj.slug || dramaObj.id || dramaObj._id}` : '';
 
     try {
       const result = await notificationService.broadcastPush({
@@ -329,7 +339,7 @@ export default function NotificationsPage() {
   };
 
   const selectedDramaDetails = useMemo(() => {
-    return availableDramas.find(d => d.id === selectedDrama);
+    return availableDramas.find(d => (d.id === selectedDrama || d._id === selectedDrama));
   }, [selectedDrama, availableDramas]);
 
   // Filtered & Sorted broadcast history
@@ -401,7 +411,7 @@ export default function NotificationsPage() {
          ───────────────────────────────────────────────────────────── */}
       <div className="bg-white dark:bg-[#121216] rounded-xl p-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div className="flex items-center space-x-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 shadow-xs">
+          <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
             <Send className="w-4 h-4 stroke-[2.2]" />
           </div>
           <div className="min-w-0">
@@ -409,8 +419,8 @@ export default function NotificationsPage() {
               <h2 className="text-sm sm:text-base font-extrabold text-slate-950 dark:text-white tracking-tight truncate">
                 Push Notifications
               </h2>
-              <span className="hidden sm:inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A]/30 dark:bg-[#FEF08A]/10 text-amber-900 dark:text-amber-300 border border-amber-300/40 dark:border-amber-400/25">
-                <Radio className="w-2.5 h-2.5 text-amber-500 animate-pulse" />
+              <span className="hidden sm:inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs border border-amber-300/50">
+                <Radio className="w-2.5 h-2.5 text-slate-950 animate-pulse" />
                 <span>FCM v1 Active</span>
               </span>
             </div>
@@ -422,12 +432,15 @@ export default function NotificationsPage() {
 
         <div className="flex items-center space-x-2 shrink-0">
           <button
-            onClick={fetchCampaigns}
-            disabled={isLoading}
+            onClick={() => {
+              fetchCampaigns();
+              fetchDramas();
+            }}
+            disabled={isLoading || isDramasLoading}
             className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 transition-colors border border-slate-200/80 dark:border-white/10 cursor-pointer"
             title="Refresh statistics and history"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-amber-500' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${(isLoading || isDramasLoading) ? 'animate-spin text-amber-500' : ''}`} />
           </button>
 
           {activeTab === 'ledger' ? (
@@ -495,8 +508,8 @@ export default function NotificationsPage() {
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                <Send className="w-4 h-4 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Send className="w-5 h-5 text-slate-950 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
@@ -519,7 +532,7 @@ export default function NotificationsPage() {
             <span className="truncate text-slate-500 dark:text-slate-400">
               Delivery records
             </span>
-            <span className="shrink-0 px-1.5 py-0.5 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-amber-900 dark:text-amber-300 font-bold">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               Active Logs
             </span>
           </div>
@@ -529,8 +542,8 @@ export default function NotificationsPage() {
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                <Smartphone className="w-4 h-4 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Smartphone className="w-5 h-5 text-slate-950 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
@@ -553,7 +566,7 @@ export default function NotificationsPage() {
             <span className="truncate text-slate-500 dark:text-slate-400">
               Audience: {stats.totalUsers.toLocaleString()} users
             </span>
-            <span className="shrink-0 px-1.5 py-0.5 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-amber-900 dark:text-amber-300 font-bold">
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               Push Enabled
             </span>
           </div>
@@ -563,8 +576,8 @@ export default function NotificationsPage() {
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                <UserCheck className="w-4 h-4 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <UserCheck className="w-5 h-5 text-slate-950 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
@@ -587,7 +600,7 @@ export default function NotificationsPage() {
             <span className="truncate text-slate-500 dark:text-slate-400">
               Exclusive broadcasts
             </span>
-            <span className="shrink-0 px-1.5 py-0.5 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-amber-900 dark:text-amber-300 font-bold">
+            <span className="text-amber-600 dark:text-amber-400 font-bold">
               VIP Tier
             </span>
           </div>
@@ -597,8 +610,8 @@ export default function NotificationsPage() {
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-8.5 h-8.5 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 group-hover:scale-105 transition-all duration-300 shadow-xs shrink-0">
-                <RotateCcw className="w-4 h-4 stroke-[2.2]" />
+              <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <RotateCcw className="w-5 h-5 text-slate-950 stroke-[2.2]" />
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block truncate">
@@ -621,7 +634,7 @@ export default function NotificationsPage() {
             <span className="truncate text-slate-500 dark:text-slate-400">
               Re-engagement target
             </span>
-            <span className="shrink-0 px-1.5 py-0.5 rounded-md bg-amber-100/60 dark:bg-amber-400/10 border border-amber-300/40 dark:border-amber-400/30 text-amber-900 dark:text-amber-300 font-bold">
+            <span className="text-slate-600 dark:text-slate-300 font-bold">
               Available
             </span>
           </div>
@@ -811,7 +824,7 @@ export default function NotificationsPage() {
                           {/* Campaign & Message */}
                           <td className="py-2 px-3 min-w-[220px] max-w-[320px]">
                             <div className="flex items-start space-x-2">
-                              <div className="w-6 h-6 rounded-md bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0 mt-0.5">
+                              <div className="w-6 h-6 rounded-md bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0 mt-0.5">
                                 <Send className="w-3 h-3" />
                               </div>
                               <div className="min-w-0">
@@ -948,7 +961,7 @@ export default function NotificationsPage() {
             {/* Form Header */}
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10">
               <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                   <Sparkles className="w-3.5 h-3.5 stroke-[2.2]" />
                 </div>
                 <div>
@@ -1041,24 +1054,29 @@ export default function NotificationsPage() {
                     <select
                       value={selectedDrama}
                       onChange={(e) => setSelectedDrama(e.target.value)}
+                      disabled={isDramasLoading && availableDramas.length === 0}
                       className="w-full pl-3 pr-8 py-1.5 appearance-none rounded-xl border border-slate-200 dark:border-white/10 font-bold text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-[#18181E] focus:bg-white dark:focus:bg-[#121216] focus:outline-hidden focus:ring-1 focus:ring-[#FEF08A] transition-all cursor-pointer text-xs"
                     >
                       <option value="">General (App Home Feed)</option>
-                      {availableDramas.map(d => (
-                        <option key={d.id} value={d.id}>
-                          {d.title} ({d.totalEpisodes || 0} eps)
-                        </option>
-                      ))}
+                      {availableDramas.map((d) => {
+                        const dId = d.id || d._id;
+                        const epCount = d.totalEpisodes || (Array.isArray(d.episodes) ? d.episodes.length : 0);
+                        return (
+                          <option key={dId} value={dId}>
+                            {d.title} ({epCount} eps)
+                          </option>
+                        );
+                      })}
                     </select>
                     <ChevronDown className="w-3.5 h-3.5 text-slate-400 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2" />
                   </div>
                   {selectedDramaDetails ? (
                     <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold mt-0.5 truncate">
-                      🎬 Deep link: /watch/{selectedDramaDetails.slug || selectedDramaDetails.id}
+                      🎬 Deep link: /watch/{selectedDramaDetails.slug || selectedDramaDetails.id || selectedDramaDetails._id}
                     </p>
                   ) : (
                     <p className="text-[10px] text-slate-400 mt-0.5 truncate">
-                      Opens mobile application home page
+                      {isDramasLoading ? 'Loading drama catalog from database...' : 'Opens mobile application home page'}
                     </p>
                   )}
                 </div>
@@ -1087,7 +1105,7 @@ export default function NotificationsPage() {
                   {selectedUser ? (
                     <div className="p-2 bg-white dark:bg-[#1E1E26] rounded-lg border border-slate-200/90 dark:border-white/15 flex items-center justify-between gap-2 shadow-2xs">
                       <div className="flex items-center space-x-2 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 font-extrabold text-xs shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs font-extrabold text-xs shrink-0">
                           {(selectedUser.name || 'U').charAt(0).toUpperCase()}
                         </div>
                         <div className="min-w-0">
@@ -1170,7 +1188,7 @@ export default function NotificationsPage() {
                                   className="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/[0.05] transition-colors cursor-pointer group"
                                 >
                                   <div className="flex items-center space-x-2 min-w-0 pr-2">
-                                    <div className="w-6 h-6 rounded-md bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 font-black text-xs shrink-0">
+                                    <div className="w-6 h-6 rounded-md bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs font-black text-xs shrink-0">
                                       {(u.name || 'U').charAt(0).toUpperCase()}
                                     </div>
                                     <div className="min-w-0">
@@ -1303,7 +1321,7 @@ export default function NotificationsPage() {
             <div>
               <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-white/10 mb-3">
                 <div className="flex items-center space-x-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#FEF08A]/40 dark:bg-amber-400/10 border border-amber-200/60 dark:border-amber-400/30 flex items-center justify-center text-slate-950 dark:text-amber-300 shrink-0">
+                  <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                     <Bell className="w-3.5 h-3.5 stroke-[2.2]" />
                   </div>
                   <div>
