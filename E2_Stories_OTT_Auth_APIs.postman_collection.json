@@ -164,7 +164,7 @@
     },
     {
       "key": "adminToken",
-      "value": "",
+      "value": "esquare_admin_dev_secret_2026",
       "type": "string",
       "description": "Auto-filled by Firebase Admin Login script or static admin JWT"
     },
@@ -191,6 +191,18 @@
       "value": "privacy-policy",
       "type": "string",
       "description": "Slug of statutory legal policy"
+    },
+    {
+      "key": "adminKey",
+      "value": "esquare_admin_dev_secret_2026",
+      "type": "string",
+      "description": "Admin secret master key (header x-admin-key)"
+    },
+    {
+      "key": "triggerId",
+      "value": "",
+      "type": "string",
+      "description": "MongoDB ObjectId of an Automated Notification Trigger rule"
     }
   ],
   "item": [
@@ -890,13 +902,13 @@
                 "method": "PATCH",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/notifications/NOTIFICATION_ID/read",
+                  "raw": "{{baseUrl}}/notifications/{{notificationId}}/read",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "notifications",
-                    "NOTIFICATION_ID",
+                    "{{notificationId}}",
                     "read"
                   ]
                 },
@@ -949,13 +961,13 @@
                 "method": "DELETE",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/notifications/NOTIFICATION_ID",
+                  "raw": "{{baseUrl}}/notifications/{{notificationId}}",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "notifications",
-                    "NOTIFICATION_ID"
+                    "{{notificationId}}"
                   ]
                 },
                 "description": "Delete one notification by ID (swipe-to-delete gesture). Replace `NOTIFICATION_ID` with an actual notification id."
@@ -3402,7 +3414,20 @@
               "name": "2.1 List All Users",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/users?filter=ALL&page=1&limit=100",
                   "host": [
@@ -3443,7 +3468,20 @@
               "name": "2.2 Search Users",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/users?search=kartik&filter=ALL&page=1&limit=50",
                   "host": [
@@ -3480,7 +3518,20 @@
               "name": "2.3 Filter — Subscribed Users",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/users?filter=SUBSCRIBED&page=1&limit=100",
                   "host": [
@@ -3512,7 +3563,20 @@
               "name": "2.4 Filter — Free Users",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/users?filter=FREE&page=1&limit=100",
                   "host": [
@@ -3544,7 +3608,20 @@
               "name": "2.5 Filter — Suspended Users",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/users?filter=SUSPENDED&page=1&limit=100",
                   "host": [
@@ -3576,7 +3653,20 @@
               "name": "2.6 Get User by ID",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/users/{{userId}}",
                   "host": [
@@ -3597,8 +3687,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -3630,8 +3732,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -3664,8 +3778,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -3698,8 +3824,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -3732,8 +3870,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -3764,7 +3914,20 @@
               "name": "2.12 Delete User (Permanent)",
               "request": {
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/users/{{userId}}",
                   "host": [
@@ -3788,6 +3951,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -3827,8 +3996,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -3870,8 +4051,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -3913,8 +4106,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -3956,8 +4161,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -3987,7 +4204,20 @@
               "name": "3.5 Get Push Broadcast Campaigns & Stats",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/notifications/admin/campaigns",
                   "host": [
@@ -4009,8 +4239,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4041,7 +4283,20 @@
               "name": "3.7 Get In-App Announcements",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/notifications/admin/announcements",
                   "host": [
@@ -4063,8 +4318,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4095,7 +4362,20 @@
               "name": "3.9 Delete In-App Announcement",
               "request": {
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/notifications/admin/announcements/{{announcementId}}",
                   "host": [
@@ -4121,6 +4401,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -4139,6 +4425,224 @@
                 "description": "Toggle active visibility of an in-app banner announcement on/off."
               },
               "response": []
+            },
+            {
+              "name": "3.11 Get Automated Notification Triggers",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/notifications/admin/auto-triggers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    "admin",
+                    "auto-triggers"
+                  ]
+                },
+                "description": "Fetch all configured system and custom automated push notification triggers (Welcome to E², VIP Payment, Episode Drops, Renewal Reminders, Win-back)."
+              }
+            },
+            {
+              "name": "3.12 Create Automated Notification Trigger",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Welcome to E² Stories\",\n  \"description\": \"Triggered when a new user registers on the app\",\n  \"category\": \"USER\",\n  \"title\": \"🎬 Welcome to E² Stories, {{userName}}!\",\n  \"body\": \"Start watching viral vertical web series and original micro-dramas today.\",\n  \"targetAudience\": \"New Users\",\n  \"deepLink\": \"/home\",\n  \"delayMinutes\": 0,\n  \"isEnabled\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/notifications/admin/auto-triggers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    "admin",
+                    "auto-triggers"
+                  ]
+                },
+                "description": "Create a new automated event trigger with custom template variables."
+              }
+            },
+            {
+              "name": "3.13 Update Automated Notification Trigger",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"👑 VIP Unlocked: Welcome to Premium!\",\n  \"body\": \"Your {{planName}} is active. Enjoy ad-free streaming and all unlocked episodes!\",\n  \"deepLink\": \"/vip\",\n  \"delayMinutes\": 0,\n  \"isEnabled\": true,\n  \"targetAudience\": \"Subscribers Only\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/notifications/admin/auto-triggers/{{triggerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    "admin",
+                    "auto-triggers",
+                    "{{triggerId}}"
+                  ]
+                },
+                "description": "Update trigger title, message template, deep-link route, and audience."
+              }
+            },
+            {
+              "name": "3.14 Toggle Automated Trigger Status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/notifications/admin/auto-triggers/{{triggerId}}/toggle",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    "admin",
+                    "auto-triggers",
+                    "{{triggerId}}",
+                    "toggle"
+                  ]
+                },
+                "description": "Toggle auto-sending ON or OFF for an automated trigger."
+              }
+            },
+            {
+              "name": "3.15 Delete Automated Notification Trigger",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/notifications/admin/auto-triggers/{{triggerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    "admin",
+                    "auto-triggers",
+                    "{{triggerId}}"
+                  ]
+                },
+                "description": "Delete a custom automated notification trigger."
+              }
+            },
+            {
+              "name": "3.16 Test Send Automated Notification Trigger",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/notifications/admin/auto-triggers/{{triggerId}}/test",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    "admin",
+                    "auto-triggers",
+                    "{{triggerId}}",
+                    "test"
+                  ]
+                },
+                "description": "Dispatch an immediate test push to registered test tokens or recent users."
+              }
             }
           ]
         },
@@ -4150,7 +4654,20 @@
               "name": "4.1 Get Monetization Overview",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/subscriptions/admin/overview",
                   "host": [
@@ -4170,7 +4687,20 @@
               "name": "4.2 List All Plans (Admin)",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/subscriptions/admin/plans",
                   "host": [
@@ -4192,8 +4722,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4226,8 +4768,20 @@
                 "method": "PUT",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4259,7 +4813,20 @@
               "name": "4.5 Delete or Archive Plan",
               "request": {
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/subscriptions/admin/plans/{{planId}}",
                   "host": [
@@ -4280,7 +4847,20 @@
               "name": "4.6 Get 7-Day Trial Settings",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/subscriptions/admin/trial-settings",
                   "host": [
@@ -4302,8 +4882,20 @@
                 "method": "PUT",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4334,7 +4926,20 @@
               "name": "4.8 List Transactions Ledger",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/subscriptions/admin/transactions?status=ALL&page=1&limit=20",
                   "host": [
@@ -4371,7 +4976,20 @@
               "name": "4.9 List Subscribers Directory",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/subscriptions/admin/subscribers?status=ALL&page=1&limit=20",
                   "host": [
@@ -4410,8 +5028,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4449,6 +5079,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -4476,7 +5112,20 @@
               "name": "5.1 Get Admin Content Library & Catalog Stats",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/dramas/admin",
                   "host": [
@@ -4497,8 +5146,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4524,8 +5185,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4550,7 +5223,20 @@
               "name": "5.4 Toggle Drama Active/Inactive Status",
               "request": {
                 "method": "PATCH",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/dramas/{{dramaId}}/toggle-active",
                   "host": [
@@ -4570,7 +5256,20 @@
               "name": "5.5 Toggle Drama Paid/Free Access",
               "request": {
                 "method": "PATCH",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/dramas/{{dramaId}}/toggle-paid",
                   "host": [
@@ -4592,8 +5291,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4621,8 +5332,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4647,7 +5370,20 @@
               "name": "5.7 Delete Drama Series",
               "request": {
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/dramas/{{dramaId}}",
                   "host": [
@@ -4668,8 +5404,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4702,7 +5450,20 @@
               "name": "6.1 List All Banners (Admin Catalog & Stats)",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/home/admin/banners",
                   "host": [
@@ -4724,8 +5485,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4757,8 +5530,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4789,7 +5574,20 @@
               "name": "6.4 Toggle Banner Active/Inactive Status",
               "request": {
                 "method": "PATCH",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/home/admin/banners/{{bannerId}}/toggle",
                   "host": [
@@ -4813,8 +5611,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4846,7 +5656,20 @@
               "name": "6.6 Delete Banner Permanently",
               "request": {
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/home/banners/{{bannerId}}",
                   "host": [
@@ -4874,8 +5697,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -4906,7 +5741,20 @@
               "name": "7.2 List All Home Category Sections",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/home/admin/sections?page=1&limit=20&status=ALL",
                   "host": [
@@ -4948,7 +5796,20 @@
               "name": "7.3 Get Single Home Section Details",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/home/admin/sections/{{sectionId}}",
                   "host": [
@@ -4971,8 +5832,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5006,8 +5879,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5039,7 +5924,20 @@
               "name": "7.6 Toggle Section Active/Inactive Status",
               "request": {
                 "method": "PATCH",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/home/admin/sections/{{sectionId}}/toggle",
                   "host": [
@@ -5061,7 +5959,20 @@
               "name": "7.7 Delete Home Category Section",
               "request": {
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/home/admin/sections/{{sectionId}}",
                   "host": [
@@ -5084,8 +5995,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5124,7 +6047,20 @@
               "name": "8.1 Get All Genres with Live Metrics (Admin)",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/genres/admin",
                   "host": [
@@ -5145,8 +6081,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5177,8 +6125,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5208,7 +6168,20 @@
               "name": "8.4 Toggle Genre Active Status",
               "request": {
                 "method": "PATCH",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/genres/{{genreId}}/toggle-active",
                   "host": [
@@ -5230,8 +6203,20 @@
                 "method": "PATCH",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5261,7 +6246,20 @@
               "name": "8.6 Delete Genre (Safe Unlink)",
               "request": {
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/genres/{{genreId}}",
                   "host": [
@@ -5283,8 +6281,14 @@
                 "header": [
                   {
                     "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
+                    "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -5309,8 +6313,14 @@
                 "header": [
                   {
                     "key": "Authorization",
-                    "value": "Bearer {{authToken}}",
+                    "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -5338,7 +6348,20 @@
               "name": "9.1 Get AdMob & Mediation Settings",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/ads/settings",
                   "host": [
@@ -5359,8 +6382,20 @@
                 "method": "PUT",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5390,7 +6425,20 @@
               "name": "9.3 List Custom Ads (with Filters & Pagination)",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/ads/custom?page=1&limit=20&status=ALL&type=ALL",
                   "host": [
@@ -5456,8 +6504,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5487,7 +6547,20 @@
               "name": "9.5 Get Custom Ad by ID",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/ads/custom/{{customAdId}}",
                   "host": [
@@ -5509,8 +6582,20 @@
                 "method": "PUT",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5541,7 +6626,20 @@
               "name": "9.7 Toggle Custom Ad Status",
               "request": {
                 "method": "PATCH",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/ads/custom/{{customAdId}}/toggle",
                   "host": [
@@ -5562,7 +6660,20 @@
               "name": "9.8 Reset Custom Ad Analytics",
               "request": {
                 "method": "POST",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/ads/custom/{{customAdId}}/reset-stats",
                   "host": [
@@ -5583,7 +6694,20 @@
               "name": "9.9 Delete Custom Ad",
               "request": {
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token (Firebase Admin ID Token, platform admin JWT, or ADMIN_API_KEY)"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/ads/custom/{{customAdId}}",
                   "host": [
@@ -5614,6 +6738,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -5661,6 +6791,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5694,6 +6830,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5723,6 +6865,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -5753,6 +6901,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5782,6 +6936,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -5808,6 +6968,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -5839,6 +7005,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -5886,6 +7058,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5919,6 +7097,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -5948,6 +7132,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -5978,6 +7168,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "body": {
@@ -6007,6 +7203,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -6033,6 +7235,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (server-to-server bypass)"
                   }
                 ],
                 "url": {
@@ -6051,7 +7259,17 @@
             }
           ]
         }
-      ]
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{adminToken}}",
+            "type": "string"
+          }
+        ]
+      }
     },
     {
       "name": "SHARED",
@@ -6207,7 +7425,20 @@
               "name": "2.4 [Admin] List All Legal Documents (Active + Inactive)",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key"
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/legal/admin/all",
                   "host": [
@@ -6229,8 +7460,20 @@
                 "method": "PUT",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key"
                   }
                 ],
                 "body": {
@@ -6258,8 +7501,20 @@
                 "method": "POST",
                 "header": [
                   {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key"
                   }
                 ],
                 "body": {
@@ -6290,6 +7545,12 @@
                     "key": "Authorization",
                     "value": "Bearer {{adminToken}}",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key"
                   }
                 ],
                 "url": {
@@ -6322,6 +7583,12 @@
                     "key": "Content-Type",
                     "value": "application/json",
                     "type": "text"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key"
                   }
                 ],
                 "url": {

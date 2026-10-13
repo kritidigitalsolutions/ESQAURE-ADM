@@ -14,6 +14,8 @@ import {
   FileText,
   Lock,
   Unlock,
+  Tag,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 /**
@@ -57,6 +59,20 @@ export const BADGE_CONFIGS = {
     bg: 'bg-emerald-200 dark:bg-emerald-500/20',
     text: 'text-emerald-950 dark:text-emerald-300',
     border: 'border border-emerald-300/40 dark:border-emerald-500/30',
+  },
+  success: {
+    label: 'Success',
+    icon: Check,
+    bg: 'bg-emerald-200 dark:bg-emerald-500/20',
+    text: 'text-emerald-950 dark:text-emerald-300',
+    border: 'border border-emerald-300/40 dark:border-emerald-500/30',
+  },
+  refunded: {
+    label: 'Refunded',
+    icon: X,
+    bg: 'bg-rose-200 dark:bg-rose-500/20',
+    text: 'text-rose-950 dark:text-rose-300',
+    border: 'border border-rose-300/40 dark:border-rose-500/30',
   },
   offline: {
     label: 'Offline',
@@ -151,6 +167,13 @@ export const BADGE_CONFIGS = {
     text: 'text-blue-950 dark:text-blue-300',
     border: 'border border-blue-300/40 dark:border-blue-500/30',
   },
+  image: {
+    label: 'Image Banner',
+    icon: ImageIcon,
+    bg: 'bg-sky-200 dark:bg-sky-500/20',
+    text: 'text-sky-950 dark:text-sky-300',
+    border: 'border border-sky-300/40 dark:border-sky-500/30',
+  },
   text: {
     label: 'Text',
     icon: FileText,
@@ -216,6 +239,27 @@ export const BADGE_CONFIGS = {
   'flix9-trial': {
     label: '7-Day Free Trial',
     icon: Clock,
+    bg: 'bg-emerald-200 dark:bg-emerald-500/20',
+    text: 'text-emerald-950 dark:text-emerald-300',
+    border: 'border border-emerald-300/40 dark:border-emerald-500/30',
+  },
+  'all-plans': {
+    label: 'All Subscription Plans',
+    icon: Sparkles,
+    bg: 'bg-indigo-200 dark:bg-indigo-500/20',
+    text: 'text-indigo-950 dark:text-indigo-300',
+    border: 'border border-indigo-300/40 dark:border-indigo-500/30',
+  },
+  'discount-percent': {
+    label: 'Discount',
+    icon: Tag,
+    bg: 'bg-purple-200 dark:bg-purple-500/20',
+    text: 'text-purple-950 dark:text-purple-300',
+    border: 'border border-purple-300/40 dark:border-purple-500/30',
+  },
+  'discount-flat': {
+    label: 'Flat Off',
+    icon: Tag,
     bg: 'bg-emerald-200 dark:bg-emerald-500/20',
     text: 'text-emerald-950 dark:text-emerald-300',
     border: 'border border-emerald-300/40 dark:border-emerald-500/30',
@@ -301,21 +345,26 @@ export function resolveBadgeVariant(input) {
   if (val.includes('subscriber base')) return 'live-users';
 
   // Statuses
-  if (val === 'active' || val === 'success' || val === 'enabled') return 'active';
+  if (val === 'success') return 'success';
+  if (val === 'active' || val === 'enabled') return 'active';
   if (val === 'published') return 'published';
   if (val === 'unread') return 'unread';
   if (val === 'pending' || val === 'processing') return 'pending';
   if (val === 'paused') return 'paused';
   if (val === 'offline') return 'offline';
   if (val === 'video') return 'video';
+  if (val === 'image' || val.includes('image banner')) return 'image';
   if (val === 'text') return 'text';
   if (val === 'sports') return 'sports';
   if (val === 'news') return 'news';
   if (val === 'entertainment') return 'entertainment';
   if (val === 'paid') return 'paid';
+  if (val === 'refunded') return 'refunded';
+  if (val === 'failed') return 'failed';
+  if (val === 'expired') return 'expired';
+  if (val === 'suspended') return 'suspended';
   if (
-    val === 'inactive' || val === 'suspended' || val === 'revoked' ||
-    val === 'expired' || val === 'failed' || val === 'blocked' || val === 'disabled'
+    val === 'inactive' || val === 'revoked' || val === 'blocked' || val === 'disabled'
   ) return 'inactive';
 
   // Payment / Source
@@ -323,6 +372,10 @@ export function resolveBadgeVariant(input) {
   if (val.includes('given by admin') || val.includes('manual') || val.includes('admin override')) return 'given-by-admin';
 
   // Plan Tiers - Priority matching from most specific to general
+  if (val === 'all' || val.includes('all subscription') || val.includes('all plan')) return 'all-plans';
+  if (val.includes('% off') || val.includes('percent')) return 'discount-percent';
+  if (val.includes('₹ off') || val.includes('flat off') || val.includes('flat')) return 'discount-flat';
+
   if (
     val.includes('12 month') || val.includes('12m') || val.includes('annual') ||
     val.includes('yearly') || val.includes('365 day') || val.includes('all-access') ||
@@ -360,6 +413,10 @@ export function cleanPlanName(input) {
   if (!val || val === '—' || val === 'N/A') return 'Free Tier';
 
   const lower = val.toLowerCase();
+
+  if (lower === 'all' || lower.includes('all subscription') || lower.includes('all plan')) {
+    return 'All Subscription Plans';
+  }
 
   if (
     lower.includes('12 month') || lower.includes('12m') || lower.includes('annual') ||
@@ -447,7 +504,7 @@ export default function Badge({
     (resolvedVariantKey && (resolvedVariantKey.startsWith('flix9-') || resolvedVariantKey === 'no-plan'))
   );
 
-  let rawText = children || label || config.label;
+  let rawText = children || label || (plan ? cleanPlanName(plan) : config.label);
   if (isPlanBadge && typeof rawText === 'string') {
     rawText = cleanPlanName(rawText);
   }

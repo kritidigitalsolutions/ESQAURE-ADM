@@ -21,6 +21,7 @@ import {
 import AnimatedNumber from '../../components/common/AnimatedNumber';
 import PageLoader from '../../components/common/PageLoader';
 import Badge from '../../components/common/Badge';
+import { confirmModal, alertModal } from '../../context/DialogContext';
 
 /**
  * Clean & Minimalist Subscribers & Access Management Page for ESQUARE Admin.
@@ -149,25 +150,46 @@ export default function SubscribersPage() {
       showToast(`Added 30 days subscription access for ${name || 'Subscriber'}.`);
       loadData(false);
     } catch (err) {
-      alert(err.message || 'Failed to extend subscription.');
+      await alertModal({
+        title: 'Action Failed',
+        message: err.message || 'Failed to extend subscription.',
+        variant: 'danger'
+      });
     }
   };
 
   const handleRevokeVip = async (id, name) => {
-    if (!window.confirm(`Revoke subscription access for ${name || 'Subscriber'} immediately?`)) return;
+    const subscriberName = name || 'Subscriber';
+    const confirmed = await confirmModal({
+      title: 'Revoke Subscription Access',
+      message: `Revoke VIP subscription access for ${subscriberName} immediately? Entitlement access will be terminated.`,
+      itemName: subscriberName,
+      confirmText: 'Revoke Access',
+      variant: 'danger'
+    });
+    if (!confirmed) return;
+
     try {
       await subscriptionService.overrideSubscriberVip(id, { action: 'REVOKE' });
-      showToast(`Revoked subscription access for ${name || 'Subscriber'}.`);
+      showToast(`Revoked subscription access for ${subscriberName}.`);
       loadData(false);
     } catch (err) {
-      alert(err.message || 'Failed to revoke subscription.');
+      await alertModal({
+        title: 'Revocation Failed',
+        message: err.message || 'Failed to revoke subscription.',
+        variant: 'danger'
+      });
     }
   };
 
   // CSV Export
-  const handleExportCSV = () => {
+  const handleExportCSV = async () => {
     if (filteredSubscribers.length === 0) {
-      alert('No subscribers to export.');
+      await alertModal({
+        title: 'Export Notice',
+        message: 'No subscribers found to export.',
+        variant: 'info'
+      });
       return;
     }
     const headers = ['Subscriber Name', 'Phone', 'Email', 'Plan', 'Mandate', 'Expiry Date', 'Days Left', 'Status'];
@@ -350,44 +372,6 @@ export default function SubscribersPage() {
         </div>
       </div>
 
-      {/* Page Title & Main Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-0.5">
-        <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
-              Subscribers & Memberships
-            </h1>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs text-slate-950 border border-amber-300/50">
-              {filteredSubscribers.length} Members
-            </span>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            Monitor active memberships, subscription tiers, renewal dates, and billing mandates.
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => loadData(false)}
-            disabled={isRefreshing}
-            className="p-1.5 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-xl transition-all cursor-pointer active:scale-95 shrink-0"
-            title="Sync live subscribers"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleExportCSV}
-            className="py-1.5 px-3 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all border border-slate-200/90 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95"
-            title="Download CSV report"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export CSV</span>
-          </button>
-        </div>
-      </div>
 
       {/* Unified Single-Row Filter & Search Toolbar */}
       <div className="bg-white dark:bg-[#121216] rounded-xl p-2 sm:px-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
@@ -454,9 +438,31 @@ export default function SubscribersPage() {
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
           </div>
 
-          <span className="text-[11px] text-slate-400 font-medium shrink-0 hidden lg:inline">
+          <span className="text-[11px] text-slate-400 font-medium shrink-0 hidden xl:inline">
             <strong className="text-slate-900 dark:text-white font-bold">{filteredSubscribers.length}</strong> matches
           </span>
+
+          {/* Refresh Button */}
+          <button
+            type="button"
+            onClick={() => loadData(false)}
+            disabled={isRefreshing}
+            className="w-9 h-9 flex items-center justify-center bg-slate-50 hover:bg-slate-100 dark:bg-[#18181E] dark:hover:bg-white/[0.08] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10 rounded-full transition-all cursor-pointer active:scale-90 hover:scale-105 shadow-sm shrink-0"
+            title="Sync live subscribers"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
+          </button>
+
+          {/* Export CSV */}
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            className="py-1.5 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-[#18181E] dark:hover:bg-white/[0.08] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all border border-slate-200 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95 shrink-0"
+            title="Download CSV report"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>CSV</span>
+          </button>
         </div>
       </div>
 
@@ -572,26 +578,9 @@ export default function SubscribersPage() {
                         <Badge plan={cleanPlanName(planTitle)} size="xs" />
                       </td>
 
-                      {/* Expiry Date & Days Left */}
+                      {/* Expiry Date */}
                       <td className="py-2 px-3 whitespace-nowrap text-slate-700 dark:text-slate-300">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="text-xs font-semibold">{expiryText}</span>
-                          {!isExpired && daysLeft > 0 ? (
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-[9.5px] font-bold ${
-                                daysLeft <= 7
-                                  ? 'bg-amber-200 dark:bg-amber-400/20 text-amber-950 dark:text-amber-300 border border-amber-300/40 dark:border-amber-400/30'
-                                  : 'bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30'
-                              }`}
-                            >
-                              {daysLeft}d left
-                            </span>
-                          ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-slate-200 dark:bg-white/[0.08] text-slate-900 dark:text-slate-300 border border-slate-300/40 dark:border-white/10">
-                              Expired
-                            </span>
-                          )}
-                        </div>
+                        <span className="text-xs font-semibold">{expiryText}</span>
                       </td>
 
                       {/* Status */}

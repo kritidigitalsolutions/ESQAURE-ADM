@@ -5,4 +5,5 @@ export { default as ToggleSwitch } from './ToggleSwitch';
 export { default as PageLoader } from './PageLoader';
 export { default as RippleWaveLoader } from './RippleWaveLoader';
 export { default as PulsatingDots } from './PulsatingDots';
-
+export { default as CustomDialog } from './CustomDialog';
+export { default as ModalPortal } from './ModalPortal';

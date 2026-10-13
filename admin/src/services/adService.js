@@ -1,16 +1,28 @@
+import { getAdminAuthToken } from './apiClient';
+
 const API_BASE = '/api/v1/ads';
 const FALLBACK_BASE = 'http://localhost:5001/api/v1/ads';
 
 const request = async (endpoint, options = {}) => {
+  const token = await getAdminAuthToken();
+  const authHeaders = token
+    ? { Authorization: `Bearer ${token}`, 'X-Admin-Key': token }
+    : {};
+
   const tryFetch = async (url) => {
     const res = await fetch(`${url}${endpoint}`, {
-      headers: { 'Content-Type': 'application/json', ...options.headers },
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeaders,
+        ...options.headers
+      },
       ...options,
     });
     const data = await res.json();
     if (!res.ok) throw { response: { data } };
     return data;
   };
+
 
   try {
     return await tryFetch(API_BASE);

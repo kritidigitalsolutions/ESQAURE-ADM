@@ -1,21 +1,19 @@
+import { getAdminAuthToken } from './apiClient';
+
 const API_BASE = '/api/v1/vouchers';
 const FALLBACK_BASE = 'http://127.0.0.1:5001/api/v1/vouchers';
 
-const getAuthHeaders = () => {
-  try {
-    const token = localStorage.getItem('admin_token') || localStorage.getItem('token') || localStorage.getItem('adminToken');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  } catch {
-    return {};
-  }
-};
-
 const request = async (endpoint, options = {}) => {
+  const token = await getAdminAuthToken();
+  const authHeaders = token
+    ? { Authorization: `Bearer ${token}`, 'X-Admin-Key': token }
+    : {};
+
   const tryFetch = async (url) => {
     const res = await fetch(`${url}${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
-        ...getAuthHeaders(),
+        ...authHeaders,
         ...options.headers
       },
       ...options,
@@ -24,6 +22,7 @@ const request = async (endpoint, options = {}) => {
     if (!res.ok) throw { response: { data } };
     return data;
   };
+
 
   try {
     return await tryFetch(API_BASE);

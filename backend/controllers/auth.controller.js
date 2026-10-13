@@ -9,6 +9,7 @@ import { AppError } from '../utils/appError.js';
 import { ERROR_CODES } from '../constants/errorCodes.js';
 import { isDev } from '../config/env.js';
 import { resolveMediaUrl } from '../utils/formatters.js';
+import { dispatchAutoNotification } from './autoNotification.controller.js';
 
 /**
  * Helper to resolve genre IDs from either ObjectIds or slugs/names
@@ -314,6 +315,11 @@ export class AuthController {
         avatarUrl: resolveMediaUrl(user.avatarUrl || '', req),
         status: user.status
       };
+
+      // Auto-send welcome notification to user's device if trigger is enabled
+      dispatchAutoNotification('WELCOME_SIGNUP', { user }).catch((err) => {
+        console.warn('[AutoNotification] Welcome dispatch failed:', err.message);
+      });
 
       return ApiResponse.success(
         res,

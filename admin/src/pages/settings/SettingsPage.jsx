@@ -181,7 +181,7 @@ export default function SettingsPage() {
         <div className="flex items-center space-x-2 shrink-0">
           <button
             onClick={loadProfile}
-            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 transition-colors border border-slate-200/80 dark:border-white/10 cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 transition-all border border-slate-200/80 dark:border-white/10 cursor-pointer hover:scale-105 active:scale-90 shadow-sm shrink-0"
             title="Reload profile defaults"
           >
             <RefreshCw className="w-3.5 h-3.5" />
@@ -346,28 +346,6 @@ export default function SettingsPage() {
               </button>
             </div>
           </form>
-
-          {/* Account System Diagnostics Card */}
-          <div className="bg-white dark:bg-[#121216] rounded-xl p-3 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1.5 text-xs">
-            <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-              Console Access Credentials
-            </span>
-            
-            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300 text-[10.5px]">
-              <span className="font-medium">Access Tier</span>
-              <span className="font-bold text-slate-900 dark:text-white">Root Super Administrator</span>
-            </div>
-
-            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300 text-[10.5px]">
-              <span className="font-medium">Auth Provider</span>
-              <span className="font-bold text-slate-900 dark:text-white">Firebase Authentication</span>
-            </div>
-
-            <div className="flex items-center justify-between text-slate-600 dark:text-slate-300 text-[10.5px]">
-              <span className="font-medium">Session Protocol</span>
-              <span className="font-bold text-emerald-600 dark:text-emerald-400">TLS 1.3 / AES-256</span>
-            </div>
-          </div>
 
         </div>
 
@@ -563,16 +541,6 @@ export default function SettingsPage() {
               </button>
             </div>
           </form>
-
-          {/* Security Best Practices Card */}
-          <div className="bg-white dark:bg-[#121216] rounded-xl p-3 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-1.5 text-xs">
-            <span className="text-[9.5px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-              Security Best Practices
-            </span>
-            <p className="text-[10.5px] text-slate-500 dark:text-slate-400 leading-relaxed">
-              Use a unique password not shared with other platforms. Changing credentials re-validates Firebase authentication sessions across active admin browsers.
-            </p>
-          </div>
 
         </div>
 

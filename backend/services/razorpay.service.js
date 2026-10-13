@@ -85,7 +85,11 @@ export class RazorpayService {
     }
 
     if (!keySecret) {
-      console.warn('[Razorpay] No secret configured; permitting signature in non-prod mode.');
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[Razorpay Security Alert] Missing RAZORPAY_KEY_SECRET in production! Rejecting signature.');
+        return false;
+      }
+      console.warn('[Razorpay] No secret configured; permitting mock signature in dev mode.');
       return true;
     }
 
@@ -103,7 +107,13 @@ export class RazorpayService {
    * @param {string} signature - Header 'x-razorpay-signature'
    */
   static verifyWebhookSignature(rawBody, signature) {
-    if (!webhookSecret) return true; // If secret not yet configured, allow in dev
+    if (!webhookSecret) {
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[Razorpay Security Alert] Missing RAZORPAY_WEBHOOK_SECRET in production! Rejecting webhook.');
+        return false;
+      }
+      return true; // If secret not yet configured, allow in local dev simulation
+    }
     if (!signature) return false;
 
     const expectedSignature = crypto
@@ -113,4 +123,5 @@ export class RazorpayService {
 
     return expectedSignature === signature;
   }
+
 }

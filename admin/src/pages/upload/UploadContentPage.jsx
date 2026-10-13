@@ -43,6 +43,7 @@ import {
 import { uploadService } from '../../services/uploadService';
 import { genreService } from '../../services/genreService';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
+import { confirmModal, alertModal } from '../../context/DialogContext';
 
 // Reusable Dashboard-styled Slide Switch component
 function SlideSwitch({ checked, onChange, label, sublabel, icon: Icon, badge }) {
@@ -243,7 +244,11 @@ export default function UploadContentPage({ onNavigate }) {
       setPosterUrl(res.url);
     } catch (err) {
       console.error('Poster upload failed:', err);
-      alert(err.message || 'Failed to upload poster image to server.');
+      await alertModal({
+        title: 'Upload Failed',
+        message: err.message || 'Failed to upload poster image to server.',
+        variant: 'danger'
+      });
     } finally {
       setIsPosterUploading(false);
     }
@@ -258,7 +263,11 @@ export default function UploadContentPage({ onNavigate }) {
       setBannerUrl(res.url);
     } catch (err) {
       console.error('Banner upload failed:', err);
-      alert(err.message || 'Failed to upload banner image to server.');
+      await alertModal({
+        title: 'Upload Failed',
+        message: err.message || 'Failed to upload banner image to server.',
+        variant: 'danger'
+      });
     } finally {
       setIsBannerUploading(false);
     }
@@ -274,7 +283,11 @@ export default function UploadContentPage({ onNavigate }) {
       setTrailerFileName(res.originalName || file.name);
     } catch (err) {
       console.error('Trailer upload failed:', err);
-      alert(err.message || 'Failed to upload trailer video to server.');
+      await alertModal({
+        title: 'Upload Failed',
+        message: err.message || 'Failed to upload trailer video to server.',
+        variant: 'danger'
+      });
     } finally {
       setIsTrailerUploading(false);
     }
@@ -299,20 +312,28 @@ export default function UploadContentPage({ onNavigate }) {
       }
     } catch (err) {
       console.error('Episode video upload failed:', err);
-      alert(err.message || 'Failed to upload episode video to server.');
+      await alertModal({
+        title: 'Upload Failed',
+        message: err.message || 'Failed to upload episode video to server.',
+        variant: 'danger'
+      });
     } finally {
       setSingleEpFileUploading(false);
     }
   };
 
   // Add individual episode with real media
-  const handleAddNewEpisode = (e) => {
+  const handleAddNewEpisode = async (e) => {
     if (e) e.preventDefault();
     const nextNum = episodes.length + 1;
     const finalTitle = newEpTitle.trim() || `Episode ${nextNum}: Chapter`;
     const videoStreamUrl = newEpVideoUrl.trim();
     if (!videoStreamUrl) {
-      alert('Please select an episode video file or enter a video stream URL.');
+      await alertModal({
+        title: 'Missing Media',
+        message: 'Please select an episode video file or enter a direct video stream URL.',
+        variant: 'warning'
+      });
       return;
     }
     const newEpisode = {
@@ -362,15 +383,24 @@ export default function UploadContentPage({ onNavigate }) {
         return ep;
       }));
     } catch (err) {
-      alert(`Failed to replace video: ${err.message}`);
+      await alertModal({
+        title: 'Video Replacement Failed',
+        message: `Failed to replace video: ${err.message}`,
+        variant: 'danger'
+      });
     }
   };
 
   // Clear episode queue
-  const handleClearEpisodes = () => {
-    if (confirm('Are you sure you want to clear all episodes from the queue?')) {
-      setEpisodes([]);
-    }
+  const handleClearEpisodes = async () => {
+    const confirmed = await confirmModal({
+      title: 'Clear Episode Queue',
+      message: 'Are you sure you want to clear all episodes from the queue? All queued episodes will be removed from this session.',
+      confirmText: 'Clear All Episodes',
+      variant: 'danger'
+    });
+    if (!confirmed) return;
+    setEpisodes([]);
   };
 
   const handleRemoveEpisode = (id) => {
@@ -416,20 +446,32 @@ export default function UploadContentPage({ onNavigate }) {
   };
 
   // Validation before advancing
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     if (currentStep === 1) {
       if (!title.trim()) {
-        alert('Please enter a series title to proceed.');
+        await alertModal({
+          title: 'Validation Required',
+          message: 'Please enter a series title to proceed.',
+          variant: 'warning'
+        });
         return;
       }
       if (!synopsis.trim()) {
-        alert('Please provide a storyline synopsis.');
+        await alertModal({
+          title: 'Validation Required',
+          message: 'Please provide a storyline synopsis.',
+          variant: 'warning'
+        });
         return;
       }
     }
     if (currentStep === 2) {
       if (!posterUrl.trim()) {
-        alert('Please upload or provide a 9:16 vertical poster image.');
+        await alertModal({
+          title: 'Validation Required',
+          message: 'Please upload or provide a 9:16 vertical poster image.',
+          variant: 'warning'
+        });
         return;
       }
     }
@@ -449,7 +491,11 @@ export default function UploadContentPage({ onNavigate }) {
   // Real Multi-stage Publishing to Backend Database
   const handlePublish = async () => {
     if (!title.trim()) {
-      alert('Please enter a series title in Step 1.');
+      await alertModal({
+        title: 'Validation Required',
+        message: 'Please enter a series title in Step 1 before publishing.',
+        variant: 'warning'
+      });
       setCurrentStep(1);
       return;
     }
@@ -538,9 +584,9 @@ export default function UploadContentPage({ onNavigate }) {
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h1 className="text-sm sm:text-base font-black text-slate-950 dark:text-white tracking-tight">
+                <span className="text-sm sm:text-base font-black text-slate-950 dark:text-white tracking-tight">
                   Content Upload Studio
-                </h1>
+                </span>
                 <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
                   Step {currentStep} of {totalSteps}
                 </span>

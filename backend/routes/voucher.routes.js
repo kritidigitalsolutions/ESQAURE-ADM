@@ -11,17 +11,19 @@ import {
   redeemVoucher,
   getUserVoucherHistory
 } from '../controllers/voucher.controller.js';
+import { verifyAdmin } from '../middlewares/adminAuth.middleware.js';
 
 const router = Router();
 
-// ─── Admin Routes ─────────────────────────────────────────────────────────────
-router.get('/admin',               getAdminVouchers);
-router.post('/admin',              createVoucher);
-router.post('/admin/bulk-generate', bulkGenerateVouchers);
-router.get('/admin/:id',           getVoucherById);
-router.patch('/admin/:id',         updateVoucher);
-router.delete('/admin/:id',        deleteVoucher);
-router.patch('/admin/:id/toggle',  toggleVoucherStatus);
+// ─── Admin Routes (Protected) ──────────────────────────────────────────────────
+router.get('/admin',               verifyAdmin, getAdminVouchers);
+router.post('/admin',              verifyAdmin, createVoucher);
+router.post('/admin/bulk-generate', verifyAdmin, bulkGenerateVouchers);
+router.get('/admin/:id',           verifyAdmin, getVoucherById);
+router.patch('/admin/:id',         verifyAdmin, updateVoucher);
+router.delete('/admin/:id',        verifyAdmin, deleteVoucher);
+router.patch('/admin/:id/toggle',  verifyAdmin, toggleVoucherStatus);
+
 
 // ─── Public / Client Routes ───────────────────────────────────────────────────
 router.post('/validate',           validateVoucherCode);

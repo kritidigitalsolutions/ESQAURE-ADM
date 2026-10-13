@@ -38,3 +38,26 @@ export const authRateLimiter = rateLimit({
     );
   }
 });
+
+/**
+ * Global API rate limiter protecting endpoints against scraping and flood attacks
+ * Allows 500 requests per 15 minutes per IP (skips health check & media)
+ */
+export const apiGlobalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 500,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    return req.path === '/health' || req.path.startsWith('/uploads');
+  },
+  handler: (req, res) => {
+    return ApiResponse.error(
+      res,
+      'Too many requests from this network. Please slow down and try again shortly.',
+      ERROR_CODES.RATE_LIMIT_EXCEEDED,
+      429
+    );
+  }
+});
+

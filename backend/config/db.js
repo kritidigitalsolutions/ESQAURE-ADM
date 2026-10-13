@@ -13,9 +13,11 @@ export const connectDB = async () => {
 
   try {
     const conn = await mongoose.connect(env.MONGODB_URI, {
-      autoIndex: true,
-      serverSelectionTimeoutMS: 5000
+      autoIndex: env.NODE_ENV !== 'production',
+      serverSelectionTimeoutMS: 5000,
+      maxPoolSize: 20
     });
+
 
     isConnected = true;
     console.log(`[Database] MongoDB Connected: ${conn.connection.host}/${conn.connection.name}`);

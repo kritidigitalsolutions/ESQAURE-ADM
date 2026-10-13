@@ -4,6 +4,7 @@ import { PlayerController } from '../controllers/player.controller.js';
 import { HomeController } from '../controllers/home.controller.js';
 import { SavedSeriesController } from '../controllers/savedSeries.controller.js';
 import { authenticate, optionalAuthenticate } from '../middlewares/auth.middleware.js';
+import { verifyAdmin } from '../middlewares/adminAuth.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { playerValidation } from '../validations/player.validation.js';
 import { homeValidation } from '../validations/home.validation.js';
@@ -11,62 +12,63 @@ import { homeValidation } from '../validations/home.validation.js';
 const router = Router();
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  ADMIN PANEL DRAMA & CONTENT LIBRARY MANAGEMENT ROUTES
+//  ADMIN PANEL DRAMA & CONTENT LIBRARY MANAGEMENT ROUTES (Protected)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * 1. Admin: Get Full Content Library with Stats & Filter Parameters
  * GET /api/v1/dramas/admin
  */
-router.get('/admin', DramaController.getAdminDramas);
+router.get('/admin', verifyAdmin, DramaController.getAdminDramas);
 
 /**
  * 2. Admin: Create New Drama Series
  * POST /api/v1/dramas
  */
-router.post('/', DramaController.createDrama);
+router.post('/', verifyAdmin, DramaController.createDrama);
 
 /**
  * 2.1 Admin: Batch Reorder All Drama Catalog Priorities
  * PATCH /api/v1/dramas/reorder
  */
-router.patch('/reorder', DramaController.reorderDramas);
+router.patch('/reorder', verifyAdmin, DramaController.reorderDramas);
 
 /**
  * 3. Admin: Update Drama Details
  * PATCH /api/v1/dramas/:id
  */
-router.patch('/:id', DramaController.updateDrama);
+router.patch('/:id', verifyAdmin, DramaController.updateDrama);
 
 /**
  * 4. Admin: Delete Drama Series
  * DELETE /api/v1/dramas/:id
  */
-router.delete('/:id', DramaController.deleteDrama);
+router.delete('/:id', verifyAdmin, DramaController.deleteDrama);
 
 /**
  * 5. Admin: Toggle Active / Inactive Status
  * PATCH /api/v1/dramas/:id/toggle-active
  */
-router.patch('/:id/toggle-active', DramaController.toggleActive);
+router.patch('/:id/toggle-active', verifyAdmin, DramaController.toggleActive);
 
 /**
  * 6. Admin: Toggle Paid / Free Access
- * PATCH /api/v1/dramas/:id/toggle-paid',
+ * PATCH /api/v1/dramas/:id/toggle-paid
  */
-router.patch('/:id/toggle-paid', DramaController.togglePaid);
+router.patch('/:id/toggle-paid', verifyAdmin, DramaController.togglePaid);
 
 /**
  * 7. Admin: Update / Shift Drama Priority
  * PATCH /api/v1/dramas/:id/priority
  */
-router.patch('/:id/priority', DramaController.setDramaPriority);
+router.patch('/:id/priority', verifyAdmin, DramaController.setDramaPriority);
 
 /**
  * 8. Admin: Batch Save / Update Drama Episodes & Paywall Rules
  * POST /api/v1/dramas/:id/episodes/admin
  */
-router.post('/:id/episodes/admin', DramaController.saveAdminEpisodes);
+router.post('/:id/episodes/admin', verifyAdmin, DramaController.saveAdminEpisodes);
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  DRAMA CATALOG & CONTENT ACCESS ROUTES (MOBILE APP & COMMON)

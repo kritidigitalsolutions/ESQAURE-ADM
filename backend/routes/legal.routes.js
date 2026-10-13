@@ -1,44 +1,46 @@
 import { Router } from 'express';
 import { LegalController } from '../controllers/legal.controller.js';
+import { verifyAdmin } from '../middlewares/adminAuth.middleware.js';
 
 const router = Router();
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  ADMIN PANEL ROUTES  (/api/v1/legal/admin/...)
+//  ADMIN PANEL ROUTES  (/api/v1/legal/admin/...) - Protected
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * GET /api/v1/legal/admin/all
  * Retrieve all legal documents (active + inactive) for Admin Legal & Compliance management
  */
-router.get('/admin/all', LegalController.adminGetAllLegalDocs);
+router.get('/admin/all', verifyAdmin, LegalController.adminGetAllLegalDocs);
 
 /**
  * PUT /api/v1/legal/admin/compliance
  * Update statutory Grievance Redressal Officer & age-classification maturity metadata
  * Body: { name, designation, email, address, sla, certifiedMaturityTags }
  */
-router.put('/admin/compliance', LegalController.updateComplianceOfficer);
+router.put('/admin/compliance', verifyAdmin, LegalController.updateComplianceOfficer);
 
 /**
  * PUT /api/v1/legal/admin/:slug
  * Create or update full legal document text, version, and details
  * Body: { title, content, summary, version, effectiveDate, isActive, metadata }
  */
-router.put('/admin/:slug', LegalController.upsertLegalDoc);
+router.put('/admin/:slug', verifyAdmin, LegalController.upsertLegalDoc);
 
 /**
  * PATCH /api/v1/legal/admin/:slug/toggle
  * Toggle active/inactive status of a legal document
  */
-router.patch('/admin/:slug/toggle', LegalController.toggleLegalDocStatus);
+router.patch('/admin/:slug/toggle', verifyAdmin, LegalController.toggleLegalDocStatus);
 
 /**
  * POST /api/v1/legal/admin/seed
  * Seed or reset default legal policies (Terms, Privacy, Refund, Compliance)
  * Body: { "force": false }
  */
-router.post('/admin/seed', LegalController.seedLegalDocs);
+router.post('/admin/seed', verifyAdmin, LegalController.seedLegalDocs);
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  PUBLIC / MOBILE CLIENT ROUTES  (/api/v1/legal/...)

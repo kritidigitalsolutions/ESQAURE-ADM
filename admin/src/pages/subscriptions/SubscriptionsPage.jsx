@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import ModalPortal from '../../components/common/ModalPortal';
 import { subscriptionService } from '../../services/subscriptionService';
+import { confirmModal, alertModal } from '../../context/DialogContext';
 import Badge from '../../components/common/Badge';
 import AnimatedNumber from '../../components/common/AnimatedNumber';
 import KpiStatCard from '../../components/common/KpiStatCard';
@@ -314,19 +315,31 @@ export default function SubscriptionsPage() {
   // Delete plan
   const handleDeletePlan = async (planId, planName) => {
     if (plans.length <= 1) {
-      alert('You must have at least one subscription plan in the system.');
+      await alertModal({
+        title: 'Action Restricted',
+        message: 'You must have at least one active subscription plan in the system.',
+        variant: 'warning'
+      });
       return;
     }
-    if (window.confirm(`Are you sure you want to delete "${planName}"? This action cannot be undone.`)) {
-      try {
-        await subscriptionService.deletePlan(planId);
-      } catch (err) {
-        console.warn('Delete plan API fallback:', err);
-      }
-      setPlans((prev) => prev.filter((p) => (p.id ? p.id !== planId : p._id ? p._id !== planId : p.code !== planId)));
-      showToast(`Deleted plan "${planName}".`);
-      setIsModalOpen(false);
+
+    const confirmed = await confirmModal({
+      title: 'Delete Subscription Plan',
+      message: `Are you sure you want to delete "${planName}"? This action cannot be undone. Users will no longer be able to subscribe to this tier.`,
+      itemName: planName,
+      confirmText: 'Delete Plan',
+      variant: 'danger'
+    });
+    if (!confirmed) return;
+
+    try {
+      await subscriptionService.deletePlan(planId);
+    } catch (err) {
+      console.warn('Delete plan API fallback:', err);
     }
+    setPlans((prev) => prev.filter((p) => (p.id ? p.id !== planId : p._id ? p._id !== planId : p.code !== planId)));
+    showToast(`Deleted plan "${planName}".`);
+    setIsModalOpen(false);
   };
 
   // Add perk inside modal
@@ -351,11 +364,19 @@ export default function SubscriptionsPage() {
   const handleSaveModal = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      alert('Please enter a plan name.');
+      await alertModal({
+        title: 'Validation Error',
+        message: 'Please enter a plan name.',
+        variant: 'warning'
+      });
       return;
     }
     if (!formData.price || formData.price <= 0) {
-      alert('Please enter a valid price.');
+      await alertModal({
+        title: 'Validation Error',
+        message: 'Please enter a valid subscription price.',
+        variant: 'warning'
+      });
       return;
     }
 
@@ -470,18 +491,13 @@ export default function SubscriptionsPage() {
           <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
             <CreditCard className="w-4 h-4 stroke-[2.2]" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-extrabold text-slate-950 dark:text-white text-base tracking-tight leading-tight">
-                Subscription Plans & Pricing
-              </h1>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs border border-amber-300/50">
-                {plans.length} Active Plans
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-              Manage subscription tiers, pricing, and AutoPay renewals
-            </p>
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs border border-amber-300/50">
+              {plans.length} Active Plans
+            </span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+              Tiers, pricing & AutoPay mandates
+            </span>
           </div>
         </div>
 
@@ -490,11 +506,10 @@ export default function SubscriptionsPage() {
             type="button"
             onClick={() => loadAllData(false)}
             disabled={isRefreshing}
-            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.08] dark:hover:bg-white/[0.14] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 transition-all cursor-pointer hover:scale-105 active:scale-90 shadow-sm shrink-0"
             title="Sync live subscription data"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
-            <span>{isRefreshing ? 'Syncing...' : 'Sync'}</span>
           </button>
           <button
             type="button"

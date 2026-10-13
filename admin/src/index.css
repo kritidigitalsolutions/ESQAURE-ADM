@@ -273,8 +273,10 @@ html.view-transitioning *::after {
 }
 
 /* ==========================================================
-   Bell Icon Hover Ringing Animation
+   Topbar Icon Micro-Interactions & Hover Animations
    ========================================================== */
+
+/* 1. Bell Icon Hover Ringing Chime Animation */
 @keyframes bell-ring {
   0% { transform: rotate(0); }
   15% { transform: rotate(16deg); }
@@ -287,10 +289,84 @@ html.view-transitioning *::after {
 
 .bell-hover-ring {
   transform-origin: top center;
+  display: inline-block;
+  will-change: transform;
 }
 
-.group:hover .bell-hover-ring {
+.group:hover .bell-hover-ring,
+.group:focus-visible .bell-hover-ring {
   animation: bell-ring 0.65s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* 2. Fullscreen Precision Corner Micro-Animations (Zero tilt/rotation, mature axial motion) */
+.fs-corner-tl,
+.fs-corner-tr,
+.fs-corner-bl,
+.fs-corner-br,
+.fs-min-tl,
+.fs-min-tr,
+.fs-min-bl,
+.fs-min-br {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* Enter Fullscreen: 4 corners smoothly glide outward */
+.group:hover .fs-corner-tl,
+.group:focus-visible .fs-corner-tl {
+  transform: translate(-1.5px, -1.5px);
+}
+
+.group:hover .fs-corner-tr,
+.group:focus-visible .fs-corner-tr {
+  transform: translate(1.5px, -1.5px);
+}
+
+.group:hover .fs-corner-bl,
+.group:focus-visible .fs-corner-bl {
+  transform: translate(-1.5px, 1.5px);
+}
+
+.group:hover .fs-corner-br,
+.group:focus-visible .fs-corner-br {
+  transform: translate(1.5px, 1.5px);
+}
+
+/* Exit Fullscreen: 4 corners smoothly glide inward */
+.group:hover .fs-min-tl,
+.group:focus-visible .fs-min-tl {
+  transform: translate(1.5px, 1.5px);
+}
+
+.group:hover .fs-min-tr,
+.group:focus-visible .fs-min-tr {
+  transform: translate(-1.5px, 1.5px);
+}
+
+.group:hover .fs-min-bl,
+.group:focus-visible .fs-min-bl {
+  transform: translate(1.5px, -1.5px);
+}
+
+.group:hover .fs-min-br,
+.group:focus-visible .fs-min-br {
+  transform: translate(-1.5px, -1.5px);
+}
+
+/* 3. Universal Tooltip Fade-in */
+@keyframes tooltip-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: tooltip-fade-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* ==========================================================

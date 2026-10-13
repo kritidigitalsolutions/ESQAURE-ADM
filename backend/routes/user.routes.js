@@ -1,13 +1,12 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/user.controller.js';
+import { verifyAdmin } from '../middlewares/adminAuth.middleware.js';
 
 const router = Router();
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  ADMIN USER MANAGEMENT  (/api/v1/users)
-//  All routes are intended for the Admin Panel. Add admin auth middleware here
-//  when the admin authentication system is implemented.
-// ─────────────────────────────────────────────────────────────────────────────
+// Protect all user management endpoints with Admin Authentication
+router.use(verifyAdmin);
+
 
 /**
  * GET /api/v1/users

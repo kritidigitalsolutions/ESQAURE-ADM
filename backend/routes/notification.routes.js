@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticate, optionalAuthenticate } from '../middlewares/auth.middleware.js';
+import { verifyAdmin } from '../middlewares/adminAuth.middleware.js';
 import {
   getNotifications,
   getUnreadCount,
@@ -22,16 +23,33 @@ import {
   deleteAnnouncement,
   toggleAnnouncement
 } from '../controllers/adminNotification.controller.js';
+import {
+  getAutoTriggers,
+  createAutoTrigger,
+  updateAutoTrigger,
+  toggleAutoTrigger,
+  deleteAutoTrigger,
+  testSendAutoTrigger
+} from '../controllers/autoNotification.controller.js';
 
 const router = Router();
 
-// ── Admin Panel Routes (Push Campaigns & Announcements) ─────────────────────
-router.get('/admin/campaigns', getCampaigns);
-router.post('/admin/broadcast', broadcastPush);
-router.get('/admin/announcements', getAnnouncements);
-router.post('/admin/announcements', createAnnouncement);
-router.delete('/admin/announcements/:id', deleteAnnouncement);
-router.patch('/admin/announcements/:id/toggle', toggleAnnouncement);
+// ── Admin Panel Routes (Push Campaigns & Announcements) - Protected ────────
+router.get('/admin/campaigns', verifyAdmin, getCampaigns);
+router.post('/admin/broadcast', verifyAdmin, broadcastPush);
+router.get('/admin/announcements', verifyAdmin, getAnnouncements);
+router.post('/admin/announcements', verifyAdmin, createAnnouncement);
+router.delete('/admin/announcements/:id', verifyAdmin, deleteAnnouncement);
+router.patch('/admin/announcements/:id/toggle', verifyAdmin, toggleAnnouncement);
+
+// ── Admin Auto-Send Notification Triggers - Protected ──────────────────────
+router.get('/admin/auto-triggers', verifyAdmin, getAutoTriggers);
+router.post('/admin/auto-triggers', verifyAdmin, createAutoTrigger);
+router.put('/admin/auto-triggers/:id', verifyAdmin, updateAutoTrigger);
+router.patch('/admin/auto-triggers/:id/toggle', verifyAdmin, toggleAutoTrigger);
+router.delete('/admin/auto-triggers/:id', verifyAdmin, deleteAutoTrigger);
+router.post('/admin/auto-triggers/:id/test', verifyAdmin, testSendAutoTrigger);
+
 
 // ── Device / Push Token Management (supports both authenticated & guest app launches) ──
 // POST   /api/v1/notifications/register-device   → Save FCM token

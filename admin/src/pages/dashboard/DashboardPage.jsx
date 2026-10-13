@@ -20,10 +20,15 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
       .then((res) => {
         if (!isMounted) return;
         const list = Array.isArray(res) ? res : (res?.dramas || []);
-        // Prioritize isTrending, then fallback to catalog order
-        let trending = list.filter(d => d.isTrending);
+        // Prioritize isTrending, then fallback to catalog order by views
+        let trending = list.filter(d => Boolean(d.isTrending));
         if (trending.length === 0) {
-          trending = [...list].sort((a, b) => (b.views || b.viewCount || 0) - (a.views || a.viewCount || 0));
+          trending = [...list].sort((a, b) => Number(b.viewsCount || 0) - Number(a.viewsCount || 0));
+        } else {
+          trending = [...trending].sort((a, b) => {
+            if (a.trendingRank && b.trendingRank) return a.trendingRank - b.trendingRank;
+            return Number(b.viewsCount || 0) - Number(a.viewsCount || 0);
+          });
         }
         setTrendingDramas(trending);
         setIsLoadingTrending(false);
@@ -108,48 +113,64 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
               ) : (
                 trendingDramas.slice(0, 4).map((drama, idx) => {
                   const rankNum = idx + 1;
-                  const posterUrl = drama.poster || drama.coverImage || drama.thumbnail || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400';
-                  const titleStr = drama.title || 'Untitled Series';
-                  const epCount = drama.totalEpisodes || drama.episodeCount || (Array.isArray(drama.episodes) ? drama.episodes.length : 0);
+                  const posterUrl = drama.posterUrl || drama.poster || drama.coverImage || drama.thumbnail || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400';
+                  const titleStr = drama.title || drama.name || 'Untitled Series';
+                  const epCount = drama.totalEpisodes ?? drama.episodeCount ?? (Array.isArray(drama.episodes) ? drama.episodes.length : 0);
                   const genreStr = Array.isArray(drama.genres)
-                    ? drama.genres.join(', ')
-                    : (drama.genre || 'Drama');
+                    ? drama.genres.map(g => (typeof g === 'object' ? g.name : g)).filter(Boolean).join(', ')
+                    : (drama.genreDisplay || drama.genre || 'Drama');
+                  const viewsDisplay = drama.views || (drama.viewsCount ? `${drama.viewsCount}` : null);
 
                   return (
                     <div
                       key={drama._id || drama.id || idx}
                       onClick={() => onNavigate('dramas')}
-                      className="flex items-center space-x-3 py-2.5 px-2 -mx-2 rounded-xl hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors cursor-pointer group"
+                      className="flex items-center justify-between py-2.5 px-2 -mx-2 rounded-xl hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors cursor-pointer group"
                     >
-                      {/* Typographic Rank Number */}
-                      <span className={`font-urbanist font-black text-xs w-4 text-center shrink-0 ${
-                        rankNum === 1 ? 'text-amber-400' : 'text-slate-400'
-                      }`}>
-                        {rankNum}
-                      </span>
+                      <div className="flex items-center space-x-3 min-w-0 pr-2">
+                        {/* Typographic Rank Number */}
+                        <span className={`font-urbanist font-black text-xs w-4 text-center shrink-0 ${
+                          rankNum === 1 ? 'text-amber-400' : 'text-slate-400'
+                        }`}>
+                          {rankNum}
+                        </span>
 
-                      {/* 9:16 Portrait Poster */}
-                      <div className="w-9 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-slate-200/80 dark:border-white/10 shadow-2xs group-hover:scale-[1.02] transition-transform duration-200">
-                        <img
-                          src={posterUrl}
-                          alt={titleStr}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400';
-                          }}
-                        />
+                        {/* 9:16 Portrait Poster */}
+                        <div className="w-9 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-slate-200/80 dark:border-white/10 shadow-2xs group-hover:scale-[1.02] transition-transform duration-200">
+                          <img
+                            src={posterUrl}
+                            alt={titleStr}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src = 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400';
+                            }}
+                          />
+                        </div>
+
+                        {/* Title & Clean Info */}
+                        <div className="min-w-0">
+                          <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-amber-400 transition-colors">
+                            {titleStr}
+                          </h4>
+                          <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5 flex items-center">
+                            <span>{epCount} Episodes</span>
+                            <span className="mx-1 text-slate-300 dark:text-white/20">·</span>
+                            <span className="text-slate-600 dark:text-slate-400 truncate">{genreStr}</span>
+                            {viewsDisplay && (
+                              <>
+                                <span className="mx-1 text-slate-300 dark:text-white/20">·</span>
+                                <span className="text-amber-400/90 font-semibold shrink-0">{viewsDisplay} views</span>
+                              </>
+                            )}
+                          </p>
+                        </div>
                       </div>
 
-                      {/* Title & Clean Info */}
-                      <div className="min-w-0 flex-1">
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-amber-400 transition-colors">
-                          {titleStr}
-                        </h4>
-                        <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
-                          <span>{epCount} Episodes</span>
-                          <span className="mx-1 text-slate-300 dark:text-white/20">·</span>
-                          <span className="text-slate-600 dark:text-slate-400">{genreStr}</span>
-                        </p>
+                      {/* Right: Rating Badge */}
+                      <div className="shrink-0 flex items-center pl-2">
+                        <span className="text-[11px] font-bold text-amber-400 bg-amber-400/10 dark:bg-amber-400/15 border border-amber-400/20 px-2 py-0.5 rounded-md flex items-center gap-1">
+                          ★ {drama.rating || '4.8'}
+                        </span>
                       </div>
                     </div>
                   );

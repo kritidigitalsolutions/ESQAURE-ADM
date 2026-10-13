@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { notificationService } from '../../services/notificationService';
 import { userService } from '../../services/userService';
 import { dramaService } from '../../services/dramaService';
 import PageLoader from '../../components/common/PageLoader';
 import PulsatingDots from '../../components/common/PulsatingDots';
+import ToggleSwitch from '../../components/common/ToggleSwitch';
+import Badge from '../../components/common/Badge';
+import ModalPortal from '../../components/common/ModalPortal';
+import { confirmModal } from '../../context/DialogContext';
 import {
   Send,
   Bell,
@@ -31,7 +36,13 @@ import {
   Plus,
   SlidersHorizontal,
   Layers,
-  ArrowUpRight
+  ArrowUpRight,
+  Zap,
+  CreditCard,
+  Trash2,
+  Edit3,
+  Clock,
+  ExternalLink
 } from 'lucide-react';
 
 const PUSH_TEMPLATES = [
@@ -107,6 +118,25 @@ export default function NotificationsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
+  // ── Automated Notification Triggers State ─────────────────────────────────
+  const [autoTriggers, setAutoTriggers] = useState([]);
+  const [isAutoLoading, setIsAutoLoading] = useState(false);
+  const [testingTriggerId, setTestingTriggerId] = useState(null);
+
+  // Auto trigger modal state (Create / Edit)
+  const [isAutoModalOpen, setIsAutoModalOpen] = useState(false);
+  const [editingTrigger, setEditingTrigger] = useState(null);
+  const [autoFormName, setAutoFormName] = useState('');
+  const [autoFormDesc, setAutoFormDesc] = useState('');
+  const [autoFormCategory, setAutoFormCategory] = useState('USER');
+  const [autoFormTitle, setAutoFormTitle] = useState('');
+  const [autoFormBody, setAutoFormBody] = useState('');
+  const [autoFormAudience, setAutoFormAudience] = useState('All Users');
+  const [autoFormDeepLink, setAutoFormDeepLink] = useState('/home');
+  const [autoFormDelay, setAutoFormDelay] = useState(0);
+  const [autoFormEnabled, setAutoFormEnabled] = useState(true);
+  const [isSubmittingAuto, setIsSubmittingAuto] = useState(false);
+
   // Live drama catalog from backend API
   const [availableDramas, setAvailableDramas] = useState([]);
   const [isDramasLoading, setIsDramasLoading] = useState(false);
@@ -145,10 +175,165 @@ export default function NotificationsPage() {
     }
   };
 
+  // Fetch auto triggers
+  const fetchAutoTriggers = async () => {
+    try {
+      setIsAutoLoading(true);
+      const res = await notificationService.getAutoTriggers();
+      if (res) {
+        setAutoTriggers(res.triggers || []);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch auto triggers:', err.message);
+    } finally {
+      setIsAutoLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchCampaigns();
     fetchDramas();
+    fetchAutoTriggers();
   }, []);
+
+  const handleToggleAutoTrigger = async (id) => {
+    try {
+      const res = await notificationService.toggleAutoTrigger(id);
+      if (res && res.trigger) {
+        setAutoTriggers((prev) =>
+          prev.map((t) => (t.id === id || t._id === id ? { ...t, isEnabled: res.trigger.isEnabled } : t))
+        );
+        setFeedback({
+          type: 'success',
+          message: `Auto trigger "${res.trigger.name}" ${res.trigger.isEnabled ? 'activated' : 'disabled'}.`
+        });
+      }
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err.message || 'Failed to toggle auto trigger'
+      });
+    }
+  };
+
+  const handleTestSendAuto = async (trigger) => {
+    try {
+      setTestingTriggerId(trigger.id || trigger._id);
+      const res = await notificationService.testSendAutoTrigger(trigger.id || trigger._id);
+      setFeedback({
+        type: 'success',
+        message: `Test push dispatched for "${trigger.name}"! Delivered to ${res.deliveredCount || 'all registered'} device(s).`
+      });
+      fetchAutoTriggers();
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err.message || 'Failed to dispatch test push'
+      });
+    } finally {
+      setTestingTriggerId(null);
+    }
+  };
+
+  const handleDeleteAutoTrigger = async (trigger) => {
+    const confirmed = await confirmModal({
+      title: 'Delete Automated Trigger',
+      message: 'Are you sure you want to permanently delete this auto notification trigger?',
+      itemName: trigger.name,
+      confirmText: 'Delete Trigger',
+      variant: 'danger'
+    });
+    if (!confirmed) return;
+
+    try {
+      await notificationService.deleteAutoTrigger(trigger.id || trigger._id);
+      setAutoTriggers((prev) => prev.filter((t) => t.id !== trigger.id && t._id !== trigger._id));
+      setFeedback({
+        type: 'success',
+        message: `Trigger "${trigger.name}" removed.`
+      });
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err.message || 'Failed to delete trigger'
+      });
+    }
+  };
+
+  const handleOpenAutoModal = (trigger = null) => {
+    setEditingTrigger(trigger);
+    if (trigger) {
+      setAutoFormName(trigger.name || '');
+      setAutoFormDesc(trigger.description || '');
+      setAutoFormCategory(trigger.category || 'USER');
+      setAutoFormTitle(trigger.title || '');
+      setAutoFormBody(trigger.body || '');
+      setAutoFormAudience(trigger.targetAudience || 'All Users');
+      setAutoFormDeepLink(trigger.deepLink || '/home');
+      setAutoFormDelay(trigger.delayMinutes || 0);
+      setAutoFormEnabled(trigger.isEnabled !== false);
+    } else {
+      setAutoFormName('');
+      setAutoFormDesc('');
+      setAutoFormCategory('USER');
+      setAutoFormTitle('');
+      setAutoFormBody('');
+      setAutoFormAudience('All Users');
+      setAutoFormDeepLink('/home');
+      setAutoFormDelay(0);
+      setAutoFormEnabled(true);
+    }
+    setIsAutoModalOpen(true);
+  };
+
+  const handleSaveAutoTrigger = async (e) => {
+    e.preventDefault();
+    if (!autoFormName.trim() || !autoFormTitle.trim() || !autoFormBody.trim()) return;
+
+    setIsSubmittingAuto(true);
+    try {
+      const payload = {
+        name: autoFormName.trim(),
+        description: autoFormDesc.trim(),
+        category: autoFormCategory,
+        title: autoFormTitle.trim(),
+        body: autoFormBody.trim(),
+        targetAudience: autoFormAudience,
+        deepLink: autoFormDeepLink.trim() || '/home',
+        delayMinutes: Number(autoFormDelay) || 0,
+        isEnabled: autoFormEnabled
+      };
+
+      if (editingTrigger) {
+        const res = await notificationService.updateAutoTrigger(editingTrigger.id || editingTrigger._id, payload);
+        setAutoTriggers((prev) =>
+          prev.map((t) => ((t.id === editingTrigger.id || t._id === editingTrigger._id) ? res.trigger : t))
+        );
+        setFeedback({
+          type: 'success',
+          message: `Auto trigger "${payload.name}" updated successfully.`
+        });
+      } else {
+        const res = await notificationService.createAutoTrigger(payload);
+        if (res && res.trigger) {
+          setAutoTriggers((prev) => [...prev, res.trigger]);
+          setFeedback({
+            type: 'success',
+            message: `New automated trigger "${payload.name}" created.`
+          });
+        }
+      }
+      setIsAutoModalOpen(false);
+      fetchAutoTriggers();
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err.message || 'Failed to save auto trigger'
+      });
+    } finally {
+      setIsSubmittingAuto(false);
+    }
+  };
 
   // Fetch user list when Specific User mode is activated
   useEffect(() => {
@@ -403,6 +588,61 @@ export default function NotificationsPage() {
     return filteredCampaigns.slice(start, start + pageSize);
   }, [filteredCampaigns, currentPage]);
 
+  // ── Sequential User Lifecycle Order ──────────────────────────────────────────
+  const LIFECYCLE_STEPS = useMemo(() => [
+    {
+      key: 'WELCOME_SIGNUP',
+      stepNumber: '01',
+      eventLabel: 'On User Registration',
+      icon: UserCheck
+    },
+    {
+      key: 'SUBSCRIPTION_SUCCESS',
+      stepNumber: '02',
+      eventLabel: 'On VIP Pass Purchase',
+      icon: CreditCard
+    },
+    {
+      key: 'NEW_EPISODE_RELEASE',
+      stepNumber: '03',
+      eventLabel: 'On New Episode Published',
+      icon: Film
+    },
+    {
+      key: 'RENEWAL_REMINDER',
+      stepNumber: '04',
+      eventLabel: '3 Days Before Expiry',
+      icon: Clock
+    },
+    {
+      key: 'INACTIVE_WINBACK',
+      stepNumber: '05',
+      eventLabel: 'Inactive for 7+ Days',
+      icon: RotateCcw
+    },
+    {
+      key: 'PAYMENT_FAILED',
+      stepNumber: '06',
+      eventLabel: 'On Payment Failure',
+      icon: AlertCircle
+    }
+  ], []);
+
+  // Sorted perfectly sequentially along the viewer journey
+  const sequentialAutoTriggers = useMemo(() => {
+    const orderKeys = LIFECYCLE_STEPS.map((s) => s.key);
+    return [...autoTriggers].sort((a, b) => {
+      const keyA = a.triggerKey || a.triggerEvent || '';
+      const keyB = b.triggerKey || b.triggerEvent || '';
+      const idxA = orderKeys.indexOf(keyA);
+      const idxB = orderKeys.indexOf(keyB);
+      const posA = idxA !== -1 ? idxA : 999;
+      const posB = idxB !== -1 ? idxB : 999;
+      if (posA !== posB) return posA - posB;
+      return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+    });
+  }, [autoTriggers, LIFECYCLE_STEPS]);
+
   return (
     <div className="space-y-3 font-urbanist selection:bg-[#FEF08A] selection:text-black">
       
@@ -437,7 +677,7 @@ export default function NotificationsPage() {
               fetchDramas();
             }}
             disabled={isLoading || isDramasLoading}
-            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 transition-colors border border-slate-200/80 dark:border-white/10 cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 transition-all border border-slate-200/80 dark:border-white/10 cursor-pointer hover:scale-105 active:scale-90 shadow-sm shrink-0"
             title="Refresh statistics and history"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${(isLoading || isDramasLoading) ? 'animate-spin text-amber-500' : ''}`} />
@@ -463,6 +703,14 @@ export default function NotificationsPage() {
                 <span>New Broadcast</span>
               </button>
             </>
+          ) : activeTab === 'auto' ? (
+            <button
+              onClick={() => handleOpenAutoModal(null)}
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs transition-colors shadow-xs cursor-pointer active:scale-98"
+            >
+              <Plus className="w-3.5 h-3.5 stroke-[2.4]" />
+              <span>New Auto Trigger</span>
+            </button>
           ) : (
             <button
               onClick={() => setActiveTab('ledger')}
@@ -503,7 +751,8 @@ export default function NotificationsPage() {
       {/* ─────────────────────────────────────────────────────────────
           2. UNIFORM COMPACT KPI STAT CARDS (4 Cards, Theme Colors)
          ───────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+      {activeTab !== 'auto' && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         {/* Card 1: Total Broadcasts Sent */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
           <div>
@@ -640,101 +889,105 @@ export default function NotificationsPage() {
           </div>
         </div>
       </div>
+    )}
 
       {/* ─────────────────────────────────────────────────────────────
-          3. NAVIGATION PILL TABS
+          3. SEGMENTED SWITCH TOGGLE TABS (Clean, Minimal, Sliding Badge UI)
          ───────────────────────────────────────────────────────────── */}
-      <div className="flex items-center space-x-2 border-b border-slate-200/70 dark:border-white/10 pb-2">
-        <button
-          onClick={() => setActiveTab('ledger')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer ${
-            activeTab === 'ledger'
-              ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.04]'
-          }`}
-        >
-          <Send className="w-3.5 h-3.5" />
-          <span>Broadcast Ledger</span>
-          <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
-            activeTab === 'ledger' ? 'bg-slate-950 text-[#FEF08A]' : 'bg-slate-200 dark:bg-white/[0.08] text-slate-700 dark:text-slate-300'
-          }`}>
-            {campaigns.length}
-          </span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('compose')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-2 cursor-pointer ${
-            activeTab === 'compose'
-              ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.04]'
-          }`}
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Compose Push Broadcast</span>
-        </button>
+      <div className="flex items-center justify-between gap-3 overflow-x-auto pb-0.5 scrollbar-none">
+        <div className="relative inline-flex items-center p-1 rounded-xl bg-slate-100 dark:bg-[#14141A] border border-slate-200/80 dark:border-white/10 shadow-2xs">
+          {[
+            { id: 'ledger', label: 'Broadcast Ledger', count: campaigns.length },
+            { id: 'compose', label: 'Compose Broadcast' },
+            { id: 'auto', label: 'Automated Triggers' }
+          ].map((tab) => {
+            const isSelected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`group relative px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-black transition-colors cursor-pointer select-none flex items-center space-x-2 shrink-0 outline-hidden ${
+                  isSelected
+                    ? 'text-slate-950'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                }`}
+              >
+                {isSelected && (
+                  <motion.div
+                    layoutId="notificationMainTabBadge"
+                    className="absolute inset-0 bg-[#FEF08A] rounded-lg shadow-xs"
+                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                  />
+                )}
+                <span className="relative z-10 transition-colors duration-150">
+                  {tab.label}
+                </span>
+                {typeof tab.count === 'number' && (
+                  <span
+                    className={`relative z-10 px-1.5 py-0.2 rounded-full text-[10px] font-black transition-colors duration-150 ${
+                      isSelected
+                        ? 'bg-slate-950 text-[#FEF08A] shadow-2xs'
+                        : 'bg-slate-200/80 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400 group-hover:bg-slate-300/80 dark:group-hover:bg-white/[0.14] group-hover:text-slate-900 dark:group-hover:text-white'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
           TAB 1: BROADCAST LEDGER (History, Table, Filters)
          ───────────────────────────────────────────────────────────── */}
       {activeTab === 'ledger' && (
-        <div className="space-y-3">
+        <motion.div
+          key="tab-ledger"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-3"
+        >
           {/* Unified Single-Row Toolbar */}
           <div className="bg-white dark:bg-[#121216] rounded-xl p-2 sm:p-2.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2">
             
             {/* Left: Audience Filter Tabs */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-              <button
-                onClick={() => { setHistoryFilter('ALL'); setCurrentPage(1); }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  historyFilter === 'ALL'
-                    ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.05]'
-                }`}
-              >
-                All ({filterCounts.all})
-              </button>
-              <button
-                onClick={() => { setHistoryFilter('ALL_USERS'); setCurrentPage(1); }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  historyFilter === 'ALL_USERS'
-                    ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.05]'
-                }`}
-              >
-                All Users ({filterCounts.allUsers})
-              </button>
-              <button
-                onClick={() => { setHistoryFilter('SUBSCRIBERS'); setCurrentPage(1); }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  historyFilter === 'SUBSCRIBERS'
-                    ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.05]'
-                }`}
-              >
-                Subscribers ({filterCounts.subscribers})
-              </button>
-              <button
-                onClick={() => { setHistoryFilter('INACTIVE'); setCurrentPage(1); }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  historyFilter === 'INACTIVE'
-                    ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.05]'
-                }`}
-              >
-                Inactive 7d+ ({filterCounts.inactive})
-              </button>
-              <button
-                onClick={() => { setHistoryFilter('SPECIFIC'); setCurrentPage(1); }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  historyFilter === 'SPECIFIC'
-                    ? 'bg-[#FEF08A] text-slate-950 shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.05]'
-                }`}
-              >
-                Direct User ({filterCounts.specific})
-              </button>
+            <div className="relative inline-flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-[#18181E] border border-slate-200/60 dark:border-white/10 shrink-0 overflow-x-auto scrollbar-none">
+              {[
+                { id: 'ALL', label: 'All', count: filterCounts.all },
+                { id: 'ALL_USERS', label: 'All Users', count: filterCounts.allUsers },
+                { id: 'SUBSCRIBERS', label: 'Subscribers', count: filterCounts.subscribers },
+                { id: 'INACTIVE', label: 'Inactive 7d+', count: filterCounts.inactive },
+                { id: 'SPECIFIC', label: 'Direct User', count: filterCounts.specific },
+              ].map((tab) => {
+                const isSelected = historyFilter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => { setHistoryFilter(tab.id); setCurrentPage(1); }}
+                    className={`relative px-2.5 py-1 rounded-lg text-xs font-bold transition-colors whitespace-nowrap cursor-pointer select-none outline-hidden ${
+                      isSelected
+                        ? 'text-slate-950 font-black'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white'
+                    }`}
+                  >
+                    {isSelected && (
+                      <motion.div
+                        layoutId="notificationHistoryFilterBadge"
+                        className="absolute inset-0 bg-[#FEF08A] rounded-lg shadow-2xs"
+                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center space-x-1">
+                      <span>{tab.label}</span>
+                      <span className="text-[10px] font-black opacity-80">({tab.count})</span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Right: Search & Sort Controls */}
@@ -946,14 +1199,20 @@ export default function NotificationsPage() {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* ─────────────────────────────────────────────────────────────
           TAB 2: COMPOSE PUSH BROADCAST (Minimal & Proportioned)
          ───────────────────────────────────────────────────────────── */}
       {activeTab === 'compose' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+        <motion.div
+          key="tab-compose"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-3"
+        >
           
           {/* Left Column: Broadcast Composer (lg:col-span-7) */}
           <div className="lg:col-span-7 bg-white dark:bg-[#121216] rounded-xl p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs space-y-3">
@@ -1426,9 +1685,420 @@ export default function NotificationsPage() {
 
           </div>
 
-        </div>
+        </motion.div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          TAB 3: AUTOMATED TRIGGERS (Auto Send Notifications)
+         ───────────────────────────────────────────────────────────── */}
+      {activeTab === 'auto' && (
+        <motion.div
+          key="tab-auto"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="font-urbanist"
+        >
+          {isAutoLoading && autoTriggers.length === 0 ? (
+            <div className="bg-white dark:bg-[#121216] rounded-2xl border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs">
+              <PageLoader size="sm" text="Loading automated triggers..." minHeight="min-h-[200px]" />
+            </div>
+          ) : sequentialAutoTriggers.length === 0 ? (
+            <div className="bg-white dark:bg-[#121216] rounded-2xl p-8 border border-slate-200/80 dark:border-white/10 text-center text-xs text-slate-400 space-y-2 shadow-xs">
+              <Zap className="w-7 h-7 mx-auto text-slate-300 dark:text-slate-600 stroke-[1.5]" />
+              <p className="font-bold text-slate-700 dark:text-slate-300">No automated triggers configured.</p>
+              <button
+                type="button"
+                onClick={() => handleOpenAutoModal(null)}
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs mt-2 transition-colors cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Create First Trigger</span>
+              </button>
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-[#121216] rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
+              
+              {/* Unified Header */}
+              <div className="px-4 py-3 sm:px-5 sm:py-3.5 border-b border-slate-100 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="flex items-center space-x-2.5 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shrink-0 shadow-xs">
+                    <Zap className="w-3.5 h-3.5 stroke-[2.2]" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="text-xs sm:text-sm font-extrabold text-slate-950 dark:text-white tracking-tight truncate">
+                        Automated Event Triggers
+                      </h3>
+                      <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                        {autoTriggers.filter((t) => t.isEnabled).length} of {autoTriggers.length} Active
+                      </span>
+                    </div>
+                    <p className="text-[10.5px] text-slate-400 dark:text-slate-500 truncate">
+                      Real-time push dispatches triggered by user lifecycle events
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-1.5 shrink-0 self-end sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={fetchAutoTriggers}
+                    disabled={isAutoLoading}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-600 dark:text-slate-400 transition-colors cursor-pointer"
+                    title="Refresh triggers"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isAutoLoading ? 'animate-spin text-amber-500' : ''}`} />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenAutoModal(null)}
+                    className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-[#FEF08A] hover:bg-[#FDE047] text-slate-950 font-bold text-xs transition-colors shadow-2xs cursor-pointer active:scale-98"
+                  >
+                    <Plus className="w-3.5 h-3.5 stroke-[2.2]" />
+                    <span>New Trigger</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Minimal Clean Triggers List */}
+              <div className="divide-y divide-slate-100 dark:divide-white/5">
+                {sequentialAutoTriggers.map((t) => {
+                  const tId = t.id || t._id;
+                  const isTesting = testingTriggerId === tId;
+                  const stepMeta = LIFECYCLE_STEPS.find((s) => s.key === (t.triggerKey || t.triggerEvent));
+                  const IconComponent = stepMeta?.icon || Zap;
+                  const triggerTiming = stepMeta?.eventLabel || t.description || 'System Event';
+                  const isEnabled = Boolean(t.isEnabled);
+
+                  return (
+                    <div
+                      key={tId}
+                      className="px-4 py-3 sm:px-5 sm:py-3.5 hover:bg-slate-50/70 dark:hover:bg-[#16161C] transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3 group"
+                    >
+                      {/* Left: Dynamic State Icon + Trigger Info */}
+                      <div className="flex items-center space-x-3 min-w-0 flex-1">
+                        {/* Dynamic Icon Badge: Theme accent when enabled, muted when disabled */}
+                        <div
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                            isEnabled
+                              ? 'bg-[#FEF08A] text-slate-950 shadow-2xs group-hover:scale-105'
+                              : 'bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-500 border border-slate-200/50 dark:border-white/5 opacity-60'
+                          }`}
+                        >
+                          <IconComponent className="w-3.5 h-3.5 stroke-[2.2]" />
+                        </div>
+
+                        {/* Trigger Name, Timing, Audience & Snippet */}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center space-x-2 flex-wrap gap-y-0.5">
+                            <h4 className="font-extrabold text-xs sm:text-[13px] text-slate-950 dark:text-white truncate">
+                              {t.name}
+                            </h4>
+                            <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 truncate">
+                              · {triggerTiming}
+                            </span>
+                            <span className="px-1.5 py-0.2 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 shrink-0">
+                              {t.targetAudience}
+                            </span>
+                          </div>
+
+                          {/* Minimal Clean Notification Snippet */}
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5 max-w-2xl flex items-center gap-1.5">
+                            <span className="font-bold text-slate-800 dark:text-slate-200 shrink-0">
+                              {t.title}
+                            </span>
+                            <span className="text-slate-300 dark:text-slate-600 shrink-0">—</span>
+                            <span className="truncate">{t.body}</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Right: Clean Action Controls & Toggle */}
+                      <div className="flex items-center justify-between md:justify-end space-x-1.5 sm:space-x-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-white/5">
+                        <button
+                          type="button"
+                          onClick={() => handleTestSendAuto(t)}
+                          disabled={isTesting}
+                          className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer disabled:opacity-50"
+                          title="Send test push to device"
+                        >
+                          <Send className={`w-3 h-3 ${isTesting ? 'animate-spin text-amber-500' : ''}`} />
+                          <span>{isTesting ? 'Testing...' : 'Test'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenAutoModal(t)}
+                          className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                          title="Edit notification trigger"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                          <span>Edit</span>
+                        </button>
+
+                        {!t.isSystem && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteAutoTrigger(t)}
+                            className="p-1 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                            title="Delete custom trigger"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
+                        <div className="h-4 w-px bg-slate-200/80 dark:bg-white/10 mx-0.5" />
+
+                        <ToggleSwitch
+                          checked={isEnabled}
+                          onChange={() => handleToggleAutoTrigger(tId)}
+                          size="sm"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
+          )}
+
+        </motion.div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          MODAL: CREATE / EDIT AUTOMATED NOTIFICATION TRIGGER
+         ───────────────────────────────────────────────────────────── */}
+      {isAutoModalOpen && (
+        <ModalPortal>
+          <div className="fixed inset-0 z-[99999] bg-slate-950/60 dark:bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 font-urbanist">
+            <div className="bg-white dark:bg-[#30303D] rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 border border-slate-200 dark:border-white/15 transition-all max-h-[92vh] overflow-y-auto">
+              
+              {/* Modal Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
+                    <Zap className="w-4 h-4 stroke-[2.2]" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-950 dark:text-white tracking-tight">
+                      {editingTrigger ? 'Edit Automated Trigger' : 'Create Automated Trigger'}
+                    </h3>
+                    <p className="text-[11px] font-semibold text-slate-400">
+                      Configure real-time auto-send rules for platform events
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsAutoModalOpen(false)}
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Form Content */}
+              <form onSubmit={handleSaveAutoTrigger} className="space-y-3.5">
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Trigger Rule Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={autoFormName}
+                      onChange={(e) => setAutoFormName(e.target.value)}
+                      placeholder="e.g. Welcome to E² Stories"
+                      className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-900 dark:text-white bg-slate-50 dark:bg-[#18181E] focus:bg-white dark:focus:bg-[#121216] focus:outline-hidden focus:ring-1 focus:ring-[#FEF08A]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Event Category
+                    </label>
+                    <select
+                      value={autoFormCategory}
+                      onChange={(e) => setAutoFormCategory(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-900 dark:text-white bg-slate-50 dark:bg-[#18181E] focus:outline-hidden"
+                    >
+                      <option value="USER">User Onboarding</option>
+                      <option value="BILLING">Billing & VIP Subscription</option>
+                      <option value="CONTENT">Content & Episode Drop</option>
+                      <option value="ENGAGEMENT">Engagement & Win-Back</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Target Audience
+                    </label>
+                    <select
+                      value={autoFormAudience}
+                      onChange={(e) => setAutoFormAudience(e.target.value)}
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-900 dark:text-white bg-slate-50 dark:bg-[#18181E] focus:outline-hidden"
+                    >
+                      <option value="All Users">All Users</option>
+                      <option value="New Users">New Users Only</option>
+                      <option value="Subscribers Only">Subscribers Only</option>
+                      <option value="Expiring Users">Expiring Soon (VIP)</option>
+                      <option value="Inactive 7+ Days">Inactive 7+ Days</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Deep Link Route
+                    </label>
+                    <input
+                      type="text"
+                      value={autoFormDeepLink}
+                      onChange={(e) => setAutoFormDeepLink(e.target.value)}
+                      placeholder="/home, /vip, /dramas"
+                      className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-900 dark:text-white bg-slate-50 dark:bg-[#18181E] focus:bg-white dark:focus:bg-[#121216] focus:outline-hidden focus:ring-1 focus:ring-[#FEF08A]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      Delay (Minutes)
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={autoFormDelay}
+                      onChange={(e) => setAutoFormDelay(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-900 dark:text-white bg-slate-50 dark:bg-[#18181E] focus:outline-hidden"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Notification Title *
+                    </label>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-[10px] text-slate-400 font-medium">Insert:</span>
+                      {['{{userName}}', '{{planName}}'].map((v) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => setAutoFormTitle((prev) => `${prev} ${v}`)}
+                          className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-amber-200/80 dark:bg-amber-400/20 text-amber-950 dark:text-amber-300 hover:opacity-80 cursor-pointer"
+                        >
+                          {v}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={autoFormTitle}
+                    onChange={(e) => setAutoFormTitle(e.target.value)}
+                    placeholder="e.g. 🎬 Welcome to E² Stories, {{userName}}!"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-900 dark:text-white bg-slate-50 dark:bg-[#18181E] focus:bg-white dark:focus:bg-[#121216] focus:outline-hidden focus:ring-1 focus:ring-[#FEF08A]"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Notification Body Copy *
+                    </label>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-[10px] text-slate-400 font-medium">Insert:</span>
+                      {['{{userName}}', '{{planName}}', '{{dramaTitle}}'].map((v) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => setAutoFormBody((prev) => `${prev} ${v}`)}
+                          className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-amber-200/80 dark:bg-amber-400/20 text-amber-950 dark:text-amber-300 hover:opacity-80 cursor-pointer"
+                        >
+                          {v}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <textarea
+                    required
+                    rows={3}
+                    value={autoFormBody}
+                    onChange={(e) => setAutoFormBody(e.target.value)}
+                    placeholder="e.g. Dive into trending vertical web series and original micro-dramas. Start watching now!"
+                    className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-medium text-slate-900 dark:text-white bg-slate-50 dark:bg-[#18181E] focus:bg-white dark:focus:bg-[#121216] focus:outline-hidden focus:ring-1 focus:ring-[#FEF08A]"
+                  />
+                </div>
+
+                {/* Mobile Notification Preview Card */}
+                <div className="p-3 rounded-xl bg-slate-100 dark:bg-[#1A1A22] border border-slate-200 dark:border-white/10 space-y-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                    Mobile Device Notification Mockup
+                  </span>
+                  <div className="p-2.5 rounded-lg bg-white dark:bg-[#121216] border border-slate-200/80 dark:border-white/10 shadow-xs flex items-start space-x-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shrink-0 font-black text-xs">
+                      E²
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <div className="flex items-center justify-between text-[10px] text-slate-400">
+                        <span className="font-bold">E² Stories</span>
+                        <span>now</span>
+                      </div>
+                      <p className="text-xs font-black text-slate-950 dark:text-white truncate">
+                        {autoFormTitle || 'Notification Title'}
+                      </p>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-tight line-clamp-2">
+                        {autoFormBody || 'Notification body copy preview...'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Enable toggle */}
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200/60 dark:border-white/5">
+                  <div>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">Enable Auto Sending</p>
+                    <p className="text-[10.5px] text-slate-400">When enabled, the backend will auto-dispatch on trigger event</p>
+                  </div>
+                  <ToggleSwitch
+                    checked={autoFormEnabled}
+                    onChange={(checked) => setAutoFormEnabled(checked)}
+                    size="sm"
+                  />
+                </div>
+
+                {/* Modal Footer Actions */}
+                <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100 dark:border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setIsAutoModalOpen(false)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingAuto}
+                    className="px-4 py-1.5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 text-xs font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer active:scale-98"
+                  >
+                    {isSubmittingAuto ? 'Saving...' : editingTrigger ? 'Save Changes' : 'Create Trigger'}
+                  </button>
+                </div>
+              </form>
+
+            </div>
+          </div>
+        </ModalPortal>
       )}
 
     </div>
   );
 }
+

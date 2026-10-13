@@ -10,19 +10,21 @@ import {
   validatePromoCode,
   applyPromoCode
 } from '../controllers/promo.controller.js';
+import { verifyAdmin } from '../middlewares/adminAuth.middleware.js';
 
 const router = Router();
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  ADMIN PANEL ROUTES
+//  ADMIN PANEL ROUTES (Protected)
 // ─────────────────────────────────────────────────────────────────────────────
-router.get('/admin',               getAdminPromos);
-router.post('/admin',              createPromo);
-router.post('/admin/bulk-generate', bulkGeneratePromos);
-router.get('/admin/:id',           getPromoById);
-router.patch('/admin/:id',         updatePromo);
-router.delete('/admin/:id',        deletePromo);
-router.patch('/admin/:id/toggle',  togglePromoStatus);
+router.get('/admin',               verifyAdmin, getAdminPromos);
+router.post('/admin',              verifyAdmin, createPromo);
+router.post('/admin/bulk-generate', verifyAdmin, bulkGeneratePromos);
+router.get('/admin/:id',           verifyAdmin, getPromoById);
+router.patch('/admin/:id',         verifyAdmin, updatePromo);
+router.delete('/admin/:id',        verifyAdmin, deletePromo);
+router.patch('/admin/:id/toggle',  verifyAdmin, togglePromoStatus);
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  CLIENT / MOBILE APP ROUTES

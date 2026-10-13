@@ -14,25 +14,27 @@ import {
   trackImpression,
   trackClick
 } from '../controllers/ad.controller.js';
+import { verifyAdmin } from '../middlewares/adminAuth.middleware.js';
 
 const router = Router();
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  ADMIN PANEL ROUTES (/api/v1/ads)
+//  ADMIN PANEL ROUTES (/api/v1/ads) - Protected
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** AdMob & Mediation Settings */
-router.get('/settings', getAdSettings);
-router.put('/settings', updateAdSettings);
+router.get('/settings', verifyAdmin, getAdSettings);
+router.put('/settings', verifyAdmin, updateAdSettings);
 
 /** Custom Direct Sponsor Ads CRUD */
-router.get('/custom', getCustomAds);
-router.post('/custom', createCustomAd);
-router.get('/custom/:id', getCustomAdById);
-router.put('/custom/:id', updateCustomAd);
-router.delete('/custom/:id', deleteCustomAd);
-router.patch('/custom/:id/toggle', toggleCustomAdStatus);
-router.post('/custom/:id/reset-stats', resetCustomAdStats);
+router.get('/custom', verifyAdmin, getCustomAds);
+router.post('/custom', verifyAdmin, createCustomAd);
+router.get('/custom/:id', verifyAdmin, getCustomAdById);
+router.put('/custom/:id', verifyAdmin, updateCustomAd);
+router.delete('/custom/:id', verifyAdmin, deleteCustomAd);
+router.patch('/custom/:id/toggle', verifyAdmin, toggleCustomAdStatus);
+router.post('/custom/:id/reset-stats', verifyAdmin, resetCustomAdStats);
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  MOBILE / CLIENT APP ROUTES (/api/v1/ads)

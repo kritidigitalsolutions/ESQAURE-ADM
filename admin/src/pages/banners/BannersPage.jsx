@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { bannerService } from '../../services/bannerService';
 import { dramaService } from '../../services/dramaService';
 import { uploadService } from '../../services/uploadService';
+import { confirmModal } from '../../context/DialogContext';
 import Badge from '../../components/common/Badge';
 import KpiStatCard from '../../components/common/KpiStatCard';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
@@ -350,7 +351,16 @@ export default function BannersPage({ onNavigate }) {
 
   // Delete Banner
   const handleDeleteBanner = async (id, title) => {
-    if (!window.confirm(`Are you sure you want to permanently delete banner "${title}"?`)) return;
+    const bannerTitle = title || 'Hero Banner';
+    const confirmed = await confirmModal({
+      title: 'Delete Banner',
+      message: `Are you sure you want to permanently delete banner "${bannerTitle}"? This slide will be removed from top hero carousels immediately.`,
+      itemName: bannerTitle,
+      confirmText: 'Delete Banner',
+      variant: 'danger'
+    });
+    if (!confirmed) return;
+
     try {
       await bannerService.deleteBanner(id);
       setBanners((prev) => prev.filter((b) => b.id !== id));
@@ -490,45 +500,6 @@ export default function BannersPage({ onNavigate }) {
         </motion.div>
       </motion.div>
 
-      {/* Page Title & Main Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-        <div className="flex items-center space-x-3">
-          <div>
-            <div className="flex items-center space-x-2.5">
-              <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
-                Banners & Hero Carousel
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-black bg-[#FEF08A] text-slate-950 border border-amber-300/60 shadow-xs">
-                {banners.length} Banners
-              </span>
-            </div>
-            <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">
-              Manage 16:9 widescreen showcase slides, video trailer teasers, and one-tap drama deep links.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2 shrink-0">
-          <button
-            type="button"
-            onClick={fetchData}
-            disabled={isLoading}
-            className="w-8 h-8 rounded-full bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.08] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 flex items-center justify-center transition-all duration-300 cursor-pointer active:scale-90 hover:scale-105 shadow-2xs group/refresh shrink-0"
-            title="Refresh Banners"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 transition-transform duration-500 ease-out group-hover/refresh:rotate-180 ${isLoading ? 'animate-spin text-[#FEF08A]' : 'group-hover/refresh:text-[#FEF08A]'}`} />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleOpenCreate}
-            className="h-8 px-4 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-full flex items-center space-x-1.5 transition-all duration-200 shadow-xs cursor-pointer active:scale-95 hover:scale-[1.02] group/upload"
-          >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5] transition-transform duration-200 group-hover/upload:rotate-90" />
-            <span>Upload Banner</span>
-          </button>
-        </div>
-      </div>
 
       {/* Unified Filter, Search & View Toolbar */}
       <div className="bg-white dark:bg-[#121216] rounded-2xl p-2.5 sm:px-3.5 border border-slate-200/90 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -622,9 +593,30 @@ export default function BannersPage({ onNavigate }) {
             )}
           </div>
 
-          <span className="text-[11.5px] text-slate-400 font-medium shrink-0 hidden lg:inline">
+          <span className="text-[11.5px] text-slate-400 font-medium shrink-0 hidden xl:inline">
             <strong className="text-slate-900 dark:text-white font-bold">{filteredBanners.length}</strong> banners listed
           </span>
+
+          {/* Refresh Button */}
+          <button
+            type="button"
+            onClick={fetchData}
+            disabled={isLoading}
+            className="w-9 h-9 rounded-full bg-slate-50 hover:bg-slate-100 dark:bg-[#18181E] dark:hover:bg-white/[0.08] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10 flex items-center justify-center transition-all duration-300 cursor-pointer active:scale-90 hover:scale-105 shadow-sm group/refresh shrink-0"
+            title="Refresh Banners"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 transition-transform duration-500 ease-out group-hover/refresh:rotate-180 ${isLoading ? 'animate-spin text-amber-500' : 'group-hover/refresh:text-amber-500'}`} />
+          </button>
+
+          {/* Upload Banner Primary CTA */}
+          <button
+            type="button"
+            onClick={handleOpenCreate}
+            className="h-8 px-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all duration-200 shadow-xs cursor-pointer active:scale-95 hover:scale-[1.02] group/upload shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5] transition-transform duration-200 group-hover/upload:rotate-90" />
+            <span>Upload Banner</span>
+          </button>
         </div>
 
       </div>
@@ -669,7 +661,7 @@ export default function BannersPage({ onNavigate }) {
               <thead className="bg-slate-50/80 dark:bg-[#18181E] border-b border-slate-200/90 dark:border-white/10 text-slate-400 font-bold uppercase tracking-wider text-[10.5px]">
                 <tr>
                   <th className="py-3 px-3.5 w-24 text-center">Rank</th>
-                  <th className="py-3 px-3.5 w-32">Artwork</th>
+                  <th className="py-3 px-3.5 w-28">Artwork</th>
                   <th className="py-3 px-3.5 min-w-[200px]">Banner Title & Info</th>
                   <th className="py-3 px-3.5 w-32">Badge</th>
                   <th className="py-3 px-3.5 min-w-[170px]">Destination Link</th>
@@ -730,31 +722,18 @@ export default function BannersPage({ onNavigate }) {
                       </div>
                     </td>
 
-                    {/* Thumbnail Artwork */}
+                    {/* Thumbnail Artwork — Rectangular */}
                     <td className="py-2.5 px-3.5 align-middle">
                       <div
-                        className={`relative aspect-[16/9] w-24 rounded-lg overflow-hidden bg-slate-950 border border-slate-200/90 dark:border-white/10 shadow-2xs group/art ${
-                          banner.trailerUrl ? 'cursor-pointer' : ''
-                        }`}
-                        onClick={() => {
-                          if (banner.trailerUrl) {
-                            setPreviewVideo({ title: banner.title, url: banner.trailerUrl });
-                          }
-                        }}
-                        title={banner.trailerUrl ? 'Click to preview teaser trailer' : undefined}
+                        className="relative w-20 h-11 rounded-lg overflow-hidden border border-slate-200/80 dark:border-white/10 bg-slate-900 shadow-2xs group/art cursor-pointer"
+                        onClick={() => handleOpenEdit(banner)}
+                        title="Click to edit banner"
                       >
                         <img
                           src={banner.bannerUrl}
                           alt={banner.title}
-                          className="w-full h-full object-cover group-hover/art:scale-108 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover/art:scale-105 transition-transform duration-300"
                         />
-                        {banner.trailerUrl && (
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/art:opacity-100 transition-opacity">
-                            <div className="w-6 h-6 rounded-full bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-md">
-                              <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </td>
 
@@ -765,9 +744,17 @@ export default function BannersPage({ onNavigate }) {
                           {banner.title}
                         </span>
                         {banner.trailerUrl && (
-                          <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-amber-400/15 text-amber-600 dark:text-amber-400 border border-amber-400/25">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewVideo({ title: banner.title, url: banner.trailerUrl });
+                            }}
+                            className="px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-amber-400/15 hover:bg-amber-400/30 text-amber-600 dark:text-amber-400 border border-amber-400/25 cursor-pointer transition-colors"
+                            title="Click to preview teaser trailer"
+                          >
                             Trailer
-                          </span>
+                          </button>
                         )}
                       </div>
                       {banner.subtitle && (

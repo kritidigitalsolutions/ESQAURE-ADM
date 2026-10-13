@@ -6,13 +6,11 @@ import {
   TrendingUp,
   Film,
   Smartphone,
-  Apple,
   CheckCircle2,
   Copy,
   Check,
   Save,
   Loader2,
-  Globe,
   Key,
   Eye,
   EyeOff,
@@ -20,16 +18,15 @@ import {
   Layers,
   ShieldCheck,
   AlertCircle,
-  ExternalLink,
   RefreshCw,
   Radio,
   Sliders,
   DollarSign,
-  Sparkles,
   PlaySquare,
   Clock,
   LayoutGrid,
-  Tag
+  Tag,
+  ChevronDown
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -40,26 +37,6 @@ import {
   Tooltip,
   CartesianGrid
 } from 'recharts';
-
-// Official Google AdMob Test Unit IDs for safe development
-const OFFICIAL_GOOGLE_TEST_UNITS = {
-  android: {
-    appId: 'ca-app-pub-3940256099942544~3347511713',
-    appOpen: 'ca-app-pub-3940256099942544/3419832817',
-    banner: 'ca-app-pub-3940256099942544/6300978111',
-    interstitial: 'ca-app-pub-3940256099942544/1033173712',
-    rewarded: 'ca-app-pub-3940256099942544/5224354917',
-    rewardedInterstitial: 'ca-app-pub-3940256099942544/5354046379'
-  },
-  ios: {
-    appId: 'ca-app-pub-3940256099942544~1458602516',
-    appOpen: 'ca-app-pub-3940256099942544/5662855259',
-    banner: 'ca-app-pub-3940256099942544/2934735716',
-    interstitial: 'ca-app-pub-3940256099942544/4411468910',
-    rewarded: 'ca-app-pub-3940256099942544/1712485313',
-    rewardedInterstitial: 'ca-app-pub-3940256099942544/6978759866'
-  }
-};
 
 // Initial default configuration
 const INITIAL_CONFIG_STATE = {
@@ -159,7 +136,7 @@ export default function AdmobPage({ onNavigate }) {
   const [showSecret, setShowSecret] = useState(false);
   const [showToken, setShowToken] = useState(false);
   const [activeTab, setActiveTab] = useState('units'); // 'units' | 'credentials' | 'analytics'
-  const [activePlatformTab, setActivePlatformTab] = useState('ALL'); // 'ALL' | 'ANDROID' | 'IOS'
+  const [activePlatformTab, setActivePlatformTab] = useState('ANDROID'); // Android only
   const [timeframe, setTimeframe] = useState('28d');
   const [currency, setCurrency] = useState('USD');
   const [toast, setToast] = useState({ show: false, text: '', type: 'success' });
@@ -257,44 +234,6 @@ export default function AdmobPage({ onNavigate }) {
     setTimeout(() => {
       setCopiedKey((prev) => (prev === key ? null : prev));
     }, 2000);
-  };
-
-  const handleApplyGoogleDemoIds = () => {
-    setForm((prev) => ({
-      ...prev,
-      testMode: true,
-      androidAppId: OFFICIAL_GOOGLE_TEST_UNITS.android.appId,
-      iosAppId: OFFICIAL_GOOGLE_TEST_UNITS.ios.appId,
-      adUnits: {
-        ...prev.adUnits,
-        appOpen: {
-          ...prev.adUnits.appOpen,
-          android: OFFICIAL_GOOGLE_TEST_UNITS.android.appOpen,
-          ios: OFFICIAL_GOOGLE_TEST_UNITS.ios.appOpen
-        },
-        banner: {
-          ...prev.adUnits.banner,
-          android: OFFICIAL_GOOGLE_TEST_UNITS.android.banner,
-          ios: OFFICIAL_GOOGLE_TEST_UNITS.ios.banner
-        },
-        interstitial: {
-          ...prev.adUnits.interstitial,
-          android: OFFICIAL_GOOGLE_TEST_UNITS.android.interstitial,
-          ios: OFFICIAL_GOOGLE_TEST_UNITS.ios.interstitial
-        },
-        rewarded: {
-          ...prev.adUnits.rewarded,
-          android: OFFICIAL_GOOGLE_TEST_UNITS.android.rewarded,
-          ios: OFFICIAL_GOOGLE_TEST_UNITS.ios.rewarded
-        },
-        rewardedInterstitial: {
-          ...prev.adUnits.rewardedInterstitial,
-          android: OFFICIAL_GOOGLE_TEST_UNITS.android.rewardedInterstitial,
-          ios: OFFICIAL_GOOGLE_TEST_UNITS.ios.rewardedInterstitial
-        }
-      }
-    }));
-    showToast('Applied official Google AdMob Test Demo IDs', 'info');
   };
 
   const handleResetToSaved = () => {
@@ -489,7 +428,7 @@ export default function AdmobPage({ onNavigate }) {
 
           <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium leading-normal gap-2">
             <span className="truncate text-slate-500 dark:text-slate-400">
-              Android & iOS units
+              Android units
             </span>
             <span className="text-emerald-600 dark:text-emerald-400 font-bold">
               {form.admobEnabled ? 'Serving' : 'Paused'}
@@ -498,38 +437,26 @@ export default function AdmobPage({ onNavigate }) {
         </div>
       </div>
 
-      {/* Page Title & Main Actions */}
+      {/* Status Badge & Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-0.5">
-        <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
-              Google AdMob Setup
-            </h1>
-            <span
-              className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                form.admobEnabled
-                  ? 'bg-[#FEF08A]/30 text-slate-900 dark:text-amber-300 border border-amber-300/50'
-                  : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
-              }`}
-            >
-              {form.admobEnabled ? 'Ads Active' : 'Ads Disabled'}
+        <div className="flex items-center space-x-2">
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+              form.admobEnabled
+                ? 'bg-[#FEF08A]/30 text-slate-900 dark:text-amber-300 border border-amber-300/50'
+                : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
+            }`}
+          >
+            {form.admobEnabled ? 'Ads Active' : 'Ads Disabled'}
+          </span>
+          {isDirty && (
+            <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
+              • Unsaved changes
             </span>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            Configure SDK publisher credentials, Ad Unit ID coordinates, and reporting synchronization.
-          </p>
+          )}
         </div>
 
         <div className="flex items-center space-x-2 shrink-0 flex-wrap gap-y-1">
-          <button
-            type="button"
-            onClick={handleApplyGoogleDemoIds}
-            className="py-1.5 px-3 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all border border-slate-200/90 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95"
-            title="Populate official Google test IDs"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Test Demo IDs</span>
-          </button>
 
           <button
             type="button"
@@ -545,7 +472,7 @@ export default function AdmobPage({ onNavigate }) {
             type="button"
             onClick={() => loadData(true)}
             disabled={isRefreshing}
-            className="p-1.5 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-xl transition-all cursor-pointer active:scale-95 shrink-0"
+            className="w-9 h-9 flex items-center justify-center bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-full transition-all cursor-pointer active:scale-90 hover:scale-105 shadow-sm shrink-0"
             title="Sync live status from server"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
@@ -620,74 +547,36 @@ export default function AdmobPage({ onNavigate }) {
       {activeTab === 'units' && (
         <div className="space-y-2.5 animate-in fade-in duration-200">
           
-          {/* App IDs: Compact 2-column card */}
+          {/* App IDs: Compact card */}
           <div className="bg-white dark:bg-[#121216] rounded-xl p-2.5 sm:p-3 border border-slate-200/80 dark:border-white/10 shadow-xs">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
-              {/* Android App ID */}
-              {(activePlatformTab === 'ALL' || activePlatformTab === 'ANDROID') && (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center space-x-1.5 w-28 sm:w-32 shrink-0">
-                    <Smartphone className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
-                    <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                      Android App ID
-                    </span>
-                  </div>
-                  <div className="relative flex-1 min-w-0">
-                    <input
-                      type="text"
-                      value={form.androidAppId}
-                      onChange={(e) => setForm((p) => ({ ...p, androidAppId: e.target.value }))}
-                      placeholder="ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX"
-                      className="w-full pl-2.5 pr-8 py-1.5 text-xs font-mono bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] transition-colors"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(form.androidAppId, 'androidAppId', 'Android App ID')}
-                      className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded transition-colors cursor-pointer"
-                      title="Copy Android App ID"
-                    >
-                      {copiedKey === 'androidAppId' ? (
-                        <Check className="w-3.5 h-3.5 text-amber-500" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* iOS App ID */}
-              {(activePlatformTab === 'ALL' || activePlatformTab === 'IOS') && (
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center space-x-1.5 w-28 sm:w-32 shrink-0">
-                    <Apple className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
-                    <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                      iOS App ID
-                    </span>
-                  </div>
-                  <div className="relative flex-1 min-w-0">
-                    <input
-                      type="text"
-                      value={form.iosAppId}
-                      onChange={(e) => setForm((p) => ({ ...p, iosAppId: e.target.value }))}
-                      placeholder="ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX"
-                      className="w-full pl-2.5 pr-8 py-1.5 text-xs font-mono bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] transition-colors"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(form.iosAppId, 'iosAppId', 'iOS App ID')}
-                      className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded transition-colors cursor-pointer"
-                      title="Copy iOS App ID"
-                    >
-                      {copiedKey === 'iosAppId' ? (
-                        <Check className="w-3.5 h-3.5 text-amber-500" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center space-x-1.5 w-28 sm:w-32 shrink-0">
+                <Smartphone className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
+                <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                  Android App ID
+                </span>
+              </div>
+              <div className="relative flex-1 min-w-0">
+                <input
+                  type="text"
+                  value={form.androidAppId}
+                  onChange={(e) => setForm((p) => ({ ...p, androidAppId: e.target.value }))}
+                  placeholder="ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX"
+                  className="w-full pl-2.5 pr-8 py-1.5 text-xs font-mono bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(form.androidAppId, 'androidAppId', 'Android App ID')}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded transition-colors cursor-pointer"
+                  title="Copy Android App ID"
+                >
+                  {copiedKey === 'androidAppId' ? (
+                    <Check className="w-3.5 h-3.5 text-amber-500" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -704,25 +593,12 @@ export default function AdmobPage({ onNavigate }) {
                 </span>
               </div>
 
-              {/* Integrated Platform Filter Pills */}
+              {/* Platform Indicator */}
               <div className="flex items-center space-x-1 p-0.5 bg-white dark:bg-[#101014] rounded-lg border border-slate-200/80 dark:border-white/10 shrink-0">
-                {[
-                  { id: 'ALL', label: 'All Platforms' },
-                  { id: 'ANDROID', label: 'Android' },
-                  { id: 'IOS', label: 'iOS' }
-                ].map((pTab) => (
-                  <button
-                    key={pTab.id}
-                    onClick={() => setActivePlatformTab(pTab.id)}
-                    className={`px-2 py-0.5 rounded-md text-[10.5px] font-bold transition-all cursor-pointer ${
-                      activePlatformTab === pTab.id
-                        ? 'bg-[#FEF08A] text-slate-950 shadow-2xs'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {pTab.label}
-                  </button>
-                ))}
+                <span className="px-2.5 py-0.5 rounded-md text-[10.5px] font-bold bg-[#FEF08A] text-slate-950 shadow-2xs flex items-center space-x-1">
+                  <Smartphone className="w-3 h-3 text-slate-950" />
+                  <span>Android</span>
+                </span>
               </div>
             </div>
 
@@ -730,30 +606,10 @@ export default function AdmobPage({ onNavigate }) {
             <div className="hidden lg:grid grid-cols-12 gap-3 px-3.5 py-1.5 bg-slate-50/40 dark:bg-white/[0.015] border-b border-slate-100 dark:border-white/5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
               <div className="col-span-3">Ad Format</div>
               <div className="col-span-1 text-center">Status</div>
-              {activePlatformTab === 'ALL' && (
-                <>
-                  <div className="col-span-4 flex items-center space-x-1">
-                    <Smartphone className="w-3 h-3 text-slate-400" />
-                    <span>Android Slot Unit ID</span>
-                  </div>
-                  <div className="col-span-4 flex items-center space-x-1">
-                    <Apple className="w-3 h-3 text-slate-400" />
-                    <span>iOS Slot Unit ID</span>
-                  </div>
-                </>
-              )}
-              {activePlatformTab === 'ANDROID' && (
-                <div className="col-span-8 flex items-center space-x-1">
-                  <Smartphone className="w-3 h-3 text-slate-400" />
-                  <span>Android Slot Unit ID</span>
-                </div>
-              )}
-              {activePlatformTab === 'IOS' && (
-                <div className="col-span-8 flex items-center space-x-1">
-                  <Apple className="w-3 h-3 text-slate-400" />
-                  <span>iOS Slot Unit ID</span>
-                </div>
-              )}
+              <div className="col-span-8 flex items-center space-x-1">
+                <Smartphone className="w-3 h-3 text-slate-400" />
+                <span>Android Slot Unit ID</span>
+              </div>
             </div>
 
             {/* Unit Rows */}
@@ -795,60 +651,30 @@ export default function AdmobPage({ onNavigate }) {
                       </div>
 
                       {/* Android Slot Input */}
-                      {(activePlatformTab === 'ALL' || activePlatformTab === 'ANDROID') && (
-                        <div className={activePlatformTab === 'ALL' ? 'col-span-4' : 'col-span-8'}>
-                          <div className="relative">
-                            <Smartphone className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                            <input
-                              type="text"
-                              value={unitState.android || ''}
-                              onChange={(e) => handleUnitChange(cfg.key, 'android', e.target.value)}
-                              placeholder="ca-app-pub-xxx/yyy"
-                              className="w-full pl-7 pr-8 py-1.5 text-xs font-mono bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] transition-colors"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => copyToClipboard(unitState.android, `and_${cfg.key}`, `Android ${cfg.name}`)}
-                              className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded transition-colors cursor-pointer"
-                              title="Copy Android Unit ID"
-                            >
-                              {copiedKey === `and_${cfg.key}` ? (
-                                <Check className="w-3.5 h-3.5 text-amber-500" />
-                              ) : (
-                                <Copy className="w-3.5 h-3.5" />
-                              )}
-                            </button>
-                          </div>
+                      <div className="col-span-8">
+                        <div className="relative">
+                          <Smartphone className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <input
+                            type="text"
+                            value={unitState.android || ''}
+                            onChange={(e) => handleUnitChange(cfg.key, 'android', e.target.value)}
+                            placeholder="ca-app-pub-xxx/yyy"
+                            className="w-full pl-7 pr-8 py-1.5 text-xs font-mono bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] transition-colors"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(unitState.android, `and_${cfg.key}`, `Android ${cfg.name}`)}
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded transition-colors cursor-pointer"
+                            title="Copy Android Unit ID"
+                          >
+                            {copiedKey === `and_${cfg.key}` ? (
+                              <Check className="w-3.5 h-3.5 text-amber-500" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
                         </div>
-                      )}
-
-                      {/* iOS Slot Input */}
-                      {(activePlatformTab === 'ALL' || activePlatformTab === 'IOS') && (
-                        <div className={activePlatformTab === 'ALL' ? 'col-span-4' : 'col-span-8'}>
-                          <div className="relative">
-                            <Apple className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                            <input
-                              type="text"
-                              value={unitState.ios || ''}
-                              onChange={(e) => handleUnitChange(cfg.key, 'ios', e.target.value)}
-                              placeholder="ca-app-pub-xxx/yyy"
-                              className="w-full pl-7 pr-8 py-1.5 text-xs font-mono bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] transition-colors"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => copyToClipboard(unitState.ios, `ios_${cfg.key}`, `iOS ${cfg.name}`)}
-                              className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded transition-colors cursor-pointer"
-                              title="Copy iOS Unit ID"
-                            >
-                              {copiedKey === `ios_${cfg.key}` ? (
-                                <Check className="w-3.5 h-3.5 text-amber-500" />
-                              ) : (
-                                <Copy className="w-3.5 h-3.5" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                      </div>
                     </div>
 
                     {/* Compact Stack Layout (< lg) */}
@@ -873,45 +699,22 @@ export default function AdmobPage({ onNavigate }) {
                         />
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {(activePlatformTab === 'ALL' || activePlatformTab === 'ANDROID') && (
-                          <div className="relative">
-                            <Smartphone className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                            <input
-                              type="text"
-                              value={unitState.android || ''}
-                              onChange={(e) => handleUnitChange(cfg.key, 'android', e.target.value)}
-                              placeholder="Android Unit ID"
-                              className="w-full pl-7 pr-8 py-1.5 text-xs font-mono bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => copyToClipboard(unitState.android, `and_${cfg.key}`, `Android ${cfg.name}`)}
-                              className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded"
-                            >
-                              {copiedKey === `and_${cfg.key}` ? <Check className="w-3.5 h-3.5 text-amber-500" /> : <Copy className="w-3.5 h-3.5" />}
-                            </button>
-                          </div>
-                        )}
-                        {(activePlatformTab === 'ALL' || activePlatformTab === 'IOS') && (
-                          <div className="relative">
-                            <Apple className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                            <input
-                              type="text"
-                              value={unitState.ios || ''}
-                              onChange={(e) => handleUnitChange(cfg.key, 'ios', e.target.value)}
-                              placeholder="iOS Unit ID"
-                              className="w-full pl-7 pr-8 py-1.5 text-xs font-mono bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => copyToClipboard(unitState.ios, `ios_${cfg.key}`, `iOS ${cfg.name}`)}
-                              className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded"
-                            >
-                              {copiedKey === `ios_${cfg.key}` ? <Check className="w-3.5 h-3.5 text-amber-500" /> : <Copy className="w-3.5 h-3.5" />}
-                            </button>
-                          </div>
-                        )}
+                      <div className="relative">
+                        <Smartphone className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={unitState.android || ''}
+                          onChange={(e) => handleUnitChange(cfg.key, 'android', e.target.value)}
+                          placeholder="Android Unit ID"
+                          className="w-full pl-7 pr-8 py-1.5 text-xs font-mono bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(unitState.android, `and_${cfg.key}`, `Android ${cfg.name}`)}
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded"
+                        >
+                          {copiedKey === `and_${cfg.key}` ? <Check className="w-3.5 h-3.5 text-amber-500" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1089,23 +892,6 @@ export default function AdmobPage({ onNavigate }) {
                 </div>
               </div>
             </div>
-
-            {/* Website Monetization Notice */}
-            <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-300">
-              <Globe className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-slate-900 dark:text-white">Website Monetization:</strong> Web platform uses{' '}
-                <strong className="text-slate-900 dark:text-white">Google AdSense</strong>. Manage web ad slot IDs in{' '}
-                <button
-                  type="button"
-                  onClick={() => onNavigate ? onNavigate('ad_control') : null}
-                  className="text-amber-600 dark:text-amber-400 font-bold hover:underline cursor-pointer inline-flex items-center gap-0.5"
-                >
-                  <span>AdSense Manager</span>
-                  <ExternalLink className="w-3 h-3 inline" />
-                </button>.
-              </div>
-            </div>
           </div>
         </div>
       )}
@@ -1134,16 +920,19 @@ export default function AdmobPage({ onNavigate }) {
 
               <div className="flex items-center space-x-2">
                 {/* Timeframe Selector */}
-                <select
-                  value={timeframe}
-                  onChange={(e) => setTimeframe(e.target.value)}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white cursor-pointer"
-                >
-                  <option value="28d">Last 28 Days</option>
-                  <option value="14d">Last 14 Days</option>
-                  <option value="7d">Last 7 Days</option>
-                  <option value="month">This Month</option>
-                </select>
+                <div className="relative inline-flex items-center">
+                  <select
+                    value={timeframe}
+                    onChange={(e) => setTimeframe(e.target.value)}
+                    className="appearance-none pl-3 pr-8 py-1 text-xs font-semibold rounded-lg bg-slate-50 dark:bg-[#18181E] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white cursor-pointer focus:outline-hidden hover:bg-slate-100 dark:hover:bg-[#24242E] transition-colors"
+                  >
+                    <option value="28d" className="dark:bg-[#1E1E26]">Last 28 Days</option>
+                    <option value="14d" className="dark:bg-[#1E1E26]">Last 14 Days</option>
+                    <option value="7d" className="dark:bg-[#1E1E26]">Last 7 Days</option>
+                    <option value="month" className="dark:bg-[#1E1E26]">This Month</option>
+                  </select>
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
+                </div>
 
                 {/* Currency Switcher */}
                 <div className="flex items-center space-x-1 p-0.5 bg-slate-100 dark:bg-[#18181E] rounded-lg border border-slate-200/60 dark:border-white/10">
