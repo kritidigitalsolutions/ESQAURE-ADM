@@ -42,17 +42,27 @@ export default function LoginPage({ onLoginSuccess }) {
 
     try {
       const user = await loginWithEmail(cleanEmail, password);
+      let idToken = '';
+      try {
+        idToken = await user.getIdToken();
+      } catch (tokErr) {
+        console.warn('Could not retrieve token immediately:', tokErr);
+      }
 
       // Persist user session info for fast UI hydration
       try {
         localStorage.setItem('admin_authenticated', 'true');
         localStorage.setItem('admin_user_email', user.email || cleanEmail);
+        if (idToken) {
+          localStorage.setItem('admin_token', idToken);
+        }
         if (user.displayName) {
           localStorage.setItem('admin_user_name', user.displayName);
         }
       } catch (err) {
         console.error('Error storing session', err);
       }
+
 
       if (onLoginSuccess) {
         onLoginSuccess(user);

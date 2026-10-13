@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { legalService } from '../../services/legalService';
 import PageLoader from '../../components/common/PageLoader';
+import { confirmModal } from '../../context/DialogContext';
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
 const fmtDate = (d) =>
@@ -210,7 +211,15 @@ export default function LegalPage() {
 
   /* Discard */
   const handleDiscard = async () => {
-    if (!window.confirm('Discard all unsaved edits and reload from database?')) return;
+    const docTitle = docData[activeId]?.title || 'policy document';
+    const confirmed = await confirmModal({
+      title: 'Discard Changes',
+      message: `Discard all unsaved edits to ${docTitle} and reload from the database? All unsaved progress will be permanently lost.`,
+      confirmText: 'Discard Changes',
+      variant: 'warning'
+    });
+    if (!confirmed) return;
+
     await loadData();
     showToast('success', 'Changes discarded.');
   };
@@ -299,7 +308,7 @@ export default function LegalPage() {
           <button
             onClick={loadData}
             disabled={loading}
-            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 transition-colors border border-slate-200/80 dark:border-white/10 cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-700 dark:text-slate-300 transition-all border border-slate-200/80 dark:border-white/10 cursor-pointer hover:scale-105 active:scale-90 shadow-sm shrink-0"
             title="Reload policies from server"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-amber-500' : ''}`} />

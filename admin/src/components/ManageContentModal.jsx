@@ -37,6 +37,7 @@ import {
 import { dramaService } from '../services/dramaService';
 import { genreService } from '../services/genreService';
 import { uploadService } from '../services/uploadService';
+import { confirmModal } from '../context/DialogContext';
 
 export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
   if (!isOpen || !drama) return null;
@@ -426,7 +427,18 @@ export default function ManageContentModal({ isOpen, drama, onClose, onSave }) {
     setTotalEpisodes(updated.length);
   };
 
-  const handleRemoveEpisode = (epId) => {
+  const handleRemoveEpisode = async (epId) => {
+    const epToRemove = episodesList.find(ep => ep.id === epId);
+    const epTitle = epToRemove?.title || `Episode ${epToRemove?.episodeNumber || ''}`;
+    const confirmed = await confirmModal({
+      title: 'Remove Episode',
+      message: `Are you sure you want to remove "${epTitle}" from this series?`,
+      itemName: epTitle,
+      confirmText: 'Remove Episode',
+      variant: 'danger'
+    });
+    if (!confirmed) return;
+
     const filtered = episodesList.filter(ep => ep.id !== epId);
     // Renumber remaining episodes
     const renumbered = filtered.map((ep, idx) => ({

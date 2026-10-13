@@ -11,15 +11,20 @@ export default async function handler(req, res) {
   if (!initialized) {
     try {
       await connectDB();
-      await seedDefaultGenres();
-      await seedDefaultLegalDocs();
-      await removeDummyUsers();
       initializeFirebase();
+
+      // Only run initial migration seeds in development, not on production lambda cold starts
+      if (process.env.NODE_ENV !== 'production') {
+        await seedDefaultGenres();
+        await seedDefaultLegalDocs();
+        await removeDummyUsers();
+      }
       initialized = true;
     } catch (err) {
       console.error('[Vercel Serverless Initialization Error]:', err);
     }
   }
+
 
   return app(req, res);
 }

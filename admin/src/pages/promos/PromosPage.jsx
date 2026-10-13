@@ -13,8 +13,6 @@ import {
   Check,
   CheckCircle2,
   Percent,
-  ToggleLeft,
-  ToggleRight,
   Pencil,
   AlertCircle,
   Sparkles,
@@ -22,14 +20,16 @@ import {
 } from 'lucide-react';
 import promoService from '../../services/promoService';
 import { subscriptionService } from '../../services/subscriptionService';
+import { confirmModal } from '../../context/DialogContext';
 import PageLoader from '../../components/common/PageLoader';
 import ModalPortal from '../../components/common/ModalPortal';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
+import Badge, { cleanPlanName } from '../../components/common/Badge';
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
 const formatDiscount = (type, value) => {
   if (type === 'PERCENTAGE') return `${value}% Off`;
-  if (type === 'FLAT') return `Flat ₹${value} Off`;
+  if (type === 'FLAT') return `₹${value} Off`;
   return `${value}`;
 };
 
@@ -52,32 +52,7 @@ const EMPTY_FORM = {
   description: ''
 };
 
-// ─── Status Badge ─────────────────────────────────────────────────────────────
-function StatusBadge({ status }) {
-  const isActive = status === 'ACTIVE';
-  const isPaused = status === 'PAUSED';
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold ${
-        isActive
-          ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40'
-          : isPaused
-          ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/40'
-          : 'bg-slate-100 dark:bg-white/[0.06] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10'
-      }`}
-    >
-      <span
-        className={`w-1.5 h-1.5 rounded-full ${
-          isActive ? 'bg-emerald-500' : isPaused ? 'bg-amber-500' : 'bg-slate-400'
-        }`}
-      />
-      <span>{status || 'EXPIRED'}</span>
-    </span>
-  );
-}
-
-// ─── Promo Modal ──────────────────────────────────────────────────────────────
+// ─── Promo Modal (Create / Edit) ──────────────────────────────────────────────
 function PromoModal({ initial, plans = [], onClose, onSaved }) {
   const isEdit = Boolean(initial?.id);
   const [form, setForm] = useState(
@@ -139,11 +114,11 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
   return (
     <ModalPortal isOpen={true}>
       <div className="fixed inset-0 z-[99999] bg-slate-950/60 dark:bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-        <div className="bg-white dark:bg-[#24242E] rounded-xl max-w-md w-full p-4 sm:p-5 shadow-2xl space-y-3.5 border border-slate-200 dark:border-white/15 font-urbanist animate-in fade-in zoom-in-95 duration-150">
+        <div className="bg-white dark:bg-[#24242E] rounded-2xl max-w-md w-full p-4 sm:p-5 shadow-2xl space-y-3.5 border border-slate-200 dark:border-white/15 font-urbanist animate-in fade-in zoom-in-95 duration-150">
           {/* Header */}
           <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <TicketPercent className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
@@ -158,15 +133,15 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
             <button
               type="button"
               onClick={onClose}
-              className="w-6 h-6 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+              className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
           {error && (
-            <div className="flex items-center space-x-2 text-rose-600 dark:text-rose-400 text-[11px] font-semibold bg-rose-50 dark:bg-rose-950/30 rounded-lg p-2.5 border border-rose-200 dark:border-rose-800/40">
-              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+            <div className="flex items-center space-x-2 text-rose-600 dark:text-rose-400 text-[11px] font-semibold bg-rose-50 dark:bg-rose-950/30 rounded-xl p-2.5 border border-rose-200 dark:border-rose-800/40">
+              <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
@@ -194,7 +169,7 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
                 onChange={(e) => set('code', e.target.value.toUpperCase().replace(/\s+/g, ''))}
                 disabled={isEdit}
                 placeholder="e.g. WELCOME20, FESTIVAL50"
-                className="w-full px-2.5 py-1.5 font-mono text-xs font-bold uppercase rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-[#121216] focus:outline-none focus:border-[#FEF08A] transition-colors disabled:opacity-60"
+                className="w-full px-3 py-2 font-mono text-xs font-bold uppercase rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:bg-white dark:focus:bg-[#121216] focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A] transition-colors disabled:opacity-60"
                 required
               />
             </div>
@@ -208,7 +183,7 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
                 <select
                   value={form.discountType}
                   onChange={(e) => set('discountType', e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+                  className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A] cursor-pointer"
                 >
                   <option value="PERCENTAGE">Percentage (% Off)</option>
                   <option value="FLAT">Flat Rate (₹ Off)</option>
@@ -226,7 +201,7 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
                   value={form.discountValue}
                   onChange={(e) => set('discountValue', e.target.value)}
                   placeholder={form.discountType === 'PERCENTAGE' ? '20' : '50'}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
+                  className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A]"
                   required
                 />
               </div>
@@ -241,7 +216,7 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
                 <select
                   value={form.applicablePlan}
                   onChange={(e) => set('applicablePlan', e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+                  className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A] cursor-pointer"
                 >
                   <option value="ALL">All Subscription Plans</option>
                   {plans.map((p) => (
@@ -269,7 +244,7 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
                   value={form.maxUses}
                   onChange={(e) => set('maxUses', e.target.value)}
                   placeholder="500"
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
+                  className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A]"
                   required
                 />
               </div>
@@ -285,38 +260,24 @@ function PromoModal({ initial, plans = [], onClose, onSaved }) {
                 value={form.expiryDate}
                 onChange={(e) => set('expiryDate', e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+                className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A] cursor-pointer"
                 required
               />
             </div>
 
-            {/* Description / Campaign Note */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Internal Note / Description
-              </label>
-              <input
-                type="text"
-                value={form.description}
-                onChange={(e) => set('description', e.target.value)}
-                placeholder="e.g. Festival launch 20% discount offer"
-                className="w-full px-2.5 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
-              />
-            </div>
-
             {/* Modal Actions */}
-            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100 dark:border-white/10">
+            <div className="flex items-center justify-end space-x-2 pt-2.5 border-t border-slate-100 dark:border-white/10">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="px-3.5 py-1.5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+                className="px-4 py-1.5 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-60"
               >
                 {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Create Promo Code'}
               </button>
@@ -375,10 +336,10 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
   return (
     <ModalPortal isOpen={true}>
       <div className="fixed inset-0 z-[99999] bg-slate-950/60 dark:bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-        <div className="bg-white dark:bg-[#24242E] rounded-xl max-w-md w-full p-4 sm:p-5 shadow-2xl space-y-3.5 border border-slate-200 dark:border-white/15 font-urbanist animate-in fade-in zoom-in-95 duration-150">
+        <div className="bg-white dark:bg-[#24242E] rounded-2xl max-w-md w-full p-4 sm:p-5 shadow-2xl space-y-3.5 border border-slate-200 dark:border-white/15 font-urbanist animate-in fade-in zoom-in-95 duration-150">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/10">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs shrink-0">
                 <Sparkles className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
@@ -393,15 +354,15 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
             <button
               type="button"
               onClick={onClose}
-              className="w-6 h-6 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+              className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
           {error && (
-            <div className="flex items-center space-x-2 text-rose-600 dark:text-rose-400 text-[11px] font-semibold bg-rose-50 dark:bg-rose-950/30 rounded-lg p-2.5 border border-rose-200 dark:border-rose-800/40">
-              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+            <div className="flex items-center space-x-2 text-rose-600 dark:text-rose-400 text-[11px] font-semibold bg-rose-50 dark:bg-rose-950/30 rounded-xl p-2.5 border border-rose-200 dark:border-rose-800/40">
+              <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
@@ -417,7 +378,7 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
                   value={prefix}
                   onChange={(e) => setPrefix(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
                   placeholder="DIWALI"
-                  className="w-full px-2.5 py-1.5 font-mono text-xs font-bold uppercase rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                  className="w-full px-3 py-2 font-mono text-xs font-bold uppercase rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A]"
                   required
                 />
               </div>
@@ -431,7 +392,7 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
                   max="50"
                   value={count}
                   onChange={(e) => setCount(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                  className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A]"
                   required
                 />
               </div>
@@ -445,7 +406,7 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
                 <select
                   value={discountType}
                   onChange={(e) => setDiscountType(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+                  className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A] cursor-pointer"
                 >
                   <option value="PERCENTAGE">Percentage (% Off)</option>
                   <option value="FLAT">Flat Rate (₹ Off)</option>
@@ -462,7 +423,7 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
                   max={discountType === 'PERCENTAGE' ? '100' : '9999'}
                   value={discountValue}
                   onChange={(e) => setDiscountValue(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                  className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A]"
                   required
                 />
               </div>
@@ -476,7 +437,7 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
                 <select
                   value={applicablePlan}
                   onChange={(e) => setApplicablePlan(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+                  className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A] cursor-pointer"
                 >
                   <option value="ALL">All Subscription Plans</option>
                   {plans.map((p) => (
@@ -503,12 +464,13 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
                   min="1"
                   value={maxUses}
                   onChange={(e) => setMaxUses(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A]"
+                  className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A]"
                   required
                 />
               </div>
             </div>
 
+            {/* Expiry Date */}
             <div>
               <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Expiry Date *
@@ -518,36 +480,23 @@ function BulkPromoModal({ plans = [], onClose, onSaved }) {
                 value={expiryDate}
                 onChange={(e) => setExpiryDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-none focus:border-[#FEF08A] cursor-pointer"
+                className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#FEF08A]/50 focus:border-[#FEF08A] cursor-pointer"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Campaign Description
-              </label>
-              <input
-                type="text"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="e.g. Diwali festive campaign batch"
-                className="w-full px-2.5 py-1.5 text-xs font-medium rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#18181E] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-[#FEF08A]"
-              />
-            </div>
-
-            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-100 dark:border-white/10">
+            <div className="flex items-center justify-end space-x-2 pt-2.5 border-t border-slate-100 dark:border-white/10">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="px-3.5 py-1.5 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+                className="px-4 py-1.5 rounded-xl bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs shadow-xs transition-colors cursor-pointer disabled:opacity-60"
               >
                 {saving ? 'Generating...' : `Generate ${count} Codes`}
               </button>
@@ -637,7 +586,15 @@ export default function PromosPage() {
   };
 
   const handleDelete = async (id, code) => {
-    if (!window.confirm(`Are you sure you want to delete promo code "${code}"?`)) return;
+    const confirmed = await confirmModal({
+      title: 'Delete Promo Code',
+      message: `Are you sure you want to delete promo code "${code}"? Customers will no longer be able to apply this discount at checkout.`,
+      itemName: code,
+      confirmText: 'Delete Promo',
+      variant: 'danger'
+    });
+    if (!confirmed) return;
+
     setActionLoadingId(id);
     try {
       const res = await promoService.deletePromo(id);
@@ -674,6 +631,7 @@ export default function PromosPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    showToast('Promo codes exported to CSV.');
   };
 
   // Filter & Sort
@@ -711,13 +669,75 @@ export default function PromosPage() {
     <div className="space-y-3 sm:space-y-3.5 font-urbanist text-slate-900 dark:text-slate-100 pb-10">
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed bottom-4 right-4 z-50 bg-[#18181E] text-[#FEF08A] border border-amber-400/30 px-3 py-2 rounded-lg text-xs font-bold shadow-xl flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-2 duration-150">
-          <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+        <div className="fixed bottom-4 right-4 z-50 bg-[#18181E] text-[#FEF08A] border border-amber-400/30 px-3.5 py-2 rounded-xl text-xs font-bold shadow-2xl flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-2 duration-150">
+          <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* KPI Overview Cards - Consistent Theme Badge (#FEF08A), Compact */}
+      {/* ─── Top Header & Primary Action Bar ─── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-0.5">
+        <div>
+          <div className="flex items-center space-x-2">
+            <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
+              Promo Codes & Discounts
+            </h1>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A] text-slate-950 border border-amber-300/50 shadow-2xs">
+              {promos.length} Codes
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+            Create, track, and manage promotional discount coupons for subscription checkout.
+          </p>
+        </div>
+
+        <div className="flex items-center space-x-2 shrink-0">
+          {/* Refresh Button */}
+          <button
+            type="button"
+            onClick={fetchData}
+            disabled={loading}
+            className="w-9 h-9 flex items-center justify-center bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-full transition-all cursor-pointer active:scale-90 hover:scale-105 shadow-sm shrink-0"
+            title="Refresh promo codes"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-amber-500' : ''}`} />
+          </button>
+
+          {/* Export CSV */}
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            className="py-1.5 px-3 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all border border-slate-200/90 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95 shrink-0"
+            title="Export CSV"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>CSV</span>
+          </button>
+
+          {/* Bulk Generate */}
+          <button
+            type="button"
+            onClick={() => setModal({ mode: 'bulk' })}
+            className="py-1.5 px-3 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all border border-slate-200/90 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95 shrink-0"
+            title="Generate batch of promo codes"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>Bulk</span>
+          </button>
+
+          {/* New Promo Code Button */}
+          <button
+            type="button"
+            onClick={() => setModal({ mode: 'create' })}
+            className="py-1.5 px-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Add Code</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ─── KPI Overview Cards ─── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         {/* Metric 1: Active Codes */}
         <div className="bg-white dark:bg-[#121216] rounded-xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col justify-between group select-none">
@@ -742,7 +762,7 @@ export default function PromosPage() {
             </div>
           </div>
           <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium">
-            <span className="text-slate-500 dark:text-slate-400">Discount coupons</span>
+            <span className="text-slate-500 dark:text-slate-400">Campaigns live</span>
             <span className="text-emerald-600 dark:text-emerald-400 font-bold">Active</span>
           </div>
         </div>
@@ -770,8 +790,8 @@ export default function PromosPage() {
             </div>
           </div>
           <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium">
-            <span className="text-slate-500 dark:text-slate-400">Claims recorded</span>
-            <span className="text-amber-600 dark:text-amber-400 font-bold">Applied</span>
+            <span className="text-slate-500 dark:text-slate-400">Customer savings</span>
+            <span className="text-amber-600 dark:text-amber-400 font-bold">Redeemed</span>
           </div>
         </div>
 
@@ -799,7 +819,7 @@ export default function PromosPage() {
           </div>
           <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] font-medium">
             <span className="text-slate-500 dark:text-slate-400">{pausedCount} paused codes</span>
-            <span className="text-slate-600 dark:text-slate-300 font-bold">Total</span>
+            <span className="text-slate-600 dark:text-slate-300 font-bold">Catalog</span>
           </div>
         </div>
 
@@ -832,65 +852,9 @@ export default function PromosPage() {
         </div>
       </div>
 
-      {/* Header & Main Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-0.5">
-        <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
-              Promo Codes & Discounts
-            </h1>
-            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs text-slate-950 border border-amber-300/50">
-              {filteredPromos.length} Codes
-            </span>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            Create and manage percentage and flat discount coupons applied during subscription checkout.
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-2 shrink-0">
-          <button
-            type="button"
-            onClick={fetchData}
-            disabled={loading}
-            className="p-1.5 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-lg transition-all cursor-pointer active:scale-95 shrink-0"
-            title="Refresh promo codes"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-amber-500' : ''}`} />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleExportCSV}
-            className="py-1.5 px-3 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all border border-slate-200/90 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export CSV</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setModal({ mode: 'bulk' })}
-            className="py-1.5 px-3 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all border border-slate-200/90 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Bulk Generate</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setModal({ mode: 'create' })}
-            className="py-1.5 px-3 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
-          >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Create Promo Code</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Filter & Search Bar - Compact Single Row */}
-      <div className="bg-white dark:bg-[#121216] rounded-xl p-2 sm:px-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2">
-        {/* Status Filter Tabs */}
+      {/* ─── Unified Filter & Search Toolbar ─── */}
+      <div className="bg-white dark:bg-[#121216] rounded-xl p-2 sm:px-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+        {/* Left: Status Filter Tabs */}
         <div className="flex items-center space-x-1 p-0.5 bg-slate-100 dark:bg-[#18181E] rounded-lg border border-slate-200/60 dark:border-white/10 shrink-0 overflow-x-auto">
           {[
             { id: 'ALL', label: `All (${promos.length})` },
@@ -915,32 +879,35 @@ export default function PromosPage() {
           })}
         </div>
 
-        {/* Search & Sort */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <div className="relative flex-1 sm:w-56">
+        {/* Right: Search Box + Sort Dropdown */}
+        <div className="flex items-center flex-wrap sm:flex-nowrap gap-2 w-full md:w-auto">
+          {/* Search Input */}
+          <div className="relative flex-1 sm:w-64">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search code, discount..."
+              placeholder="Search code, description, plan..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-[#121216] focus:outline-none focus:border-[#FEF08A] placeholder:text-slate-400 transition-colors"
+              className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-[#121216] focus:outline-hidden focus:border-[#FEF08A] placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer"
+                title="Clear search"
               >
                 <X className="w-3 h-3" />
               </button>
             )}
           </div>
 
+          {/* Sort By Dropdown */}
           <div className="relative flex items-center shrink-0">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="appearance-none pl-3 pr-8 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FEF08A] cursor-pointer transition-colors"
+              className="appearance-none pl-3 pr-8 py-1.5 bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg font-bold text-xs text-slate-900 dark:text-slate-100 focus:outline-hidden focus:border-[#FEF08A] cursor-pointer transition-colors"
             >
               <option value="newest" className="dark:bg-[#1E1E26]">Recent First</option>
               <option value="uses" className="dark:bg-[#1E1E26]">Most Redemptions</option>
@@ -949,6 +916,11 @@ export default function PromosPage() {
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
           </div>
+
+          {/* Matches Counter */}
+          <span className="text-[11px] text-slate-400 font-medium shrink-0 hidden xl:inline">
+            <strong className="text-slate-900 dark:text-white font-bold">{filteredPromos.length}</strong> matches
+          </span>
         </div>
       </div>
 
@@ -960,34 +932,47 @@ export default function PromosPage() {
         </div>
       )}
 
-      {/* Promo Codes Table */}
-      <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden">
-        {loading ? (
-          <PageLoader size="sm" text="Loading promo codes..." minHeight="min-h-[200px]" />
+      {/* ─── Promo Codes Table Container ─── */}
+      <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden transition-colors">
+        {loading && promos.length === 0 ? (
+          <div className="py-10">
+            <PageLoader size="sm" text="Loading promo code directory..." minHeight="min-h-[200px]" />
+          </div>
         ) : filteredPromos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-10 space-y-1.5 text-slate-400">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400">
-              <TicketPercent className="w-4 h-4" />
+          <div className="py-12 text-center flex flex-col items-center justify-center space-y-2">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 shadow-2xs">
+              <TicketPercent className="w-5 h-5" />
             </div>
             <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
               No promo codes found
             </p>
-            <p className="text-[11px] text-slate-400 dark:text-slate-500">
-              {searchTerm ? `No codes matching "${searchTerm}".` : 'No promo codes in this view.'}
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 max-w-xs">
+              {searchTerm
+                ? `No codes match "${searchTerm}". Try another keyword or clear filters.`
+                : 'No promo codes in this view tier. Create a new campaign to get started.'}
             </p>
+            {!searchTerm && statusFilter === 'ALL' && (
+              <button
+                type="button"
+                onClick={() => setModal({ mode: 'create' })}
+                className="mt-2 py-1.5 px-3 rounded-lg bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs shadow-xs transition-colors cursor-pointer"
+              >
+                Create Promo Code
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs border-collapse">
               <thead className="bg-slate-50 dark:bg-[#18181E] border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold">
                 <tr>
-                  <th className="py-2.5 px-3">Promo Code</th>
-                  <th className="py-2.5 px-3">Discount Off</th>
-                  <th className="py-2.5 px-3">Applicable Plan</th>
-                  <th className="py-2.5 px-3">Redemption Quota</th>
-                  <th className="py-2.5 px-3">Expiry Date</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3 text-right">Actions</th>
+                  <th className="py-2.5 px-3 min-w-[190px]">Promo Code</th>
+                  <th className="py-2.5 px-3 w-36">Discount Rate</th>
+                  <th className="py-2.5 px-3 w-40">Applicable Plan</th>
+                  <th className="py-2.5 px-3 w-44">Redemption Quota</th>
+                  <th className="py-2.5 px-3 w-32">Expiry Date</th>
+                  <th className="py-2.5 px-3 w-28 text-center">Status</th>
+                  <th className="py-2.5 px-3 w-32 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium text-slate-900 dark:text-slate-100">
@@ -998,10 +983,10 @@ export default function PromosPage() {
                   return (
                     <tr
                       key={p.id}
-                      className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors"
+                      className="hover:bg-slate-50/80 dark:hover:bg-white/[0.03] transition-colors"
                     >
-                      {/* Code */}
-                      <td className="py-2 px-3">
+                      {/* Code + Description */}
+                      <td className="py-2 px-3 whitespace-nowrap">
                         <div className="flex items-center space-x-1.5">
                           <span className="px-2 py-0.5 rounded-md bg-[#FEF08A]/35 dark:bg-[#FEF08A]/15 font-mono font-bold text-xs text-slate-950 dark:text-[#FEF08A] border border-amber-300/40 dark:border-amber-400/25">
                             {p.code}
@@ -1009,7 +994,7 @@ export default function PromosPage() {
                           <button
                             type="button"
                             onClick={() => handleCopy(p.code)}
-                            className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded transition-colors cursor-pointer"
+                            className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-md transition-colors cursor-pointer"
                             title="Copy code"
                           >
                             {copiedCode === p.code ? (
@@ -1019,48 +1004,40 @@ export default function PromosPage() {
                             )}
                           </button>
                         </div>
-                        {p.description && (
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500 block truncate max-w-[180px] mt-0.5">
-                            {p.description}
-                          </span>
-                        )}
                       </td>
 
                       {/* Benefit */}
-                      <td className="py-2 px-3 font-bold text-slate-950 dark:text-white">
-                        <span className="inline-flex items-center gap-1">
-                          <Tag className="w-3 h-3 text-amber-500" />
-                          <span>{formatDiscount(p.discountType, p.discountValue)}</span>
-                        </span>
+                      <td className="py-2 px-3 whitespace-nowrap">
+                        <Badge
+                          variant={p.discountType === 'PERCENTAGE' ? 'discount-percent' : 'discount-flat'}
+                          label={formatDiscount(p.discountType, p.discountValue)}
+                          size="xs"
+                        />
                       </td>
 
                       {/* Plan Scope */}
-                      <td className="py-2 px-3">
-                        <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.06] text-[10px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10">
-                          {p.applicablePlan === 'ALL'
-                            ? 'All Plans'
-                            : plans.find((pl) => pl.code === p.applicablePlan)?.name ||
-                              (p.applicablePlan === 'PLAN_1M'
-                                ? '1 Month Pass'
-                                : p.applicablePlan === 'PLAN_6M'
-                                ? '6 Month Pass'
-                                : p.applicablePlan === 'PLAN_12M'
-                                ? '12 Month Pass'
-                                : p.applicablePlan)}
-                        </span>
+                      <td className="py-2 px-3 whitespace-nowrap">
+                        <Badge
+                          plan={cleanPlanName(
+                            p.applicablePlan === 'ALL' || !p.applicablePlan
+                              ? 'All Subscription Plans'
+                              : (plans.find((pl) => pl.code === p.applicablePlan)?.name || p.applicablePlan)
+                          )}
+                          size="xs"
+                        />
                       </td>
 
                       {/* Usage Progress */}
-                      <td className="py-2 px-3">
-                        <div className="space-y-1 w-24">
-                          <div className="flex justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
-                            <span>{(p.currentUses || 0).toLocaleString()}</span>
-                            <span className="text-slate-400">/ {p.maxUses.toLocaleString()}</span>
+                      <td className="py-2 px-3 whitespace-nowrap">
+                        <div className="space-y-1 w-32">
+                          <div className="flex justify-between items-center text-[10px] font-mono text-slate-600 dark:text-slate-400">
+                            <span>{(p.currentUses || 0).toLocaleString()} / {p.maxUses.toLocaleString()}</span>
+                            <span className="text-[9.5px] font-bold text-slate-400">{pct}%</span>
                           </div>
                           <div className="w-full bg-slate-100 dark:bg-[#18181E] rounded-full h-1.5 overflow-hidden border border-slate-200/40 dark:border-white/5">
                             <div
                               className={`h-full rounded-full transition-all ${
-                                pct >= 100 ? 'bg-rose-500' : 'bg-[#FACC15]'
+                                pct >= 100 ? 'bg-rose-500' : pct >= 80 ? 'bg-amber-400' : 'bg-[#FACC15]'
                               }`}
                               style={{ width: `${Math.min(pct, 100)}%` }}
                             />
@@ -1068,21 +1045,25 @@ export default function PromosPage() {
                         </div>
                       </td>
 
-                      {/* Expiry */}
-                      <td className="py-2 px-3 text-slate-600 dark:text-slate-300 text-[11px] font-medium whitespace-nowrap">
+                      {/* Expiry Date */}
+                      <td className="py-2 px-3 text-slate-700 dark:text-slate-300 text-xs font-semibold whitespace-nowrap">
                         {formatDate(p.expiryDate)}
                       </td>
 
                       {/* Status */}
-                      <td className="py-2 px-3">
-                        <StatusBadge status={p.status} />
+                      <td className="py-2 px-3 whitespace-nowrap text-center">
+                        <Badge
+                          variant={p.status === 'ACTIVE' ? 'active' : p.status === 'PAUSED' ? 'paused' : 'inactive'}
+                          label={p.status || 'EXPIRED'}
+                          size="xs"
+                        />
                       </td>
 
                       {/* Actions */}
-                      <td className="py-2 px-3 text-right">
-                        <div className="flex items-center justify-end space-x-1">
+                      <td className="py-2 px-3 whitespace-nowrap text-right">
+                        <div className="flex items-center justify-end space-x-1.5">
                           {p.status !== 'EXPIRED' && (
-                            <div className="inline-flex items-center px-1" title={p.status === 'ACTIVE' ? 'Pause promo' : 'Activate promo'}>
+                            <div className="inline-flex items-center" title={p.status === 'ACTIVE' ? 'Pause promo' : 'Activate promo'}>
                               <ToggleSwitch
                                 checked={p.status === 'ACTIVE'}
                                 onChange={() => handleToggle(p.id)}
@@ -1096,7 +1077,7 @@ export default function PromosPage() {
                             type="button"
                             onClick={() => setModal({ mode: 'edit', promo: p })}
                             disabled={isBusy}
-                            className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-md transition-colors cursor-pointer"
+                            className="p-1 text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 rounded-md transition-colors cursor-pointer"
                             title="Edit promo code"
                           >
                             <Pencil className="w-3.5 h-3.5" />
@@ -1122,7 +1103,7 @@ export default function PromosPage() {
         )}
       </div>
 
-      {/* Modals */}
+      {/* ─── Modals ─── */}
       {modal?.mode === 'bulk' && (
         <BulkPromoModal
           plans={plans}

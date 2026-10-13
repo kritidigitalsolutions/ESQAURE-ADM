@@ -1,3 +1,5 @@
+import { getAdminAuthToken } from './apiClient';
+
 const API_BASE = '/api/v1/upload';
 const FALLBACK_BASE = 'http://localhost:5001/api/v1/upload';
 
@@ -17,6 +19,7 @@ export const uploadService = {
       throw new Error('Please select a file to upload.');
     }
 
+    const token = await getAdminAuthToken();
     const formData = new FormData();
     formData.append('file', file);
     if (folder) {
@@ -26,9 +29,14 @@ export const uploadService = {
     const tryUpload = async (url) => {
       const response = await fetch(url, {
         method: 'POST',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          'X-Admin-Key': token
+        },
         body: formData
         // Note: fetch will automatically set multipart/form-data with proper boundary
       });
+
 
       const contentType = response.headers.get('content-type') || '';
       if (!contentType.includes('application/json')) {
@@ -70,11 +78,17 @@ export const uploadService = {
       formData.append('folder', folder);
     }
 
+    const token = await getAdminAuthToken();
     const tryUpload = async (url) => {
       const response = await fetch(url, {
         method: 'POST',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          'X-Admin-Key': token
+        },
         body: formData
       });
+
 
       const contentType = response.headers.get('content-type') || '';
       if (!contentType.includes('application/json')) {

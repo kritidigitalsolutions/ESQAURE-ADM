@@ -1,13 +1,12 @@
 import { Router } from 'express';
 import { SubscriptionAdminController } from '../controllers/subscriptionAdmin.controller.js';
+import { verifyAdmin } from '../middlewares/adminAuth.middleware.js';
 
 const router = Router();
 
-/**
- * ─────────────────────────────────────────────────────────────────────────────
- * ADMIN SUBSCRIPTION MANAGEMENT ROUTES (/api/v1/subscriptions/admin)
- * ─────────────────────────────────────────────────────────────────────────────
- */
+// Protect all admin subscription & revenue management routes
+router.use(verifyAdmin);
+
 
 // Overview & Monetization KPIs
 router.get('/overview', SubscriptionAdminController.getOverview);

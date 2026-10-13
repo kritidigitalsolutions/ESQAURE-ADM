@@ -27,6 +27,7 @@ function formatTimeAgo(dateStr) {
 
 export default function NotificationDropdown({ onNavigate }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
   const [rawItems, setRawItems] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,68 +74,29 @@ export default function NotificationDropdown({ onNavigate }) {
     }
   }, [clearedIds]);
 
-  // Fetch real system alerts from backend (excluding push notifications)
+  // Listen for external updates (e.g. from Notifications page)
+  useEffect(() => {
+    const handleUpdate = () => {
+      try {
+        const savedRead = localStorage.getItem(READ_STORAGE_KEY);
+        if (savedRead) setReadIds(new Set(JSON.parse(savedRead)));
+        const savedCleared = localStorage.getItem(CLEARED_STORAGE_KEY);
+        if (savedCleared) setClearedIds(new Set(JSON.parse(savedCleared)));
+      } catch {}
+    };
+    window.addEventListener('admin_notifications_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('admin_notifications_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
+
+  // Fetch real system alerts that came to admin
   const fetchLiveAlerts = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [announcementsRes, txRes, dramasRes] = await Promise.allSettled([
-        notificationService.getAnnouncements(),
-        subscriptionService.getTransactions({ limit: 6 }),
-        dramaService.getAdminDramas()
-      ]);
-
-      const items = [];
-
-      // 1. Live In-App Notices
-      if (announcementsRes.status === 'fulfilled' && announcementsRes.value?.announcements) {
-        announcementsRes.value.announcements.slice(0, 4).forEach((a) => {
-          const id = `ann-${a._id || a.id}`;
-          items.push({
-            id,
-            category: 'system',
-            title: a.title || 'System Announcement',
-            message: a.body || 'In-app notification sent to viewer inboxes.',
-            createdAt: a.createdAt,
-            targetTab: 'app_notifications',
-            actionLabel: 'View Notices'
-          });
-        });
-      }
-
-      // 3. Live Transactions
-      if (txRes.status === 'fulfilled' && txRes.value?.transactions) {
-        txRes.value.transactions.slice(0, 6).forEach((t) => {
-          const id = `tx-${t.id || t._id}`;
-          items.push({
-            id,
-            category: 'monetization',
-            title: t.status === 'SUCCESS' ? 'Subscription Payment Success' : `Payment Status: ${t.status || 'Pending'}`,
-            message: `${t.user || 'Viewer'} purchased ${t.plan || 'Plan'} (${t.amount}) via ${t.method || 'UPI'}.`,
-            createdAt: t.createdAt,
-            targetTab: 'transactions',
-            actionLabel: 'View Transaction'
-          });
-        });
-      }
-
-      // 4. Live Dramas Updated
-      if (dramasRes.status === 'fulfilled' && dramasRes.value?.dramas) {
-        dramasRes.value.dramas.slice(0, 3).forEach((d) => {
-          const id = `drm-${d._id || d.id}`;
-          items.push({
-            id,
-            category: 'content',
-            title: `Series: ${d.title}`,
-            message: `Catalog status: ${d.status || 'PUBLISHED'} with ${d.totalEpisodes || (d.episodes ? d.episodes.length : 0)} episodes.`,
-            createdAt: d.updatedAt || d.createdAt,
-            targetTab: 'dramas',
-            actionLabel: 'Open Library'
-          });
-        });
-      }
-
-      // Sort newest first
-      items.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      const items = await notificationService.getAllAdminAlerts({ limit: 25 });
       setRawItems(items);
     } catch (err) {
       console.warn('Failed to fetch live notifications:', err);
@@ -227,9 +189,9 @@ export default function NotificationDropdown({ onNavigate }) {
 
   const filteredNotifications = notifications.filter((n) => {
     if (activeFilter === 'unread') return n.unread;
-    if (activeFilter === 'content') return n.category === 'content';
-    if (activeFilter === 'monetization') return n.category === 'monetization';
-    if (activeFilter === 'system') return n.category === 'system';
+    if (activeFilter === 'users') return n.category === 'USER';
+    if (activeFilter === 'monetization') return n.category === 'BILLING' || n.category === 'monetization';
+    if (activeFilter === 'system') return n.category === 'ANNOUNCEMENT' || n.category === 'CONTENT' || n.category === 'system';
     return true; // 'all'
   });
 
@@ -239,6 +201,9 @@ export default function NotificationDropdown({ onNavigate }) {
       notifications.forEach((n) => next.add(n.id));
       return next;
     });
+    setTimeout(() => {
+      window.dispatchEvent(new Event('admin_notifications_updated'));
+    }, 50);
   };
 
   const handleMarkSingleRead = (id, e) => {
@@ -248,8 +213,10 @@ export default function NotificationDropdown({ onNavigate }) {
       next.add(id);
       return next;
     });
+    setTimeout(() => {
+      window.dispatchEvent(new Event('admin_notifications_updated'));
+    }, 50);
   };
-
 
   const handleClearAll = () => {
     setClearedIds((prev) => {
@@ -257,6 +224,9 @@ export default function NotificationDropdown({ onNavigate }) {
       notifications.forEach((n) => next.add(n.id));
       return next;
     });
+    setTimeout(() => {
+      window.dispatchEvent(new Event('admin_notifications_updated'));
+    }, 50);
   };
 
   const handleItemClick = (n) => {
@@ -268,7 +238,7 @@ export default function NotificationDropdown({ onNavigate }) {
   };
 
   return (
-    <div className="relative font-urbanist" ref={dropdownRef}>
+    <div className="relative font-urbanist group" ref={dropdownRef}>
       {/* Bell Trigger Button */}
       <button
         type="button"
@@ -276,21 +246,42 @@ export default function NotificationDropdown({ onNavigate }) {
           setIsOpen(!isOpen);
           if (!isOpen) fetchLiveAlerts();
         }}
-        title="Notifications"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         aria-label="Notifications"
-        className={`relative p-2 rounded-xl transition-all duration-200 cursor-pointer ${
+        className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer select-none active:scale-95 border ${
           isOpen
-            ? 'bg-slate-200/80 dark:bg-white/[0.12] text-slate-950 dark:text-white'
-            : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06]'
+            ? 'bg-slate-200/90 dark:bg-white/[0.14] text-slate-950 dark:text-white border-slate-300/80 dark:border-white/20 shadow-xs'
+            : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] hover:border-slate-200/80 dark:hover:border-white/10 hover:scale-105'
         }`}
       >
-        <Bell className="w-4 h-4 stroke-[2]" />
+        <Bell className="w-[18px] h-[18px] stroke-[1.9] bell-hover-ring transition-all duration-200 group-hover:text-slate-950 dark:group-hover:text-white" />
         
-        {/* Sleek Minimalist Unread Dot */}
+        {/* Razor-Sharp High-Precision Unread Count Badge */}
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#1E1E26] shadow-xs" />
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold font-sans leading-none flex items-center justify-center border-2 border-white dark:border-[#141419] shadow-xs tabular-nums select-none pointer-events-none antialiased transition-all duration-200 group-hover:scale-115 group-hover:-translate-y-0.5">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
         )}
       </button>
+
+      {/* Clean Micro-Tooltip */}
+      {!isOpen && (
+        <div className={`absolute right-0 top-full mt-2 z-50 pointer-events-none whitespace-nowrap transition-all duration-200 ${
+          isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0'
+        }`}>
+          <div className="px-2.5 py-1 text-[11px] font-bold font-urbanist rounded-lg shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-slate-950 text-slate-100 border-slate-800">
+            <span>Notifications</span>
+            {unreadCount > 0 ? (
+              <span className="px-1.5 py-0.2 text-[9px] font-bold bg-rose-600 text-white rounded-full">
+                {unreadCount} new
+              </span>
+            ) : (
+              <span className="text-[10px] text-slate-400 font-normal">All caught up</span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Floating Dropdown Panel (Compact 330px, Minimalist, Smooth Entrance) */}
       {isOpen && (
@@ -305,7 +296,7 @@ export default function NotificationDropdown({ onNavigate }) {
                 Notifications
               </span>
               {unreadCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-[#FEF08A]/60 dark:bg-amber-400/15 text-slate-950 border border-amber-300/40 dark:border-amber-400/25">
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold font-sans tabular-nums leading-none bg-[#FEF08A] text-slate-950 shadow-2xs">
                   {unreadCount}
                 </span>
               )}
@@ -339,8 +330,9 @@ export default function NotificationDropdown({ onNavigate }) {
             {[
               { id: 'all', label: 'All', count: notifications.length },
               { id: 'unread', label: 'Unread', count: unreadCount },
-              { id: 'monetization', label: 'Billing', count: notifications.filter((n) => n.category === 'monetization').length },
-              { id: 'system', label: 'Notices', count: notifications.filter((n) => n.category === 'system').length },
+              { id: 'users', label: 'Users', count: notifications.filter((n) => n.category === 'USER').length },
+              { id: 'monetization', label: 'Billing', count: notifications.filter((n) => n.category === 'BILLING' || n.category === 'monetization').length },
+              { id: 'system', label: 'Notices', count: notifications.filter((n) => n.category === 'ANNOUNCEMENT' || n.category === 'CONTENT').length },
             ].map((f) => (
               <button
                 key={f.id}
@@ -417,21 +409,29 @@ export default function NotificationDropdown({ onNavigate }) {
             )}
           </div>
 
-          {/* Footer (Minimalist) */}
-          {notifications.length > 0 && (
-            <div className="py-2 px-3 bg-slate-50/60 dark:bg-[#181820]/70 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px]">
-              <span className="text-slate-400 font-medium">
-                {notifications.length} notification{notifications.length === 1 ? '' : 's'}
-              </span>
+          {/* Footer (Minimalist & Direct Navigation to Notifications Page) */}
+          <div className="py-2.5 px-3 bg-slate-50/70 dark:bg-[#181820]/80 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px]">
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                if (onNavigate) onNavigate('app_notifications');
+              }}
+              className="text-amber-600 hover:text-amber-700 dark:text-[#FEF08A] dark:hover:text-yellow-300 font-extrabold transition-colors cursor-pointer flex items-center space-x-1"
+            >
+              <span>View all notifications</span>
+              <span>→</span>
+            </button>
+            {notifications.length > 0 && (
               <button
                 type="button"
                 onClick={handleClearAll}
-                className="text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 font-bold transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 font-semibold transition-colors cursor-pointer"
               >
                 Clear all
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>

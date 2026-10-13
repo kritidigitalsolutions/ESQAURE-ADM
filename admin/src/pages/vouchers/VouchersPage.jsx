@@ -23,11 +23,13 @@ import {
   CheckCheck,
   ChevronDown
 } from 'lucide-react';
+
+import { confirmModal, alertModal } from '../../context/DialogContext';
 import voucherService from '../../services/voucherService';
 import { subscriptionService } from '../../services/subscriptionService';
 import PageLoader from '../../components/common/PageLoader';
 import ModalPortal from '../../components/common/ModalPortal';
-import Badge from '../../components/common/Badge';
+import Badge, { cleanPlanName } from '../../components/common/Badge';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
@@ -63,15 +65,15 @@ const EMPTY_VOUCHER_FORM = {
 function VoucherStatusBadge({ status }) {
   const norm = String(status || '').toUpperCase();
   if (norm === 'ACTIVE') {
-    return <Badge variant="active" label="ACTIVE" size="xs" />;
+    return <Badge variant="active" label="Active" size="xs" />;
   }
   if (norm === 'PAUSED') {
-    return <Badge variant="paused" label="PAUSED" size="xs" />;
+    return <Badge variant="paused" label="Paused" size="xs" />;
   }
   if (norm === 'EXHAUSTED') {
-    return <Badge variant="offline" label="EXHAUSTED" size="xs" />;
+    return <Badge variant="offline" label="Redeemed" size="xs" />;
   }
-  return <Badge variant="inactive" label={status || 'EXPIRED'} size="xs" />;
+  return <Badge variant="inactive" label={status === 'EXPIRED' ? 'Expired' : (status || 'Expired')} size="xs" />;
 }
 
 // ─── Create/Edit Voucher Modal ────────────────────────────────────────────────
@@ -881,7 +883,15 @@ export default function VouchersPage() {
   };
 
   const handleDelete = async (id, code) => {
-    if (!window.confirm(`Are you sure you want to delete voucher "${code}"?`)) return;
+    const confirmed = await confirmModal({
+      title: 'Delete Voucher',
+      message: `Are you sure you want to delete voucher "${code}"? Any unredeemed passes with this code will be invalidated permanently.`,
+      itemName: code,
+      confirmText: 'Delete Voucher',
+      variant: 'danger'
+    });
+    if (!confirmed) return;
+
     setActionLoadingId(id);
     try {
       const res = await voucherService.deleteVoucher(id);
@@ -1094,61 +1104,6 @@ export default function VouchersPage() {
         </div>
       </div>
 
-      {/* Header & Main Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-0.5">
-        <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
-              Subscription Plan Vouchers
-            </h1>
-            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs text-slate-950 border border-amber-300/50">
-              {filteredVouchers.length} Vouchers
-            </span>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            Create and distribute vouchers that grant complete subscription passes (100% complimentary VIP access).
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-2 shrink-0">
-          <button
-            type="button"
-            onClick={fetchData}
-            disabled={loading}
-            className="p-1.5 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-lg transition-all cursor-pointer active:scale-95 shrink-0"
-            title="Refresh vouchers"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-amber-500' : ''}`} />
-          </button>
-
-          <button
-            type="button"
-            onClick={handleExportCSV}
-            className="py-1.5 px-3 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all border border-slate-200/90 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export CSV</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setModal({ mode: 'bulk' })}
-            className="py-1.5 px-3 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all border border-slate-200/90 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Bulk Generate</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setModal({ mode: 'create' })}
-            className="py-1.5 px-3 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
-          >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Create Plan Voucher</span>
-          </button>
-        </div>
-      </div>
 
       {/* Filter & Search Bar - Compact Single Row */}
       <div className="bg-white dark:bg-[#121216] rounded-xl p-2 sm:px-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2">
@@ -1184,7 +1139,7 @@ export default function VouchersPage() {
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search voucher, plan, campaign..."
+              placeholder="Search voucher code, plan..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-8 pr-7 py-1.5 text-xs font-semibold bg-slate-50 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 rounded-lg text-slate-900 dark:text-white focus:bg-white dark:focus:bg-[#121216] focus:outline-none focus:border-[#FEF08A] placeholder:text-slate-400 transition-colors"
@@ -1212,6 +1167,47 @@ export default function VouchersPage() {
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
           </div>
+
+          {/* Refresh Button */}
+          <button
+            type="button"
+            onClick={fetchData}
+            disabled={loading}
+            className="w-9 h-9 flex items-center justify-center bg-slate-50 hover:bg-slate-100 dark:bg-[#18181E] dark:hover:bg-white/[0.08] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10 rounded-full transition-all cursor-pointer active:scale-90 hover:scale-105 shadow-sm shrink-0"
+            title="Refresh vouchers"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-amber-500' : ''}`} />
+          </button>
+
+          {/* Export CSV */}
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            className="py-1.5 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-[#18181E] dark:hover:bg-white/[0.08] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all border border-slate-200 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95 shrink-0"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>CSV</span>
+          </button>
+
+          {/* Bulk Generate */}
+          <button
+            type="button"
+            onClick={() => setModal({ mode: 'bulk' })}
+            className="py-1.5 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-[#18181E] dark:hover:bg-white/[0.08] text-slate-700 dark:text-slate-200 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all border border-slate-200 dark:border-white/10 shadow-2xs cursor-pointer active:scale-95 shrink-0"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>Bulk</span>
+          </button>
+
+          {/* Create Plan Voucher CTA */}
+          <button
+            type="button"
+            onClick={() => setModal({ mode: 'create' })}
+            className="py-1.5 px-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Add Voucher</span>
+          </button>
         </div>
       </div>
 
@@ -1240,13 +1236,13 @@ export default function VouchersPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 dark:bg-[#18181E] border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] font-bold">
                 <tr>
                   <th className="py-2.5 px-3">Voucher Code</th>
                   <th className="py-2.5 px-3">Plan Granted</th>
-                  <th className="py-2.5 px-3">Campaign / Recipient</th>
                   <th className="py-2.5 px-3">Type & Quota</th>
                   <th className="py-2.5 px-3">Expiry Date</th>
                   <th className="py-2.5 px-3">Status</th>
@@ -1290,29 +1286,9 @@ export default function VouchersPage() {
                         )}
                       </td>
 
-                      {/* Complete Plan Granted */}
-                      <td className="py-2 px-3">
-                        <div className="flex items-center space-x-1.5">
-                          <span className="font-bold text-slate-950 dark:text-white text-xs">
-                            {v.planName}
-                          </span>
-                          <span className="px-1.5 py-0.2 rounded-md bg-[#FEF08A]/30 dark:bg-[#FEF08A]/10 text-[9.5px] font-bold text-slate-950 border border-amber-300/40 dark:border-amber-400/25">
-                            {v.durationDays}d Full VIP
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* Campaign / Partner */}
-                      <td className="py-2 px-3">
-                        {v.campaignName ? (
-                          <span className="text-slate-700 dark:text-slate-300 text-[11px] font-semibold block truncate max-w-[160px]">
-                            {v.campaignName}
-                          </span>
-                        ) : (
-                          <span className="text-slate-400 dark:text-slate-500 text-[10px]">
-                            Direct Gift
-                          </span>
-                        )}
+                      {/* Plan Granted Badge */}
+                      <td className="py-2 px-3 whitespace-nowrap">
+                        <Badge plan={cleanPlanName(v.planName)} size="xs" />
                       </td>
 
                       {/* Type & Usage Quota */}
@@ -1413,7 +1389,31 @@ export default function VouchersPage() {
               </tbody>
             </table>
           </div>
-        )}
+
+          {/* Table Summary Footer */}
+          <div className="px-3 sm:px-4 py-2 bg-slate-50/60 dark:bg-[#18181E]/80 border-t border-slate-100 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+            <span className="font-medium text-[11px] text-slate-500 dark:text-slate-400">
+              Showing <strong className="text-slate-900 dark:text-white">{filteredVouchers.length}</strong> of {vouchers.length} vouchers
+            </span>
+            <div className="flex flex-wrap items-center gap-3 text-[10.5px] font-medium">
+              <span className="inline-flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Active: <strong className="text-slate-700 dark:text-slate-200">{stats.activeCount || 0}</strong>
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                Redeemed: <strong className="text-slate-700 dark:text-slate-200">{stats.exhaustedCount || 0}</strong>
+              </span>
+              {(stats.expiredCount || 0) > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                  Expired: <strong className="text-slate-700 dark:text-slate-200">{stats.expiredCount}</strong>
+                </span>
+              )}
+            </div>
+          </div>
+        </>
+      )}
       </div>
 
       {/* Modals */}

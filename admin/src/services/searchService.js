@@ -1,32 +1,7 @@
-const API_BASE = '/api/v1/search';
-const FALLBACK_BASE = 'http://localhost:5001/api/v1/search';
+import { createApiRequest } from './apiClient';
 
-const request = async (endpoint = '', options = {}) => {
-  const tryFetch = async (url) => {
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options.headers || {})
-      },
-      ...options
-    });
-    const contentType = response.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      throw new Error(`Expected JSON response but received ${contentType}`);
-    }
-    const data = await response.json();
-    if (!response.ok || data.success === false) {
-      throw new Error(data.message || 'API request failed');
-    }
-    return data.data;
-  };
+const request = createApiRequest('/api/v1/search', 'http://localhost:5001/api/v1/search');
 
-  try {
-    return await tryFetch(`${API_BASE}${endpoint}`);
-  } catch (err) {
-    return await tryFetch(`${FALLBACK_BASE}${endpoint}`);
-  }
-};
 
 export const searchService = {
   /**

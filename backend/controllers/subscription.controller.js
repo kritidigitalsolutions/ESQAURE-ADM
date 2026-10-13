@@ -8,6 +8,7 @@ import { RazorpayService } from '../services/razorpay.service.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { AppError } from '../utils/appError.js';
 import { ERROR_CODES } from '../constants/errorCodes.js';
+import { dispatchAutoNotification } from './autoNotification.controller.js';
 
 export class SubscriptionController {
   /**
@@ -302,6 +303,14 @@ export class SubscriptionController {
         gatewaySignature: signature
       });
 
+      // Auto-send subscription success notification to user's device if trigger is enabled
+      dispatchAutoNotification('SUBSCRIPTION_SUCCESS', {
+        user,
+        data: { planName: plan.name }
+      }).catch((err) => {
+        console.warn('[AutoNotification] Payment dispatch failed:', err.message);
+      });
+
       return ApiResponse.success(res, 'Subscription verified and Premium membership activated!', {
         isVip: true,
         planName: plan.name,
@@ -399,9 +408,10 @@ export class SubscriptionController {
   static async handleRazorpayWebhook(req, res) {
     try {
       const signature = req.headers['x-razorpay-signature'];
-      const rawPayload = req.body;
+      const rawPayload = req.rawBody || req.body;
 
       const isValid = RazorpayService.verifyWebhookSignature(rawPayload, signature);
+
       if (!isValid) {
         console.warn('[Webhook] Invalid Razorpay webhook signature received.');
         return res.status(400).json({ success: false, message: 'Invalid webhook signature' });

@@ -389,43 +389,6 @@ export default function GenresPage({ onNavigate }) {
         />
       </div>
 
-      {/* Page Title & Main Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
-        <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
-              Genres & Categories
-            </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 dark:bg-amber-400/20 text-amber-950 dark:text-amber-300 border border-amber-300/40 dark:border-amber-400/30">
-              {genres.length} Categories
-            </span>
-          </div>
-          <p className="text-[11.5px] text-slate-500 dark:text-slate-400 mt-0.5">
-            Manage catalog taxonomy, display ranking, and series association.
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => onNavigate && onNavigate('category_priority')}
-            className="py-1.5 px-3 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-800 dark:text-slate-200 border border-slate-200/90 dark:border-white/10 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shadow-2xs cursor-pointer active:scale-95"
-            title="Manage Homepage Display Priority Ranks"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
-            <span>Category Priority</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleOpenAdd}
-            className="py-1.5 px-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
-          >
-            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Add Genre</span>
-          </button>
-        </div>
-      </div>
 
       {/* Unified Filter, Search & Sort Toolbar */}
       <div className="bg-white dark:bg-[#121216] rounded-xl p-2 sm:px-3 border border-slate-200/80 dark:border-white/10 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-2.5">
@@ -505,10 +468,31 @@ export default function GenresPage({ onNavigate }) {
             type="button"
             onClick={() => fetchGenres(true)}
             disabled={isRefreshing}
-            className="p-1.5 bg-slate-50 hover:bg-slate-100 dark:bg-[#18181E] dark:hover:bg-white/[0.08] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10 rounded-lg transition-all cursor-pointer active:scale-95 shrink-0"
+            className="w-9 h-9 flex items-center justify-center bg-slate-50 hover:bg-slate-100 dark:bg-[#18181E] dark:hover:bg-white/[0.08] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-white/10 rounded-full transition-all cursor-pointer active:scale-90 hover:scale-105 shadow-sm shrink-0"
             title="Refresh Live Data"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
+          </button>
+
+          {/* Category Priority Button */}
+          <button
+            type="button"
+            onClick={() => onNavigate && onNavigate('category_priority')}
+            className="py-1.5 px-3 bg-slate-50 hover:bg-slate-100 dark:bg-[#18181E] dark:hover:bg-white/[0.08] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
+            title="Manage Homepage Display Priority Ranks"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5 text-amber-500" />
+            <span>Category Priority</span>
+          </button>
+
+          {/* Add Genre Primary CTA */}
+          <button
+            type="button"
+            onClick={handleOpenAdd}
+            className="py-1.5 px-3.5 bg-[#FACC15] hover:bg-[#EAB308] text-slate-950 font-bold text-xs rounded-lg flex items-center space-x-1.5 transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Add Genre</span>
           </button>
         </div>
 

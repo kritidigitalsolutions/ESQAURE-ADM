@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { HomeController } from '../controllers/home.controller.js';
 import { optionalAuthenticate } from '../middlewares/auth.middleware.js';
+import { verifyAdmin } from '../middlewares/adminAuth.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { homeValidation } from '../validations/home.validation.js';
 
 const router = Router();
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  ADMIN PANEL ROUTES: HOME SECTIONS & PRIORITY MANAGEMENT
+//  ADMIN PANEL ROUTES: HOME SECTIONS & PRIORITY MANAGEMENT (Protected)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -16,6 +17,7 @@ const router = Router();
  */
 router.post(
   '/admin/sections',
+  verifyAdmin,
   validate(homeValidation.createSection, 'body'),
   HomeController.createSection
 );
@@ -24,7 +26,7 @@ router.post(
  * 2. Admin: List all home category sections with pagination & filter
  * GET /api/v1/home/admin/sections?page=1&limit=20&search=&status=ALL
  */
-router.get('/admin/sections', HomeController.getAdminSections);
+router.get('/admin/sections', verifyAdmin, HomeController.getAdminSections);
 
 /**
  * 3. Admin: Batch reorder section display order / priorities
@@ -32,6 +34,7 @@ router.get('/admin/sections', HomeController.getAdminSections);
  */
 router.patch(
   '/admin/sections/reorder',
+  verifyAdmin,
   validate(homeValidation.reorderSections, 'body'),
   HomeController.reorderSections
 );
@@ -40,7 +43,7 @@ router.patch(
  * 4. Admin: Get single section by ID
  * GET /api/v1/home/admin/sections/:id
  */
-router.get('/admin/sections/:id', HomeController.getAdminSectionById);
+router.get('/admin/sections/:id', verifyAdmin, HomeController.getAdminSectionById);
 
 /**
  * 5. Admin: Update home category section
@@ -48,6 +51,7 @@ router.get('/admin/sections/:id', HomeController.getAdminSectionById);
  */
 router.patch(
   '/admin/sections/:id',
+  verifyAdmin,
   validate(homeValidation.updateSection, 'body'),
   HomeController.updateSection
 );
@@ -56,13 +60,13 @@ router.patch(
  * 6. Admin: Toggle section active/inactive status
  * PATCH /api/v1/home/admin/sections/:id/toggle
  */
-router.patch('/admin/sections/:id/toggle', HomeController.toggleSectionStatus);
+router.patch('/admin/sections/:id/toggle', verifyAdmin, HomeController.toggleSectionStatus);
 
 /**
  * 7. Admin: Delete home category section
  * DELETE /api/v1/home/admin/sections/:id
  */
-router.delete('/admin/sections/:id', HomeController.deleteSection);
+router.delete('/admin/sections/:id', verifyAdmin, HomeController.deleteSection);
 
 /**
  * 8. Admin: Set/Update individual drama priority
@@ -70,9 +74,50 @@ router.delete('/admin/sections/:id', HomeController.deleteSection);
  */
 router.patch(
   '/admin/dramas/:id/priority',
+  verifyAdmin,
   validate(homeValidation.setDramaPriority, 'body'),
   HomeController.setDramaPriority
 );
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ADMIN CONTENT BANNERS MANAGEMENT (Protected)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Admin: Get all banners with details and stats
+ * GET /api/v1/home/admin/banners
+ */
+router.get('/admin/banners', verifyAdmin, HomeController.getAdminBanners);
+
+/**
+ * Admin: Batch reorder banner display orders
+ * PATCH /api/v1/home/admin/banners/reorder
+ */
+router.patch('/admin/banners/reorder', verifyAdmin, HomeController.reorderBanners);
+
+/**
+ * Admin: Toggle banner active/inactive
+ * PATCH /api/v1/home/admin/banners/:id/toggle
+ */
+router.patch('/admin/banners/:id/toggle', verifyAdmin, HomeController.toggleBannerStatus);
+
+/**
+ * Create New Content Banner
+ * POST /api/v1/home/banners
+ */
+router.post('/banners', verifyAdmin, HomeController.createBanner);
+
+/**
+ * Update Content Banner
+ * PATCH /api/v1/home/banners/:id
+ */
+router.patch('/banners/:id', verifyAdmin, HomeController.updateBanner);
+
+/**
+ * Delete Content Banner
+ * DELETE /api/v1/home/banners/:id
+ */
+router.delete('/banners/:id', verifyAdmin, HomeController.deleteBanner);
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  MOBILE APP & HOME FEED DISCOVERY ROUTES (All with Pagination)
@@ -84,41 +129,6 @@ router.patch(
  */
 router.get('/banners', optionalAuthenticate, HomeController.getHomeBanners);
 
-/**
- * Admin: Get all banners with details and stats
- * GET /api/v1/home/admin/banners
- */
-router.get('/admin/banners', HomeController.getAdminBanners);
-
-/**
- * Admin: Batch reorder banner display orders
- * PATCH /api/v1/home/admin/banners/reorder
- */
-router.patch('/admin/banners/reorder', HomeController.reorderBanners);
-
-/**
- * Admin: Toggle banner active/inactive
- * PATCH /api/v1/home/admin/banners/:id/toggle
- */
-router.patch('/admin/banners/:id/toggle', HomeController.toggleBannerStatus);
-
-/**
- * Create New Content Banner
- * POST /api/v1/home/banners
- */
-router.post('/banners', HomeController.createBanner);
-
-/**
- * Update Content Banner
- * PATCH /api/v1/home/banners/:id
- */
-router.patch('/banners/:id', HomeController.updateBanner);
-
-/**
- * Delete Content Banner
- * DELETE /api/v1/home/banners/:id
- */
-router.delete('/banners/:id', HomeController.deleteBanner);
 
 /**
  * 1. All Content as per Priority set by Admin

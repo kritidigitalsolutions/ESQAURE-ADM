@@ -14,6 +14,7 @@ export const env = {
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/esquare_ott',
   JWT_SECRET: process.env.JWT_SECRET || 'esquare_ott_super_secure_jwt_secret_key_2026_x!',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
+  ADMIN_API_KEY: process.env.ADMIN_API_KEY || 'esquare_admin_dev_secret_2026',
   OTP_COOLDOWN_SECONDS: parseInt(process.env.OTP_COOLDOWN_SECONDS || '60', 10),
   OTP_EXPIRY_SECONDS: parseInt(process.env.OTP_EXPIRY_SECONDS || '300', 10),
   MAX_OTP_ATTEMPTS: parseInt(process.env.MAX_OTP_ATTEMPTS || '5', 10),
@@ -24,3 +25,4 @@ export const env = {
 };
 
 export const isDev = env.NODE_ENV !== 'production';
+

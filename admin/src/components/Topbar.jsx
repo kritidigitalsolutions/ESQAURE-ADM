@@ -1,9 +1,55 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Maximize, Minimize, User, LogOut } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import GlobalSearchBar from './GlobalSearchBar';
 import NotificationDropdown from './NotificationDropdown';
 import Badge from './common/Badge';
+
+function FullscreenToggleIcon({ isFullscreen }) {
+  if (isFullscreen) {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-[18px] h-[18px] overflow-visible text-current transition-colors"
+      >
+        {/* Top-Left: pulls inward cleanly */}
+        <path d="M8 3v3a2 2 0 0 1-2 2H3" className="fs-min-tl" />
+        {/* Top-Right: pulls inward cleanly */}
+        <path d="M21 8h-3a2 2 0 0 1-2-2V3" className="fs-min-tr" />
+        {/* Bottom-Left: pulls inward cleanly */}
+        <path d="M3 16h3a2 2 0 0 1 2 2v3" className="fs-min-bl" />
+        {/* Bottom-Right: pulls inward cleanly */}
+        <path d="M16 21v-3a2 2 0 0 1 2-2h3" className="fs-min-br" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="w-[18px] h-[18px] overflow-visible text-current transition-colors"
+    >
+      {/* Top-Left: glides outward cleanly */}
+      <path d="M8 3H5a2 2 0 0 0-2 2v3" className="fs-corner-tl" />
+      {/* Top-Right: glides outward cleanly */}
+      <path d="M21 8V5a2 2 0 0 0-2-2h-3" className="fs-corner-tr" />
+      {/* Bottom-Left: glides outward cleanly */}
+      <path d="M3 16v3a2 2 0 0 0 2 2h3" className="fs-corner-bl" />
+      {/* Bottom-Right: glides outward cleanly */}
+      <path d="M16 21h3a2 2 0 0 0 2-2v-3" className="fs-corner-br" />
+    </svg>
+  );
+}
 
 export default function Topbar({
   title,
@@ -16,6 +62,8 @@ export default function Topbar({
   onOpenIngestModal
 }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFsHovered, setIsFsHovered] = useState(false);
+  const [isProfileHovered, setIsProfileHovered] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
 
@@ -42,14 +90,27 @@ export default function Topbar({
   }, []);
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen().catch(() => { });
+    try {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        const el = document.documentElement;
+        if (el.requestFullscreen) {
+          el.requestFullscreen().catch(() => { });
+        } else if (el.webkitRequestFullscreen) {
+          el.webkitRequestFullscreen();
+        } else if (el.msRequestFullscreen) {
+          el.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => { });
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
       }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => { });
-      }
+    } catch (e) {
+      console.warn('Fullscreen toggle failed:', e);
     }
   };
 
@@ -109,18 +170,38 @@ export default function Topbar({
           />
 
           {/* Fullscreen Toggle */}
-          <button
-            onClick={toggleFullscreen}
-            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-            aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-            className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] rounded-full transition-colors"
-          >
-            {isFullscreen ? (
-              <Minimize className="w-4 h-4" />
-            ) : (
-              <Maximize className="w-4 h-4" />
-            )}
-          </button>
+          <div className="relative inline-flex items-center justify-center font-urbanist group">
+            <button
+              onClick={toggleFullscreen}
+              onMouseEnter={() => setIsFsHovered(true)}
+              onMouseLeave={() => setIsFsHovered(false)}
+              aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              className={`relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer select-none active:scale-95 border ${
+                isFullscreen
+                  ? 'bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] border-[#FEF08A]/35 dark:border-[#FEF08A]/25 shadow-[0_0_12px_rgba(254,240,138,0.2)]'
+                  : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] hover:border-slate-200/80 dark:hover:border-white/10'
+              }`}
+            >
+              <FullscreenToggleIcon isFullscreen={isFullscreen} />
+
+              {/* Active Fullscreen Glowing Indicator Dot */}
+              {isFullscreen && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#FEF08A] shadow-[0_0_8px_rgba(254,240,138,0.9)] ring-1 ring-black/20 animate-pulse" />
+              )}
+            </button>
+
+            {/* Clean Micro-Tooltip */}
+            <div className={`absolute right-0 top-full mt-2 z-50 pointer-events-none whitespace-nowrap transition-all duration-200 ${
+              isFsHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0'
+            }`}>
+              <div className="px-2.5 py-1 text-[11px] font-bold font-urbanist rounded-lg shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-slate-950 text-slate-100 border-slate-800">
+                <span>{isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}</span>
+                <kbd className="px-1 py-0.2 text-[9px] font-mono bg-slate-800 text-slate-300 rounded border border-slate-700">
+                  {isFullscreen ? 'Esc' : 'F11'}
+                </kbd>
+              </div>
+            </div>
+          </div>
 
           {/* Radical Theme Switch Toggle */}
           <ThemeToggle variant="topbar" />
@@ -129,17 +210,30 @@ export default function Topbar({
           <NotificationDropdown onNavigate={onNavigate} />
 
           {/* Profile Avatar Dropdown */}
-          <div className="relative pl-2.5 border-l border-slate-200 dark:border-white/10" ref={profileRef}>
+          <div className="relative pl-2.5 border-l border-slate-200 dark:border-white/10 group" ref={profileRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              title="Admin Profile"
-              className="relative flex items-center justify-center cursor-pointer hover:opacity-95 transition-all group"
+              onMouseEnter={() => setIsProfileHovered(true)}
+              onMouseLeave={() => setIsProfileHovered(false)}
+              aria-label="Admin Profile"
+              className="relative flex items-center justify-center cursor-pointer hover:opacity-95 transition-all active:scale-95"
             >
-              <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-[#1E1E26] text-slate-700 dark:text-slate-200 flex items-center justify-center border border-slate-200/90 dark:border-white/10 shadow-xs group-hover:bg-slate-200/80 dark:group-hover:bg-[#24242E] group-hover:border-slate-300 dark:group-hover:border-white/20 transition-all duration-200">
-                <User className="w-4 h-4 text-slate-700 dark:text-slate-300" strokeWidth={2} />
+              <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-[#1E1E26] text-slate-700 dark:text-slate-200 flex items-center justify-center border border-slate-200/90 dark:border-white/10 shadow-xs group-hover:bg-slate-200/80 dark:group-hover:bg-[#24242E] group-hover:border-slate-300 dark:group-hover:border-white/20 group-hover:scale-105 transition-all duration-200">
+                <User className="w-4 h-4 text-slate-700 dark:text-slate-300 transition-transform duration-200 group-hover:scale-110" strokeWidth={2} />
               </div>
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-[#141419] rounded-full shadow-xs"></span>
             </button>
+
+            {/* Profile Micro-Tooltip */}
+            {!isProfileOpen && (
+              <div className={`absolute right-0 top-full mt-2 z-50 pointer-events-none whitespace-nowrap transition-all duration-200 ${
+                isProfileHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0'
+              }`}>
+                <div className="px-2.5 py-1 text-[11px] font-bold font-urbanist rounded-lg shadow-lg border backdrop-blur-md flex items-center gap-1.5 bg-slate-950 text-slate-100 border-slate-800">
+                  <span>Administrator</span>
+                </div>
+              </div>
+            )}
 
             {/* Dropdown Menu */}
             {isProfileOpen && (

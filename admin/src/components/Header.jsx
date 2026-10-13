@@ -62,9 +62,9 @@ export default function Header({ activeTab, setActiveTab, onOpenIngestModal }) {
               <span>Upload Content</span>
             </button>
 
-            <button class="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full relative transition-colors">
-              <Bell class="w-4 h-4" />
-              <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+            <button className="group relative w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer">
+              <Bell className="w-[18px] h-[18px] stroke-[1.9] bell-hover-ring transition-transform" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white group-hover:scale-125 transition-transform"></span>
             </button>
 
             <button title="Admin Profile" className="relative flex items-center justify-center cursor-pointer hover:opacity-95 transition-all pl-3 border-l border-slate-200 group">

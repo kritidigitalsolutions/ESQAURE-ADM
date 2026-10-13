@@ -97,7 +97,7 @@ export default function Sidebar({
         { id: 'vouchers', label: 'Plan Vouchers', icon: Gift },
         { id: 'admob', label: 'Google AdMob', icon: BadgePercent },
         { id: 'custom_ads', label: 'Custom Ads', icon: Sparkles },
-        { id: 'ad_control', label: 'Ad Control & Sync', icon: SlidersHorizontal },
+        { id: 'ad_control', label: 'Ads Control', icon: SlidersHorizontal },
       ]
     },
     {
@@ -245,33 +245,8 @@ export default function Sidebar({
         ))}
       </nav>
 
-      {/* 3. Refined Sidebar Footer */}
-      <div className={`p-3 border-t border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-[#0A0A0E] shrink-0 ${isCollapsed ? 'flex justify-center' : ''}`}>
-        {isCollapsed ? (
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
-            onClick={toggleCollapse}
-            title="Expand sidebar (Ctrl+B)"
-          >
-            <div className="w-2 h-2 rounded-full bg-emerald-400 ring-4 ring-emerald-400/20" />
-          </div>
-        ) : (
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center space-x-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span className="text-[11.5px] font-semibold text-slate-500 dark:text-white/50 tracking-tight">
-                System Live
-              </span>
-            </div>
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-white/10 text-slate-600 dark:text-white/40 tracking-wider">
-              v2.4
-            </span>
-          </div>
-        )}
-      </div>
+      {/* 3. Refined Sidebar Footer Surface */}
+      <div className="h-11 border-t border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-[#0A0A0E] shrink-0" />
     </aside>
   );
 }

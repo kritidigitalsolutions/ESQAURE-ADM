@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import ToggleSwitch from '../../components/common/ToggleSwitch';
 import PageLoader from '../../components/common/PageLoader';
+import Badge from '../../components/common/Badge';
 import adService from '../../services/adService';
 import { uploadService } from '../../services/uploadService';
+import { confirmModal, alertModal } from '../../context/DialogContext';
 import {
   Eye,
   MousePointerClick,
@@ -14,8 +16,6 @@ import {
   Megaphone,
   Plus,
   Search,
-  Pause,
-  Play,
   Pencil,
   Trash2,
   ArrowLeft,
@@ -350,7 +350,16 @@ export default function CustomAdsPage({ onNavigate }) {
 
   // Delete Campaign
   const handleDeleteAd = async (id, title) => {
-    if (!window.confirm(`Are you sure you want to delete campaign "${title || 'Ad'}"?`)) return;
+    const campaignName = title || 'Ad Campaign';
+    const confirmed = await confirmModal({
+      title: 'Delete Ad Campaign',
+      message: `Are you sure you want to delete campaign "${campaignName}"? This action cannot be undone and will immediately halt active delivery.`,
+      itemName: campaignName,
+      confirmText: 'Delete Campaign',
+      variant: 'danger'
+    });
+    if (!confirmed) return;
+
     try {
       setAds(prev => prev.filter(a => (a.id || a._id) !== id));
       await adService.deleteCustomAd(id);
@@ -423,9 +432,13 @@ export default function CustomAdsPage({ onNavigate }) {
   };
 
   // CSV Export
-  const handleExportCSV = () => {
+  const handleExportCSV = async () => {
     if (filteredAds.length === 0) {
-      alert('No campaigns to export.');
+      await alertModal({
+        title: 'Export Notice',
+        message: 'No ad campaigns available to export.',
+        variant: 'info'
+      });
       return;
     }
     const headers = ['Campaign Title,Advertiser,Placement,Type,Priority,Impressions,Clicks,Status,Start Date'];
@@ -600,20 +613,12 @@ export default function CustomAdsPage({ onNavigate }) {
             </div>
           </div>
 
-          {/* Page Title & Main Actions */}
+          {/* Main Actions Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-0.5">
-            <div>
-              <div className="flex items-center space-x-2">
-                <h1 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight">
-                  Custom Ad Campaigns
-                </h1>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs text-slate-950 border border-amber-300/50">
-                  {filteredAds.length} Campaigns
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                Manage client-sponsored video ads, banner promotions, skips, caps, and candidate rotation rules.
-              </p>
+            <div className="flex items-center space-x-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF08A] text-slate-950 shadow-xs border border-amber-300/50">
+                {filteredAds.length} Campaigns
+              </span>
             </div>
 
             <div className="flex items-center space-x-2 shrink-0 flex-wrap gap-y-1">
@@ -635,7 +640,7 @@ export default function CustomAdsPage({ onNavigate }) {
                 type="button"
                 onClick={() => loadData(true)}
                 disabled={isRefreshing}
-                className="p-1.5 bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-xl transition-all cursor-pointer active:scale-95 shrink-0"
+                className="w-9 h-9 flex items-center justify-center bg-white dark:bg-[#121216] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-white/10 rounded-full transition-all cursor-pointer active:scale-90 hover:scale-105 shadow-sm shrink-0"
                 title="Refresh Inventory"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
@@ -842,7 +847,7 @@ export default function CustomAdsPage({ onNavigate }) {
           </div>
 
           {/* Active Campaigns Table Container */}
-          <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs overflow-hidden transition-colors">
+          <div className="bg-white dark:bg-[#121216] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xs overflow-hidden transition-colors">
             {isLoading ? (
               <PageLoader size="sm" text="Loading campaign inventory..." minHeight="min-h-[200px]" />
             ) : filteredAds.length === 0 ? (
@@ -866,17 +871,19 @@ export default function CustomAdsPage({ onNavigate }) {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 dark:bg-[#18181E] border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10.5px] font-bold">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="bg-slate-50/80 dark:bg-[#18181E] border-b border-slate-200/90 dark:border-white/10 text-slate-400 font-bold uppercase tracking-wider text-[10.5px]">
                     <tr>
-                      <th className="py-2.5 px-3">Ad Campaign</th>
-                      <th className="py-2.5 px-3">Placement</th>
-                      <th className="py-2.5 px-3">Media Format</th>
-                      <th className="py-2.5 px-3">Priority</th>
-                      <th className="py-2.5 px-3">Telemetry (Imps / Clicks)</th>
-                      <th className="py-2.5 px-3">Schedule</th>
-                      <th className="py-2.5 px-3">Status</th>
-                      <th className="py-2.5 px-3 text-right">Actions</th>
+                      <th className="py-3 px-3 min-w-[170px]">Ad Campaign</th>
+                      <th className="py-3 px-3 whitespace-nowrap">Placement</th>
+                      <th className="py-3 px-3 whitespace-nowrap">Media Format</th>
+                      <th className="py-3 px-3 text-center whitespace-nowrap">Priority</th>
+                      <th className="py-3 px-3 text-center whitespace-nowrap">Views</th>
+                      <th className="py-3 px-3 text-center whitespace-nowrap">Clicks</th>
+                      <th className="py-3 px-3 text-center whitespace-nowrap">CTR</th>
+                      <th className="py-3 px-3 whitespace-nowrap">Schedule</th>
+                      <th className="py-3 px-3 whitespace-nowrap">Status</th>
+                      <th className="py-3 px-3.5 text-right whitespace-nowrap sticky right-0 bg-slate-50 dark:bg-[#18181E] z-20 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.4)]">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium text-slate-900 dark:text-slate-100">
@@ -886,22 +893,24 @@ export default function CustomAdsPage({ onNavigate }) {
                       const impressions = ad.impressionsCount || 0;
                       const clicks = ad.clicksCount || 0;
                       const priority = ad.priority || 5;
-                      const ctr = impressions > 0 ? `${((clicks / impressions) * 100).toFixed(1)}%` : '0%';
+                      const ctr = impressions > 0 ? `${((clicks / impressions) * 100).toFixed(1)}%` : '0.0%';
                       const isActive = ad.status === 'ACTIVE';
 
                       return (
                         <tr
                           key={id}
-                          className="hover:bg-slate-50/80 dark:hover:bg-white/[0.04] transition-colors"
+                          className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors group"
                         >
-                          {/* 1. Title & Advertiser */}
-                          <td className="py-2 px-3">
+                          {/* 1. Title without client subtitle underline */}
+                          <td className="py-3 px-3 align-middle min-w-[170px]">
                             <div className="flex items-center space-x-2.5">
-                              {/* Asset preview icon */}
-                              <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-100 dark:bg-[#18181E] border border-slate-200 dark:border-white/10 flex items-center justify-center shrink-0">
+                              {/* Asset preview thumbnail */}
+                              <div className="w-9 h-9 rounded-xl overflow-hidden bg-slate-100 dark:bg-[#18181E] border border-slate-200/90 dark:border-white/10 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform duration-200">
                                 {ad.mediaUrl ? (
                                   isVideo ? (
-                                    <Video className="w-4 h-4 text-amber-500" />
+                                    <div className="w-full h-full bg-slate-950 flex items-center justify-center text-amber-400">
+                                      <Video className="w-4 h-4 stroke-[2.2]" />
+                                    </div>
                                   ) : (
                                     <img
                                       src={ad.mediaUrl}
@@ -914,90 +923,101 @@ export default function CustomAdsPage({ onNavigate }) {
                                   <ImageIcon className="w-4 h-4 text-slate-400" />
                                 )}
                               </div>
-                              <div className="min-w-0">
-                                <span className="font-bold text-xs text-slate-900 dark:text-white block truncate max-w-[150px]">
-                                  {ad.title}
-                                </span>
-                                <span className="text-[10px] text-slate-400 dark:text-slate-500 block truncate max-w-[150px]">
-                                  Client: {ad.advertiser || 'Direct'}
-                                </span>
-                              </div>
+                              <span className="font-bold text-xs sm:text-[13px] text-slate-900 dark:text-white truncate max-w-[190px]" title={ad.title}>
+                                {ad.title}
+                              </span>
                             </div>
                           </td>
 
                           {/* 2. Placement */}
-                          <td className="py-2 px-3">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-[#FEF08A]/35 dark:bg-[#FEF08A]/15 text-slate-950 dark:text-[#FEF08A] border border-amber-300/40 dark:border-amber-400/25">
-                              {getPlacementDisplay(ad.placement)}
-                            </span>
+                          <td className="py-3 px-3 align-middle whitespace-nowrap">
+                            <Badge variant="kpi-amber" label={getPlacementDisplay(ad.placement)} size="xs" />
                           </td>
 
                           {/* 3. Media Format */}
-                          <td className="py-2 px-3">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-semibold bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10">
-                              {isVideo ? <Video className="w-3 h-3 text-amber-500" /> : <ImageIcon className="w-3 h-3 text-sky-500" />}
-                              <span>{isVideo ? 'Video Stream' : 'Image Banner'}</span>
+                          <td className="py-3 px-3 align-middle whitespace-nowrap">
+                            <Badge
+                              variant={isVideo ? 'video' : 'image'}
+                              label={isVideo ? 'Video Stream' : 'Image Banner'}
+                              size="xs"
+                            />
+                          </td>
+
+                          {/* 4. Priority (number only, no #) */}
+                          <td className="py-3 px-3 align-middle text-center whitespace-nowrap">
+                            <span className="inline-flex items-center justify-center min-w-[26px] h-6 px-2 rounded-full text-xs font-bold font-mono bg-slate-100 dark:bg-[#18181E] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-white/10 shadow-2xs">
+                              {priority}
                             </span>
                           </td>
 
-                          {/* 4. Priority */}
-                          <td className="py-2 px-3 font-mono font-bold text-xs text-slate-800 dark:text-slate-200">
-                            Rank #{priority}
+                          {/* 5. Separate Views Column */}
+                          <td className="py-3 px-3 align-middle text-center whitespace-nowrap">
+                            <span className="font-bold font-mono text-slate-900 dark:text-white text-xs">
+                              {impressions.toLocaleString('en-IN')}
+                            </span>
                           </td>
 
-                          {/* 5. Telemetry (Imps / Clicks / CTR) */}
-                          <td className="py-2 px-3">
-                            <div className="flex items-center space-x-1.5 font-mono text-[11px]">
-                              <span className="font-bold text-slate-900 dark:text-white">
-                                {impressions.toLocaleString()} views
-                              </span>
-                              <span className="text-slate-400">/</span>
-                              <span className="text-slate-500 dark:text-slate-400">
-                                {clicks} clicks
-                              </span>
-                              <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
-                                {ctr}
+                          {/* 6. Separate Clicks Column */}
+                          <td className="py-3 px-3 align-middle text-center whitespace-nowrap">
+                            <span className="font-bold font-mono text-slate-900 dark:text-white text-xs">
+                              {clicks.toLocaleString('en-IN')}
+                            </span>
+                          </td>
+
+                          {/* 7. Separate CTR Percentage Column */}
+                          <td className="py-3 px-3 align-middle text-center whitespace-nowrap">
+                            <Badge
+                              variant="active"
+                              hideIcon
+                              label={ctr}
+                              size="xs"
+                              className="text-[10.5px] font-mono"
+                            />
+                          </td>
+
+                          {/* 7. Schedule */}
+                          <td className="py-3 px-3 align-middle text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                            <div className="inline-flex items-center gap-1.5 text-xs">
+                              <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <span className="font-medium text-[11.5px]">
+                                {ad.startDate ? new Date(ad.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : 'Always'}
+                                {ad.endDate ? (
+                                  <>
+                                    <span className="text-slate-400 mx-1">–</span>
+                                    {new Date(ad.endDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                                  </>
+                                ) : ad.startDate ? (
+                                  <span className="text-slate-400 ml-1 font-normal">(Ongoing)</span>
+                                ) : null}
                               </span>
                             </div>
                           </td>
 
-                          {/* 6. Schedule */}
-                          <td className="py-2 px-3 text-[11px] text-slate-600 dark:text-slate-400 whitespace-nowrap">
-                            {ad.startDate ? new Date(ad.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : 'Always'}
-                            {ad.endDate ? ` – ${new Date(ad.endDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}` : ''}
-                          </td>
-
-                          {/* 7. Status */}
-                          <td className="py-2 px-3" onClick={(e) => e.stopPropagation()}>
-                            <div className="inline-flex items-center gap-1.5">
+                          {/* 8. Status */}
+                          <td className="py-3 px-3 align-middle whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                            <div className="inline-flex items-center gap-2">
                               <ToggleSwitch
                                 checked={isActive}
                                 onChange={() => handleToggleStatus(id)}
                                 size="sm"
                                 title={isActive ? 'Active (Click to pause)' : 'Paused (Click to activate)'}
                               />
-                              <span className={`text-[10px] font-bold ${isActive ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}>
-                                {isActive ? 'Active' : 'Paused'}
-                              </span>
+                              <Badge
+                                variant={isActive ? 'active' : 'paused'}
+                                label={isActive ? 'Active' : 'Paused'}
+                                size="xs"
+                              />
                             </div>
                           </td>
 
-                          {/* 8. Actions */}
-                          <td className="py-2 px-3 text-right">
-                            <div className="flex items-center justify-end space-x-1">
-                              <button
-                                type="button"
-                                onClick={() => handleToggleStatus(id)}
-                                title={isActive ? 'Pause Campaign' : 'Resume Campaign'}
-                                className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
-                              >
-                                {isActive ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                              </button>
+                          {/* 9. Actions (Sticky right so always visible) */}
+                          <td className="py-3 px-3.5 align-middle text-right whitespace-nowrap sticky right-0 bg-white group-hover:bg-slate-50/80 dark:bg-[#121216] dark:group-hover:bg-[#18181E] z-10 shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.08)] dark:shadow-[-8px_0_12px_-4px_rgba(0,0,0,0.4)] transition-colors">
+                            <div className="inline-flex items-center justify-end space-x-1">
                               <button
                                 type="button"
                                 onClick={() => handleOpenEdit(ad)}
                                 title="Edit Campaign"
-                                className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-all cursor-pointer active:scale-90 hover:scale-105"
                               >
                                 <Pencil className="w-3.5 h-3.5" />
                               </button>
@@ -1005,7 +1025,7 @@ export default function CustomAdsPage({ onNavigate }) {
                                 type="button"
                                 onClick={() => handleDeleteAd(id, ad.title)}
                                 title="Delete Campaign"
-                                className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all cursor-pointer active:scale-90 hover:scale-105"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -1020,26 +1040,26 @@ export default function CustomAdsPage({ onNavigate }) {
             )}
 
             {/* Table Summary Footer */}
-            <div className="px-3 sm:px-4 py-2 bg-slate-50/60 dark:bg-[#18181E]/80 border-t border-slate-100 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+            <div className="px-3.5 sm:px-4 py-2.5 bg-slate-50/70 dark:bg-[#18181E]/80 border-t border-slate-100 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
               <span className="font-medium text-[11px] text-slate-500 dark:text-slate-400">
-                Showing <strong className="text-slate-900 dark:text-white">{filteredAds.length}</strong> of {counts.all} campaigns
+                Showing <strong className="text-slate-900 dark:text-white font-bold">{filteredAds.length}</strong> of {counts.all} campaigns
               </span>
               <div className="flex flex-wrap items-center gap-3 text-[10.5px] font-medium">
-                <span className="inline-flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Active: <strong className="text-slate-700 dark:text-slate-200">{counts.active}</strong>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  Active: <strong className="text-slate-700 dark:text-slate-200 font-bold">{counts.active}</strong>
                 </span>
-                <span className="inline-flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                  Paused: <strong className="text-slate-700 dark:text-slate-200">{counts.paused}</strong>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  Paused: <strong className="text-slate-700 dark:text-slate-200 font-bold">{counts.paused}</strong>
                 </span>
-                <span className="inline-flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-                  Total Views: <strong className="text-slate-700 dark:text-slate-200">{totalImpressions.toLocaleString('en-IN')}</strong>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-sky-400" />
+                  Total Views: <strong className="text-slate-700 dark:text-slate-200 font-bold">{totalImpressions.toLocaleString('en-IN')}</strong>
                 </span>
-                <span className="inline-flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  Total Clicks: <strong className="text-slate-700 dark:text-slate-200">{totalClicks.toLocaleString('en-IN')}</strong>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  Total Clicks: <strong className="text-slate-700 dark:text-slate-200 font-bold">{totalClicks.toLocaleString('en-IN')}</strong>
                 </span>
               </div>
             </div>

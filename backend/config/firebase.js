@@ -1,5 +1,6 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getMessaging as adminGetMessaging } from 'firebase-admin/messaging';
+import { getAuth as adminGetAuth } from 'firebase-admin/auth';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -51,7 +52,7 @@ export const initializeFirebase = () => {
     }
 
     console.warn('⚠️  [Firebase] Key file not found at:', resolvedPath);
-    console.warn('⚠️  [Firebase] FCM push notifications will run in disabled/dry-run mode.');
+    console.warn('⚠️  [Firebase] FCM & Admin Auth will run in local developer fallback mode.');
   } catch (error) {
     console.error('❌ [Firebase] Initialization failed:', error.message);
   }
@@ -73,4 +74,19 @@ export const getMessaging = () => {
   }
 };
 
-export default { initializeFirebase, getMessaging };
+/**
+ * Returns the Firebase Auth instance if initialized, else null.
+ */
+export const getFirebaseAuth = () => {
+  const app = firebaseApp || initializeFirebase();
+  if (!app) return null;
+  try {
+    return adminGetAuth(app);
+  } catch (err) {
+    console.error('❌ [Firebase] Failed to get auth instance:', err.message);
+    return null;
+  }
+};
+
+export default { initializeFirebase, getMessaging, getFirebaseAuth };
+

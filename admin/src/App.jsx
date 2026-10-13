@@ -45,6 +45,11 @@ export default function App() {
       if (firebaseUser) {
         setAdminUser(firebaseUser);
         setIsAuthenticated(true);
+        firebaseUser.getIdToken().then((token) => {
+          try {
+            if (token) localStorage.setItem('admin_token', token);
+          } catch {}
+        }).catch(() => {});
         try {
           localStorage.setItem('admin_authenticated', 'true');
           localStorage.setItem('admin_user_email', firebaseUser.email || '');
@@ -59,10 +64,13 @@ export default function App() {
         setIsAuthenticated(false);
         try {
           localStorage.removeItem('admin_authenticated');
+          localStorage.removeItem('admin_token');
+          localStorage.removeItem('admin_user_email');
         } catch (e) {}
       }
       setIsAuthChecking(false);
     });
+
 
     return () => unsubscribe();
   }, []);
@@ -113,11 +121,13 @@ export default function App() {
     }
     try {
       localStorage.removeItem('admin_authenticated');
+      localStorage.removeItem('admin_token');
       localStorage.removeItem('admin_user_email');
     } catch {}
     setIsAuthenticated(false);
     setAdminUser(null);
   };
+
 
   const getPageMeta = () => {
     switch (activeTab) {
@@ -168,8 +178,8 @@ export default function App() {
         };
       case 'ad_control':
         return {
-          title: "Ad Control & Synchronized Delivery",
-          subtitle: "Central control room to synchronize whether to show Custom ads, AdMob, or both across all OTT placements."
+          title: "Ads Control",
+          subtitle: "Choose whether to show both ads, only AdMob, or only custom ads across mobile apps."
         };
       case 'users':
         return {
@@ -357,7 +367,7 @@ export default function App() {
               )}
 
               {activeTab === 'app_notifications' && (
-                <AppNotificationsPage />
+                <AppNotificationsPage onNavigate={setActiveTab} />
               )}
 
               {activeTab === 'legal' && (
