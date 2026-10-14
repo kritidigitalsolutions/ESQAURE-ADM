@@ -116,9 +116,41 @@ const UserSchema = new mongoose.Schema(
     // System & Status
     status: {
       type: String,
-      enum: ['ACTIVE', 'SUSPENDED', 'DELETED'],
+      enum: ['ACTIVE', 'SUSPENDED', 'DELETED', 'PENDING_DELETION'],
       default: 'ACTIVE',
       index: true
+    },
+    // Account Deletion Request (Admin verification required within 24 hours)
+    deletionRequest: {
+      isRequested: {
+        type: Boolean,
+        default: false,
+        index: true
+      },
+      requestedAt: {
+        type: Date,
+        default: null
+      },
+      scheduledDeletionAt: {
+        type: Date,
+        default: null
+      },
+      reason: {
+        type: String,
+        trim: true,
+        default: ''
+      },
+      status: {
+        type: String,
+        enum: ['NONE', 'PENDING', 'APPROVED', 'REJECTED'],
+        default: 'NONE',
+        index: true
+      },
+      adminNote: {
+        type: String,
+        trim: true,
+        default: ''
+      }
     },
     fcmTokens: [
       {
@@ -145,6 +177,20 @@ const UserSchema = new mongoose.Schema(
         ret.promoCode = doc.promoCode || doc.voucherCode || null;
         ret.avatarUrl = resolveMediaUrl(doc.avatarUrl || '');
         
+        // Deletion request details for client notification & admin review
+        ret.isDeletionRequested = Boolean(doc.deletionRequest?.isRequested || doc.status === 'PENDING_DELETION');
+        ret.deletionRequest = doc.deletionRequest || {
+          isRequested: false,
+          status: 'NONE',
+          requestedAt: null,
+          scheduledDeletionAt: null,
+          reason: ''
+        };
+        if (doc.deletionRequest?.requestedAt) {
+          ret.deletionRequestedAt = doc.deletionRequest.requestedAt;
+          ret.scheduledDeletionAt = doc.deletionRequest.scheduledDeletionAt;
+        }
+
         if (doc.vipExpiresAt) {
           ret.vipExpiresAt = new Date(doc.vipExpiresAt).toLocaleDateString('en-GB', {
             day: '2-digit',
@@ -188,4 +234,10 @@ UserSchema.virtual('fullName').get(function () {
   return `${this.firstName || ''} ${this.lastName || ''}`.trim();
 });
 
+// High-speed compound indexes for user counting, status filtering and telemetry
+UserSchema.index({ status: 1, createdAt: -1 });
+UserSchema.index({ isVip: 1, status: 1 });
+UserSchema.index({ createdAt: -1 });
+
 export const User = mongoose.model('User', UserSchema);
+

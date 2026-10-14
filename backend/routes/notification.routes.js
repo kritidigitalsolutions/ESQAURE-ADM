@@ -10,6 +10,8 @@ import {
   clearAllNotifications,
   getNotificationSettings,
   updateNotificationSettings,
+  toggleNotificationSetting,
+  resetNotificationSettings,
   registerDeviceToken,
   unregisterDeviceToken,
   sendNotification,
@@ -62,12 +64,24 @@ router.delete('/unregister-device', optionalAuthenticate, unregisterDeviceToken)
 // The remaining mobile notification routes require a valid Bearer token
 router.use(authenticate);
 
-// ── Notification Settings (toggles screen) ────────────────────────────────
-// GET  /api/v1/notifications/settings    → Get newEpisodes / newReleases / recommendations
+// ── Notification Settings (Alert preferences screen) ───────────────────────
+// GET   /api/v1/notifications/settings              → Get newEpisodes / newReleases / recommendations & UI metadata
 router.get('/settings', getNotificationSettings);
 
-// PUT  /api/v1/notifications/settings    → Update one or more toggles
+// PUT   /api/v1/notifications/settings              → Update preferences (batch or single)
 router.put('/settings', updateNotificationSettings);
+
+// PATCH /api/v1/notifications/settings              → Partial update preferences
+router.patch('/settings', updateNotificationSettings);
+
+// POST  /api/v1/notifications/settings/toggle       → Toggle a specific preference (body: { key, enabled? })
+router.post('/settings/toggle', toggleNotificationSetting);
+
+// PATCH /api/v1/notifications/settings/:key/toggle  → Toggle specific preference by URL param
+router.patch('/settings/:key/toggle', toggleNotificationSetting);
+
+// POST  /api/v1/notifications/settings/reset        → Reset preferences to defaults
+router.post('/settings/reset', resetNotificationSettings);
 
 // ── Notification List & State (Static routes BEFORE parameterized /:id) ──────
 // GET  /api/v1/notifications/unread-count → App icon badge count

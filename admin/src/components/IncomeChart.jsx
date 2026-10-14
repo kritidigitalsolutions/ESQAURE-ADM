@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useId } from 'react';
 import { IndianRupee, ArrowUp, Loader2 } from 'lucide-react';
 import AnimatedNumber from './common/AnimatedNumber';
+import RippleWaveLoader from './common/RippleWaveLoader';
 import { subscriptionService } from '../services/subscriptionService';
 
 // Format currency in Indian Rupee (₹)
@@ -248,24 +249,37 @@ export default function IncomeChart({ className = '' }) {
       <div className="mt-2.5 flex flex-col md:flex-row items-start justify-between gap-4">
         {/* Left Column: Metric Headline & Subtitle */}
         <div className="w-full md:w-[260px] lg:w-[280px] shrink-0 pt-0.5">
-          <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-0.5 font-urbanist transition-all">
-            {displaySubtitle}
-          </span>
-          <div className="flex items-center flex-wrap gap-2">
-            <span className="text-2xl sm:text-3xl font-black leading-none tracking-tight text-slate-950 dark:text-white font-urbanist transition-all">
-              <AnimatedNumber value={displayAmount} duration={500} />
-            </span>
+          {isLoading ? (
+            <div className="space-y-2">
+              <div className="h-3 w-28 bg-slate-200/80 dark:bg-white/[0.08] rounded-md animate-pulse" />
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-32 bg-slate-200/80 dark:bg-white/[0.08] rounded-lg animate-pulse" />
+                <div className="h-5 w-14 bg-slate-200/60 dark:bg-white/[0.05] rounded-full animate-pulse" />
+              </div>
+              <div className="h-3 w-40 bg-slate-200/60 dark:bg-white/[0.05] rounded-md animate-pulse" />
+            </div>
+          ) : (
+            <>
+              <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-0.5 font-urbanist transition-all">
+                {displaySubtitle}
+              </span>
+              <div className="flex items-center flex-wrap gap-2">
+                <span className="text-2xl sm:text-3xl font-black leading-none tracking-tight text-slate-950 dark:text-white font-urbanist transition-all">
+                  <AnimatedNumber value={displayAmount} duration={500} />
+                </span>
 
-            {/* Yellow Trend Pill Badge */}
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-[#FEF08A] text-slate-950 border border-amber-300/80 shadow-2xs shrink-0">
-              <ArrowUp className="w-3 h-3 stroke-[2.5]" />
-              <AnimatedNumber value={currentData.trend} duration={500} />
-            </span>
-          </div>
+                {/* Yellow Trend Pill Badge */}
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-[#FEF08A] text-slate-950 border border-amber-300/80 shadow-2xs shrink-0">
+                  <ArrowUp className="w-3 h-3 stroke-[2.5]" />
+                  <AnimatedNumber value={currentData.trend} duration={500} />
+                </span>
+              </div>
 
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
-            {currentData.subtext}
-          </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
+                {currentData.subtext}
+              </p>
+            </>
+          )}
         </div>
 
         {/* Right Column: Clean, Unobstructed SVG Graph Canvas (NO BUTTONS OVER IT) */}
@@ -275,121 +289,132 @@ export default function IncomeChart({ className = '' }) {
           onMouseLeave={handleMouseLeave}
           className="relative flex-1 w-full h-[100px] sm:h-[110px] rounded-xl bg-gradient-to-l from-amber-50/25 dark:from-amber-900/10 via-amber-50/10 dark:via-amber-900/5 to-transparent border border-slate-100/90 dark:border-white/10 overflow-hidden cursor-crosshair select-none"
         >
-          {/* SVG Spline Curve & Area */}
-          <svg
-            viewBox={`0 0 ${chartBounds.width} ${chartBounds.height}`}
-            preserveAspectRatio="none"
-            shapeRendering="geometricPrecision"
-            className="w-full h-full overflow-visible"
-          >
-            <defs>
-              <linearGradient id="income-grad-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#EAB308" stopOpacity="0.32" />
-                <stop offset="65%" stopColor="#EAB308" stopOpacity="0.07" />
-                <stop offset="100%" stopColor="#EAB308" stopOpacity="0.0" />
-              </linearGradient>
-            </defs>
+          {isLoading ? (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+              <RippleWaveLoader size="sm" count={7} />
+              <span className="text-[10.5px] font-bold text-slate-400 dark:text-slate-500 font-urbanist tracking-wide">
+                Loading revenue analytics...
+              </span>
+            </div>
+          ) : (
+            <>
+              {/* SVG Spline Curve & Area */}
+              <svg
+                viewBox={`0 0 ${chartBounds.width} ${chartBounds.height}`}
+                preserveAspectRatio="none"
+                shapeRendering="geometricPrecision"
+                className="w-full h-full overflow-visible"
+              >
+                <defs>
+                  <linearGradient id="income-grad-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#EAB308" stopOpacity="0.32" />
+                    <stop offset="65%" stopColor="#EAB308" stopOpacity="0.07" />
+                    <stop offset="100%" stopColor="#EAB308" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
 
-            {/* Crisp Horizontal Guidelines */}
-            <g className="opacity-30 dark:opacity-15 pointer-events-none">
-              {[0.2, 0.55, 0.9].map((ratio, gIdx) => {
-                const yPos = chartBounds.padTop + (chartBounds.height - chartBounds.padTop - chartBounds.padBottom) * (1 - ratio);
-                return (
+                {/* Crisp Horizontal Guidelines */}
+                <g className="opacity-30 dark:opacity-15 pointer-events-none">
+                  {[0.2, 0.55, 0.9].map((ratio, gIdx) => {
+                    const yPos = chartBounds.padTop + (chartBounds.height - chartBounds.padTop - chartBounds.padBottom) * (1 - ratio);
+                    return (
+                      <line
+                        key={`inc-grid-${gIdx}`}
+                        x1={0}
+                        y1={yPos}
+                        x2={chartBounds.width}
+                        y2={yPos}
+                        stroke="#64748B"
+                        strokeWidth={1}
+                        strokeDasharray="4 4"
+                        vectorEffect="non-scaling-stroke"
+                        shapeRendering="crispEdges"
+                      />
+                    );
+                  })}
+                </g>
+
+                {/* Filled Area */}
+                <path
+                  d={chartBounds.areaPath}
+                  fill="url(#income-grad-fill)"
+                  shapeRendering="geometricPrecision"
+                  className="transition-all duration-300 ease-out"
+                />
+
+                {/* Spline Line (Pin-sharp non-scaling stroke) */}
+                <path
+                  d={chartBounds.splinePath}
+                  fill="none"
+                  stroke="#EAB308"
+                  strokeWidth={2.8}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                  shapeRendering="geometricPrecision"
+                  className="transition-all duration-300 ease-out"
+                />
+
+                {/* Hover Vertical Guide Line (Stays strictly inside chart area) */}
+                {isHovering && activePoint && (
                   <line
-                    key={`inc-grid-${gIdx}`}
-                    x1={0}
-                    y1={yPos}
-                    x2={chartBounds.width}
-                    y2={yPos}
-                    stroke="#64748B"
-                    strokeWidth={1}
-                    strokeDasharray="4 4"
+                    x1={activePoint.x}
+                    y1={chartBounds.padTop - 8}
+                    x2={activePoint.x}
+                    y2={chartBounds.height}
+                    stroke="#EAB308"
+                    strokeWidth={1.5}
+                    strokeDasharray="3 3"
+                    strokeOpacity={0.8}
                     vectorEffect="non-scaling-stroke"
                     shapeRendering="crispEdges"
+                    className="pointer-events-none transition-all duration-100"
                   />
-                );
-              })}
-            </g>
+                )}
 
-            {/* Filled Area */}
-            <path
-              d={chartBounds.areaPath}
-              fill="url(#income-grad-fill)"
-              shapeRendering="geometricPrecision"
-              className="transition-all duration-300 ease-out"
-            />
+                {/* Hover Active Point Indicator */}
+                {isHovering && activePoint && (
+                  <g className="transition-all duration-100">
+                    <circle
+                      cx={activePoint.x}
+                      cy={activePoint.y}
+                      r={8}
+                      fill="#EAB308"
+                      fillOpacity={0.25}
+                    />
+                    <circle
+                      cx={activePoint.x}
+                      cy={activePoint.y}
+                      r={4.5}
+                      fill="#FFFFFF"
+                      stroke="#EAB308"
+                      strokeWidth={2.5}
+                    />
+                  </g>
+                )}
+              </svg>
 
-            {/* Spline Line (Pin-sharp non-scaling stroke) */}
-            <path
-              d={chartBounds.splinePath}
-              fill="none"
-              stroke="#EAB308"
-              strokeWidth={2.8}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              vectorEffect="non-scaling-stroke"
-              shapeRendering="geometricPrecision"
-              className="transition-all duration-300 ease-out"
-            />
-
-            {/* Hover Vertical Guide Line (Stays strictly inside chart area) */}
-            {isHovering && activePoint && (
-              <line
-                x1={activePoint.x}
-                y1={chartBounds.padTop - 8}
-                x2={activePoint.x}
-                y2={chartBounds.height}
-                stroke="#EAB308"
-                strokeWidth={1.5}
-                strokeDasharray="3 3"
-                strokeOpacity={0.8}
-                vectorEffect="non-scaling-stroke"
-                shapeRendering="crispEdges"
-                className="pointer-events-none transition-all duration-100"
-              />
-            )}
-
-            {/* Hover Active Point Indicator */}
-            {isHovering && activePoint && (
-              <g className="transition-all duration-100">
-                <circle
-                  cx={activePoint.x}
-                  cy={activePoint.y}
-                  r={8}
-                  fill="#EAB308"
-                  fillOpacity={0.25}
-                />
-                <circle
-                  cx={activePoint.x}
-                  cy={activePoint.y}
-                  r={4.5}
-                  fill="#FFFFFF"
-                  stroke="#EAB308"
-                  strokeWidth={2.5}
-                />
-              </g>
-            )}
-          </svg>
-
-          {/* Floating Tooltip Pill (Clamped cleanly so it never clips) */}
-          {isHovering && activePoint && (
-            <div
-              className="pointer-events-none absolute z-30 flex flex-col items-center transform -translate-x-1/2 transition-all duration-75 ease-out"
-              style={{
-                left: `${Math.max(8, Math.min(92, (activePoint.x / chartBounds.width) * 100))}%`,
-                top: activePoint.y < 45 ? '48%' : `${Math.max(6, (activePoint.y / chartBounds.height) * 100 - 28)}%`,
-              }}
-            >
-              <div className="bg-slate-950/95 dark:bg-[#1E1E26]/95 backdrop-blur-md text-white px-3 py-1 rounded-xl shadow-xl text-xs font-semibold whitespace-nowrap flex items-center gap-2 border border-slate-800 dark:border-white/12">
-                <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
-                <span className="font-urbanist font-black text-white">
-                  {formatINRFull(activePoint.value)}
-                </span>
-                <span className="text-slate-400 dark:text-slate-400 font-medium text-[11px] border-l border-slate-800 dark:border-white/10 pl-1.5">
-                  {activePoint.time}
-                </span>
-              </div>
-            </div>
+              {/* Floating Tooltip Pill (Clamped cleanly so it never clips) */}
+              {isHovering && activePoint && (
+                <div
+                  className="pointer-events-none absolute z-30 flex flex-col items-center transform -translate-x-1/2 transition-all duration-75 ease-out"
+                  style={{
+                    left: `${Math.max(8, Math.min(92, (activePoint.x / chartBounds.width) * 100))}%`,
+                    top: activePoint.y < 45 ? '48%' : `${Math.max(6, (activePoint.y / chartBounds.height) * 100 - 28)}%`,
+                  }}
+                >
+                  <div className="bg-slate-950/95 dark:bg-[#1E1E26]/95 backdrop-blur-md text-white px-3 py-1 rounded-xl shadow-xl text-xs font-semibold whitespace-nowrap flex items-center gap-2 border border-slate-800 dark:border-white/12">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
+                    <span className="font-urbanist font-black text-white">
+                      {formatINRFull(activePoint.value)}
+                    </span>
+                    <span className="text-slate-400 dark:text-slate-400 font-medium text-[11px] border-l border-slate-800 dark:border-white/10 pl-1.5">
+                      {activePoint.time}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

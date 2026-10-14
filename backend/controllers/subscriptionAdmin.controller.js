@@ -8,6 +8,15 @@ import { AppError } from '../utils/appError.js';
 import { ERROR_CODES } from '../constants/errorCodes.js';
 import { syncAndCleanSubscriptionData } from '../utils/syncSubscriptionData.js';
 
+// In-memory caching for ultra-fast telemetry responses
+let overviewCache = { data: null, expiresAt: 0 };
+let revenueCache = { data: null, expiresAt: 0 };
+
+export const invalidateSubscriptionAdminCache = () => {
+  overviewCache = { data: null, expiresAt: 0 };
+  revenueCache = { data: null, expiresAt: 0 };
+};
+
 export class SubscriptionAdminController {
   /**
    * GET /api/v1/subscriptions/admin/overview
@@ -15,6 +24,11 @@ export class SubscriptionAdminController {
    */
   static async getOverview(req, res, next) {
     try {
+      const nowMs = Date.now();
+      if (overviewCache.data && nowMs < overviewCache.expiresAt) {
+        return ApiResponse.success(res, 'Monetization overview retrieved.', overviewCache.data);
+      }
+
       await seedDefaultSubscriptionPlans();
       await syncAndCleanSubscriptionData();
       const settings = await getOrCreateSubscriptionSettings();
@@ -31,7 +45,7 @@ export class SubscriptionAdminController {
         Subscription.countDocuments({ status: 'TRIAL' }),
         Subscription.countDocuments({ status: 'CANCELLED' }),
         Subscription.countDocuments({ status: 'EXPIRED' }),
-        SubscriptionPlan.find({ status: 'ACTIVE' }),
+        SubscriptionPlan.find({ status: 'ACTIVE' }).lean(),
         SubscriptionTransaction.aggregate([
           { $match: { status: 'SUCCESS' } },
           { $group: { _id: null, total: { $sum: '$amount' } } }
@@ -44,11 +58,11 @@ export class SubscriptionAdminController {
       let liveMrr = 0;
       const activeSubscriptions = await Subscription.find({
         status: { $in: ['ACTIVE', 'TRIAL'] }
-      }).populate('planId');
+      }).populate('planId').lean();
 
       activeSubscriptions.forEach((sub) => {
         if (sub.planId && sub.planId.price) {
-          const months = sub.planId.durationMonths || Math.max(1, Math.round(sub.planId.durationDays / 30));
+          const months = sub.planId.durationMonths || Math.max(1, Math.round((sub.planId.durationDays || 30) / 30));
           liveMrr += sub.planId.price / months;
         }
       });
@@ -59,7 +73,7 @@ export class SubscriptionAdminController {
       const realChurnRate = totalAccounts > 0 ? ((totalExpiredSubs / totalAccounts) * 100).toFixed(1) + '%' : '0.0%';
       const totalRevenueCollected = totalRevenueAgg.length > 0 ? totalRevenueAgg[0].total : 0;
 
-      return ApiResponse.success(res, 'Monetization overview retrieved.', {
+      const payload = {
         kpis: {
           totalMrr: realMrrDisplay,
           activeSubscribers: activeSubscribersCount,
@@ -75,7 +89,10 @@ export class SubscriptionAdminController {
           conversionRate: settings.conversionRate,
           gateway: settings.gateway
         }
-      });
+      };
+
+      overviewCache = { data: payload, expiresAt: nowMs + 20 * 1000 }; // 20s TTL
+      return ApiResponse.success(res, 'Monetization overview retrieved.', payload);
     } catch (err) {
       return next(err);
     }
@@ -88,25 +105,47 @@ export class SubscriptionAdminController {
   static async getRevenueAnalytics(req, res, next) {
     try {
       const now = new Date();
+      const nowMs = now.getTime();
+      if (revenueCache.data && nowMs < revenueCache.expiresAt) {
+        return ApiResponse.success(res, 'Revenue analytics retrieved successfully.', revenueCache.data);
+      }
 
-      // --- 1. TODAY'S REVENUE (Hourly checkpoints) ---
+      // --- 1. Compute time boundaries ---
       const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-      const startOfYesterday = new Date(startOfToday.getTime() - 24 * 60 * 60 * 1000);
+      const startOfTodayMs = startOfToday.getTime();
+      const startOfYesterdayMs = startOfTodayMs - 24 * 60 * 60 * 1000;
 
-      const [todayTxns, yesterdayTxns] = await Promise.all([
-        SubscriptionTransaction.find({
-          status: 'SUCCESS',
-          createdAt: { $gte: startOfToday, $lte: now }
-        }).select('amount createdAt'),
-        SubscriptionTransaction.find({
-          status: 'SUCCESS',
-          createdAt: { $gte: startOfYesterday, $lt: startOfToday }
-        }).select('amount createdAt')
-      ]);
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+      const startOfMonthMs = startOfMonth.getTime();
+      const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0);
+      const startOfPrevMonthMs = startOfPrevMonth.getTime();
 
-      const todayTotal = todayTxns.reduce((sum, t) => sum + (t.amount || 0), 0);
-      const yesterdayTotal = yesterdayTxns.reduce((sum, t) => sum + (t.amount || 0), 0);
+      const yearlyBuckets = [];
+      for (let k = 5; k >= 0; k--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - k, 1);
+        const mName = d.toLocaleString('en-US', { month: 'short' });
+        const yShort = String(d.getFullYear()).slice(-2);
+        const yFull = d.getFullYear();
+        const start = new Date(d.getFullYear(), d.getMonth(), 1, 0, 0, 0);
+        const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+        yearlyBuckets.push({
+          label: `${mName} '${yShort}`,
+          time: `${mName} ${yFull}`,
+          startDateMs: start.getTime(),
+          endDateMs: end.getTime(),
+          value: 0
+        });
+      }
 
+      const sixMonthsAgo = new Date(yearlyBuckets[0].startDateMs);
+
+      // Single lean query for all transactions within past 6 months
+      const sixMonthTxns = await SubscriptionTransaction.find({
+        status: 'SUCCESS',
+        createdAt: { $gte: sixMonthsAgo, $lte: now }
+      }).select('amount createdAt').lean();
+
+      // Hourly buckets for Today
       const hourlyBuckets = [
         { label: '00:00', time: '12:00 AM', hourStart: 0, hourEnd: 4, value: 0 },
         { label: '04:00', time: '04:00 AM', hourStart: 4, hourEnd: 8, value: 0 },
@@ -117,35 +156,7 @@ export class SubscriptionAdminController {
         { label: '23:00', time: '11:00 PM', hourStart: 23, hourEnd: 24, value: 0 },
       ];
 
-      todayTxns.forEach((t) => {
-        const h = new Date(t.createdAt).getHours();
-        const b = hourlyBuckets.find((bucket) => h >= bucket.hourStart && h < bucket.hourEnd) || hourlyBuckets[hourlyBuckets.length - 1];
-        if (b) b.value += (t.amount || 0);
-      });
-
-      const todayTrendPct = yesterdayTotal > 0
-        ? `${(((todayTotal - yesterdayTotal) / yesterdayTotal) * 100).toFixed(1)}%`
-        : '+0.0%';
-      const todayTrendSign = (todayTotal > yesterdayTotal && !todayTrendPct.startsWith('+')) ? '+' : '';
-
-      // --- 2. MONTHLY REVENUE (By intervals of current month) ---
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
-      const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0);
-
-      const [monthTxns, prevMonthTxns] = await Promise.all([
-        SubscriptionTransaction.find({
-          status: 'SUCCESS',
-          createdAt: { $gte: startOfMonth, $lte: now }
-        }).select('amount createdAt'),
-        SubscriptionTransaction.find({
-          status: 'SUCCESS',
-          createdAt: { $gte: startOfPrevMonth, $lt: startOfMonth }
-        }).select('amount createdAt')
-      ]);
-
-      const monthTotal = monthTxns.reduce((sum, t) => sum + (t.amount || 0), 0);
-      const prevMonthTotal = prevMonthTxns.reduce((sum, t) => sum + (t.amount || 0), 0);
-
+      // Month interval buckets
       const monthName = now.toLocaleString('en-US', { month: 'short' });
       const prevMonthName = startOfPrevMonth.toLocaleString('en-US', { month: 'short' });
 
@@ -158,49 +169,56 @@ export class SubscriptionAdminController {
         { label: `26-31 ${monthName}`, time: `26-31 ${monthName}`, startDay: 26, endDay: 31, value: 0 },
       ];
 
-      monthTxns.forEach((t) => {
-        const day = new Date(t.createdAt).getDate();
-        const b = monthBuckets.find((bucket) => day >= bucket.startDay && day <= bucket.endDay) || monthBuckets[monthBuckets.length - 1];
-        if (b) b.value += (t.amount || 0);
-      });
+      let todayTotal = 0;
+      let yesterdayTotal = 0;
+      let monthTotal = 0;
+      let prevMonthTotal = 0;
+      let sixMonthTotal = 0;
+
+      // Ultra-fast single-pass processing
+      for (let i = 0; i < sixMonthTxns.length; i++) {
+        const t = sixMonthTxns[i];
+        const amt = t.amount || 0;
+        const dt = new Date(t.createdAt);
+        const tMs = dt.getTime();
+
+        sixMonthTotal += amt;
+
+        // Yearly bucket matching
+        const yb = yearlyBuckets.find((b) => tMs >= b.startDateMs && tMs <= b.endDateMs);
+        if (yb) yb.value += amt;
+
+        // Today & Yesterday
+        if (tMs >= startOfTodayMs && tMs <= nowMs) {
+          todayTotal += amt;
+          const h = dt.getHours();
+          const hb = hourlyBuckets.find((b) => h >= b.hourStart && h < b.hourEnd) || hourlyBuckets[hourlyBuckets.length - 1];
+          if (hb) hb.value += amt;
+        } else if (tMs >= startOfYesterdayMs && tMs < startOfTodayMs) {
+          yesterdayTotal += amt;
+        }
+
+        // Current Month vs Previous Month
+        if (tMs >= startOfMonthMs && tMs <= nowMs) {
+          monthTotal += amt;
+          const day = dt.getDate();
+          const mb = monthBuckets.find((b) => day >= b.startDay && day <= b.endDay) || monthBuckets[monthBuckets.length - 1];
+          if (mb) mb.value += amt;
+        } else if (tMs >= startOfPrevMonthMs && tMs < startOfMonthMs) {
+          prevMonthTotal += amt;
+        }
+      }
+
+      const todayTrendPct = yesterdayTotal > 0
+        ? `${(((todayTotal - yesterdayTotal) / yesterdayTotal) * 100).toFixed(1)}%`
+        : '+0.0%';
+      const todayTrendSign = (todayTotal > yesterdayTotal && !todayTrendPct.startsWith('+')) ? '+' : '';
 
       const monthTrendPct = prevMonthTotal > 0
         ? `${(((monthTotal - prevMonthTotal) / prevMonthTotal) * 100).toFixed(1)}%`
         : '+0.0%';
 
-      // --- 3. YEARLY REVENUE (Past 6 months progression) ---
-      const yearlyBuckets = [];
-      for (let k = 5; k >= 0; k--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - k, 1);
-        const mName = d.toLocaleString('en-US', { month: 'short' });
-        const yShort = String(d.getFullYear()).slice(-2);
-        const yFull = d.getFullYear();
-        const start = new Date(d.getFullYear(), d.getMonth(), 1, 0, 0, 0);
-        const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
-        yearlyBuckets.push({
-          label: `${mName} '${yShort}`,
-          time: `${mName} ${yFull}`,
-          startDate: start,
-          endDate: end,
-          value: 0
-        });
-      }
-
-      const sixMonthsAgo = yearlyBuckets[0].startDate;
-      const sixMonthTxns = await SubscriptionTransaction.find({
-        status: 'SUCCESS',
-        createdAt: { $gte: sixMonthsAgo, $lte: now }
-      }).select('amount createdAt');
-
-      sixMonthTxns.forEach((t) => {
-        const dt = new Date(t.createdAt);
-        const b = yearlyBuckets.find((bucket) => dt >= bucket.startDate && dt <= bucket.endDate);
-        if (b) b.value += (t.amount || 0);
-      });
-
-      const sixMonthTotal = sixMonthTxns.reduce((sum, t) => sum + (t.amount || 0), 0);
-
-      return ApiResponse.success(res, 'Revenue analytics retrieved successfully.', {
+      const payload = {
         today: {
           label: "TODAY'S REVENUE",
           total: `₹${todayTotal.toLocaleString('en-IN')}`,
@@ -225,7 +243,10 @@ export class SubscriptionAdminController {
           subtext: 'vs previous 6 mo',
           points: yearlyBuckets.map((b) => ({ label: b.label, value: b.value, time: b.time }))
         }
-      });
+      };
+
+      revenueCache = { data: payload, expiresAt: nowMs + 30 * 1000 }; // 30s TTL
+      return ApiResponse.success(res, 'Revenue analytics retrieved successfully.', payload);
     } catch (err) {
       return next(err);
     }

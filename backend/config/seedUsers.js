@@ -22,10 +22,13 @@ export const DUMMY_EMAILS = [
   'meera.nair@yahoo.com'
 ];
 
+let dummyUsersCleaned = false;
+
 /**
  * Permanently delete any mock/sample users from MongoDB so only 100% genuine real users exist.
  */
-export const removeDummyUsers = async () => {
+export const removeDummyUsers = async (force = false) => {
+  if (dummyUsersCleaned && !force) return;
   try {
     const result = await User.deleteMany({
       $or: [

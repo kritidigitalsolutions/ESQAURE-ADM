@@ -11,6 +11,7 @@ import searchRoutes       from './search.routes.js';
 import homeRoutes         from './home.routes.js';
 import genreRoutes        from './genre.routes.js';
 import savedSeriesRoutes  from './savedSeries.routes.js';
+import watchHistoryRoutes  from './watchHistory.routes.js';
 import promoRoutes        from './promo.routes.js';
 import voucherRoutes      from './voucher.routes.js';
 import adRoutes           from './ad.routes.js';
@@ -59,6 +60,9 @@ router.use('/banners', homeRoutes);
 /** User Library: Saved Series (Watchlist / Watch Later), Watch History & Settings */
 router.use('/user', savedSeriesRoutes);
 router.use('/saved-series', savedSeriesRoutes);
+
+/** User Watch History & Viewing Activity (OTT Viewing Activity & Scrubber Sync) */
+router.use('/watch-history', watchHistoryRoutes);
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  ADMIN PANEL ROUTES

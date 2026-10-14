@@ -3,12 +3,20 @@ import { User } from '../models/User.js';
 import { Genre } from '../models/Genre.js';
 import { Subscription } from '../models/Subscription.js';
 import { SubscriptionPlan } from '../models/SubscriptionPlan.js';
+import { AccountDeletionRequest } from '../models/AccountDeletionRequest.js';
 import { removeDummyUsers } from '../config/seedUsers.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { AppError } from '../utils/appError.js';
 import { ERROR_CODES } from '../constants/errorCodes.js';
 import { syncAndCleanSubscriptionData } from '../utils/syncSubscriptionData.js';
 import { resolveMediaUrl } from '../utils/formatters.js';
+
+// In-memory cache for user activity telemetry
+let activityAnalyticsCache = { data: null, expiresAt: 0 };
+
+export const invalidateUserActivityCache = () => {
+  activityAnalyticsCache = { data: null, expiresAt: 0 };
+};
 
 export class UserController {
   /**
@@ -28,11 +36,17 @@ export class UserController {
       // Apply filter type
       if (filter === 'VIP' || filter === 'SUBSCRIBED') {
         query.isVip = true;
+        query.status = { $ne: 'SUSPENDED' };
       } else if (filter === 'FREE') {
         query.isVip = { $ne: true };
-        query.status = { $ne: 'SUSPENDED' };
+        query.status = { $nin: ['SUSPENDED', 'PENDING_DELETION'] };
       } else if (filter === 'SUSPENDED') {
         query.status = 'SUSPENDED';
+      } else if (filter === 'DELETION_REQUESTS' || filter === 'PENDING_DELETION') {
+        query.$or = [
+          { status: 'PENDING_DELETION' },
+          { 'deletionRequest.isRequested': true }
+        ];
       }
 
       // Apply search term
@@ -52,7 +66,11 @@ export class UserController {
           orClauses.push({ phoneNumber: new RegExp(digitsOnly, 'i') });
         }
 
-        query.$and = [{ $or: orClauses }];
+        if (query.$and) {
+          query.$and.push({ $or: orClauses });
+        } else {
+          query.$and = [{ $or: orClauses }];
+        }
       }
 
       const users = await User.find(query)
@@ -62,12 +80,19 @@ export class UserController {
 
       // Calculate global counts and real analytics for KPIs
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      const [totalUsers, vipUsers, freeUsers, suspendedUsers, activeTodayUsers, allUsers] = await Promise.all([
+      const [totalUsers, vipUsers, freeUsers, suspendedUsers, activeTodayUsers, deletionRequestsCount, allUsers] = await Promise.all([
         User.countDocuments({ status: { $ne: 'DELETED' } }),
         User.countDocuments({ isVip: true, status: { $ne: 'DELETED' } }),
-        User.countDocuments({ isVip: { $ne: true }, status: { $ne: 'SUSPENDED', $ne: 'DELETED' } }),
+        User.countDocuments({ isVip: { $ne: true }, status: { $nin: ['SUSPENDED', 'DELETED', 'PENDING_DELETION'] } }),
         User.countDocuments({ status: 'SUSPENDED' }),
         User.countDocuments({ status: { $ne: 'DELETED' }, lastLoginAt: { $gte: oneDayAgo } }),
+        User.countDocuments({
+          $or: [
+            { status: 'PENDING_DELETION' },
+            { 'deletionRequest.isRequested': true }
+          ],
+          status: { $ne: 'DELETED' }
+        }),
         User.find({ status: { $ne: 'DELETED' } }).select('totalWatchTime lastLoginAt name isVip firstName lastName phoneNumber countryCode')
       ]);
 
@@ -99,6 +124,16 @@ export class UserController {
             isVip: Boolean(u.isVip),
             vipExpiresAt: u.vipExpiresAt ? new Date(u.vipExpiresAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—',
             status: u.status || 'ACTIVE',
+            isDeletionRequested: Boolean(u.deletionRequest?.isRequested || u.status === 'PENDING_DELETION'),
+            deletionRequest: u.deletionRequest || {
+              isRequested: false,
+              status: 'NONE',
+              requestedAt: null,
+              scheduledDeletionAt: null,
+              reason: ''
+            },
+            deletionRequestedAt: u.deletionRequest?.requestedAt || null,
+            scheduledDeletionAt: u.deletionRequest?.scheduledDeletionAt || null,
             totalWatchTime: u.totalWatchTime || '0.0 hrs',
             promoCode: u.promoCode || u.voucherCode || null,
             avatarUrl: resolveMediaUrl(u.avatarUrl || '', req),
@@ -116,6 +151,7 @@ export class UserController {
           free: freeUsers,
           suspended: suspendedUsers,
           activeToday: activeTodayUsers,
+          deletionRequests: deletionRequestsCount,
           avgWatchTime: avgWatchHours,
           peakWatchTime: maxHours > 0 ? maxHours.toFixed(1) : '0.0'
         }
@@ -312,6 +348,10 @@ export class UserController {
       }
 
       await Subscription.deleteMany({ userId: id });
+      await AccountDeletionRequest.updateMany(
+        { userId: id, status: 'PENDING' },
+        { status: 'APPROVED', reviewedBy: req.admin?.email || 'admin', reviewedAt: new Date(), adminNotes: 'Account removed by admin' }
+      );
       const user = await User.findByIdAndDelete(id);
       if (!user) {
         return next(new AppError('User not found', 404, ERROR_CODES.USER_NOT_FOUND));
@@ -326,33 +366,166 @@ export class UserController {
   }
 
   /**
+   * GET /api/v1/users/admin/deletion-requests
+   * List all user account deletion requests submitted to admin with real status & timeline
+   */
+  static async getDeletionRequests(req, res, next) {
+    try {
+      const requests = await AccountDeletionRequest.find()
+        .sort({ requestedAt: -1 })
+        .populate('userId', 'firstName lastName phoneNumber countryCode email plan isVip totalWatchTime avatarUrl status');
+
+      const pendingCount = await AccountDeletionRequest.countDocuments({ status: 'PENDING' });
+
+      return ApiResponse.success(res, 'Account deletion requests retrieved successfully', {
+        requests,
+        pendingCount
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/users/:id/verify-delete
+   * Admin verifies user profile, entitelements, and permanently deletes user account
+   */
+  static async verifyAndDeleteUser(req, res, next) {
+    try {
+      const { id } = req.params;
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return next(new AppError('Invalid User ID', 400, ERROR_CODES.VALIDATION_ERROR));
+      }
+
+      const user = await User.findById(id);
+      if (!user) {
+        return next(new AppError('User not found', 404, ERROR_CODES.USER_NOT_FOUND));
+      }
+
+      const userName = user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.phoneNumber;
+
+      // 1. Terminate and purge subscriptions
+      await Subscription.deleteMany({ userId: id });
+
+      // 2. Mark AccountDeletionRequest as APPROVED
+      await AccountDeletionRequest.updateMany(
+        { userId: id, status: 'PENDING' },
+        {
+          status: 'APPROVED',
+          reviewedBy: req.admin?.email || 'admin',
+          reviewedAt: new Date(),
+          adminNotes: req.body?.adminNotes || 'Verified and approved for permanent deletion by admin'
+        }
+      );
+
+      // 3. Permanently remove the user record
+      await User.findByIdAndDelete(id);
+
+      return ApiResponse.success(
+        res,
+        `User "${userName}" has been verified and permanently deleted by administrator.`,
+        { id, deleted: true, status: 'PERMANENTLY_DELETED' }
+      );
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/users/:id/reject-deletion
+   * Admin rejects/cancels the user's account deletion request and restores account to ACTIVE
+   */
+  static async rejectDeletionRequest(req, res, next) {
+    try {
+      const { id } = req.params;
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return next(new AppError('Invalid User ID', 400, ERROR_CODES.VALIDATION_ERROR));
+      }
+
+      const user = await User.findById(id);
+      if (!user) {
+        return next(new AppError('User not found', 404, ERROR_CODES.USER_NOT_FOUND));
+      }
+
+      const adminNote = req.body?.adminNote || req.body?.reason || 'Deletion request rejected after admin verification';
+
+      user.status = 'ACTIVE';
+      user.deletionRequest = {
+        isRequested: false,
+        requestedAt: null,
+        scheduledDeletionAt: null,
+        reason: '',
+        status: 'REJECTED',
+        adminNote
+      };
+      await user.save();
+
+      await AccountDeletionRequest.updateMany(
+        { userId: id, status: 'PENDING' },
+        {
+          status: 'REJECTED',
+          reviewedBy: req.admin?.email || 'admin',
+          reviewedAt: new Date(),
+          adminNotes: adminNote
+        }
+      );
+
+      return ApiResponse.success(
+        res,
+        `Account deletion request for "${user.fullName || user.phoneNumber}" rejected. User restored to ACTIVE.`,
+        { user: user.toJSON() }
+      );
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
    * GET /api/v1/users/admin/activity-analytics
    * Dynamic activity telemetry derived from real database users and subscriptions
    */
   static async getActivityAnalytics(req, res, next) {
     try {
       const now = new Date();
+      const nowMs = now.getTime();
+
+      if (activityAnalyticsCache.data && nowMs < activityAnalyticsCache.expiresAt) {
+        return ApiResponse.success(res, 'Activity analytics retrieved successfully.', activityAnalyticsCache.data);
+      }
+
+      // 1-Year boundary captures all intervals (1D, 7D, 1M, 1Y)
+      const oneYearAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1, 0, 0, 0);
+
+      // Single parallel lean query pair for the entire year
+      const [allYearUsers, allYearSubs] = await Promise.all([
+        User.find({
+          status: { $ne: 'DELETED' },
+          createdAt: { $gte: oneYearAgo, $lte: now }
+        }).select('createdAt').lean(),
+        Subscription.find({
+          createdAt: { $gte: oneYearAgo, $lte: now }
+        }).select('createdAt').lean()
+      ]);
+
+      const userTimes = allYearUsers.map((u) => new Date(u.createdAt).getTime());
+      const subTimes = allYearSubs.map((s) => new Date(s.createdAt).getTime());
 
       // --- 1. 1D (Today's Bi-Hourly checkpoints from 00:00 to 22:00) ---
       const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+      const startOfTodayMs = startOfToday.getTime();
       const hours = ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
-
-      const todayUsers = await User.find({
-        status: { $ne: 'DELETED' },
-        createdAt: { $gte: startOfToday, $lte: now }
-      }).select('createdAt');
-
-      const todaySubs = await Subscription.find({
-        createdAt: { $gte: startOfToday, $lte: now }
-      }).select('createdAt');
 
       const d1Users = hours.map((h, i) => {
         const startH = i * 2;
         const endH = startH + 2;
-        const count = todayUsers.filter((u) => {
-          const uh = new Date(u.createdAt).getHours();
-          return uh >= startH && uh < endH;
-        }).length;
+        let count = 0;
+        for (let j = 0; j < userTimes.length; j++) {
+          const t = userTimes[j];
+          if (t >= startOfTodayMs && t <= nowMs) {
+            const uh = new Date(t).getHours();
+            if (uh >= startH && uh < endH) count++;
+          }
+        }
         return {
           time: h,
           date: h,
@@ -365,10 +538,14 @@ export class UserController {
       const d1Subs = hours.map((h, i) => {
         const startH = i * 2;
         const endH = startH + 2;
-        const count = todaySubs.filter((s) => {
-          const sh = new Date(s.createdAt).getHours();
-          return sh >= startH && sh < endH;
-        }).length;
+        let count = 0;
+        for (let j = 0; j < subTimes.length; j++) {
+          const t = subTimes[j];
+          if (t >= startOfTodayMs && t <= nowMs) {
+            const sh = new Date(t).getHours();
+            if (sh >= startH && sh < endH) count++;
+          }
+        }
         return {
           time: h,
           date: h,
@@ -381,36 +558,28 @@ export class UserController {
       // --- 2. 7D (14 Rolling Days) ---
       const d7Users = [];
       const d7Subs = [];
-      const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
-
-      const recentUsers = await User.find({
-        status: { $ne: 'DELETED' },
-        createdAt: { $gte: fourteenDaysAgo, $lte: now }
-      }).select('createdAt');
-
-      const recentSubs = await Subscription.find({
-        createdAt: { $gte: fourteenDaysAgo, $lte: now }
-      }).select('createdAt');
 
       for (let i = 13; i >= 0; i--) {
         const dayDate = new Date(now);
         dayDate.setDate(now.getDate() - i);
-        const dayStart = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 0, 0, 0);
-        const dayEnd = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 23, 59, 59);
+        const dayStartMs = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 0, 0, 0).getTime();
+        const dayEndMs = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), 23, 59, 59).getTime();
 
         const weekday = dayDate.toLocaleDateString('en-US', { weekday: 'short' });
         const dayNum = dayDate.getDate();
         const timeLabel = `${weekday} ${dayNum}`;
 
-        const uCount = recentUsers.filter((u) => {
-          const ut = new Date(u.createdAt);
-          return ut >= dayStart && ut <= dayEnd;
-        }).length;
+        let uCount = 0;
+        for (let j = 0; j < userTimes.length; j++) {
+          const t = userTimes[j];
+          if (t >= dayStartMs && t <= dayEndMs) uCount++;
+        }
 
-        const sCount = recentSubs.filter((s) => {
-          const st = new Date(s.createdAt);
-          return st >= dayStart && st <= dayEnd;
-        }).length;
+        let sCount = 0;
+        for (let j = 0; j < subTimes.length; j++) {
+          const t = subTimes[j];
+          if (t >= dayStartMs && t <= dayEndMs) sCount++;
+        }
 
         d7Users.push({
           time: timeLabel,
@@ -435,21 +604,23 @@ export class UserController {
       for (let idx = 14; idx >= 0; idx--) {
         const d = new Date(now);
         d.setDate(now.getDate() - idx * 2);
-        const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1, 0, 0, 0);
-        const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
+        const dayStartMs = new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1, 0, 0, 0).getTime();
+        const dayEndMs = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59).getTime();
         const dayNum = d.getDate();
         const monthName = d.toLocaleDateString('en-US', { month: 'short' });
         const timeLabel = `${dayNum} ${monthName}`;
 
-        const uCount = recentUsers.filter((u) => {
-          const ut = new Date(u.createdAt);
-          return ut >= dayStart && ut <= dayEnd;
-        }).length;
+        let uCount = 0;
+        for (let j = 0; j < userTimes.length; j++) {
+          const t = userTimes[j];
+          if (t >= dayStartMs && t <= dayEndMs) uCount++;
+        }
 
-        const sCount = recentSubs.filter((s) => {
-          const st = new Date(s.createdAt);
-          return st >= dayStart && st <= dayEnd;
-        }).length;
+        let sCount = 0;
+        for (let j = 0; j < subTimes.length; j++) {
+          const t = subTimes[j];
+          if (t >= dayStartMs && t <= dayEndMs) sCount++;
+        }
 
         d1MUsers.push({
           time: timeLabel,
@@ -471,34 +642,26 @@ export class UserController {
       // --- 4. 1Y (12 Monthly Checkpoints) ---
       const d1YUsers = [];
       const d1YSubs = [];
-      const oneYearAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1, 0, 0, 0);
-
-      const yearUsers = await User.find({
-        status: { $ne: 'DELETED' },
-        createdAt: { $gte: oneYearAgo, $lte: now }
-      }).select('createdAt');
-
-      const yearSubs = await Subscription.find({
-        createdAt: { $gte: oneYearAgo, $lte: now }
-      }).select('createdAt');
 
       for (let k = 11; k >= 0; k--) {
         const d = new Date(now.getFullYear(), now.getMonth() - k, 1);
-        const monthStart = new Date(d.getFullYear(), d.getMonth(), 1, 0, 0, 0);
-        const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+        const monthStartMs = new Date(d.getFullYear(), d.getMonth(), 1, 0, 0, 0).getTime();
+        const monthEndMs = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59).getTime();
         const monthName = d.toLocaleDateString('en-US', { month: 'short' });
         const yearShort = String(d.getFullYear()).slice(-2);
         const timeLabel = `${monthName} '${yearShort}`;
 
-        const uCount = yearUsers.filter((u) => {
-          const ut = new Date(u.createdAt);
-          return ut >= monthStart && ut <= monthEnd;
-        }).length;
+        let uCount = 0;
+        for (let j = 0; j < userTimes.length; j++) {
+          const t = userTimes[j];
+          if (t >= monthStartMs && t <= monthEndMs) uCount++;
+        }
 
-        const sCount = yearSubs.filter((s) => {
-          const st = new Date(s.createdAt);
-          return st >= monthStart && st <= monthEnd;
-        }).length;
+        let sCount = 0;
+        for (let j = 0; j < subTimes.length; j++) {
+          const t = subTimes[j];
+          if (t >= monthStartMs && t <= monthEndMs) sCount++;
+        }
 
         d1YUsers.push({
           time: timeLabel,
@@ -517,7 +680,7 @@ export class UserController {
         });
       }
 
-      return ApiResponse.success(res, 'Activity analytics retrieved successfully.', {
+      const payload = {
         users: {
           '1D': d1Users,
           '7D': d7Users,
@@ -532,7 +695,10 @@ export class UserController {
           '1Y': d1YSubs,
           'MAX': d1YSubs
         }
-      });
+      };
+
+      activityAnalyticsCache = { data: payload, expiresAt: nowMs + 30 * 1000 }; // 30s TTL
+      return ApiResponse.success(res, 'Activity analytics retrieved successfully.', payload);
     } catch (err) {
       return next(err);
     }

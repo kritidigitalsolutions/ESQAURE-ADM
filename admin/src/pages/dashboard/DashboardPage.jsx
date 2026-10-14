@@ -12,6 +12,7 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
   const [trendingDramas, setTrendingDramas] = useState([]);
   const [isLoadingTrending, setIsLoadingTrending] = useState(true);
   const [recentTransactions, setRecentTransactions] = useState([]);
+  const [isLoadingTxns, setIsLoadingTxns] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -45,16 +46,25 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
     subscriptionService
       .getTransactions({ limit: 4 })
       .then((res) => {
+        if (!isMounted) return;
         if (res?.transactions && Array.isArray(res.transactions)) {
           setRecentTransactions(res.transactions);
         }
+        setIsLoadingTxns(false);
       })
       .catch((err) => {
+        if (!isMounted) return;
         console.warn('Dashboard transactions load error:', err);
+        setIsLoadingTxns(false);
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -102,9 +112,20 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
             {/* Drama List: Clean, Frameless, Perfectly Aligned */}
             <div className="divide-y divide-slate-100/80 dark:divide-white/5 pt-1 min-h-[220px] flex flex-col justify-center">
               {isLoadingTrending ? (
-                <div className="py-8 flex flex-col items-center justify-center text-slate-400 gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin text-amber-400" />
-                  <span className="text-xs font-semibold">Loading catalog series...</span>
+                <div className="space-y-1">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex items-center justify-between py-2.5 px-2 rounded-xl animate-pulse">
+                      <div className="flex items-center space-x-3 min-w-0 pr-2">
+                        <div className="w-4 h-3 bg-slate-200/60 dark:bg-white/[0.05] rounded" />
+                        <div className="w-9 h-12 rounded-lg bg-slate-200/80 dark:bg-white/[0.08]" />
+                        <div className="space-y-1.5">
+                          <div className="h-3.5 w-28 bg-slate-200/80 dark:bg-white/[0.08] rounded" />
+                          <div className="h-2.5 w-20 bg-slate-200/60 dark:bg-white/[0.05] rounded" />
+                        </div>
+                      </div>
+                      <div className="h-5 w-16 bg-slate-200/60 dark:bg-white/[0.05] rounded-full" />
+                    </div>
+                  ))}
                 </div>
               ) : trendingDramas.length === 0 ? (
                 <div className="py-8 text-center text-xs text-slate-400">
@@ -211,7 +232,25 @@ export default function DashboardPage({ onOpenIngestModal, onNavigate }) {
 
             {/* Subscriptions List: Clean, Minimalist, Perfectly Aligned */}
             <div className="divide-y divide-slate-100/80 dark:divide-white/5 pt-1 min-h-[220px] flex flex-col justify-center">
-              {recentTransactions.length === 0 ? (
+              {isLoadingTxns ? (
+                <div className="space-y-1">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex items-center justify-between py-2.5 px-2 rounded-xl animate-pulse">
+                      <div className="flex items-center space-x-3 min-w-0 pr-3">
+                        <div className="w-9 h-9 rounded-xl bg-slate-200/80 dark:bg-white/[0.08]" />
+                        <div className="space-y-1.5">
+                          <div className="h-3.5 w-24 bg-slate-200/80 dark:bg-white/[0.08] rounded" />
+                          <div className="h-2.5 w-32 bg-slate-200/60 dark:bg-white/[0.05] rounded" />
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end space-y-1">
+                        <div className="h-4 w-12 bg-slate-200/80 dark:bg-white/[0.08] rounded" />
+                        <div className="h-4 w-14 bg-slate-200/60 dark:bg-white/[0.05] rounded-full" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : recentTransactions.length === 0 ? (
                 <div className="py-8 text-center text-slate-400 text-xs font-bold">
                   No recent subscription transactions
                 </div>

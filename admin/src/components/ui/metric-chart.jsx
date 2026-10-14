@@ -116,10 +116,12 @@ export function MetricChart({
   const chartCalc = useMemo(() => {
     if (pointCount < 2) return null;
 
-    const allValues = series.flatMap((s) => (s.data || []).map((d) => d.value));
-    const maxVal = Math.max(...allValues, 1) * 1.12;
-    const minVal = Math.max(0, Math.min(...allValues) * 0.85);
-    const valRange = maxVal - minVal || 1;
+    const allValues = series.flatMap((s) => (s.data || []).map((d) => (typeof d.value === 'number' && !isNaN(d.value) ? d.value : 0)));
+    const safeMax = allValues.length ? Math.max(...allValues, 1) : 1;
+    const safeMin = allValues.length ? Math.min(...allValues) : 0;
+    const maxVal = Math.max(1, safeMax * 1.12);
+    const minVal = Math.max(0, safeMin * 0.85);
+    const valRange = Math.max(1, maxVal - minVal);
 
     const width = 800;
     const height = 260;
@@ -136,9 +138,11 @@ export function MetricChart({
       const seriesColor = s.color || mainColor;
       const pts = (s.data || []).map((pt, i) => {
         const x = padLeft + (i / Math.max(1, pointCount - 1)) * usableWidth;
-        const normY = (pt.value - minVal) / valRange;
-        const y = padTop + usableHeight * (1 - normY);
-        return { x, y, value: pt.value, date: pt.date, raw: pt };
+        const rawVal = typeof pt.value === 'number' && !isNaN(pt.value) ? pt.value : 0;
+        const normY = valRange > 0 ? (rawVal - minVal) / valRange : 0.5;
+        const safeNormY = Math.max(0, Math.min(1, isNaN(normY) ? 0.5 : normY));
+        const y = padTop + usableHeight * (1 - safeNormY);
+        return { x, y, value: rawVal, date: pt.date, raw: pt };
       });
 
       // Smooth Bezier Curve Path
@@ -296,10 +300,11 @@ export function MetricChart({
         {view === 'bars' && (
           <g>
             {chartCalc.series[0].points.map((pt, pIdx) => {
-              const stepW = chartCalc.usableWidth / Math.max(1, pointCount - 1);
+              const stepW = (chartCalc.usableWidth / Math.max(1, pointCount - 1)) || 20;
               const barW = Math.max(16, Math.min(stepW * 0.88, 52));
               const groundY = chartCalc.height - chartCalc.padBottom;
-              const barH = Math.max(6, groundY - pt.y);
+              const safePtY = typeof pt.y === 'number' && !isNaN(pt.y) ? pt.y : groundY - 6;
+              const barH = Math.max(6, groundY - safePtY);
               const isActive = isInteracting && pIdx === activeIndex;
 
               return (

@@ -84,4 +84,9 @@ const SubscriptionTransactionSchema = new mongoose.Schema(
   }
 );
 
+// High-speed compound indexes for analytics queries & reporting
+SubscriptionTransactionSchema.index({ status: 1, createdAt: -1 });
+SubscriptionTransactionSchema.index({ createdAt: -1 });
+
 export const SubscriptionTransaction = mongoose.model('SubscriptionTransaction', SubscriptionTransactionSchema);
+

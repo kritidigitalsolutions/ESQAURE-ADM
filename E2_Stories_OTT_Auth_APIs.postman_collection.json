@@ -710,7 +710,21 @@
                   ]
                 },
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"No longer using this streaming app\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{baseUrl}}/auth/profile",
                   "host": [
@@ -719,17 +733,81 @@
                   "path": [
                     "auth",
                     "profile"
-                  ],
-                  "query": [
+                  ]
+                },
+                "description": "Submit an account deletion request to administrator (24-hour verification SLA).\n\n**Flow:**\n- User does NOT have direct access to immediately delete their account.\n- Clicking delete submits an account deletion request to the administrator with a 24-hour SLA.\n- The user is notified in the response that an admin will verify details and delete the account within 24 hours.\n- Account status transitions to `PENDING_DELETION`."
+              },
+              "response": []
+            },
+            {
+              "name": "2.6.1 Request Account Deletion (POST alias)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
                     {
-                      "key": "hardDelete",
-                      "value": "false",
-                      "description": "true = permanent deletion. Default is soft-delete (can re-register).",
-                      "disabled": true
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
                     }
                   ]
                 },
-                "description": "Delete the user's own account.\n\n- **Default (soft delete):** status set to DELETED, data cleared, user can re-register with same number\n- **Hard delete** (`?hardDelete=true`): permanently removed from database — irreversible"
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"No longer using this streaming app\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/delete-request",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "delete-request"
+                  ]
+                },
+                "description": "POST alias for submitting an account deletion request with optional reason."
+              },
+              "response": []
+            },
+            {
+              "name": "2.6.2 Cancel Deletion Request",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/cancel-delete-request",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "cancel-delete-request"
+                  ]
+                },
+                "description": "Cancel a pending account deletion request before an admin deletes it, restoring account status to ACTIVE."
               },
               "response": []
             },
@@ -1028,12 +1106,40 @@
                     "settings"
                   ]
                 },
-                "description": "Fetch the 3 notification preference toggles for the **Notification Settings screen**:\n- `newEpisodes` — Get notified when a series continues\n- `newReleases` — Discover newly added series\n- `recommendations` — Personalized stories for you"
+                "description": "Fetch user alert preferences for the **Notification Settings screen**.\n\nReturns:\n- **title**: \"Notification Settings\"\n- **subtitle**: \"Manage your alert preferences\"\n- **category**: \"ALERTS\"\n- **settings**: `{ newEpisodes: true, newReleases: true, recommendations: false }`\n- **alerts**: Detailed metadata array for toggle items with display titles and subtitles."
               },
-              "response": []
+              "response": [
+                {
+                  "name": "200 Success — Notification Settings & Alerts",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/notifications/settings",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "notifications",
+                        "settings"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true,\n  \"statusCode\": 200,\n  \"message\": \"Notification settings fetched successfully\",\n  \"data\": {\n    \"title\": \"Notification Settings\",\n    \"subtitle\": \"Manage your alert preferences\",\n    \"category\": \"ALERTS\",\n    \"settings\": {\n      \"newEpisodes\": true,\n      \"newReleases\": true,\n      \"recommendations\": false\n    },\n    \"alerts\": [\n      {\n        \"key\": \"newEpisodes\",\n        \"title\": \"New episodes\",\n        \"description\": \"Get notified when a series continues\",\n        \"enabled\": true\n      },\n      {\n        \"key\": \"newReleases\",\n        \"title\": \"New releases\",\n        \"description\": \"Discover newly added series\",\n        \"enabled\": true\n      },\n      {\n        \"key\": \"recommendations\",\n        \"title\": \"Recommendations\",\n        \"description\": \"Personalized stories for you\",\n        \"enabled\": false\n      }\n    ]\n  }\n}"
+                }
+              ]
             },
             {
-              "name": "3.8 Update Notification Settings",
+              "name": "3.8 Update Notification Settings (PUT & PATCH)",
               "request": {
                 "auth": {
                   "type": "bearer",
@@ -1054,7 +1160,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n \"newEpisodes\": true,\n \"newReleases\": true,\n \"recommendations\": false\n}",
+                  "raw": "{\n  \"newEpisodes\": true,\n  \"newReleases\": true,\n  \"recommendations\": false\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1071,12 +1177,155 @@
                     "settings"
                   ]
                 },
-                "description": "Update one or more notification toggle preferences. Send only the fields you want to change — others remain unchanged."
+                "description": "Update notification preferences. Accepts full object, partial keys, or single key update `{ \"key\": \"recommendations\", \"enabled\": false }`. Also supports PATCH method."
               },
-              "response": []
+              "response": [
+                {
+                  "name": "200 Success — Notification Settings Updated",
+                  "originalRequest": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/notifications/settings",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "notifications",
+                        "settings"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true,\n  \"statusCode\": 200,\n  \"message\": \"Notification settings updated successfully\",\n  \"data\": {\n    \"title\": \"Notification Settings\",\n    \"subtitle\": \"Manage your alert preferences\",\n    \"settings\": {\n      \"newEpisodes\": true,\n      \"newReleases\": true,\n      \"recommendations\": true\n    },\n    \"alerts\": [\n      {\n        \"key\": \"newEpisodes\",\n        \"title\": \"New episodes\",\n        \"description\": \"Get notified when a series continues\",\n        \"enabled\": true\n      },\n      {\n        \"key\": \"newReleases\",\n        \"title\": \"New releases\",\n        \"description\": \"Discover newly added series\",\n        \"enabled\": true\n      },\n      {\n        \"key\": \"recommendations\",\n        \"title\": \"Recommendations\",\n        \"description\": \"Personalized stories for you\",\n        \"enabled\": true\n      }\n    ]\n  }\n}"
+                }
+              ]
             },
             {
-              "name": "3.9 Register Device Token (FCM)",
+              "name": "3.9 Toggle Single Notification Setting (PATCH)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"enabled\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/notifications/settings/:key/toggle",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    "settings",
+                    ":key",
+                    "toggle"
+                  ],
+                  "variable": [
+                    {
+                      "key": "key",
+                      "value": "newEpisodes",
+                      "description": "Setting key to toggle: newEpisodes | newReleases | recommendations"
+                    }
+                  ]
+                },
+                "description": "Direct toggle endpoint for switch controls. Inverts the boolean if body is empty, or sets explicit value with `{\"enabled\": true}` or `{\"enabled\": false}`. Also supports POST `{{baseUrl}}/notifications/settings/toggle` with body `{\"key\": \"newEpisodes\"}`."
+              },
+              "response": [
+                {
+                  "name": "200 Success — Setting Toggled",
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true,\n  \"statusCode\": 200,\n  \"message\": \"Notification setting 'newEpisodes' set to false\",\n  \"data\": {\n    \"key\": \"newEpisodes\",\n    \"enabled\": false,\n    \"settings\": {\n      \"newEpisodes\": false,\n      \"newReleases\": true,\n      \"recommendations\": false\n    },\n    \"alerts\": [\n      {\n        \"key\": \"newEpisodes\",\n        \"title\": \"New episodes\",\n        \"description\": \"Get notified when a series continues\",\n        \"enabled\": false\n      },\n      {\n        \"key\": \"newReleases\",\n        \"title\": \"New releases\",\n        \"description\": \"Discover newly added series\",\n        \"enabled\": true\n      },\n      {\n        \"key\": \"recommendations\",\n        \"title\": \"Recommendations\",\n        \"description\": \"Personalized stories for you\",\n        \"enabled\": false\n      }\n    ]\n  }\n}"
+                }
+              ]
+            },
+            {
+              "name": "3.10 Reset Notification Settings (POST)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/notifications/settings/reset",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "notifications",
+                    "settings",
+                    "reset"
+                  ]
+                },
+                "description": "Resets all alert toggles back to default platform state:\n- `newEpisodes: true`\n- `newReleases: true`\n- `recommendations: false`"
+              },
+              "response": [
+                {
+                  "name": "200 Success — Notification Settings Reset",
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": "{\n  \"success\": true,\n  \"statusCode\": 200,\n  \"message\": \"Notification settings reset to defaults successfully\",\n  \"data\": {\n    \"settings\": {\n      \"newEpisodes\": true,\n      \"newReleases\": true,\n      \"recommendations\": false\n    },\n    \"alerts\": [\n      {\n        \"key\": \"newEpisodes\",\n        \"title\": \"New episodes\",\n        \"description\": \"Get notified when a series continues\",\n        \"enabled\": true\n      },\n      {\n        \"key\": \"newReleases\",\n        \"title\": \"New releases\",\n        \"description\": \"Discover newly added series\",\n        \"enabled\": true\n      },\n      {\n        \"key\": \"recommendations\",\n        \"title\": \"Recommendations\",\n        \"description\": \"Personalized stories for you\",\n        \"enabled\": false\n      }\n    ]\n  }\n}"
+                }
+              ]
+            },
+            {
+              "name": "3.11 Register Device Token (FCM)",
               "request": {
                 "auth": {
                   "type": "bearer",
@@ -1119,7 +1368,7 @@
               "response": []
             },
             {
-              "name": "3.10 Unregister Device Token (FCM)",
+              "name": "3.12 Unregister Device Token (FCM)",
               "request": {
                 "auth": {
                   "type": "bearer",
@@ -1162,7 +1411,7 @@
               "response": []
             },
             {
-              "name": "3.11 Seed Sample Notifications",
+              "name": "3.13 Seed Sample Notifications",
               "request": {
                 "auth": {
                   "type": "bearer",
@@ -1797,7 +2046,7 @@
                     "progress"
                   ]
                 },
-                "description": "Syncs player timestamp (e.g. 0:45 of 2:15 = 33.3%), updates user WatchHistory for 'Continue Watching', and increments view counts."
+                "description": "Syncs player playback scrubber heartbeat every 5-10 seconds. Automatically updates user WatchHistory and evaluates real view qualification. If the user watches >= 10 seconds or 20% of episode duration, credits exactly 1 real view. Subsequent progress pings in the same session are debounced via a 30-minute cooldown window, preventing artificial inflation. NOTE: Trailer and preview teaser playbacks (isTrailer: true, mediaType: \"TRAILER\", or episodeNumber: 0) and locked episode preview teasers are STRICTLY EXCLUDED from counting towards official episode and drama view counts."
               },
               "response": []
             },
@@ -1947,6 +2196,77 @@
                   ]
                 },
                 "description": "Direct player shortcut to fetch ongoing watch progress and unfinished episodes."
+              },
+              "response": []
+            },
+            {
+              "name": "5.9 Explicit Real View Logging",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{userToken}}",
+                    "description": "Optional JWT auth token. If omitted, device fingerprint / IP hash is used."
+                  },
+                  {
+                    "key": "x-device-id",
+                    "value": "pixel-7a-device-101",
+                    "description": "Optional client hardware device ID"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dramaId\": \"{{dramaSlug}}\",\n  \"episodeNumber\": 1,\n  \"watchedSeconds\": 15,\n  \"durationSeconds\": 135\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/player/view",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "player",
+                    "view"
+                  ]
+                },
+                "description": "Dedicated callback endpoint for client player engines (ExoPlayer, AVPlayer, Video.js) once playback crosses the legitimate view threshold (>= 10 seconds or 20%). Features automatic anti-inflation deduplication and a 30-minute cooldown."
+              },
+              "response": []
+            },
+            {
+              "name": "5.10 Real View Timeseries Analytics",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{userToken}}",
+                    "description": "Optional auth token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/player/analytics/{{dramaSlug}}?days=30",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "player",
+                    "analytics",
+                    "{{dramaSlug}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "days",
+                      "value": "30",
+                      "description": "Number of past days for timeseries breakdown (1 to 90, default: 30)"
+                    }
+                  ]
+                },
+                "description": "Fetches real view metrics for a drama: total catalog views, unique viewers count, today views, completed views, completion percentage rate, average watch duration, and daily breakdown."
               },
               "response": []
             }
@@ -3043,7 +3363,7 @@
               "response": []
             },
             {
-              "name": "9.7 User Watch History",
+              "name": "9.7 User Watch History (Full Viewing Activity)",
               "request": {
                 "method": "GET",
                 "header": [
@@ -3054,12 +3374,78 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/user/watch-history?page=1&limit=20",
+                  "raw": "{{baseUrl}}/user/watch-history?page=1&limit=20&search=&status=all&period=all&sortBy=recent&view=dramas&groupBy=none",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "user",
+                    "watch-history"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number (default: 1)"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "Records per page (1-100, default: 20)"
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "Search matching drama title (case-insensitive regex)"
+                    },
+                    {
+                      "key": "status",
+                      "value": "all",
+                      "description": "Watch status filter: all | in-progress | completed"
+                    },
+                    {
+                      "key": "period",
+                      "value": "all",
+                      "description": "Timeline filter: all | today | yesterday | this_week | this_month"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "recent",
+                      "description": "Sort order: recent | oldest | progress | title"
+                    },
+                    {
+                      "key": "view",
+                      "value": "dramas",
+                      "description": "View format: dramas (drama cards) | episodes (itemized episodes) | grouped"
+                    },
+                    {
+                      "key": "groupBy",
+                      "value": "none",
+                      "description": "Date grouping: none | date (Today, Yesterday, This Week, Earlier)"
+                    }
+                  ]
+                },
+                "description": "Comprehensive OTT viewing activity feed. Returns drama card, resume episode, duration, progress %, remaining time, humanized relative time (e.g. \"2 hours ago\"), date grouping buckets, and summary statistics (total watched, cumulative watch time)."
+              },
+              "response": []
+            },
+            {
+              "name": "9.7.1 Watch History Direct Shortcut (GET /watch-history)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/watch-history?page=1&limit=20&status=in-progress",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
                     "watch-history"
                   ],
                   "query": [
@@ -3072,15 +3458,263 @@
                       "key": "limit",
                       "value": "20",
                       "description": "Records per page"
+                    },
+                    {
+                      "key": "status",
+                      "value": "in-progress",
+                      "description": "Filter continue watching / in-progress"
                     }
                   ]
                 },
-                "description": "Chronological watch history listing with resume playback timestamps, duration, and completion flags."
+                "description": "Top-level shortcut route for Watch History (identical to /user/watch-history)."
               },
               "response": []
             },
             {
-              "name": "9.8 Update Playback & App Settings",
+              "name": "9.7.2 Watch History Statistics Summary",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/watch-history/summary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "watch-history",
+                    "summary"
+                  ]
+                },
+                "description": "Cumulative viewing analytics: total titles watched, total episodes watched, completed count, in-progress count, total watch time in seconds and formatted (e.g. \"3h 45m\"), top 5 watched genres, and most recently watched title card."
+              },
+              "response": []
+            },
+            {
+              "name": "9.7.3 Drama Viewing History Breakdown",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/watch-history/drama/:dramaId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "watch-history",
+                    "drama",
+                    ":dramaId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "dramaId",
+                      "value": "{{dramaId}}",
+                      "description": "Drama ObjectId or slug"
+                    }
+                  ]
+                },
+                "description": "Detailed viewing history for a single drama series. Returns overall series progress %, current resume episode, and all individual episodes watched with their progress bars."
+              },
+              "response": []
+            },
+            {
+              "name": "9.7.4 Record / Sync Playback Progress",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dramaId\": \"{{dramaId}}\",\n  \"episodeNumber\": 1,\n  \"watchedSeconds\": 60,\n  \"durationSeconds\": 120,\n  \"isCompleted\": false\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/watch-history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "watch-history"
+                  ]
+                },
+                "description": "Explicitly record or sync playback scrubber progress into user watch history. Automatically maintains drama-level resume point and episode history list."
+              },
+              "response": []
+            },
+            {
+              "name": "9.7.5 Mark Drama or Episode as Completed",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dramaId\": \"{{dramaId}}\",\n  \"episodeNumber\": 1\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/watch-history/mark-completed",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "watch-history",
+                    "mark-completed"
+                  ]
+                },
+                "description": "Marks an episode or entire drama series as completed (100% progress) in viewing history."
+              },
+              "response": []
+            },
+            {
+              "name": "9.7.6 Remove Content from Watch History",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/watch-history/:historyId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "watch-history",
+                    ":historyId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "historyId",
+                      "value": "",
+                      "description": "History record ID or Drama ID to remove"
+                    }
+                  ]
+                },
+                "description": "Deletes an individual title from user watch history."
+              },
+              "response": []
+            },
+            {
+              "name": "9.7.7 Remove Entire Drama from Watch History",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/watch-history/drama/:dramaId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "watch-history",
+                    "drama",
+                    ":dramaId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "dramaId",
+                      "value": "{{dramaId}}",
+                      "description": "Drama ObjectId or slug to remove completely from history"
+                    }
+                  ]
+                },
+                "description": "Removes all viewing history records for a specified drama series."
+              },
+              "response": []
+            },
+            {
+              "name": "9.7.8 Clear All Watch History",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/watch-history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "watch-history"
+                  ]
+                },
+                "description": "Wipes the user complete viewing history and watch activity."
+              },
+              "response": []
+            },
+            {
+              "name": "9.8 Get User Playback & App Settings",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/user/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "settings"
+                  ]
+                },
+                "description": "Fetch complete user playback, application, and notification settings."
+              },
+              "response": []
+            },
+            {
+              "name": "9.9 Update Playback & App Settings (PUT)",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -3146,7 +3780,7 @@
               "response": []
             },
             {
-              "name": "9.10 Update Playback & App Settings (PATCH Partial)",
+              "name": "9.10 Update Playback & App Settings (PATCH)",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -3181,6 +3815,35 @@
                     }
                   }
                 }
+              },
+              "response": []
+            },
+            {
+              "name": "9.11 Get User Notification Preferences (Alias)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{authToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/user/notification-settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user",
+                    "notification-settings"
+                  ]
+                },
+                "description": "Fetch alert notification settings via user library alias endpoint."
               },
               "response": []
             }
@@ -3339,6 +4002,41 @@
                   ]
                 },
                 "description": "Increments the click counter when a custom ad CTA or poster is tapped."
+              },
+              "response": []
+            },
+            {
+              "name": "11.5 Track Video Quartile Event",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"eventType\": \"firstQuartile\",\n  \"progressSeconds\": 3.75\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ads/track/{{customAdId}}/video-event",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "track",
+                    "{{customAdId}}",
+                    "video-event"
+                  ]
+                },
+                "description": "Tracks VAST video quartile milestones: start, firstQuartile (25%), midpoint (50%), thirdQuartile (75%), complete (100%), or skip."
               },
               "response": []
             }
@@ -3971,6 +4669,131 @@
                   ]
                 },
                 "description": "Fetch dynamic user signups and subscription telemetry grouped across 1D, 7D, 1M, 1Y, and MAX."
+              },
+              "response": []
+            },
+            {
+              "name": "2.14 Get Account Deletion Requests",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/admin/deletion-requests",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "admin",
+                    "deletion-requests"
+                  ]
+                },
+                "description": "List all account deletion requests submitted by users with 24-hour verification SLA timeline and pending counts."
+              },
+              "response": []
+            },
+            {
+              "name": "2.15 Verify & Permanently Delete User",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"adminNotes\": \"Verified and approved for permanent deletion by admin\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/users/{{userId}}/verify-delete",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "{{userId}}",
+                    "verify-delete"
+                  ]
+                },
+                "description": "Admin verifies user identity, active subscriptions, and permanently deletes user account from database, approving the deletion request."
+              },
+              "response": []
+            },
+            {
+              "name": "2.16 Reject Deletion Request",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"adminNote\": \"Rejected deletion request after administrator verification\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/users/{{userId}}/reject-deletion",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "{{userId}}",
+                    "reject-deletion"
+                  ]
+                },
+                "description": "Admin rejects/dismisses a pending account deletion request and restores user account status to ACTIVE."
               },
               "response": []
             }
@@ -5437,6 +6260,32 @@
                   ]
                 },
                 "description": "Save or update episodes list and paywall rules for a drama."
+              },
+              "response": []
+            },
+            {
+              "name": "5.9 Reconcile Drama View Counts",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "description": "Master Admin Bearer Token or Firebase ID token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/player/reconcile-views/{{dramaId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "player",
+                    "reconcile-views",
+                    "{{dramaId}}"
+                  ]
+                },
+                "description": "Administrative maintenance action: recalculates and synchronizes Drama.viewsCount from the exact sum of Episode.viewsCount to guarantee 100% data integrity without any drift."
               },
               "response": []
             }
@@ -7256,6 +8105,562 @@
                 },
                 "description": "Delete a plan voucher from database."
               }
+            }
+          ]
+        },
+        {
+          "name": "12. Ads & Custom Campaigns Management",
+          "description": "Enterprise custom sponsor ad campaign management, mediation rules, rotation engine settings, VAST video metrics, and timeseries analytics.",
+          "item": [
+            {
+              "name": "12.1 Get Ad Settings & AdMob Configuration",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "settings"
+                  ]
+                },
+                "description": "Fetch master global ad switches, AdMob unit IDs, mediation waterfall mode, and live inventory overview."
+              },
+              "response": []
+            },
+            {
+              "name": "12.2 Update Ad Settings & Mediation Rules",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"globalAdsEnabled\": true,\n  \"customAdsEnabled\": true,\n  \"admobEnabled\": true,\n  \"testMode\": false,\n  \"mediationMode\": \"CUSTOM_FIRST\",\n  \"customAdSharePercent\": 60,\n  \"vipBypassAds\": true,\n  \"globalAdFrequencyCap\": 6\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ads/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "settings"
+                  ]
+                },
+                "description": "Update master switches, AdMob credentials, mediation waterfall rules, and VIP bypass policy."
+              },
+              "response": []
+            },
+            {
+              "name": "12.3 Get Custom Ads In-House Rotation Settings",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/rotation-settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "rotation-settings"
+                  ]
+                },
+                "description": "Retrieve custom ad delivery engine configuration (policy: EQUAL_RANDOM, PRIORITY_WEIGHTED, or CTR_OPTIMIZED; preventConsecutive)."
+              },
+              "response": []
+            },
+            {
+              "name": "12.4 Update Custom Ads In-House Rotation Settings",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"enabled\": true,\n  \"policy\": \"PRIORITY_WEIGHTED\",\n  \"preventConsecutive\": true,\n  \"dailyGlobalImpressionCap\": 150000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/rotation-settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "rotation-settings"
+                  ]
+                },
+                "description": "Update rotation algorithm policy, consecutive repeat prevention, and global daily impression limits."
+              },
+              "response": []
+            },
+            {
+              "name": "12.5 List All Custom Ads (Filtered, Sorted & KPIs)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom?page=1&limit=50&placement=ALL&status=ALL&sortBy=priority",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50",
+                      "description": "Results per page"
+                    },
+                    {
+                      "key": "placement",
+                      "value": "ALL",
+                      "description": "ALL | HOME_BANNER | PLAYER_PREROLL | EPISODE_TRANSITION | DRAWER_CARD | GLOBAL_POPUP"
+                    },
+                    {
+                      "key": "status",
+                      "value": "ALL",
+                      "description": "ALL | ACTIVE | PAUSED | EXPIRED | SCHEDULED"
+                    },
+                    {
+                      "key": "type",
+                      "value": "ALL",
+                      "description": "ALL | BANNER | INTERSTITIAL | VIDEO_PREROLL | NATIVE_CARD | SPLASH_POPUP",
+                      "disabled": true
+                    },
+                    {
+                      "key": "device",
+                      "value": "ALL",
+                      "description": "ALL | ANDROID | IOS | WEB",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": "",
+                      "description": "Search campaign title or advertiser",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "priority",
+                      "description": "newest | oldest | priority | impressions | clicks | name"
+                    }
+                  ]
+                },
+                "description": "List campaigns with real-time aggregated KPIs (total campaigns, active/paused/expired counts, total impressions, total clicks, CTR, and video completion rate)."
+              },
+              "response": []
+            },
+            {
+              "name": "12.6 Create Custom Ad Campaign",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Luxury Fashion Fall Premiere\",\n  \"advertiser\": \"Nordic Style Co\",\n  \"notes\": \"Q4 Direct Sponsorship Campaign\",\n  \"type\": \"VIDEO_PREROLL\",\n  \"placement\": \"PLAYER_PREROLL\",\n  \"mediaType\": \"VIDEO\",\n  \"mediaUrl\": \"https://storage.googleapis.com/esquare-media/ads/nordic-fall.mp4\",\n  \"thumbnailUrl\": \"https://storage.googleapis.com/esquare-media/ads/nordic-thumb.jpg\",\n  \"companionBannerUrl\": \"https://storage.googleapis.com/esquare-media/ads/nordic-companion.jpg\",\n  \"aspectRatio\": \"16:9\",\n  \"videoDuration\": 15,\n  \"skipAfterSeconds\": 5,\n  \"ctaText\": \"Shop the Collection\",\n  \"ctaAction\": \"EXTERNAL_URL\",\n  \"targetUrl\": \"https://nordicstyle.example.com/fall\",\n  \"targetWindow\": \"_blank\",\n  \"targetDevices\": \"ALL\",\n  \"targetPage\": \"WATCH_ONLY\",\n  \"priority\": 9,\n  \"status\": \"ACTIVE\",\n  \"cappingImpressions\": 50000,\n  \"cappingClicks\": 3000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom"
+                  ]
+                },
+                "description": "Create a new direct sponsor campaign with companion assets, VAST video duration, skip control, targeting, and impression/click budget caps."
+              },
+              "response": []
+            },
+            {
+              "name": "12.7 Get Custom Ad Campaign Details by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/{{customAdId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "{{customAdId}}"
+                  ]
+                },
+                "description": "Fetch complete metadata and live metrics of a single campaign."
+              },
+              "response": []
+            },
+            {
+              "name": "12.8 Update Custom Ad Campaign",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Luxury Fashion Premiere\",\n  \"ctaText\": \"Claim 20% Off Now\",\n  \"priority\": 10,\n  \"skipAfterSeconds\": 3\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/{{customAdId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "{{customAdId}}"
+                  ]
+                },
+                "description": "Update campaign title, assets, schedule, priority, or budget limits."
+              },
+              "response": []
+            },
+            {
+              "name": "12.9 Toggle Custom Ad Status (Active / Paused)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/{{customAdId}}/toggle",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "{{customAdId}}",
+                    "toggle"
+                  ]
+                },
+                "description": "Instantly toggle campaign between ACTIVE and PAUSED without modifying other fields."
+              },
+              "response": []
+            },
+            {
+              "name": "12.10 Reset Custom Ad Analytics",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/{{customAdId}}/reset-stats",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "{{customAdId}}",
+                    "reset-stats"
+                  ]
+                },
+                "description": "Reset impressions, clicks, video quartile milestones, and daily timeseries counters back to zero."
+              },
+              "response": []
+            },
+            {
+              "name": "12.11 Get Custom Ad Timeseries Analytics (Last 30 Days)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/{{customAdId}}/analytics?days=30",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "{{customAdId}}",
+                    "analytics"
+                  ],
+                  "query": [
+                    {
+                      "key": "days",
+                      "value": "30",
+                      "description": "Number of days (1 to 90)"
+                    }
+                  ]
+                },
+                "description": "Returns continuous timeseries performance metrics for UI charts (impressions, clicks, CTR, and video completion rate funnel) with zero-fill."
+              },
+              "response": []
+            },
+            {
+              "name": "12.12 Bulk Action on Custom Ads (Activate / Pause / Delete / Reset)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"action\": \"ACTIVATE\",\n  \"ids\": [\n    \"{{customAdId}}\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/bulk-action",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "bulk-action"
+                  ]
+                },
+                "description": "Perform mass operations across multiple ad campaigns (ACTIVATE, PAUSE, DELETE, RESET_STATS)."
+              },
+              "response": []
+            },
+            {
+              "name": "12.13 Delete Custom Ad Campaign",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}",
+                    "type": "text",
+                    "description": "Admin Bearer Token"
+                  },
+                  {
+                    "key": "x-admin-key",
+                    "value": "{{adminKey}}",
+                    "type": "text",
+                    "description": "Admin Secret Master API Key (bypass)"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ads/custom/{{customAdId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ads",
+                    "custom",
+                    "{{customAdId}}"
+                  ]
+                },
+                "description": "Permanently delete an ad campaign from the database and stop delivery."
+              },
+              "response": []
             }
           ]
         }

@@ -101,13 +101,19 @@ const SubscriptionPlanSchema = new mongoose.Schema(
 
 export const SubscriptionPlan = mongoose.model('SubscriptionPlan', SubscriptionPlanSchema);
 
+let plansSeeded = false;
+
 /**
  * Seed default plans if collection is empty
  */
 export const seedDefaultSubscriptionPlans = async () => {
+  if (plansSeeded) return;
   try {
     const count = await SubscriptionPlan.countDocuments();
-    if (count > 0) return;
+    if (count > 0) {
+      plansSeeded = true;
+      return;
+    }
 
     const defaultPlans = [
       {

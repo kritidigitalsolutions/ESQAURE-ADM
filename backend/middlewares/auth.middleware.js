@@ -8,9 +8,9 @@ import { User } from '../models/User.js';
  */
 export const authenticate = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization || req.headers.Authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader || !/^Bearer\s+/i.test(authHeader)) {
       return next(
         new AppError(
           'Authentication required. Please provide a valid Bearer token.',
@@ -20,7 +20,12 @@ export const authenticate = async (req, res, next) => {
       );
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+    if (!token || token === 'null' || token === 'undefined') {
+      return next(
+        new AppError('Invalid authentication token.', 401, ERROR_CODES.INVALID_TOKEN)
+      );
+    }
 
     let decoded;
     try {
@@ -72,15 +77,20 @@ export const authenticate = async (req, res, next) => {
  */
 export const optionalAuthenticate = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization || req.headers.Authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader || !/^Bearer\s+/i.test(authHeader)) {
       req.user = null;
       req.userId = null;
       return next();
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+    if (!token || token === 'null' || token === 'undefined') {
+      req.user = null;
+      req.userId = null;
+      return next();
+    }
 
     let decoded;
     try {
@@ -93,7 +103,7 @@ export const optionalAuthenticate = async (req, res, next) => {
 
     if (decoded && decoded.userId) {
       const user = await User.findById(decoded.userId);
-      if (user && user.status === 'ACTIVE') {
+      if (user && user.status !== 'SUSPENDED' && user.status !== 'DELETED') {
         req.user = user;
         req.userId = user._id.toString();
       } else {

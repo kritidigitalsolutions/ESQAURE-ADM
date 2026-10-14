@@ -166,6 +166,17 @@ const AdSettingSchema = new mongoose.Schema(
         episodeSidebar: { enabled: { type: Boolean, default: true } },
         footerBanner: { enabled: { type: Boolean, default: true } }
       }
+    },
+    // Custom Ads In-House Rotation & Delivery Engine Configuration
+    customAdRotation: {
+      enabled: { type: Boolean, default: true },
+      policy: {
+        type: String,
+        enum: ['EQUAL_RANDOM', 'PRIORITY_WEIGHTED', 'CTR_OPTIMIZED'],
+        default: 'EQUAL_RANDOM'
+      },
+      preventConsecutive: { type: Boolean, default: true },
+      dailyGlobalImpressionCap: { type: Number, default: 0 }
     }
   },
   {

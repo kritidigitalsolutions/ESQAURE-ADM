@@ -144,6 +144,13 @@ export const batchReorderDramas = async (items) => {
   await normalizePrioritiesInDb();
 };
 
+// In-memory cache for admin dramas catalog (20s TTL)
+let adminDramasCache = { data: null, expiresAt: 0 };
+
+export const invalidateAdminDramasCache = () => {
+  adminDramasCache = { data: null, expiresAt: 0 };
+};
+
 export class DramaController {
   /**
    * 1. Get All Dramas with Pagination & Filters for Catalog / Mobile
@@ -273,7 +280,12 @@ export class DramaController {
    */
   static async getAdminDramas(req, res, next) {
     try {
-      const allDramas = await Drama.find().populate('genres', 'name slug').sort({ priority: 1, createdAt: -1 });
+      const nowMs = Date.now();
+      if (adminDramasCache.data && nowMs < adminDramasCache.expiresAt) {
+        return ApiResponse.success(res, 'Admin dramas catalog fetched successfully.', adminDramasCache.data);
+      }
+
+      const allDramas = await Drama.find().populate('genres', 'name slug').sort({ priority: 1, createdAt: -1 }).lean();
 
       // Calculate total statistics across catalog
       const totalSeries = allDramas.length;
@@ -333,7 +345,7 @@ export class DramaController {
         };
       });
 
-      return ApiResponse.success(res, 'Admin dramas catalog fetched successfully', {
+      const payload = {
         dramas: formattedDramas,
         stats: {
           totalSeries,
@@ -343,7 +355,10 @@ export class DramaController {
           topDrama,
           watchTime
         }
-      });
+      };
+
+      adminDramasCache = { data: payload, expiresAt: nowMs + 20 * 1000 }; // 20s TTL
+      return ApiResponse.success(res, 'Admin dramas catalog fetched successfully', payload);
     } catch (error) {
       return next(error);
     }
@@ -431,6 +446,7 @@ export class DramaController {
       }
 
       const refreshedDrama = await Drama.findById(drama._id);
+      invalidateAdminDramasCache();
 
       return ApiResponse.success(res, 'Drama series created successfully', {
         drama: refreshedDrama || drama
@@ -508,6 +524,7 @@ export class DramaController {
       }
 
       const refreshedDrama = await Drama.findById(drama._id).populate('genres', 'name slug');
+      invalidateAdminDramasCache();
 
       return ApiResponse.success(res, 'Drama series updated successfully', {
         drama: refreshedDrama || drama
@@ -535,6 +552,7 @@ export class DramaController {
 
       // Re-normalize remaining drama priorities sequentially
       await normalizePrioritiesInDb();
+      invalidateAdminDramasCache();
 
       return ApiResponse.success(res, 'Drama series deleted successfully', { id });
     } catch (error) {
@@ -558,6 +576,7 @@ export class DramaController {
       const nextActive = drama.status !== 'PUBLISHED';
       drama.status = nextActive ? 'PUBLISHED' : 'DRAFT';
       await drama.save();
+      invalidateAdminDramasCache();
 
       return ApiResponse.success(res, `Drama is now ${nextActive ? 'Active' : 'Inactive'}`, {
         id: drama._id.toString(),
@@ -586,6 +605,7 @@ export class DramaController {
       drama.isPaid = nextPaid;
       drama.plan = nextPaid ? (drama.plan === 'Free Tier' ? 'Premium Plan' : drama.plan || 'Premium Plan') : 'Free Tier';
       await drama.save();
+      invalidateAdminDramasCache();
 
       return ApiResponse.success(res, `Drama access updated to ${nextPaid ? 'Paid' : 'Free Tier'}`, {
         id: drama._id.toString(),
@@ -611,6 +631,7 @@ export class DramaController {
       if (!result) {
         throw new AppError('Drama series not found.', 404, 'DRAMA_NOT_FOUND');
       }
+      invalidateAdminDramasCache();
 
       return ApiResponse.success(res, `Drama priority updated to #${result.newPriority} successfully`, {
         id,
@@ -634,6 +655,7 @@ export class DramaController {
       }
 
       await batchReorderDramas(items);
+      invalidateAdminDramasCache();
 
       return ApiResponse.success(res, 'Drama catalog priority reordered successfully');
     } catch (error) {
@@ -794,6 +816,7 @@ export class DramaController {
       }
 
       await drama.save();
+      invalidateAdminDramasCache();
 
       return ApiResponse.success(res, 'Drama episodes updated successfully', {
         id: drama._id.toString(),

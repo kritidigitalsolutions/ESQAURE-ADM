@@ -1,6 +1,7 @@
 import React, { useId, useMemo, useState } from 'react';
 import { ArrowDown, ArrowRight, ArrowUp } from 'lucide-react';
 import AnimatedNumber from '../common/AnimatedNumber';
+import RippleWaveLoader from '../common/RippleWaveLoader';
 import {
   ACCENTS,
   formatCompact,
@@ -133,16 +134,71 @@ export default function ProgressMetricCard({
   if (loading) {
     return (
       <div className={shell} aria-busy="true">
-        <div className="flex flex-1 flex-col p-6 sm:p-8">
-          <div className="flex items-center justify-between">
-            <div className="h-6 w-40 animate-pulse rounded-md bg-slate-200" />
-            <div className="h-8 w-28 animate-pulse rounded-xl bg-slate-200" />
+        {/* Background Graphic SVG Canvas Area with Shimmer Wave & RippleWaveLoader */}
+        <div className="absolute inset-y-0 right-0 z-0 pointer-events-none w-[62%] sm:w-[58%]">
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: `linear-gradient(to left, ${color.stroke}10, transparent 80%)` }}
+          />
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+            <RippleWaveLoader size="sm" count={8} />
+            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-urbanist">
+              Loading telemetry...
+            </span>
           </div>
-          <div className="mt-8 h-12 w-48 animate-pulse rounded-xl bg-slate-200" />
-          <div className="mt-auto h-32 w-full animate-pulse rounded-2xl bg-slate-100" />
         </div>
-        <div className="border-t border-slate-100 px-6 py-4">
-          <div className="h-4 w-48 animate-pulse rounded bg-slate-200" />
+
+        {/* Main Card Content Layout */}
+        <div className={`relative z-10 flex flex-1 flex-col ${isCompact ? 'p-3.5 sm:p-4' : 'p-4 sm:p-5'} pointer-events-none`}>
+          {/* Top Header Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div className="w-fit">
+              <h3 className="text-sm sm:text-base font-extrabold tracking-tight text-slate-950 dark:text-white font-urbanist">{title}</h3>
+              {subtitle && (
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">{subtitle}</p>
+              )}
+            </div>
+
+            {tabs.length > 0 && (
+              <div className="inline-flex items-center gap-0.5 rounded-lg bg-slate-100/90 dark:bg-[#18181E] p-0.5 border border-slate-200/70 dark:border-white/10 shadow-2xs self-start sm:self-auto">
+                {tabs.map((tab) => (
+                  <span
+                    key={tab.id}
+                    className={`rounded-md px-2.5 py-1 text-[11px] font-extrabold ${
+                      activeTab === tab.id
+                        ? 'bg-[#FEF08A] text-slate-950 shadow-2xs border border-amber-300/70'
+                        : 'text-slate-400 dark:text-slate-500'
+                    }`}
+                  >
+                    {tab.label}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Metric Headline Shimmer Skeleton */}
+          <div className={`${isCompact ? 'mt-2' : 'mt-2.5 sm:mt-3'} w-fit space-y-1.5`}>
+            <div className="h-3 w-28 bg-slate-200/80 dark:bg-white/[0.08] rounded-md animate-pulse" />
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-32 bg-slate-200/80 dark:bg-white/[0.08] rounded-lg animate-pulse" />
+              <div className="h-5 w-14 bg-slate-200/60 dark:bg-white/[0.05] rounded-full animate-pulse" />
+            </div>
+          </div>
+
+          {/* Period Selector Skeleton */}
+          <div className={`${isCompact ? 'mt-2 pt-0.5' : 'mt-auto pt-2.5 sm:pt-3'} w-fit`}>
+            <div className="h-6 w-36 bg-slate-200/60 dark:bg-white/[0.05] rounded-lg animate-pulse" />
+          </div>
+        </div>
+
+        {/* Footer Timeline Pills Skeleton */}
+        <div className={`relative z-10 flex items-center justify-between border-t border-slate-100 dark:border-white/10 bg-white/95 dark:bg-[#141419]/95 backdrop-blur-xs ${isCompact ? 'px-2 sm:px-3 py-1.5' : 'px-2.5 sm:px-3.5 py-2'}`}>
+          <div className="flex items-center justify-between w-full gap-1.5">
+            {[...Array(7)].map((_, idx) => (
+              <div key={idx} className="flex-1 h-3.5 bg-slate-100 dark:bg-white/[0.04] rounded animate-pulse" />
+            ))}
+          </div>
         </div>
       </div>
     );

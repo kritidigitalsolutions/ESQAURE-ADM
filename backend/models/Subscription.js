@@ -129,4 +129,9 @@ SubscriptionSchema.virtual('isValid').get(function () {
   return false;
 });
 
+// High-speed compound indexes for subscriber counting, lifecycle checking and analytics
+SubscriptionSchema.index({ status: 1, currentPeriodEnd: -1 });
+SubscriptionSchema.index({ createdAt: -1 });
+
 export const Subscription = mongoose.model('Subscription', SubscriptionSchema);
+

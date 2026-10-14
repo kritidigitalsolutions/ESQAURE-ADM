@@ -83,8 +83,18 @@ router.post('/logout', authenticate, AuthController.logout);
 
 /**
  * DELETE /api/v1/auth/profile
- * Delete user account (soft delete by default, hard delete via ?hardDelete=true)
+ * POST   /api/v1/auth/delete-account
+ * POST   /api/v1/auth/delete-request
+ * Submit account deletion request to admin (24-hour verification SLA)
  */
-router.delete('/profile', authenticate, AuthController.deleteAccount);
+router.delete('/profile', authenticate, validate(authValidation.requestAccountDeletion), AuthController.deleteAccount);
+router.post('/delete-account', authenticate, validate(authValidation.requestAccountDeletion), AuthController.deleteAccount);
+router.post('/delete-request', authenticate, validate(authValidation.requestAccountDeletion), AuthController.deleteAccount);
+
+/**
+ * POST /api/v1/auth/cancel-delete-request
+ * Cancel pending account deletion request and restore active status
+ */
+router.post('/cancel-delete-request', authenticate, AuthController.cancelDeleteRequest);
 
 export default router;

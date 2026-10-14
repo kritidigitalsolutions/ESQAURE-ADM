@@ -12,7 +12,7 @@ export const playerValidation = {
       }),
     episodeNumber: Joi.number()
       .integer()
-      .min(1)
+      .min(0)
       .default(1),
     watchedSeconds: Joi.number()
       .min(0)
@@ -23,6 +23,24 @@ export const playerValidation = {
       }),
     durationSeconds: Joi.number()
       .min(0)
-      .default(135)
+      .default(135),
+    isTrailer: Joi.boolean().default(false),
+    mediaType: Joi.string().valid('EPISODE', 'TRAILER').default('EPISODE')
+  }),
+
+  // Explicit view trigger
+  recordView: Joi.object({
+    dramaId: Joi.string()
+      .trim()
+      .required()
+      .messages({
+        'string.empty': 'Drama ID is required.',
+        'any.required': 'Drama ID is required.'
+      }),
+    episodeNumber: Joi.number().integer().min(0).default(1),
+    watchedSeconds: Joi.number().min(0).default(10),
+    durationSeconds: Joi.number().min(0).default(135),
+    isTrailer: Joi.boolean().default(false),
+    mediaType: Joi.string().valid('EPISODE', 'TRAILER').default('EPISODE')
   })
 };

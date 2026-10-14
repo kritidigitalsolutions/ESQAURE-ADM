@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { PlayerController } from '../controllers/player.controller.js';
 import { HomeController } from '../controllers/home.controller.js';
 import { authenticate, optionalAuthenticate } from '../middlewares/auth.middleware.js';
+import { verifyAdmin } from '../middlewares/adminAuth.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { playerValidation } from '../validations/player.validation.js';
 
@@ -69,7 +70,7 @@ router.get(
 );
 
 /**
- * 4. Sync Playback Progress (Scrubber & Heartbeat)
+ * 4. Sync Playback Progress (Scrubber & Heartbeat) with Automatic View Qualification
  * POST /api/v1/player/progress
  */
 router.post(
@@ -77,6 +78,37 @@ router.post(
   optionalAuthenticate,
   validate(playerValidation.recordProgress),
   PlayerController.recordProgress
+);
+
+/**
+ * 4.1 Explicit Real View Logging (ExoPlayer / Video.js / AVPlayer Callback)
+ * POST /api/v1/player/view
+ */
+router.post(
+  '/view',
+  optionalAuthenticate,
+  validate(playerValidation.recordView),
+  PlayerController.recordView
+);
+
+/**
+ * 4.2 Real View Analytics (Timeseries Breakdown & Unique Viewers)
+ * GET /api/v1/player/analytics/:dramaId?days=30
+ */
+router.get(
+  '/analytics/:dramaId',
+  optionalAuthenticate,
+  PlayerController.getViewAnalytics
+);
+
+/**
+ * 4.3 Admin: Reconcile Drama View Counts (Data integrity check)
+ * POST /api/v1/player/reconcile-views/:dramaId
+ */
+router.post(
+  '/reconcile-views/:dramaId',
+  verifyAdmin,
+  PlayerController.reconcileDramaViews
 );
 
 /**

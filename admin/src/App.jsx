@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import PageHeader from './components/PageHeader';
@@ -293,90 +294,97 @@ export default function App() {
         <main className="flex-1 w-full overflow-y-auto overflow-x-hidden">
           <div className="max-w-[1600px] w-full mx-auto px-3 sm:px-5 lg:px-6 py-4 min-h-full">
             <ErrorBoundary key={activeTab}>
-              {/* Active Page View */}
-              {activeTab === 'summary' && (
-                <DashboardPage
-                  onOpenIngestModal={() => setActiveTab('upload')}
-                  onNavigate={setActiveTab}
-                />
-              )}
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.16, ease: 'easeOut' }}
+              >
+                {/* Active Page View */}
+                {activeTab === 'summary' && (
+                  <DashboardPage
+                    onOpenIngestModal={() => setActiveTab('upload')}
+                    onNavigate={setActiveTab}
+                  />
+                )}
 
-              {(activeTab === 'dramas' || activeTab === 'episodes') && (
-                <DramasPage
-                  onOpenIngestModal={() => setActiveTab('upload')}
-                  onNavigate={setActiveTab}
-                  selectedDramaId={selectedDramaId}
-                  onClearSelectedDrama={() => setSelectedDramaId(null)}
-                />
-              )}
+                {(activeTab === 'dramas' || activeTab === 'episodes') && (
+                  <DramasPage
+                    onOpenIngestModal={() => setActiveTab('upload')}
+                    onNavigate={setActiveTab}
+                    selectedDramaId={selectedDramaId}
+                    onClearSelectedDrama={() => setSelectedDramaId(null)}
+                  />
+                )}
 
-              {activeTab === 'upload' && (
-                <UploadContentPage onNavigate={setActiveTab} />
-              )}
+                {activeTab === 'upload' && (
+                  <UploadContentPage onNavigate={setActiveTab} />
+                )}
 
-              {activeTab === 'banners' && (
-                <BannersPage onNavigate={setActiveTab} />
-              )}
+                {activeTab === 'banners' && (
+                  <BannersPage onNavigate={setActiveTab} />
+                )}
 
-              {activeTab === 'genres' && (
-                <GenresPage onNavigate={setActiveTab} />
-              )}
+                {activeTab === 'genres' && (
+                  <GenresPage onNavigate={setActiveTab} />
+                )}
 
-              {activeTab === 'category_priority' && (
-                <CategoryPriorityPage onNavigate={setActiveTab} />
-              )}
+                {activeTab === 'category_priority' && (
+                  <CategoryPriorityPage onNavigate={setActiveTab} />
+                )}
 
-              {activeTab === 'users' && (
-                <UsersPage onNavigate={setActiveTab} />
-              )}
+                {activeTab === 'users' && (
+                  <UsersPage onNavigate={setActiveTab} />
+                )}
 
-              {activeTab === 'subscribers' && (
-                <SubscribersPage />
-              )}
+                {activeTab === 'subscribers' && (
+                  <SubscribersPage />
+                )}
 
-              {activeTab === 'subscriptions' && (
-                <SubscriptionsPage />
-              )}
+                {activeTab === 'subscriptions' && (
+                  <SubscriptionsPage />
+                )}
 
-              {activeTab === 'promos' && (
-                <PromosPage />
-              )}
+                {activeTab === 'promos' && (
+                  <PromosPage />
+                )}
 
-              {activeTab === 'vouchers' && (
-                <VouchersPage />
-              )}
+                {activeTab === 'vouchers' && (
+                  <VouchersPage />
+                )}
 
-              {activeTab === 'transactions' && (
-                <TransactionsPage />
-              )}
+                {activeTab === 'transactions' && (
+                  <TransactionsPage />
+                )}
 
-              {activeTab === 'admob' && (
-                <AdmobPage onNavigate={setActiveTab} />
-              )}
+                {activeTab === 'admob' && (
+                  <AdmobPage onNavigate={setActiveTab} />
+                )}
 
-              {activeTab === 'custom_ads' && (
-                <CustomAdsPage onNavigate={setActiveTab} />
-              )}
+                {activeTab === 'custom_ads' && (
+                  <CustomAdsPage onNavigate={setActiveTab} />
+                )}
 
-              {activeTab === 'ad_control' && (
-                <AdControlPage onNavigate={setActiveTab} />
-              )}
+                {activeTab === 'ad_control' && (
+                  <AdControlPage onNavigate={setActiveTab} />
+                )}
 
-              {activeTab === 'notifications' && (
-                <NotificationsPage />
-              )}
+                {activeTab === 'notifications' && (
+                  <NotificationsPage />
+                )}
 
-              {activeTab === 'app_notifications' && (
-                <AppNotificationsPage onNavigate={setActiveTab} />
-              )}
+                {activeTab === 'app_notifications' && (
+                  <AppNotificationsPage onNavigate={setActiveTab} />
+                )}
 
-              {activeTab === 'legal' && (
-                <LegalPage />
-              )}
+                {activeTab === 'legal' && (
+                  <LegalPage />
+                )}
 
-              {activeTab === 'settings' && (
-                <SettingsPage />
-              )}
+                {activeTab === 'settings' && (
+                  <SettingsPage />
+                )}
+              </motion.div>
             </ErrorBoundary>
           </div>
         </main>

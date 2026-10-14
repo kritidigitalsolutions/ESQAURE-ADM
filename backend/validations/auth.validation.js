@@ -130,5 +130,11 @@ export const authValidation = {
     interests: Joi.array()
       .items(Joi.string().trim())
       .optional()
+  }),
+
+  // Account Deletion Request
+  requestAccountDeletion: Joi.object({
+    reason: Joi.string().trim().max(500).allow('', null).optional(),
+    feedback: Joi.string().trim().max(1000).allow('', null).optional()
   })
 };
