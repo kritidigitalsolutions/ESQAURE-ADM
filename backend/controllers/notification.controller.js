@@ -271,28 +271,61 @@ export const clearAllNotifications = async (req, res, next) => {
   }
 };
 
+// Notification configuration matching the mobile app "Notification Settings" screen
+export const NOTIFICATION_CONFIG = [
+  {
+    key: 'newEpisodes',
+    title: 'New episodes',
+    description: 'Get notified when a series continues',
+    default: true
+  },
+  {
+    key: 'newReleases',
+    title: 'New releases',
+    description: 'Discover newly added series',
+    default: true
+  },
+  {
+    key: 'recommendations',
+    title: 'Recommendations',
+    description: 'Personalized stories for you',
+    default: false
+  }
+];
+
 // ---------------------------------------------------------------------------
 // 7. GET /notifications/settings  — Get user notification preference toggles
+//    Returns both key-value settings object and structured alerts array
+//    matching the mobile app "Notification Settings" screen.
 // ---------------------------------------------------------------------------
 export const getNotificationSettings = async (req, res, next) => {
   try {
-    const user = await User.findById(req.userId).select('settings.notifications');
+    const userId = req.userId || req.user?._id;
+    const user = await User.findById(userId).select('settings.notifications');
     if (!user) {
       return next(new AppError('User not found.', 404, ERROR_CODES.USER_NOT_FOUND));
     }
 
-    const prefs = user.settings?.notifications || {
-      newEpisodes: true,
-      newReleases: true,
-      recommendations: false
+    const saved = user.settings?.notifications || {};
+    const settings = {
+      newEpisodes: typeof saved.newEpisodes === 'boolean' ? saved.newEpisodes : true,
+      newReleases: typeof saved.newReleases === 'boolean' ? saved.newReleases : true,
+      recommendations: typeof saved.recommendations === 'boolean' ? saved.recommendations : false
     };
 
-    return ApiResponse.success(res, 'Notification settings fetched', {
-      settings: {
-        newEpisodes: prefs.newEpisodes,
-        newReleases: prefs.newReleases,
-        recommendations: prefs.recommendations
-      }
+    const alerts = NOTIFICATION_CONFIG.map((item) => ({
+      key: item.key,
+      title: item.title,
+      description: item.description,
+      enabled: settings[item.key]
+    }));
+
+    return ApiResponse.success(res, 'Notification settings fetched successfully', {
+      title: 'Notification Settings',
+      subtitle: 'Manage your alert preferences',
+      category: 'ALERTS',
+      settings,
+      alerts
     });
   } catch (error) {
     return next(error);
@@ -300,12 +333,40 @@ export const getNotificationSettings = async (req, res, next) => {
 };
 
 // ---------------------------------------------------------------------------
-// 8. PUT /notifications/settings  — Update notification preference toggles
-//    Matches the 3 toggles on the "Notification Settings" screen
+// 8. PUT & PATCH /notifications/settings  — Update notification preferences
+//    Supports batch update, key-value toggle, nested settings, or alerts array.
 // ---------------------------------------------------------------------------
 export const updateNotificationSettings = async (req, res, next) => {
   try {
-    const { newEpisodes, newReleases, recommendations } = req.body;
+    const userId = req.userId || req.user?._id;
+    const { key, value, enabled, settings: nestedSettings, alerts } = req.body;
+    let { newEpisodes, newReleases, recommendations } = req.body;
+
+    // Handle nested settings object e.g. { settings: { newEpisodes: true } }
+    if (nestedSettings && typeof nestedSettings === 'object') {
+      if (typeof nestedSettings.newEpisodes === 'boolean') newEpisodes = nestedSettings.newEpisodes;
+      if (typeof nestedSettings.newReleases === 'boolean') newReleases = nestedSettings.newReleases;
+      if (typeof nestedSettings.recommendations === 'boolean') recommendations = nestedSettings.recommendations;
+    }
+
+    // Handle alerts array e.g. { alerts: [{ key: 'newEpisodes', enabled: false }] }
+    if (Array.isArray(alerts)) {
+      alerts.forEach((item) => {
+        if (item.key && typeof item.enabled === 'boolean') {
+          if (item.key === 'newEpisodes') newEpisodes = item.enabled;
+          if (item.key === 'newReleases') newReleases = item.enabled;
+          if (item.key === 'recommendations') recommendations = item.enabled;
+        }
+      });
+    }
+
+    // Handle single key-value update e.g. { key: 'newEpisodes', enabled: false } or { key: 'newEpisodes', value: false }
+    if (key && (typeof value === 'boolean' || typeof enabled === 'boolean')) {
+      const boolVal = typeof enabled === 'boolean' ? enabled : value;
+      if (key === 'newEpisodes') newEpisodes = boolVal;
+      if (key === 'newReleases') newReleases = boolVal;
+      if (key === 'recommendations') recommendations = boolVal;
+    }
 
     // Build the update object — only include fields that were actually sent
     const updateFields = {};
@@ -319,7 +380,7 @@ export const updateNotificationSettings = async (req, res, next) => {
     if (Object.keys(updateFields).length === 0) {
       return next(
         new AppError(
-          'Provide at least one setting to update: newEpisodes, newReleases, or recommendations.',
+          'Provide at least one setting to update (newEpisodes, newReleases, or recommendations).',
           400,
           ERROR_CODES.VALIDATION_ERROR
         )
@@ -327,7 +388,7 @@ export const updateNotificationSettings = async (req, res, next) => {
     }
 
     const user = await User.findByIdAndUpdate(
-      req.userId,
+      userId,
       { $set: updateFields },
       { new: true, select: 'settings.notifications' }
     );
@@ -336,8 +397,131 @@ export const updateNotificationSettings = async (req, res, next) => {
       return next(new AppError('User not found.', 404, ERROR_CODES.USER_NOT_FOUND));
     }
 
-    return ApiResponse.success(res, 'Notification settings updated', {
-      settings: user.settings.notifications
+    const current = user.settings?.notifications || {};
+    const updatedSettings = {
+      newEpisodes: typeof current.newEpisodes === 'boolean' ? current.newEpisodes : true,
+      newReleases: typeof current.newReleases === 'boolean' ? current.newReleases : true,
+      recommendations: typeof current.recommendations === 'boolean' ? current.recommendations : false
+    };
+
+    const updatedAlerts = NOTIFICATION_CONFIG.map((item) => ({
+      key: item.key,
+      title: item.title,
+      description: item.description,
+      enabled: updatedSettings[item.key]
+    }));
+
+    return ApiResponse.success(res, 'Notification settings updated successfully', {
+      title: 'Notification Settings',
+      subtitle: 'Manage your alert preferences',
+      settings: updatedSettings,
+      alerts: updatedAlerts
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// 8b. PATCH /notifications/settings/:key/toggle (or POST /notifications/settings/toggle)
+//     Toggle a single notification setting switch on/off
+// ---------------------------------------------------------------------------
+export const toggleNotificationSetting = async (req, res, next) => {
+  try {
+    const userId = req.userId || req.user?._id;
+    const targetKey = req.params.key || req.body.key;
+    const validKeys = ['newEpisodes', 'newReleases', 'recommendations'];
+
+    if (!targetKey || !validKeys.includes(targetKey)) {
+      return next(
+        new AppError(
+          `Invalid notification key '${targetKey}'. Must be one of: ${validKeys.join(', ')}`,
+          400,
+          ERROR_CODES.VALIDATION_ERROR
+        )
+      );
+    }
+
+    const user = await User.findById(userId).select('settings.notifications');
+    if (!user) {
+      return next(new AppError('User not found.', 404, ERROR_CODES.USER_NOT_FOUND));
+    }
+
+    const currentVal = user.settings?.notifications?.[targetKey] !== undefined
+      ? user.settings.notifications[targetKey]
+      : (targetKey === 'recommendations' ? false : true);
+
+    const explicitVal = typeof req.body.enabled === 'boolean'
+      ? req.body.enabled
+      : (typeof req.body.value === 'boolean' ? req.body.value : !currentVal);
+
+    user.settings = user.settings || {};
+    user.settings.notifications = user.settings.notifications || {};
+    user.settings.notifications[targetKey] = explicitVal;
+    user.markModified('settings');
+    await user.save();
+
+    const updatedSettings = {
+      newEpisodes: typeof user.settings.notifications.newEpisodes === 'boolean' ? user.settings.notifications.newEpisodes : true,
+      newReleases: typeof user.settings.notifications.newReleases === 'boolean' ? user.settings.notifications.newReleases : true,
+      recommendations: typeof user.settings.notifications.recommendations === 'boolean' ? user.settings.notifications.recommendations : false
+    };
+
+    const updatedAlerts = NOTIFICATION_CONFIG.map((item) => ({
+      key: item.key,
+      title: item.title,
+      description: item.description,
+      enabled: updatedSettings[item.key]
+    }));
+
+    return ApiResponse.success(res, `Notification setting '${targetKey}' set to ${explicitVal}`, {
+      key: targetKey,
+      enabled: explicitVal,
+      settings: updatedSettings,
+      alerts: updatedAlerts
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// 8c. POST /notifications/settings/reset
+//     Reset all notification preferences to platform defaults
+// ---------------------------------------------------------------------------
+export const resetNotificationSettings = async (req, res, next) => {
+  try {
+    const userId = req.userId || req.user?._id;
+    const defaultSettings = {
+      newEpisodes: true,
+      newReleases: true,
+      recommendations: false
+    };
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          'settings.notifications': defaultSettings
+        }
+      },
+      { new: true, select: 'settings.notifications' }
+    );
+
+    if (!user) {
+      return next(new AppError('User not found.', 404, ERROR_CODES.USER_NOT_FOUND));
+    }
+
+    const alerts = NOTIFICATION_CONFIG.map((item) => ({
+      key: item.key,
+      title: item.title,
+      description: item.description,
+      enabled: defaultSettings[item.key]
+    }));
+
+    return ApiResponse.success(res, 'Notification settings reset to defaults successfully', {
+      settings: defaultSettings,
+      alerts
     });
   } catch (error) {
     return next(error);

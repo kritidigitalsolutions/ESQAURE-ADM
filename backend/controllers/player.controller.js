@@ -6,6 +6,7 @@ import { SubscriptionPlan } from '../models/SubscriptionPlan.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { AppError } from '../utils/appError.js';
 import { ERROR_CODES } from '../constants/errorCodes.js';
+import { viewTrackingService } from '../services/viewTracking.service.js';
 
 /**
  * Format seconds into mm:ss or hh:mm:ss format (e.g. 45 -> "0:45", 135 -> "2:15")
@@ -314,11 +315,18 @@ export class PlayerController {
       // User watch history map
       const userProgressMap = new Map();
       if (user) {
-        const histories = await WatchHistory.find({
+        const history = await WatchHistory.findOne({
           userId: user._id,
           dramaId: drama._id
         });
-        histories.forEach((h) => userProgressMap.set(h.episodeNumber, h));
+        if (history) {
+          userProgressMap.set(history.episodeNumber, history);
+          if (Array.isArray(history.watchedEpisodes)) {
+            history.watchedEpisodes.forEach((we) => {
+              userProgressMap.set(we.episodeNumber, we);
+            });
+          }
+        }
       }
 
       const formattedEpisodes = episodes.map((ep) => {
@@ -377,13 +385,29 @@ export class PlayerController {
   }
 
   /**
-   * 4. Sync Playback Progress (Scrubber & Heartbeat)
+   * 4. Sync Playback Progress (Scrubber & Heartbeat) with Automatic View Qualification
    * POST /api/v1/player/progress
    */
   static async recordProgress(req, res, next) {
     try {
-      const { dramaId, episodeNumber = 1, watchedSeconds = 0, durationSeconds = 135 } = req.body;
+      const {
+        dramaId,
+        episodeNumber = 1,
+        watchedSeconds = 0,
+        durationSeconds = 135,
+        isTrailer = false,
+        mediaType = 'EPISODE'
+      } = req.body;
       const user = req.user;
+
+      // 1. Explicit Trailer / Teaser Protection: Trailers and previews must NEVER count as episode views!
+      const isTrailerPlayback =
+        Boolean(isTrailer) ||
+        mediaType === 'TRAILER' ||
+        req.body?.contentType === 'TRAILER' ||
+        req.body?.type === 'TRAILER' ||
+        episodeNumber === 0 ||
+        episodeNumber === '0';
 
       const dramaQuery =
         mongoose.Types.ObjectId.isValid(dramaId) && dramaId.length === 24
@@ -395,6 +419,24 @@ export class PlayerController {
         throw new AppError('Drama series not found.', 404, 'DRAMA_NOT_FOUND');
       }
 
+      if (isTrailerPlayback) {
+        const trailerDuration = Number(durationSeconds) || 120;
+        const trailerWatched = Math.min(Number(watchedSeconds) || 0, trailerDuration);
+        const trailerPercent = trailerDuration > 0 ? Math.min(100, Number(((trailerWatched / trailerDuration) * 100).toFixed(1))) : 0;
+        return ApiResponse.success(res, 'Trailer playback progress recorded (views excluded)', {
+          dramaId: drama._id.toString(),
+          isTrailer: true,
+          watchedSeconds: trailerWatched,
+          formattedWatched: formatDuration(trailerWatched),
+          durationSeconds: trailerDuration,
+          formattedDuration: formatDuration(trailerDuration),
+          progressPercentage: trailerPercent,
+          isCompleted: false,
+          viewCounted: false,
+          viewReason: 'TRAILER_EXCLUDED'
+        });
+      }
+
       const episode = await Episode.findOne({
         dramaId: drama._id,
         episodeNumber: Number(episodeNumber)
@@ -402,6 +444,10 @@ export class PlayerController {
       if (!episode) {
         throw new AppError('Episode not found.', 404, 'EPISODE_NOT_FOUND');
       }
+
+      // 2. Locked Episode Protection: Non-paying viewers watching a locked teaser preview cannot count as an episode stream
+      const userHasVip = isUserVip(user);
+      const isLocked = !episode.isFree && !userHasVip;
 
       const totalDuration = durationSeconds > 0 ? durationSeconds : episode.durationSeconds || 135;
       const safeWatchedSecs = Math.min(Number(watchedSeconds), totalDuration);
@@ -411,8 +457,41 @@ export class PlayerController {
 
       const isCompleted = calculatedPercentage >= 90;
 
-      // Update WatchHistory in MongoDB if user is authenticated
-      if (user) {
+      // Update WatchHistory only if user actually has unlocked access to this episode
+      if (user && !isLocked) {
+        const existingHistory = await WatchHistory.findOne({
+          userId: user._id,
+          dramaId: drama._id
+        });
+
+        let watchedEpisodes = existingHistory?.watchedEpisodes ? [...existingHistory.watchedEpisodes] : [];
+        const epIndex = watchedEpisodes.findIndex(
+          (e) => Number(e.episodeNumber) === Number(episode.episodeNumber) &&
+                 Number(e.seasonNumber || 1) === Number(episode.seasonNumber || 1)
+        );
+
+        const episodeEntry = {
+          episodeId: episode._id,
+          seasonNumber: episode.seasonNumber || 1,
+          episodeNumber: episode.episodeNumber,
+          title: episode.title || `Episode ${episode.episodeNumber}`,
+          thumbnailUrl: episode.thumbnailUrl || '',
+          watchedSeconds: safeWatchedSecs,
+          durationSeconds: totalDuration,
+          progressPercentage: calculatedPercentage,
+          isCompleted,
+          lastWatchedAt: new Date()
+        };
+
+        if (epIndex >= 0) {
+          watchedEpisodes[epIndex] = episodeEntry;
+        } else {
+          watchedEpisodes.push(episodeEntry);
+        }
+
+        // Drama series is only marked completed if this is the final episode and it is completed
+        const isDramaCompleted = isCompleted && (drama.totalEpisodes ? Number(episode.episodeNumber) >= Number(drama.totalEpisodes) : false);
+
         await WatchHistory.findOneAndUpdate(
           { userId: user._id, dramaId: drama._id },
           {
@@ -423,19 +502,45 @@ export class PlayerController {
               watchedSeconds: safeWatchedSecs,
               durationSeconds: totalDuration,
               progressPercentage: calculatedPercentage,
-              isCompleted,
-              lastWatchedAt: new Date()
+              isCompleted: isDramaCompleted,
+              lastWatchedAt: new Date(),
+              totalEpisodesWatched: watchedEpisodes.length,
+              watchedEpisodes
             }
           },
           { upsert: true, new: true }
         );
       }
 
-      // Increment view counts
-      await Promise.all([
-        Episode.findByIdAndUpdate(episode._id, { $inc: { viewsCount: 1 } }),
-        Drama.findByIdAndUpdate(drama._id, { $inc: { viewsCount: 1 } })
-      ]);
+      // If user is locked out, reject view counting immediately
+      if (isLocked) {
+        return ApiResponse.success(res, 'Locked episode preview recorded (views excluded)', {
+          dramaId: drama._id.toString(),
+          episodeNumber: episode.episodeNumber,
+          isLocked: true,
+          watchedSeconds: safeWatchedSecs,
+          formattedWatched: formatDuration(safeWatchedSecs),
+          durationSeconds: totalDuration,
+          formattedDuration: formatDuration(totalDuration),
+          progressPercentage: calculatedPercentage,
+          isCompleted: false,
+          viewCounted: false,
+          viewReason: 'LOCKED_EPISODE_EXCLUDED'
+        });
+      }
+
+      // 3. Intelligent Real View Verification & Session Deduplication (Episodes Only!)
+      const viewResult = await viewTrackingService.recordPlaybackView({
+        dramaId: drama._id,
+        episodeId: episode._id,
+        episodeNumber: episode.episodeNumber,
+        watchedSeconds: safeWatchedSecs,
+        durationSeconds: totalDuration,
+        progressPercentage: calculatedPercentage,
+        req,
+        isTrailer: false,
+        isLocked: false
+      });
 
       return ApiResponse.success(res, 'Playback progress recorded successfully', {
         dramaId: drama._id.toString(),
@@ -445,10 +550,168 @@ export class PlayerController {
         durationSeconds: totalDuration,
         formattedDuration: formatDuration(totalDuration),
         progressPercentage: calculatedPercentage,
-        isCompleted
+        isCompleted,
+        viewCounted: viewResult.counted,
+        viewReason: viewResult.reason
       });
     } catch (error) {
       return next(error);
     }
   }
+
+  /**
+   * 5. Explicit Real View Trigger API
+   * POST /api/v1/player/view
+   * Dedicated endpoint for player callbacks once minimum view threshold is achieved
+   */
+  static async recordView(req, res, next) {
+    try {
+      const {
+        dramaId,
+        episodeNumber = 1,
+        watchedSeconds = 10,
+        durationSeconds = 135,
+        isTrailer = false,
+        mediaType = 'EPISODE'
+      } = req.body;
+
+      const isTrailerPlayback =
+        Boolean(isTrailer) ||
+        mediaType === 'TRAILER' ||
+        req.body?.contentType === 'TRAILER' ||
+        req.body?.type === 'TRAILER' ||
+        episodeNumber === 0 ||
+        episodeNumber === '0';
+
+      if (!dramaId) {
+        throw new AppError('Drama ID or slug is required.', 400, 'VALIDATION_ERROR');
+      }
+
+      const dramaQuery =
+        mongoose.Types.ObjectId.isValid(dramaId) && dramaId.length === 24
+          ? { _id: dramaId }
+          : { slug: dramaId.toLowerCase().trim() };
+
+      const drama = await Drama.findOne(dramaQuery);
+      if (!drama) {
+        throw new AppError('Drama series not found.', 404, 'DRAMA_NOT_FOUND');
+      }
+
+      // Trailer check: Trailers are strictly excluded
+      if (isTrailerPlayback) {
+        return ApiResponse.success(res, 'Trailer playback recorded (views excluded)', {
+          dramaId: drama._id.toString(),
+          isTrailer: true,
+          viewCounted: false,
+          viewReason: 'TRAILER_EXCLUDED'
+        });
+      }
+
+      const episode = await Episode.findOne({
+        dramaId: drama._id,
+        episodeNumber: Number(episodeNumber)
+      });
+      if (!episode) {
+        throw new AppError('Episode not found.', 404, 'EPISODE_NOT_FOUND');
+      }
+
+      // Locked episode check: Non-VIP user on locked episode cannot count view
+      const userHasVip = isUserVip(req.user);
+      if (!episode.isFree && !userHasVip) {
+        return ApiResponse.success(res, 'Locked episode preview recorded (views excluded)', {
+          dramaId: drama._id.toString(),
+          episodeNumber: episode.episodeNumber,
+          isLocked: true,
+          viewCounted: false,
+          viewReason: 'LOCKED_EPISODE_EXCLUDED'
+        });
+      }
+
+      const totalDuration = durationSeconds > 0 ? durationSeconds : episode.durationSeconds || 135;
+      const safeWatchedSecs = Math.max(Number(watchedSeconds), 10);
+      const calculatedPercentage = totalDuration > 0
+        ? Math.min(100, Number(((safeWatchedSecs / totalDuration) * 100).toFixed(1)))
+        : 0;
+
+      const viewResult = await viewTrackingService.recordPlaybackView({
+        dramaId: drama._id,
+        episodeId: episode._id,
+        episodeNumber: episode.episodeNumber,
+        watchedSeconds: safeWatchedSecs,
+        durationSeconds: totalDuration,
+        progressPercentage: calculatedPercentage,
+        req,
+        explicit: true,
+        isTrailer: false,
+        isLocked: false
+      });
+
+      return ApiResponse.success(
+        res,
+        viewResult.counted ? 'Legitimate view counted successfully' : (viewResult.message || 'View already recorded'),
+        {
+          dramaId: drama._id.toString(),
+          episodeNumber: episode.episodeNumber,
+          viewCounted: viewResult.counted,
+          viewReason: viewResult.reason,
+          cooldownRemainingSeconds: viewResult.cooldownRemainingSeconds || 0,
+          currentEpisodeViews: viewResult.episodeViews || episode.viewsCount,
+          currentDramaViews: viewResult.dramaViews || drama.viewsCount
+        }
+      );
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * 6. Real View Analytics API
+   * GET /api/v1/player/analytics/:dramaId?days=30
+   */
+  static async getViewAnalytics(req, res, next) {
+    try {
+      const { dramaId } = req.params;
+      const days = req.query.days || 30;
+
+      const dramaQuery =
+        mongoose.Types.ObjectId.isValid(dramaId) && dramaId.length === 24
+          ? { _id: dramaId }
+          : { slug: dramaId.toLowerCase().trim() };
+
+      const drama = await Drama.findOne(dramaQuery);
+      if (!drama) {
+        throw new AppError('Drama series not found.', 404, 'DRAMA_NOT_FOUND');
+      }
+
+      const analytics = await viewTrackingService.getDramaViewAnalytics(drama._id, days);
+      return ApiResponse.success(res, 'Drama view analytics retrieved successfully', analytics);
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * 7. Admin Reconcile Drama Views
+   * POST /api/v1/player/reconcile-views/:dramaId
+   */
+  static async reconcileDramaViews(req, res, next) {
+    try {
+      const { dramaId } = req.params;
+      const dramaQuery =
+        mongoose.Types.ObjectId.isValid(dramaId) && dramaId.length === 24
+          ? { _id: dramaId }
+          : { slug: dramaId.toLowerCase().trim() };
+
+      const drama = await Drama.findOne(dramaQuery);
+      if (!drama) {
+        throw new AppError('Drama series not found.', 404, 'DRAMA_NOT_FOUND');
+      }
+
+      const result = await viewTrackingService.reconcileDramaViews(drama._id);
+      return ApiResponse.success(res, 'Drama view counts reconciled successfully', result);
+    } catch (error) {
+      return next(error);
+    }
+  }
 }
+

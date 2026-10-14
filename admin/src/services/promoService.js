@@ -43,6 +43,12 @@ const promoService = {
     return request(`/admin${qs ? `?${qs}` : ''}`);
   },
 
+  /** Alias for getAdminPromos for components calling getPromos */
+  getPromos: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/admin${qs ? `?${qs}` : ''}`);
+  },
+
   /** GET /promos/admin/:id */
   getPromoById: (id) =>
     request(`/admin/${id}`),

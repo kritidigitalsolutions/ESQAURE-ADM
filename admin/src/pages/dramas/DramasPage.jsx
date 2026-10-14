@@ -363,6 +363,18 @@ export default function DramasPage({
     }
   };
 
+  // Reconcile and synchronize real stream view counts
+  const handleReconcileViews = async (id, title) => {
+    try {
+      const res = await dramaService.reconcileViews(id);
+      showToast(`Reconciled views for "${title}". Verified streams: ${res?.reconciledViews ?? 'synced'}`, 'success');
+      loadDramas();
+    } catch (err) {
+      console.error('Reconcile views failed:', err);
+      showToast('Failed to reconcile views: ' + (err.message || 'Server error'), 'error');
+    }
+  };
+
   // Dynamically compute unique genres from real database records
   const genres = useMemo(() => {
     const set = new Set();
@@ -810,6 +822,14 @@ export default function DramasPage({
                     {/* Action buttons */}
                     <td className="py-2 pr-4 pl-3 align-middle text-right">
                       <div className="inline-flex items-center justify-end space-x-1">
+                        <button
+                          type="button"
+                          onClick={() => handleReconcileViews(drama.id, drama.title)}
+                          title="Reconcile Real Streams (Sync with episode views)"
+                          className="p-1 rounded-md text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-pointer"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           type="button"
                           onClick={() => setManagingDrama(drama)}

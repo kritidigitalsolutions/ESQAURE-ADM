@@ -23,7 +23,6 @@ const request = async (endpoint, options = {}) => {
     return data;
   };
 
-
   try {
     return await tryFetch(API_BASE);
   } catch (err) {
@@ -39,6 +38,13 @@ const adService = {
   /** PUT /ads/settings */
   updateSettings: (data) =>
     request('/settings', { method: 'PUT', body: JSON.stringify(data) }),
+
+  /** GET /ads/custom/rotation-settings */
+  getRotationSettings: () => request('/custom/rotation-settings'),
+
+  /** PUT /ads/custom/rotation-settings */
+  updateRotationSettings: (data) =>
+    request('/custom/rotation-settings', { method: 'PUT', body: JSON.stringify(data) }),
 
   /** GET /ads/custom */
   getCustomAds: (params = {}) => {
@@ -68,6 +74,16 @@ const adService = {
   /** POST /ads/custom/:id/reset-stats */
   resetCustomAdStats: (id) =>
     request(`/custom/${id}/reset-stats`, { method: 'POST' }),
+
+  /** GET /ads/custom/:id/analytics */
+  getCustomAdAnalytics: (id, params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/custom/${id}/analytics${qs ? `?${qs}` : ''}`);
+  },
+
+  /** POST /ads/custom/bulk-action */
+  bulkAction: (action, ids) =>
+    request('/custom/bulk-action', { method: 'POST', body: JSON.stringify({ action, ids }) })
 };
 
 export default adService;

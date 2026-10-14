@@ -69,5 +69,32 @@ export const userService = {
     return await request(`/${id}`, {
       method: 'DELETE'
     });
+  },
+
+  /**
+   * Fetch all user account deletion requests
+   */
+  async getDeletionRequests() {
+    return await request('/admin/deletion-requests', { method: 'GET' });
+  },
+
+  /**
+   * Verify and delete user account
+   */
+  async verifyAndDeleteUser(id, payload = {}) {
+    return await request(`/${id}/verify-delete`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  /**
+   * Reject user deletion request and restore active status
+   */
+  async rejectDeletionRequest(id, payload = {}) {
+    return await request(`/${id}/reject-deletion`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
   }
 };

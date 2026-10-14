@@ -137,6 +137,20 @@ export const BADGE_CONFIGS = {
     text: 'text-amber-950 dark:text-amber-300',
     border: 'border border-amber-300/40 dark:border-amber-400/30',
   },
+  'pending-deletion': {
+    label: 'Deletion Requested',
+    icon: Clock,
+    bg: 'bg-amber-200 dark:bg-amber-400/20',
+    text: 'text-amber-950 dark:text-amber-300',
+    border: 'border border-amber-300/40 dark:border-amber-400/30',
+  },
+  'deletion-requested': {
+    label: 'Deletion Requested (24h Review)',
+    icon: Clock,
+    bg: 'bg-amber-200 dark:bg-amber-400/20',
+    text: 'text-amber-950 dark:text-amber-300',
+    border: 'border border-amber-300/40 dark:border-amber-400/30',
+  },
   paused: {
     label: 'Paused',
     icon: Clock,

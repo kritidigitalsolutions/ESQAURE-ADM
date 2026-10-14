@@ -22,6 +22,24 @@ router.get('/', UserController.getUsers);
 router.get('/admin/activity-analytics', UserController.getActivityAnalytics);
 
 /**
+ * GET /api/v1/users/admin/deletion-requests
+ * List all user account deletion requests submitted to admin with 24-hour review SLA
+ */
+router.get('/admin/deletion-requests', UserController.getDeletionRequests);
+
+/**
+ * POST /api/v1/users/:id/verify-delete
+ * Admin verifies user details and permanently deletes user account
+ */
+router.post('/:id/verify-delete', UserController.verifyAndDeleteUser);
+
+/**
+ * POST /api/v1/users/:id/reject-deletion
+ * Admin rejects/cancels the user's deletion request and restores account to ACTIVE
+ */
+router.post('/:id/reject-deletion', UserController.rejectDeletionRequest);
+
+/**
  * GET /api/v1/users/:id
  * Get a single user's full profile and details
  */

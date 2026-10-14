@@ -11,21 +11,30 @@ export default function MetricsOverview({ onOpenIngestModal }) {
 
   const [realUserCounts, setRealUserCounts] = useState(null);
   const [realSubKpis, setRealSubKpis] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     Promise.allSettled([
       userService.getUsers({ limit: 1 }),
       subscriptionService.getOverview()
     ]).then(([usersRes, subRes]) => {
+      if (!isMounted) return;
       if (usersRes.status === 'fulfilled' && usersRes.value?.counts) {
         setRealUserCounts(usersRes.value.counts);
       }
       if (subRes.status === 'fulfilled' && subRes.value?.kpis) {
         setRealSubKpis(subRes.value.kpis);
       }
+      setIsLoading(false);
     }).catch((err) => {
       console.warn('MetricsOverview API fetch fallback:', err);
+      if (isMounted) setIsLoading(false);
     });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Dynamic values for User Base Card (Audience & Acquisition)
@@ -212,19 +221,27 @@ export default function MetricsOverview({ onOpenIngestModal }) {
             </div>
 
             <div className="mt-4 sm:mt-4.5 flex items-baseline justify-between">
-              <div className="flex items-baseline space-x-1.5">
-                <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
-                  <AnimatedNumber value={userMetrics[userTab].value} />
-                </span>
-                {userMetrics[userTab].unit && (
-                  <span className="text-sm font-bold text-slate-400 dark:text-slate-500">
-                    {userMetrics[userTab].unit}
+              {isLoading ? (
+                <div className="h-9 w-28 bg-slate-200/80 dark:bg-white/[0.08] rounded-lg animate-pulse" />
+              ) : (
+                <div className="flex items-baseline space-x-1.5">
+                  <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
+                    <AnimatedNumber value={userMetrics[userTab].value} />
                   </span>
-                )}
-              </div>
-              <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
-                <ArrowUpRight className="w-3 h-3 stroke-[2.5]" /> <AnimatedNumber value={userMetrics[userTab].badge} />
-              </span>
+                  {userMetrics[userTab].unit && (
+                    <span className="text-sm font-bold text-slate-400 dark:text-slate-500">
+                      {userMetrics[userTab].unit}
+                    </span>
+                  )}
+                </div>
+              )}
+              {isLoading ? (
+                <div className="h-5 w-16 bg-slate-200/60 dark:bg-white/[0.05] rounded-full animate-pulse" />
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
+                  <ArrowUpRight className="w-3 h-3 stroke-[2.5]" /> <AnimatedNumber value={userMetrics[userTab].badge} />
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -296,19 +313,27 @@ export default function MetricsOverview({ onOpenIngestModal }) {
             </div>
 
             <div className="mt-4 sm:mt-4.5 flex items-baseline justify-between">
-              <div className="flex items-baseline space-x-1.5">
-                <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
-                  <AnimatedNumber value={subscriptionMetrics[subTab].value} />
-                </span>
-                {subscriptionMetrics[subTab].unit && (
-                  <span className="text-sm font-bold text-slate-500 dark:text-slate-500">
-                    {subscriptionMetrics[subTab].unit}
+              {isLoading ? (
+                <div className="h-9 w-28 bg-slate-200/80 dark:bg-white/[0.08] rounded-lg animate-pulse" />
+              ) : (
+                <div className="flex items-baseline space-x-1.5">
+                  <span className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
+                    <AnimatedNumber value={subscriptionMetrics[subTab].value} />
                   </span>
-                )}
-              </div>
-              <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
-                <ArrowUpRight className="w-3 h-3 stroke-[2.5]" /> <AnimatedNumber value={subscriptionMetrics[subTab].badge} />
-              </span>
+                  {subscriptionMetrics[subTab].unit && (
+                    <span className="text-sm font-bold text-slate-500 dark:text-slate-500">
+                      {subscriptionMetrics[subTab].unit}
+                    </span>
+                  )}
+                </div>
+              )}
+              {isLoading ? (
+                <div className="h-5 w-16 bg-slate-200/60 dark:bg-white/[0.05] rounded-full animate-pulse" />
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
+                  <ArrowUpRight className="w-3 h-3 stroke-[2.5]" /> <AnimatedNumber value={subscriptionMetrics[subTab].badge} />
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -328,12 +353,18 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   {current.stat1Label}
                 </span>
                 <div className="flex items-center space-x-2 mt-0.5">
-                  <span className="text-lg sm:text-xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
-                    <AnimatedNumber value={current.stat1Value} />
-                  </span>
-                  <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
-                    <AnimatedNumber value={current.stat1Badge} />
-                  </span>
+                  {isLoading ? (
+                    <div className="h-6 w-20 bg-slate-200/80 dark:bg-white/[0.08] rounded-md animate-pulse" />
+                  ) : (
+                    <>
+                      <span className="text-lg sm:text-xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
+                        <AnimatedNumber value={current.stat1Value} />
+                      </span>
+                      <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
+                        <AnimatedNumber value={current.stat1Badge} />
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -346,12 +377,18 @@ export default function MetricsOverview({ onOpenIngestModal }) {
                   {current.stat2Label}
                 </span>
                 <div className="flex items-center space-x-2 mt-0.5">
-                  <span className="text-lg sm:text-xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
-                    <AnimatedNumber value={current.stat2Value} />
-                  </span>
-                  <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
-                    <AnimatedNumber value={current.stat2Badge} />
-                  </span>
+                  {isLoading ? (
+                    <div className="h-6 w-20 bg-slate-200/80 dark:bg-white/[0.08] rounded-md animate-pulse" />
+                  ) : (
+                    <>
+                      <span className="text-lg sm:text-xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
+                        <AnimatedNumber value={current.stat2Value} />
+                      </span>
+                      <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-200 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-500/30">
+                        <AnimatedNumber value={current.stat2Badge} />
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -370,9 +407,13 @@ export default function MetricsOverview({ onOpenIngestModal }) {
 
           {/* Center: Hero Stat Box */}
           <div className="flex flex-col items-start lg:items-center justify-center lg:border-x lg:border-slate-100 dark:lg:border-white/10 lg:px-6 py-1">
-            <span className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
-              <AnimatedNumber value={current.centerValue} />
-            </span>
+            {isLoading ? (
+              <div className="h-8 w-28 bg-slate-200/80 dark:bg-white/[0.08] rounded-lg animate-pulse" />
+            ) : (
+              <span className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white font-urbanist tracking-tight">
+                <AnimatedNumber value={current.centerValue} />
+              </span>
+            )}
             <span className="text-[10.5px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mt-0.5">
               {current.centerLabel}
             </span>

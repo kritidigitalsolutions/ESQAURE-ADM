@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { User } from '../models/User.js';
 import { Genre } from '../models/Genre.js';
 import { Otp } from '../models/Otp.js';
+import { AccountDeletionRequest } from '../models/AccountDeletionRequest.js';
 import { OtpService } from '../utils/otpService.js';
 import { signJwt, signRefreshToken, decodeTokenForRefresh } from '../utils/jwt.js';
 import { ApiResponse } from '../utils/apiResponse.js';
@@ -225,7 +226,10 @@ export class AuthController {
         isVip: user.isVip || false,
         vipExpiresAt: user.vipExpiresAt || null,
         avatarUrl: resolveMediaUrl(user.avatarUrl || '', req),
-        status: user.status
+        status: user.status,
+        isDeletionRequested: Boolean(user.deletionRequest?.isRequested || user.status === 'PENDING_DELETION'),
+        deletionRequestedAt: user.deletionRequest?.requestedAt || null,
+        scheduledDeletionAt: user.deletionRequest?.scheduledDeletionAt || null
       };
 
       const message = isNewUser
@@ -519,6 +523,9 @@ export class AuthController {
             settings: user.settings,
             status: user.status,
             isProfileCompleted: user.isProfileCompleted,
+            isDeletionRequested: Boolean(user.deletionRequest?.isRequested || user.status === 'PENDING_DELETION'),
+            deletionRequestedAt: user.deletionRequest?.requestedAt || null,
+            scheduledDeletionAt: user.deletionRequest?.scheduledDeletionAt || null,
             createdAt: user.createdAt
           }
         },
@@ -547,44 +554,131 @@ export class AuthController {
   }
 
   /**
-   * Delete User Account / Profile
+   * Request User Account Deletion / Send Request to Admin
+   * Users do not have direct access to immediately delete their account.
+   * Clicking delete sends an account deletion request to admin with a 24-hour verification SLA.
    * DELETE /api/v1/auth/profile
    * POST /api/v1/auth/delete-account
+   * POST /api/v1/auth/delete-request
    * @access Private (Bearer JWT)
    */
   static async deleteAccount(req, res, next) {
     try {
       const user = req.user;
-      const { hardDelete = false } = req.query;
+      const reason = req.body?.reason || req.query?.reason || 'User requested account deletion via profile';
+      const feedback = req.body?.feedback || '';
 
-      // Clean up any remaining OTP records for this phone number
-      await Otp.deleteMany({ phoneNumber: user.phoneNumber });
-
-      if (hardDelete === 'true' || hardDelete === true) {
-        await User.findByIdAndDelete(user._id);
+      // Check if user already submitted a deletion request that is pending review
+      if (user.deletionRequest?.isRequested && user.deletionRequest?.status === 'PENDING') {
         return ApiResponse.success(
           res,
-          'Account permanently deleted.',
-          { deleted: true, hardDelete: true },
+          'Your account deletion request has already been submitted to the admin and is currently under verification. Your account will be deleted within 24 hours of your initial request.',
+          {
+            deletionRequested: true,
+            status: user.status,
+            requestedAt: user.deletionRequest.requestedAt,
+            scheduledDeletionAt: user.deletionRequest.scheduledDeletionAt,
+            notice: 'Your account will be verified and deleted within 24 hours by an administrator.'
+          },
           200
         );
       }
 
-      // Soft delete: set status to DELETED, reset profile, clear tokens & subscription
-      user.status = 'DELETED';
-      user.isProfileCompleted = false;
-      user.fcmTokens = [];
-      user.isVip = false;
-      user.vipExpiresAt = null;
+      const requestedAt = new Date();
+      const scheduledDeletionAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24-hour verification window
+
+      // Mark user profile as pending deletion
+      user.status = 'PENDING_DELETION';
+      user.deletionRequest = {
+        isRequested: true,
+        requestedAt,
+        scheduledDeletionAt,
+        reason,
+        status: 'PENDING',
+        adminNote: ''
+      };
       await user.save();
+
+      // Create or update formal AccountDeletionRequest record for admin verification
+      const displayName = user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || `User #${user.phoneNumber ? String(user.phoneNumber).slice(-4) : '1001'}`;
+      await AccountDeletionRequest.create({
+        userId: user._id,
+        userName: displayName,
+        phoneNumber: user.phoneNumber,
+        countryCode: user.countryCode || '+91',
+        email: user.email || '',
+        reason,
+        feedback,
+        status: 'PENDING',
+        requestedAt,
+        scheduledDeletionAt,
+        userSnapshot: {
+          name: displayName,
+          isVip: user.isVip,
+          plan: user.plan,
+          vipExpiresAt: user.vipExpiresAt,
+          totalWatchTime: user.totalWatchTime,
+          joinedAt: user.createdAt
+        }
+      });
 
       return ApiResponse.success(
         res,
-        'Account deleted successfully. We are sorry to see you go!',
+        'Your account deletion request has been sent to the administrator. After verifying your account details, an admin will permanently delete your account within 24 hours.',
         {
-          deleted: true,
-          status: 'DELETED',
-          userId: user._id
+          deletionRequested: true,
+          status: 'PENDING_DELETION',
+          requestedAt,
+          scheduledDeletionAt,
+          notice: 'Your account will be verified and deleted within 24 hours by an administrator.'
+        },
+        200
+      );
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  /**
+   * Cancel Pending Account Deletion Request
+   * POST /api/v1/auth/cancel-delete-request
+   * @access Private (Bearer JWT)
+   */
+  static async cancelDeleteRequest(req, res, next) {
+    try {
+      const user = req.user;
+
+      if (!user.deletionRequest?.isRequested && user.status !== 'PENDING_DELETION') {
+        return ApiResponse.success(
+          res,
+          'No pending deletion request found for your account.',
+          { deletionRequested: false, status: user.status },
+          200
+        );
+      }
+
+      user.status = 'ACTIVE';
+      user.deletionRequest = {
+        isRequested: false,
+        requestedAt: null,
+        scheduledDeletionAt: null,
+        reason: '',
+        status: 'NONE',
+        adminNote: 'Cancelled by user'
+      };
+      await user.save();
+
+      await AccountDeletionRequest.updateMany(
+        { userId: user._id, status: 'PENDING' },
+        { status: 'CANCELLED', adminNotes: 'Cancelled by user prior to admin verification' }
+      );
+
+      return ApiResponse.success(
+        res,
+        'Your account deletion request has been cancelled successfully. Your account remains active.',
+        {
+          deletionRequested: false,
+          status: 'ACTIVE'
         },
         200
       );
@@ -683,7 +777,10 @@ export class AuthController {
         isVip: user.isVip || false,
         vipExpiresAt: user.vipExpiresAt || null,
         avatarUrl: resolveMediaUrl(user.avatarUrl || '', req),
-        status: user.status
+        status: user.status,
+        isDeletionRequested: Boolean(user.deletionRequest?.isRequested || user.status === 'PENDING_DELETION'),
+        deletionRequestedAt: user.deletionRequest?.requestedAt || null,
+        scheduledDeletionAt: user.deletionRequest?.scheduledDeletionAt || null
       };
 
       return ApiResponse.success(

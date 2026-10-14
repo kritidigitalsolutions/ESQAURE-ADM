@@ -4,6 +4,7 @@ import { Drama } from '../models/Drama.js';
 import { Genre } from '../models/Genre.js';
 import { WatchHistory } from '../models/WatchHistory.js';
 import { User } from '../models/User.js';
+import { WatchHistoryController } from './watchHistory.controller.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import { AppError } from '../utils/appError.js';
 import { ERROR_CODES } from '../constants/errorCodes.js';
@@ -460,92 +461,31 @@ export class SavedSeriesController {
    * @access Private (Bearer JWT required)
    */
   static async getWatchHistory(req, res, next) {
+    return WatchHistoryController.getWatchHistory(req, res, next);
+  }
+
+  /**
+   * 8a. Get User Settings (Architecture.md Section 4.4)
+   * GET /api/v1/user/settings
+   * @access Private (Bearer JWT required)
+   */
+  static async getUserSettings(req, res, next) {
     try {
-      const userId = req.userId || req.user?._id;
-      if (!userId) {
-        throw new AppError('Authentication required.', 401, ERROR_CODES.AUTH_REQUIRED);
-      }
-
-      const page = Math.max(1, Number(req.query.page || 1));
-      const limit = Math.min(100, Math.max(1, Number(req.query.limit || 20)));
-      const skip = (page - 1) * limit;
-
-      const query = { userId };
-      const total = await WatchHistory.countDocuments(query);
-      const totalPages = Math.ceil(total / limit) || 1;
-
-      const historyRecords = await WatchHistory.find(query)
-        .populate({
-          path: 'dramaId',
-          select: 'title slug posterUrl bannerUrl rating totalEpisodes freeEpisodes isPaid genres status',
-          populate: { path: 'genres', select: 'name slug' }
-        })
-        .populate('episodeId', 'seasonNumber episodeNumber title durationSeconds streamUrl')
-        .sort({ lastWatchedAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean();
-
-      const items = historyRecords
-        .filter((rec) => rec.dramaId && rec.dramaId.status !== 'ARCHIVED')
-        .map((rec) => {
-          const drama = rec.dramaId;
-          const episode = rec.episodeId;
-          const genreNames = Array.isArray(drama.genres)
-            ? drama.genres.map((g) => (typeof g === 'object' && g.name ? g.name : String(g))).filter(Boolean)
-            : [];
-
-          return {
-            historyId: rec._id.toString(),
-            lastWatchedAt: rec.lastWatchedAt,
-            drama: {
-              id: drama._id.toString(),
-              title: drama.title,
-              slug: drama.slug,
-              posterUrl: drama.posterUrl,
-              bannerUrl: drama.bannerUrl || '',
-              rating: drama.rating || 4.8,
-              totalEpisodes: drama.totalEpisodes || 0,
-              genres: genreNames,
-              genreDisplay: genreNames.join(' / ') || 'Drama'
-            },
-            episode: episode
-              ? {
-                  id: episode._id.toString(),
-                  episodeNumber: rec.episodeNumber || episode.episodeNumber,
-                  seasonNumber: rec.seasonNumber || episode.seasonNumber || 1,
-                  title: episode.title || `Episode ${rec.episodeNumber}`,
-                  durationSeconds: rec.durationSeconds || episode.durationSeconds || 135,
-                  formattedDuration: formatDuration(rec.durationSeconds || episode.durationSeconds || 135)
-                }
-              : {
-                  episodeNumber: rec.episodeNumber,
-                  seasonNumber: rec.seasonNumber || 1,
-                  title: `Episode ${rec.episodeNumber}`,
-                  durationSeconds: rec.durationSeconds,
-                  formattedDuration: formatDuration(rec.durationSeconds)
-                },
-            playback: {
-              watchedSeconds: rec.watchedSeconds || 0,
-              formattedWatched: formatDuration(rec.watchedSeconds || 0),
-              durationSeconds: rec.durationSeconds || 135,
-              formattedDuration: formatDuration(rec.durationSeconds || 135),
-              progressPercentage: rec.progressPercentage || 0,
-              isCompleted: Boolean(rec.isCompleted)
-            }
-          };
-        });
-
-      return ApiResponse.success(res, 'Watch history retrieved successfully', {
-        history: items,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages,
-          hasNextPage: page < totalPages,
-          hasPrevPage: page > 1
-        }
+      const user = req.user;
+      return ApiResponse.success(res, 'User settings retrieved successfully', {
+        settings: user.settings || {
+          autoplayNext: true,
+          videoQuality: 'Auto',
+          subtitlesLanguage: 'Hindi',
+          playbackSpeed: '1x',
+          appLanguage: 'English',
+          notifications: {
+            newEpisodes: true,
+            newReleases: true,
+            recommendations: false
+          }
+        },
+        preferredContentLanguages: user.preferredContentLanguages || ['Hindi', 'English']
       });
     } catch (error) {
       return next(error);
@@ -553,7 +493,7 @@ export class SavedSeriesController {
   }
 
   /**
-   * 8. Update User Settings (Architecture.md Section 4.4)
+   * 8b. Update User Settings (Architecture.md Section 4.4)
    * PUT /api/v1/user/settings
    * PATCH /api/v1/user/settings
    * Body: { autoplayNext, videoQuality, subtitlesLanguage, playbackSpeed, appLanguage, notifications }

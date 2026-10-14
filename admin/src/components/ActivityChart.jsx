@@ -139,6 +139,7 @@ export default function ActivityChart({ onNavigate }) {
           total={totalFormatted}
           percent={sumVal > 0 ? '+100%' : '0%'}
           trend="up"
+          loading={isLoading}
           accent="amber"
           period={timeRange}
           periodOptions={periodOptions}
@@ -188,12 +189,20 @@ export default function ActivityChart({ onNavigate }) {
                 </span>
               </div>
               <div className="mt-1 flex items-baseline justify-between">
-                <span className="text-2xl sm:text-[26px] font-black text-slate-950 dark:text-white font-urbanist tracking-tight block">
-                  ₹{subOverview?.totalMrr || '0'}
-                </span>
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                  {subOverview?.activeSubscribers ?? 0} active
-                </span>
+                {isLoading ? (
+                  <div className="h-8 w-28 bg-slate-200/80 dark:bg-white/[0.08] rounded-lg animate-pulse" />
+                ) : (
+                  <span className="text-2xl sm:text-[26px] font-black text-slate-950 dark:text-white font-urbanist tracking-tight block">
+                    ₹{subOverview?.totalMrr || '0'}
+                  </span>
+                )}
+                {isLoading ? (
+                  <div className="h-4 w-16 bg-slate-200/60 dark:bg-white/[0.05] rounded animate-pulse" />
+                ) : (
+                  <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                    {subOverview?.activeSubscribers ?? 0} active
+                  </span>
+                )}
               </div>
             </div>
 
@@ -203,37 +212,52 @@ export default function ActivityChart({ onNavigate }) {
                 ACTIVE PLAN TIERS
               </span>
 
-              {/* Tier 1: Paid Plans */}
-              {subPlans.slice(0, 2).map((plan) => (
-                <div key={plan._id || plan.id || plan.name} className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
-                  <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist truncate max-w-[150px]">
-                    {plan.name}
-                  </span>
-                  <div className="text-right flex items-baseline space-x-1">
-                    <span className="text-slate-950 dark:text-white font-black text-sm font-urbanist tracking-tight">
-                      ₹{plan.price}
-                    </span>
-                    <span className="text-slate-400 dark:text-slate-500 font-bold text-[10.5px]">
-                      ({plan.durationMonths || Math.max(1, Math.round((plan.durationDays || 30) / 30))} mo)
-                    </span>
+              {isLoading ? (
+                <>
+                  <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 flex items-center justify-between animate-pulse">
+                    <div className="h-3.5 w-24 bg-slate-200/80 dark:bg-white/[0.08] rounded" />
+                    <div className="h-4 w-16 bg-slate-200/80 dark:bg-white/[0.08] rounded" />
                   </div>
-                </div>
-              ))}
+                  <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 flex items-center justify-between animate-pulse">
+                    <div className="h-3.5 w-28 bg-slate-200/80 dark:bg-white/[0.08] rounded" />
+                    <div className="h-4 w-14 bg-slate-200/80 dark:bg-white/[0.08] rounded" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Tier 1: Paid Plans */}
+                  {subPlans.slice(0, 2).map((plan) => (
+                    <div key={plan._id || plan.id || plan.name} className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
+                      <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist truncate max-w-[150px]">
+                        {plan.name}
+                      </span>
+                      <div className="text-right flex items-baseline space-x-1">
+                        <span className="text-slate-950 dark:text-white font-black text-sm font-urbanist tracking-tight">
+                          ₹{plan.price}
+                        </span>
+                        <span className="text-slate-400 dark:text-slate-500 font-bold text-[10.5px]">
+                          ({plan.durationMonths || Math.max(1, Math.round((plan.durationDays || 30) / 30))} mo)
+                        </span>
+                      </div>
+                    </div>
+                  ))}
 
-              {/* Tier 2: 7-Day Free Trial AutoPay */}
-              <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
-                <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist">
-                  7-Day Trial Mandates
-                </span>
-                <div className="text-right flex items-baseline space-x-1">
-                  <span className="text-slate-950 dark:text-white font-black text-sm font-urbanist tracking-tight">
-                    {subOverview?.activeTrialUsers ?? 0}
-                  </span>
-                  <span className="text-slate-400 dark:text-slate-500 font-bold text-[10.5px]">
-                    active trials
-                  </span>
-                </div>
-              </div>
+                  {/* Tier 2: 7-Day Free Trial AutoPay */}
+                  <div className="p-2.5 rounded-xl bg-slate-50/80 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 transition-all shadow-2xs flex items-center justify-between">
+                    <span className="font-semibold text-slate-600 dark:text-slate-400 text-[10.5px] font-urbanist">
+                      7-Day Trial Mandates
+                    </span>
+                    <div className="text-right flex items-baseline space-x-1">
+                      <span className="text-slate-950 dark:text-white font-black text-sm font-urbanist tracking-tight">
+                        {subOverview?.activeTrialUsers ?? 0}
+                      </span>
+                      <span className="text-slate-400 dark:text-slate-500 font-bold text-[10.5px]">
+                        active trials
+                      </span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -241,7 +265,7 @@ export default function ActivityChart({ onNavigate }) {
         {/* Footer Link */}
         <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
           <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
-            Churn Rate: {subOverview?.churnRate || '0.0%'}
+            {isLoading ? 'Calculating churn...' : `Churn Rate: ${subOverview?.churnRate || '0.0%'}`}
           </span>
           <button
             type="button"

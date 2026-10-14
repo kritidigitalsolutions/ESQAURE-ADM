@@ -97,5 +97,19 @@ export const dramaService = {
       method: 'POST',
       body: JSON.stringify({ episodes, freeEpisodes })
     });
+  },
+
+  /**
+   * Reconcile drama view counts (synchronize drama view count from episodes)
+   */
+  async reconcileViews(id) {
+    return await request(`/${id}/reconcile-views`, { method: 'POST' });
+  },
+
+  /**
+   * Fetch real view analytics timeseries and unique viewers
+   */
+  async getViewAnalytics(id, days = 30) {
+    return await request(`/${id}/view-analytics?days=${days}`, { method: 'GET' });
   }
 };

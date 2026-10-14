@@ -156,4 +156,35 @@ router.post(
   PlayerController.recordProgress
 );
 
+/**
+ * Record Real View Event
+ * POST /api/v1/dramas/:dramaId/view
+ */
+router.post(
+  '/:dramaId/view',
+  optionalAuthenticate,
+  validate(playerValidation.recordView),
+  PlayerController.recordView
+);
+
+/**
+ * View Analytics Timeseries
+ * GET /api/v1/dramas/:dramaId/view-analytics
+ */
+router.get(
+  '/:dramaId/view-analytics',
+  optionalAuthenticate,
+  PlayerController.getViewAnalytics
+);
+
+/**
+ * Admin: Reconcile Drama View Counts
+ * POST /api/v1/dramas/:id/reconcile-views
+ */
+router.post(
+  '/:id/reconcile-views',
+  verifyAdmin,
+  PlayerController.reconcileDramaViews
+);
+
 export default router;

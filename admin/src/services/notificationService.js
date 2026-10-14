@@ -98,14 +98,34 @@ export const notificationService = {
       });
     }
 
-    // 2. Incoming New User Signups / Registrations (Came to Admin)
+    // 2. Incoming New User Signups / Registrations & Account Deletion Requests (Came to Admin)
     if (usersRes.status === 'fulfilled' && usersRes.value?.users) {
       usersRes.value.users.forEach((u) => {
-        const id = `usr-${u.id || u._id}`;
-        const displayName = u.name || `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.phoneNumber || 'New Viewer';
+        const displayName = u.name || `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.phoneNumber || 'Viewer';
         const contact = u.email || (u.phoneNumber ? `${u.countryCode || '+91'} ${u.phoneNumber}` : '');
         const tier = u.isVip ? 'VIP Subscriber' : 'Standard Viewer';
 
+        // High-Priority Alert: Account Deletion Request
+        if (u.isDeletionRequested || u.status === 'PENDING_DELETION' || u.deletionRequest?.isRequested) {
+          const delId = `del-${u.id || u._id}`;
+          const reasonText = u.deletionRequest?.reason ? ` (Reason: "${u.deletionRequest.reason}")` : '';
+          items.push({
+            id: delId,
+            rawId: u.id || u._id,
+            category: 'USER',
+            type: 'DELETION_REQUEST',
+            title: `Account Deletion Request: ${displayName}`,
+            message: `${displayName} requested account deletion${reasonText}. Admin verification required before deletion within 24 hours.`,
+            user: displayName,
+            target: 'Deletion SLA (24h)',
+            priority: 'High',
+            createdAt: u.deletionRequestedAt || u.deletionRequest?.requestedAt || u.updatedAt || u.createdAt,
+            targetTab: 'users',
+            actionLabel: 'Verify & Delete'
+          });
+        }
+
+        const id = `usr-${u.id || u._id}`;
         items.push({
           id,
           rawId: u.id || u._id,

@@ -2,11 +2,21 @@ import { User } from '../models/User.js';
 import { Subscription } from '../models/Subscription.js';
 import { SubscriptionPlan } from '../models/SubscriptionPlan.js';
 
+let lastSyncTimestamp = 0;
+const SYNC_COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes throttle
+
 /**
  * Utility to synchronize User and Subscription collections and purge orphaned records.
  * Ensures 100% real-time data consistency across User Directory, Subscribers page, and Dashboard metrics.
  */
-export async function syncAndCleanSubscriptionData() {
+export async function syncAndCleanSubscriptionData(force = false) {
+  const nowMs = Date.now();
+  if (!force && nowMs - lastSyncTimestamp < SYNC_COOLDOWN_MS) {
+    // Skip expensive scan if synchronized recently
+    return;
+  }
+  lastSyncTimestamp = nowMs;
+
   try {
     // 1. Fetch all active (non-deleted) users
     const activeUsers = await User.find({ status: { $ne: 'DELETED' } }).select('_id isVip vipExpiresAt plan currentSubscriptionId');

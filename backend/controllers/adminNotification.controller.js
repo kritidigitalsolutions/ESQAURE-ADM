@@ -87,6 +87,11 @@ export const broadcastPush = async (req, res, next) => {
       userQuery.updatedAt = { $lte: new Date(Date.now() - 7 * 86400000) };
     }
 
+    // Respect user notification preferences: exclude viewers who turned off new releases
+    if (targetAudience !== 'Specific User') {
+      userQuery['settings.notifications.newReleases'] = { $ne: false };
+    }
+
     const targetUsers = await User.find(userQuery).select('_id fcmTokens');
     const allTokens = [];
     targetUsers.forEach((u) => {

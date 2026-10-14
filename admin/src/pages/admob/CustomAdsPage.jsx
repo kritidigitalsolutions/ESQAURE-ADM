@@ -148,11 +148,27 @@ export default function CustomAdsPage({ onNavigate }) {
   const loadData = useCallback(async (showIndicator = false) => {
     if (showIndicator) setIsRefreshing(true);
     try {
-      const res = await adService.getCustomAds({ limit: 100 });
+      const [res, rotRes] = await Promise.all([
+        adService.getCustomAds({ limit: 100 }),
+        adService.getRotationSettings().catch(() => null)
+      ]);
       if (res?.success) {
         setAds(res.data.ads || []);
         if (res.data.stats) setStats(res.data.stats);
         if (showIndicator) showToast('Campaign inventory refreshed', 'success');
+      }
+      if (rotRes?.success && rotRes.data?.rotationSettings) {
+        const r = rotRes.data.rotationSettings;
+        const policyLabel = r.policy === 'PRIORITY_WEIGHTED'
+          ? 'Weighted Priority (Rank Based)'
+          : r.policy === 'CTR_OPTIMIZED'
+          ? 'Sequential Round Robin'
+          : 'Equal Random Rotation (Recommended)';
+        setRotationSettings({
+          enabled: r.enabled ?? true,
+          policy: policyLabel,
+          preventConsecutive: r.preventConsecutive ?? true
+        });
       }
     } catch (err) {
       console.warn('Failed to load custom ads:', err);
@@ -176,9 +192,20 @@ export default function CustomAdsPage({ onNavigate }) {
     try {
       localStorage.setItem('e2_custom_ads_rotation', JSON.stringify(rotationSettings));
       try {
-        await adService.updateSettings({
-          customAdsEnabled: rotationSettings.enabled,
-        });
+        const policyCode = rotationSettings.policy.includes('Weighted')
+          ? 'PRIORITY_WEIGHTED'
+          : rotationSettings.policy.includes('Round Robin')
+          ? 'CTR_OPTIMIZED'
+          : 'EQUAL_RANDOM';
+
+        await Promise.all([
+          adService.updateSettings({ customAdsEnabled: rotationSettings.enabled }),
+          adService.updateRotationSettings({
+            enabled: rotationSettings.enabled,
+            policy: policyCode,
+            preventConsecutive: rotationSettings.preventConsecutive
+          })
+        ]);
       } catch (e) {
         // Local persist fallback
       }

@@ -89,15 +89,17 @@ const SUBSCRIPTION_PLANS = [
 
 export default function UsersPage({ onNavigate }) {
   const [users, setUsers] = useState([]);
-  const [serverCounts, setServerCounts] = useState({ all: 0, vip: 0, free: 0, suspended: 0 });
+  const [serverCounts, setServerCounts] = useState({ all: 0, vip: 0, free: 0, suspended: 0, deletionRequests: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [apiError, setApiError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('ALL'); // 'ALL' | 'SUBSCRIBED' | 'FREE' | 'SUSPENDED'
+  const [filterType, setFilterType] = useState('ALL'); // 'ALL' | 'SUBSCRIBED' | 'FREE' | 'SUSPENDED' | 'DELETION_REQUESTS'
   const [overrideUser, setOverrideUser] = useState(null);
   const [viewUser, setViewUser] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [verifyDeleteUser, setVerifyDeleteUser] = useState(null);
+  const [isProcessingAction, setIsProcessingAction] = useState(false);
   const [editForm, setEditForm] = useState({ firstName: '', lastName: '', phone: '', email: '', avatarUrl: '' });
   const [toast, setToast] = useState({ show: false, text: '' });
   const toastTimeoutRef = useRef(null);
@@ -150,7 +152,7 @@ export default function UsersPage({ onNavigate }) {
   }, []);
 
   useEffect(() => {
-    if (overrideUser || viewUser || userToDelete) {
+    if (overrideUser || viewUser || userToDelete || verifyDeleteUser) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -158,7 +160,8 @@ export default function UsersPage({ onNavigate }) {
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        if (userToDelete) setUserToDelete(null);
+        if (verifyDeleteUser) setVerifyDeleteUser(null);
+        else if (userToDelete) setUserToDelete(null);
         else if (viewUser) setViewUser(null);
         else if (overrideUser) setOverrideUser(null);
       }
@@ -169,7 +172,7 @@ export default function UsersPage({ onNavigate }) {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [overrideUser, viewUser, userToDelete]);
+  }, [overrideUser, viewUser, userToDelete, verifyDeleteUser]);
 
   // Helper to remove parenthetical prices like (₹499) from plan display labels
   const cleanPlanName = (planStr) => {
@@ -305,13 +308,15 @@ export default function UsersPage({ onNavigate }) {
 
       const isVip = Boolean(u.isVip);
       const isSuspended = u.status === 'SUSPENDED';
-      const isFree = !isVip && !isSuspended;
+      const isDeletionRequested = Boolean(u.isDeletionRequested || u.status === 'PENDING_DELETION' || u.deletionRequest?.isRequested);
+      const isFree = !isVip && !isSuspended && !isDeletionRequested;
 
       const matchesFilter =
         filterType === 'ALL' ||
         (filterType === 'SUBSCRIBED' && isVip) ||
         (filterType === 'FREE' && isFree) ||
-        (filterType === 'SUSPENDED' && isSuspended);
+        (filterType === 'SUSPENDED' && isSuspended) ||
+        (filterType === 'DELETION_REQUESTS' && isDeletionRequested);
 
       return matchesSearch && matchesFilter;
     });
@@ -322,8 +327,9 @@ export default function UsersPage({ onNavigate }) {
     return {
       all: serverCounts.all || users.length,
       vip: serverCounts.vip ?? users.filter((u) => u.isVip).length,
-      free: serverCounts.free ?? users.filter((u) => !u.isVip && u.status !== 'SUSPENDED').length,
+      free: serverCounts.free ?? users.filter((u) => !u.isVip && u.status !== 'SUSPENDED' && !u.isDeletionRequested && u.status !== 'PENDING_DELETION').length,
       suspended: serverCounts.suspended ?? users.filter((u) => u.status === 'SUSPENDED').length,
+      deletionRequests: serverCounts.deletionRequests ?? users.filter((u) => u.isDeletionRequested || u.status === 'PENDING_DELETION' || u.deletionRequest?.isRequested).length,
       activeToday: serverCounts.activeToday ?? users.filter((u) => u.lastActive?.includes('min') || u.lastActive?.includes('now') || u.lastActive?.includes('hours')).length,
       avgWatchTime: serverCounts.avgWatchTime || (users.length > 0 ? (users.reduce((acc, u) => acc + (parseFloat(u.totalWatchTime) || 0), 0) / users.length).toFixed(1) : '0.0'),
       peakWatchTime: serverCounts.peakWatchTime || (users.length > 0 ? Math.max(...users.map((u) => parseFloat(u.totalWatchTime) || 0)).toFixed(1) : '0.0'),
@@ -449,13 +455,78 @@ export default function UsersPage({ onNavigate }) {
     showToast(`Copied ${label} to clipboard`);
   };
 
-  // Trigger custom delete confirmation dialog
-  const handleDeleteUser = (userOrId, optionalName) => {
+  // Open verification dialog for account deletion requests
+  const handleOpenVerifyDelete = (userOrId, optionalName) => {
     if (typeof userOrId === 'object' && userOrId !== null) {
-      setUserToDelete(userOrId);
+      setVerifyDeleteUser(userOrId);
     } else {
       const found = users.find((u) => u.id === userOrId);
-      setUserToDelete(found || { id: userOrId, name: optionalName || 'User' });
+      setVerifyDeleteUser(found || { id: userOrId, name: optionalName || 'User' });
+    }
+  };
+
+  // Perform confirmed verification & permanent user account deletion
+  const handleConfirmVerifyDelete = async () => {
+    if (!verifyDeleteUser) return;
+    const { id, name } = verifyDeleteUser;
+    setIsProcessingAction(true);
+    try {
+      await userService.verifyAndDeleteUser(id, {
+        adminNotes: 'Verified and permanently deleted by administrator after reviewing user profile & entitlements'
+      });
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+      showToast(`User "${name || 'User'}" verified and permanently deleted.`);
+      if (viewUser && viewUser.id === id) setViewUser(null);
+      if (overrideUser && overrideUser.id === id) setOverrideUser(null);
+      setVerifyDeleteUser(null);
+      loadUsers(true);
+    } catch (err) {
+      console.error('Failed to verify and delete user:', err);
+      showToast(err.message || 'Failed to delete user from database');
+    } finally {
+      setIsProcessingAction(false);
+    }
+  };
+
+  // Reject / Dismiss account deletion request and restore account to active
+  const handleRejectDeletion = async (userOrId) => {
+    const target = typeof userOrId === 'object' && userOrId !== null ? userOrId : users.find((u) => u.id === userOrId);
+    if (!target) return;
+    setIsProcessingAction(true);
+    try {
+      const res = await userService.rejectDeletionRequest(target.id, {
+        adminNote: 'Admin rejected deletion request after verification'
+      });
+      const updatedUser = res?.user || {
+        ...target,
+        status: 'ACTIVE',
+        isDeletionRequested: false,
+        deletionRequest: { isRequested: false, status: 'REJECTED' }
+      };
+      setUsers((prev) => prev.map((u) => (u.id === target.id ? { ...u, ...updatedUser } : u)));
+      if (viewUser && viewUser.id === target.id) setViewUser((prev) => ({ ...prev, ...updatedUser }));
+      if (overrideUser && overrideUser.id === target.id) setOverrideUser((prev) => ({ ...prev, ...updatedUser }));
+      showToast(`Account deletion request rejected. User restored to Active.`);
+      setVerifyDeleteUser(null);
+      loadUsers(true);
+    } catch (err) {
+      console.error('Failed to reject deletion request:', err);
+      showToast(err.message || 'Failed to update user in database');
+    } finally {
+      setIsProcessingAction(false);
+    }
+  };
+
+  // Trigger custom delete confirmation dialog
+  const handleDeleteUser = (userOrId, optionalName) => {
+    let target = typeof userOrId === 'object' && userOrId !== null ? userOrId : users.find((u) => u.id === userOrId);
+    if (!target) target = { id: userOrId, name: optionalName || 'User' };
+
+    // If user has a pending deletion request, route to the verification dialog
+    if (target.isDeletionRequested || target.status === 'PENDING_DELETION' || target.deletionRequest?.isRequested) {
+      setVerifyDeleteUser(target);
+    } else {
+      setUserToDelete(target);
     }
   };
 
@@ -735,6 +806,11 @@ export default function UsersPage({ onNavigate }) {
             { id: 'SUBSCRIBED', label: `Subscribed (${counts.vip})` },
             { id: 'FREE', label: `Free Tier (${counts.free})` },
             { id: 'SUSPENDED', label: `Suspended (${counts.suspended})` },
+            {
+              id: 'DELETION_REQUESTS',
+              label: `Deletion Requests (${counts.deletionRequests || 0})`,
+              isUrgent: (counts.deletionRequests || 0) > 0,
+            },
           ].map((tab) => {
             const isSelected = filterType === tab.id;
             return (
@@ -742,13 +818,20 @@ export default function UsersPage({ onNavigate }) {
                 key={tab.id}
                 type="button"
                 onClick={() => setFilterType(tab.id)}
-                className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center space-x-1.5 ${
                   isSelected
-                    ? 'bg-white dark:bg-[#24242E] text-slate-950 dark:text-white shadow-2xs'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? tab.id === 'DELETION_REQUESTS'
+                      ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
+                      : 'bg-white dark:bg-[#24242E] text-slate-950 dark:text-white shadow-2xs'
+                    : tab.isUrgent
+                      ? 'text-amber-600 dark:text-amber-400 font-extrabold hover:bg-amber-500/10'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                {tab.label}
+                {tab.isUrgent && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                )}
+                <span>{tab.label}</span>
               </button>
             );
           })}
@@ -829,6 +912,41 @@ export default function UsersPage({ onNavigate }) {
 
       </div>
 
+      {/* Account Deletion Request Alert Notice Banner */}
+      {counts.deletionRequests > 0 && (
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-400/[0.08] border border-amber-500/25 dark:border-amber-400/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-200">
+          <div className="flex items-center space-x-3">
+            <div className="w-9 h-9 rounded-xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shrink-0 shadow-xs">
+              <AlertCircle className="w-5 h-5 text-slate-950 stroke-[2.2]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black text-slate-950 dark:text-white">
+                  {counts.deletionRequests} Account Deletion Request{counts.deletionRequests > 1 ? 's' : ''} Pending Verification
+                </span>
+                <span className="px-1.5 py-0.2 rounded-full text-[9px] font-extrabold bg-amber-400/20 text-amber-900 dark:text-amber-200 border border-amber-400/30">
+                  24h SLA
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5">
+                Users have submitted account deletion requests that require administrative verification before permanent deletion within 24 hours.
+              </p>
+            </div>
+          </div>
+
+          {filterType !== 'DELETION_REQUESTS' && (
+            <button
+              type="button"
+              onClick={() => setFilterType('DELETION_REQUESTS')}
+              className="px-3 py-1.5 rounded-xl bg-[#FEF08A] hover:bg-yellow-300 text-slate-950 font-bold text-xs transition-all shadow-xs shrink-0 cursor-pointer flex items-center space-x-1.5"
+            >
+              <span>Review Requests</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Users Registry Table - Clean, Small & Minimal */}
       <div className="bg-white dark:bg-[#121216] rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
@@ -908,12 +1026,17 @@ export default function UsersPage({ onNavigate }) {
                 filteredUsers.map((user, idx) => {
                   const isVip = user.isVip;
                   const isActive = user.status === 'ACTIVE';
+                  const isDeletionPending = Boolean(user.isDeletionRequested || user.status === 'PENDING_DELETION' || user.deletionRequest?.isRequested);
                   const displayName = getUserDisplayName(user);
 
                   return (
                     <tr
                       key={user.id}
-                      className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors group"
+                      className={`transition-colors group ${
+                        isDeletionPending
+                          ? 'bg-amber-500/[0.04] dark:bg-amber-400/[0.04] border-l-4 border-l-amber-400 hover:bg-amber-500/[0.08]'
+                          : 'hover:bg-slate-50/70 dark:hover:bg-white/[0.03]'
+                      }`}
                     >
                       {/* Index Serial No. */}
                       <td className="py-2 px-3 text-center align-middle font-mono font-medium text-[11px] text-slate-400 select-none">
@@ -1005,54 +1128,90 @@ export default function UsersPage({ onNavigate }) {
 
                       {/* Status - Fixed-width label for perfect vertical switch alignment */}
                       <td className="py-2 px-3 align-middle text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <div className="inline-flex items-center justify-center gap-2">
-                          <ToggleSwitch
-                            checked={isActive}
-                            onChange={() => handleToggleUserStatus(user.id)}
-                            size="sm"
-                            title={isActive ? 'Active (Click to suspend)' : 'Suspended (Click to activate)'}
-                          />
-                          <span className={`text-[10px] font-bold w-16 text-left ${isActive ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
-                            {isActive ? 'Active' : 'Suspended'}
-                          </span>
-                        </div>
+                        {isDeletionPending ? (
+                          <div className="inline-flex flex-col items-center">
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                              <span>Deletion Requested</span>
+                            </span>
+                            <span className="text-[9px] text-slate-400 mt-0.5 font-medium">
+                              24h Review SLA
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center justify-center gap-2">
+                            <ToggleSwitch
+                              checked={isActive}
+                              onChange={() => handleToggleUserStatus(user.id)}
+                              size="sm"
+                              title={isActive ? 'Active (Click to suspend)' : 'Suspended (Click to activate)'}
+                            />
+                            <span className={`text-[10px] font-bold w-16 text-left ${isActive ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
+                              {isActive ? 'Active' : 'Suspended'}
+                            </span>
+                          </div>
+                        )}
                       </td>
 
                       {/* Actions */}
                       <td className="py-2 px-3 align-middle text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-0.5">
-                          <button
-                            type="button"
-                            title="View Profile"
-                            onClick={() => setViewUser(user)}
-                            className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            title="Edit User & Access"
-                            onClick={() => handleOpenEditUser(user)}
-                            className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            title={isActive ? 'Suspend User' : 'Unblock User'}
-                            onClick={() => handleToggleUserStatus(user.id)}
-                            className="p-1 rounded-md text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-pointer"
-                          >
-                            <Ban className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            title="Delete User"
-                            onClick={() => handleDeleteUser(user)}
-                            className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                        <div className="flex items-center justify-end gap-1">
+                          {isDeletionPending ? (
+                            <>
+                              <button
+                                type="button"
+                                title="View Profile"
+                                onClick={() => setViewUser(user)}
+                                className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                title="Verify & Delete Account"
+                                onClick={() => handleOpenVerifyDelete(user)}
+                                className="px-2.5 py-1 bg-[#FEF08A] hover:bg-yellow-300 text-slate-950 font-bold text-xs rounded-lg transition-all shadow-2xs flex items-center space-x-1 cursor-pointer active:scale-95"
+                              >
+                                <ShieldCheck className="w-3.5 h-3.5 stroke-[2.2]" />
+                                <span>Verify & Delete</span>
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                title="View Profile"
+                                onClick={() => setViewUser(user)}
+                                className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                title="Edit User & Access"
+                                onClick={() => handleOpenEditUser(user)}
+                                className="p-1 rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                title={isActive ? 'Suspend User' : 'Unblock User'}
+                                onClick={() => handleToggleUserStatus(user.id)}
+                                className="p-1 rounded-md text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-pointer"
+                              >
+                                <Ban className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                title="Delete User"
+                                onClick={() => handleDeleteUser(user)}
+                                className="p-1 rounded-md text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -1491,6 +1650,43 @@ export default function UsersPage({ onNavigate }) {
                 </div>
               </div>
 
+              {/* Account Deletion Request Banner if active */}
+              {(viewUser.isDeletionRequested || viewUser.status === 'PENDING_DELETION' || viewUser.deletionRequest?.isRequested) && (
+                <div className="p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-400/[0.08] border border-amber-500/30 dark:border-amber-400/25 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                      <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      Account Deletion Requested
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-800 dark:text-amber-300">
+                      24h SLA Review
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">
+                    Reason: "{viewUser.deletionReason || viewUser.deletionRequest?.reason || 'User requested account deletion via profile'}"
+                  </p>
+                  <div className="pt-1 flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={isProcessingAction}
+                      onClick={() => handleRejectDeletion(viewUser)}
+                      className="flex-1 py-1.5 px-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#18181E] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-slate-700 dark:text-slate-300 font-bold text-xs transition-all cursor-pointer shadow-2xs text-center"
+                    >
+                      Reject Request
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isProcessingAction}
+                      onClick={() => handleOpenVerifyDelete(viewUser)}
+                      className="flex-1 py-1.5 px-2.5 rounded-xl bg-[#FEF08A] hover:bg-yellow-300 text-slate-950 font-bold text-xs transition-all shadow-xs cursor-pointer flex items-center justify-center space-x-1"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>Verify & Delete</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Polished Activity Status Card */}
               <div className="p-3 sm:p-3.5 rounded-2xl bg-slate-50/90 dark:bg-[#18181E] border border-slate-100 dark:border-white/10 flex items-center justify-between gap-3 group">
                 <div className="flex items-center space-x-3 min-w-0">
@@ -1780,6 +1976,170 @@ export default function UsersPage({ onNavigate }) {
                 >
                   <Trash2 className="w-3.5 h-3.5 stroke-[2.2]" />
                   <span>Remove User</span>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Custom Verify & Review Account Deletion Modal Card */}
+      {verifyDeleteUser && createPortal(
+        <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4">
+          {/* Backdrop with smooth blur */}
+          <div
+            onClick={() => setVerifyDeleteUser(null)}
+            className="fixed inset-0 bg-slate-950/60 dark:bg-black/75 backdrop-blur-xs transition-opacity animate-in fade-in duration-200 cursor-pointer"
+          />
+
+          {/* Modal Container */}
+          <div className="relative w-full max-w-lg bg-white dark:bg-[#24242E] rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] border border-slate-200/90 dark:border-white/15 z-10 animate-in fade-in zoom-in-95 duration-200 font-urbanist overflow-hidden">
+
+            <div className="p-6 sm:p-7 space-y-4">
+
+              {/* Header: Icon Badge + Title + Close Button */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3.5">
+                  <div className="w-11 h-11 rounded-2xl bg-[#FEF08A] text-slate-950 flex items-center justify-center shadow-xs">
+                    <ShieldCheck className="w-6 h-6 stroke-[2.2]" />
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black text-slate-950 dark:text-white tracking-tight leading-tight">
+                      Verify & Review Account Deletion
+                    </h3>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                      24-hour administrative review & verification SLA
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setVerifyDeleteUser(null)}
+                  className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/[0.06] border border-transparent dark:border-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                  title="Close"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* SLA & User Request Details Banner */}
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-400/[0.08] border border-amber-500/25 dark:border-amber-400/20 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                    <span className="text-xs font-black text-amber-950 dark:text-amber-200">
+                      User Deletion Request Received
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#FEF08A] text-slate-950 shadow-2xs">
+                    24-Hour SLA
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong>User Reason:</strong> "{verifyDeleteUser.deletionReason || verifyDeleteUser.deletionRequest?.reason || 'User requested account deletion via profile'}"
+                </p>
+
+                {verifyDeleteUser.deletionRequestedAt && (
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                    Requested on: {new Date(verifyDeleteUser.deletionRequestedAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                )}
+              </div>
+
+              {/* Verification Checklist Card */}
+              <div className="p-4 rounded-2xl bg-slate-50/90 dark:bg-[#1E1E26] border border-slate-200/80 dark:border-white/10 space-y-3.5">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                  Account Verification Summary
+                </span>
+
+                {/* Identity Row */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-[#FEF08A] text-slate-950 font-black text-base flex items-center justify-center shadow-xs border border-amber-300/80 shrink-0">
+                      {verifyDeleteUser.name ? verifyDeleteUser.name.charAt(0) : 'U'}
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-sm font-black text-slate-950 dark:text-white truncate block">
+                        {verifyDeleteUser.name}
+                      </span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block truncate mt-0.5">
+                        {verifyDeleteUser.email || verifyDeleteUser.phone || 'Registered User'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <Badge variant="deletion-requested" size="xs">
+                    Pending Deletion
+                  </Badge>
+                </div>
+
+                {/* Subscription Verification Row */}
+                <div className="pt-2.5 border-t border-slate-200/60 dark:border-slate-800/60 grid grid-cols-2 gap-2.5 text-[11px]">
+                  <div>
+                    <span className="text-[10px] text-slate-400 block font-medium">Access Tier</span>
+                    <span className="font-extrabold text-slate-950 dark:text-white block mt-0.5">
+                      {verifyDeleteUser.plan || (verifyDeleteUser.isVip ? 'VIP Pass' : 'Free Tier')}
+                    </span>
+                    {verifyDeleteUser.isVip && (
+                      <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold block mt-0.5">
+                        Active pass until {verifyDeleteUser.vipExpiresAt || '—'}
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-slate-400 block font-medium">Playback Telemetry</span>
+                    <span className="font-extrabold text-slate-950 dark:text-white block mt-0.5">
+                      {verifyDeleteUser.totalWatchTime || '0.0 hrs'} watch time
+                    </span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
+                      Joined {verifyDeleteUser.joinedAt || '2026'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Warning Notice Banner */}
+              <div className="flex items-start space-x-2.5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-950 dark:text-rose-200">
+                <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                <p className="text-[11px] font-semibold leading-relaxed">
+                  Confirming verification will permanently purge this user record, terminate all active JWT sessions, and delete subscription passes.
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex items-center space-x-2.5">
+                <button
+                  type="button"
+                  disabled={isProcessingAction}
+                  onClick={() => setVerifyDeleteUser(null)}
+                  className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#18181E] hover:bg-slate-50 dark:hover:bg-white/[0.06] text-xs font-bold text-slate-700 dark:text-slate-300 transition-all shadow-2xs active:scale-95 cursor-pointer text-center"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isProcessingAction}
+                  onClick={() => handleRejectDeletion(verifyDeleteUser)}
+                  className="flex-1 py-2.5 px-3 rounded-xl border border-amber-300 dark:border-amber-400/30 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-xs font-bold text-amber-900 dark:text-amber-200 transition-all shadow-2xs active:scale-95 cursor-pointer text-center"
+                >
+                  {isProcessingAction ? 'Processing...' : 'Reject Request & Keep Active'}
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isProcessingAction}
+                  onClick={handleConfirmVerifyDelete}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-xs font-bold text-white shadow-md shadow-rose-600/25 transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5 stroke-[2.2]" />
+                  <span>{isProcessingAction ? 'Deleting...' : 'Verify & Delete'}</span>
                 </button>
               </div>
 
